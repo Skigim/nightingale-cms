@@ -1,0 +1,3677 @@
+<!doctype html>
+<html lang="en" class="h-full bg-gray-900 text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nightingale Correspondence (React)</title>
+    <!-- React DevTools Detection -->
+    <meta name="react-devtools" content="enabled" />
+    <meta name="application-name" content="Nightingale Correspondence" />
+    <meta name="framework" content="React" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: file:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com chrome-extension: moz-extension: edge-extension: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com chrome-extension: moz-extension: edge-extension:; font-src https://fonts.gstatic.com data:; connect-src 'self' https: chrome-extension: moz-extension: edge-extension: data: blob: file:; img-src 'self' data: blob: chrome-extension: moz-extension: edge-extension:; frame-src 'self' chrome-extension: moz-extension: edge-extension:;"
+    />
+
+    <!-- DevTools CORS Override - Must run before any other scripts -->
+    <script>
+      (function () {
+        'use strict';
+
+        if (window.location.protocol === 'file:') {
+          console.log('🔧 Initializing DevTools CORS override for file:// protocol');
+
+          // Immediate fetch override before any libraries load
+          const originalFetch = window.fetch;
+          window.fetch = function (url, options) {
+            if (typeof url === 'string') {
+              if (
+                url.includes('%3Canonymous%3E') ||
+                url.includes('<anonymous>') ||
+                url.includes('anonymous') ||
+                url.includes('chrome-extension://') ||
+                url.includes('moz-extension://') ||
+                url.includes('edge-extension://') ||
+                url.match(/file:\/\/.*\/(undefined|null|%3C|%3E)/)
+              ) {
+                console.log('🚫 Blocked DevTools fetch:', url);
+                return Promise.resolve(
+                  new Response('// DevTools placeholder', {
+                    status: 200,
+                    statusText: 'OK',
+                    headers: { 'Content-Type': 'application/javascript' },
+                  })
+                );
+              }
+            }
+
+            return originalFetch
+              ? originalFetch.apply(this, arguments)
+              : Promise.reject(new Error('Fetch not available'));
+          };
+
+          // Error suppression for DevTools CORS errors
+          window.addEventListener('error', function (e) {
+            if (e.message && e.message.includes('Access to fetch') && e.message.includes('%3Canonymous%3E')) {
+              console.warn('🔇 Suppressed DevTools CORS error');
+              e.preventDefault();
+              return false;
+            }
+          });
+        }
+      })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="lib/dayjs.min.js"></script>
+    <script src="lib/dayjs-relativeTime.min.js"></script>
+    <script src="lib/dayjs-customParseFormat.min.js"></script>
+    <script>
+      // Initialize Day.js plugins
+      if (typeof dayjs !== 'undefined') {
+        dayjs.extend(window.dayjs_plugin_relativeTime);
+        dayjs.extend(window.dayjs_plugin_customParseFormat);
+      }
+    </script>
+
+    <script src="js/nightingale.utils.js"></script>
+    <script src="js/nightingale.dayjs.js"></script>
+    <script src="js/nightingale.parsers.js"></script>
+    <script src="js/nightingale.fileservice.js"></script>
+    <script src="js/nightingale.toast.js"></script>
+    <script src="lib/fuse.min.js"></script>
+    <script src="js/nightingale.search.js"></script>
+
+    <!-- Nightingale Component Library -->
+    <script src="../Components/index.js"></script>
+
+    <!-- Lodash for reliable utility functions -->
+    <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
+
+    <!-- Early broadcast capture for timing issues -->
+    <script>
+      // Capture any broadcasts that arrive before React app is ready
+      if (typeof BroadcastChannel !== 'undefined') {
+        const earlyChannel = new BroadcastChannel('nightingale-app-communication');
+        earlyChannel.addEventListener('message', (event) => {
+          if (event.data.type === 'SELECT_CASE' && event.data.mcn) {
+            console.log('Early broadcast captured:', event.data);
+            window.nightingaleBroadcastPending = event.data;
+          }
+        });
+
+        // Clean up after 10 seconds
+        setTimeout(() => {
+          earlyChannel.close();
+        }, 10000);
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      html {
+        font-family: 'Inter', sans-serif;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1f2937;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+      /* Softer focus ring */
+      input:focus,
+      select:focus,
+      textarea:focus {
+        --tw-ring-color: rgba(96, 165, 250, 0.5);
+      }
+      /* Toast notification styles */
+      .toast {
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        color: white;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        opacity: 0;
+        transform: translateX(100%);
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.success {
+        background-color: #22c55e;
+      } /* green-500 */
+      .toast.error {
+        background-color: #ef4444;
+      } /* red-500 */
+    </style>
+  </head>
+  <body class="h-full bg-gray-900 text-white">
+    <div id="root"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[2000] flex flex-col gap-3"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/slate@0.94.1/dist/slate.js"></script>
+    <script src="https://unpkg.com/slate-react@0.98.4/dist/slate-react.js"></script>
+    <script src="https://unpkg.com/slate-history@0.93.0/dist/slate-history.js"></script>
+
+    <!-- React DevTools Integration Helper -->
+    <script>
+      // Expose React globals for DevTools
+      window.React = React;
+      window.ReactDOM = ReactDOM;
+
+      // Help React DevTools detect our app
+      if (typeof window !== 'undefined') {
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = window.__REACT_DEVTOOLS_GLOBAL_HOOK__ || {};
+
+        // Mark as React app for DevTools
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__.isReactApp = true;
+
+        // Allow DevTools to access our file system
+        if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onCommitFiberRoot) {
+          const originalOnCommitFiberRoot = window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onCommitFiberRoot;
+          window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onCommitFiberRoot = function (...args) {
+            try {
+              return originalOnCommitFiberRoot.apply(this, args);
+            } catch (err) {
+              console.warn('React DevTools hook error (non-critical):', err);
+            }
+          };
+        }
+      }
+
+      // Override fetch for DevTools compatibility with file:// protocol
+      if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
+        // Store original fetch
+        const originalFetch = window.fetch;
+
+        // Enhanced fetch override with better pattern matching
+        window.fetch = function (url, options) {
+          console.log('Fetch intercepted:', url); // Debug log
+
+          // Check for problematic URLs that DevTools tries to fetch
+          if (typeof url === 'string') {
+            if (
+              url.includes('%3Canonymous%3E') ||
+              url.includes('<anonymous>') ||
+              url.includes('anonymous') ||
+              url.includes('chrome-extension://') ||
+              url.includes('moz-extension://') ||
+              url.includes('edge-extension://') ||
+              url.match(/file:\/\/.*\/(undefined|null|%3C|%3E)/)
+            ) {
+              console.log('Blocked DevTools fetch:', url);
+              // Return a mock successful response
+              return Promise.resolve(
+                new Response('// DevTools source map placeholder', {
+                  status: 200,
+                  statusText: 'OK',
+                  headers: {
+                    'Content-Type': 'application/javascript',
+                  },
+                })
+              );
+            }
+          }
+
+          // For normal requests, use original fetch if available
+          if (originalFetch) {
+            return originalFetch.apply(this, arguments);
+          } else {
+            return Promise.reject(new Error('Fetch not available'));
+          }
+        };
+
+        // Also override XMLHttpRequest as a fallback
+        const originalXHR = window.XMLHttpRequest;
+        window.XMLHttpRequest = function () {
+          const xhr = new originalXHR();
+          const originalOpen = xhr.open;
+
+          xhr.open = function (method, url, async, user, password) {
+            if (
+              typeof url === 'string' &&
+              (url.includes('%3Canonymous%3E') || url.includes('<anonymous>') || url.includes('anonymous'))
+            ) {
+              console.log('Blocked XHR request:', url);
+              // Create a mock successful request
+              Object.defineProperty(xhr, 'status', {
+                writable: true,
+                value: 200,
+              });
+              Object.defineProperty(xhr, 'responseText', {
+                writable: true,
+                value: '// DevTools source placeholder',
+              });
+              Object.defineProperty(xhr, 'readyState', {
+                writable: true,
+                value: 4,
+              });
+
+              setTimeout(() => {
+                if (xhr.onload) xhr.onload();
+                if (xhr.onreadystatechange) xhr.onreadystatechange();
+              }, 0);
+
+              return;
+            }
+
+            return originalOpen.apply(this, arguments);
+          };
+
+          return xhr;
+        };
+
+        // Suppress error reporting for these known DevTools issues
+        const originalConsoleError = console.error;
+        console.error = function (...args) {
+          const message = args.join(' ');
+          if (
+            message.includes('Access to fetch') &&
+            message.includes('%3Canonymous%3E') &&
+            message.includes('CORS policy')
+          ) {
+            console.warn('🔇 Suppressed DevTools CORS error (handled by override)');
+            return;
+          }
+          return originalConsoleError.apply(this, args);
+        };
+      }
+    </script>
+
+    <script type="text/babel">
+      const { useState, useEffect, useCallback, useMemo, useRef } = React;
+      const e = React.createElement;
+
+      // ✅ IMPLEMENTED: MCN broadcast listener from CMS for auto-case selection
+
+      function FinancialsList({ items, selectedIds, onToggleItem }) {
+        if (!items || items.length === 0) {
+          return e('p', { className: 'text-gray-500 text-center py-4' }, 'No financial items found for this case.');
+        }
+
+        return e(
+          'div',
+          {
+            className: 'space-y-2 max-h-64 overflow-y-auto p-2 bg-gray-900/50 rounded-md',
+          },
+          items.map((item) =>
+            e(
+              'label',
+              {
+                key: item.id,
+                className: 'flex items-center p-2 bg-gray-700/50 rounded-md hover:bg-gray-700 cursor-pointer',
+              },
+              e('input', {
+                type: 'checkbox',
+                className:
+                  'vr-financial-item-checkbox h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500/50 mr-3',
+                value: item.id,
+                checked: selectedIds.has(item.id),
+                onChange: () => onToggleItem(item.id),
+              }),
+              e(
+                'div',
+                { className: 'flex-1' },
+                e(
+                  'div',
+                  { className: 'flex items-center justify-between' },
+                  e(
+                    'div',
+                    { className: 'font-medium' },
+                    `${item.type} ${item.accountNumber ? `(${item.accountNumber})` : ''}`
+                  ),
+                  e(Badge, {
+                    status: item.verificationStatus,
+                    variant: 'verification',
+                    size: 'sm',
+                  })
+                ),
+                e('div', { className: 'text-sm text-gray-400' }, `${item.location} - $${(item.value || 0).toFixed(2)}`)
+              )
+            )
+          )
+        );
+      }
+
+      function CaseDetailsPanel({ activeCase, fullData, selectedFinItemIds, onFinancialItemToggle }) {
+        const [showVerified, setShowVerified] = useState(false);
+
+        const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
+
+        // Separate financials by category
+        const resources = activeCase.financials?.resources || [];
+        const income = activeCase.financials?.income || [];
+        const expenses = activeCase.financials?.expenses || [];
+
+        // Filter based on verification status if needed
+        const filterByVerification = (items) => {
+          if (showVerified) return items;
+          return items.filter((item) => item.verificationStatus !== 'Verified');
+        };
+
+        const filteredResources = filterByVerification(resources);
+        const filteredIncome = filterByVerification(income);
+        const filteredExpenses = filterByVerification(expenses);
+
+        const hasAnyItems = filteredResources.length > 0 || filteredIncome.length > 0 || filteredExpenses.length > 0;
+
+        return e(
+          'div',
+          { className: 'space-y-4 mt-6' },
+          e(
+            'div',
+            { className: 'flex items-center justify-between' },
+            e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Select Financial Items'),
+            e(
+              'label',
+              {
+                className: 'flex items-center space-x-2 text-sm text-gray-300',
+              },
+              e('input', {
+                type: 'checkbox',
+                checked: showVerified,
+                onChange: (e) => setShowVerified(e.target.checked),
+                className: 'h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500/50',
+              }),
+              e('span', null, 'Show Verified')
+            )
+          ),
+          !hasAnyItems
+            ? e(
+                'p',
+                { className: 'text-gray-500 text-center py-4' },
+                showVerified
+                  ? 'No financial items found for this case.'
+                  : "No unverified financial items found. Toggle 'Show Verified' to see all items."
+              )
+            : e(
+                'div',
+                { className: 'space-y-4' },
+                // Resources Section
+                filteredResources.length > 0 &&
+                  e(
+                    'div',
+                    null,
+                    e(
+                      'h4',
+                      {
+                        className: 'text-md font-semibold text-green-400 mb-2',
+                      },
+                      `Resources (${filteredResources.length})`
+                    ),
+                    e(FinancialsList, {
+                      items: filteredResources,
+                      selectedIds: selectedFinItemIds,
+                      onToggleItem: onFinancialItemToggle,
+                    })
+                  ),
+                // Income Section
+                filteredIncome.length > 0 &&
+                  e(
+                    'div',
+                    null,
+                    e(
+                      'h4',
+                      { className: 'text-md font-semibold text-blue-400 mb-2' },
+                      `Income (${filteredIncome.length})`
+                    ),
+                    e(FinancialsList, {
+                      items: filteredIncome,
+                      selectedIds: selectedFinItemIds,
+                      onToggleItem: onFinancialItemToggle,
+                    })
+                  ),
+                // Expenses Section
+                filteredExpenses.length > 0 &&
+                  e(
+                    'div',
+                    null,
+                    e(
+                      'h4',
+                      { className: 'text-md font-semibold text-red-400 mb-2' },
+                      `Expenses (${filteredExpenses.length})`
+                    ),
+                    e(FinancialsList, {
+                      items: filteredExpenses,
+                      selectedIds: selectedFinItemIds,
+                      onToggleItem: onFinancialItemToggle,
+                    })
+                  )
+              )
+        );
+      }
+
+      // This is the core logic ported from the original app to handle template text generation.
+      function processPlaceholders(templateContent, activeCase, fullData, customReplacements = {}) {
+        if (!activeCase) return templateContent;
+        const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
+        const appDetails = activeCase.appDetails || {};
+
+        const organization = person?.organizationId
+          ? fullData.organizations.find((o) => o.id === parseInt(person.organizationId))
+          : null;
+        const primaryContact =
+          organization?.personnel?.find((p) => p.title === 'Administrator') || organization?.personnel?.[0] || null;
+
+        // Get today's date formatted
+        const todayFormatted = dateUtils.format(dateUtils.now());
+
+        const replacements = {
+          ClientName: person?.name || '[CLIENT NAME]',
+          MCN: activeCase?.mcn || '[MCN]',
+          ApplicationDate: dateUtils.format(appDetails.appDate),
+          TodayDate: todayFormatted,
+
+          // Organization placeholders
+          OrganizationName: organization?.name || '[ORGANIZATION NAME]',
+          OrganizationPhone: organization?.phone || '[ORGANIZATION PHONE]',
+          AdminName: primaryContact?.name || '[ADMINISTRATOR NAME]',
+          AdminPhone: primaryContact?.phone || '[ADMINISTRATOR PHONE]',
+
+          // Due date (calculated based on current date + 15 days by default)
+          DueDate: dateUtils.format(dateUtils.addDays(15)),
+
+          ...customReplacements,
+        };
+
+        let processed = templateContent;
+        Object.keys(replacements).forEach((key) => {
+          const regex = new RegExp(`\\{${key}\\}`, 'g');
+          processed = processed.replace(regex, replacements[key]);
+        });
+
+        return processed;
+      }
+
+      // Slate.js Rich Text Editor for Placeholders
+      const { createEditor, Editor, Transforms, Text } = window.Slate;
+      const { Slate, Editable, withReact, ReactEditor, useSlate, useSelected, useFocused } = window.SlateReact;
+      const { withHistory } = window.SlateHistory;
+
+      // Slate.js plugin to handle placeholder chips
+      const withPlaceholders = (editor) => {
+        const { isInline, isVoid, insertText } = editor;
+
+        // Define placeholder chips as inline elements that don't have their own content
+        editor.isInline = (element) => {
+          return element.type === 'placeholder' ? true : isInline(element);
+        };
+
+        editor.isVoid = (element) => {
+          return element.type === 'placeholder' ? true : isVoid(element);
+        };
+
+        // Override insertText to handle '/' trigger for autocomplete
+        editor.insertText = (text) => {
+          if (text === '/' && editor.selection) {
+            // Trigger autocomplete - we'll handle this in the component
+            insertText(text);
+            return;
+          }
+          insertText(text);
+        };
+
+        return editor;
+      };
+
+      // Custom Placeholder Chip Component
+      function PlaceholderChip({ attributes, children, element, activeCase, fullData }) {
+        const editor = useSlate();
+        const selected = useSelected();
+        const focused = useFocused();
+
+        // Get preview value for the placeholder
+        const getPreviewValue = () => {
+          if (!activeCase || !fullData) return element.key;
+
+          const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
+          const organization = person?.organizationId
+            ? fullData.organizations.find((o) => o.id === parseInt(person.organizationId))
+            : null;
+          const primaryContact =
+            organization?.personnel?.find((p) => p.title === 'Administrator') || organization?.personnel?.[0] || null;
+
+          const replacements = {
+            ClientName: person?.name || element.key,
+            MCN: activeCase?.mcn || element.key,
+            ApplicationDate: activeCase?.appDetails?.appDate
+              ? dateUtils.format(activeCase.appDetails.appDate)
+              : element.key,
+            TodayDate: dateUtils.format(dateUtils.now()),
+            DueDate: dateUtils.format(dateUtils.addDays(15)),
+            OrganizationName: organization?.name || element.key,
+            OrganizationPhone: organization?.phone || element.key,
+            AdminName: primaryContact?.name || element.key,
+            AdminPhone: primaryContact?.phone || element.key,
+            // Financial placeholders - these will show generic values in preview
+            ItemName: '[Item Type]',
+            Location: '[Location]',
+            AccountNumber: '[Account #]',
+            Value: '[$0.00]',
+          };
+
+          return replacements[element.key] || element.key;
+        };
+
+        const removeChip = (e) => {
+          e.preventDefault();
+          const path = ReactEditor.findPath(editor, element);
+          Transforms.delete(editor, { at: path });
+        };
+
+        const previewValue = getPreviewValue();
+        const displayText = previewValue.length > 20 ? previewValue.substring(0, 20) + '...' : previewValue;
+
+        return e(
+          'span',
+          {
+            ...attributes,
+            contentEditable: false,
+            className: `inline-flex items-center bg-blue-600 text-white rounded text-xs font-mono ${
+              selected && focused ? 'ring-2 ring-blue-400' : ''
+            }`,
+            style: {
+              lineHeight: '1.5',
+              verticalAlign: 'baseline',
+              padding: '0 4px',
+            },
+          },
+          e('span', null, element.key),
+          activeCase &&
+            e(
+              'span',
+              {
+                className: 'text-blue-200 text-xs ml-1',
+                title: previewValue,
+              },
+              `(${displayText})`
+            ),
+          e(
+            'button',
+            {
+              type: 'button',
+              onClick: removeChip,
+              className:
+                'ml-1 flex-shrink-0 h-3 w-3 rounded-full inline-flex items-center justify-center text-blue-300 hover:bg-blue-500 hover:text-white focus:outline-none',
+            },
+            e('span', { className: 'sr-only' }, 'Remove'),
+            '×'
+          ),
+          children
+        );
+      }
+
+      // Enhanced Slate.js Placeholder Editor
+      function PlaceholderEditor({ value, onChange, activeCase, fullData, placeholder }) {
+        const [showAutocomplete, setShowAutocomplete] = useState(false);
+        const [autocompletePosition, setAutocompletePosition] = useState({
+          top: 0,
+          left: 0,
+        });
+        const [searchTerm, setSearchTerm] = useState('');
+        const [selectedIndex, setSelectedIndex] = useState(0);
+        const autocompleteRef = useRef(null);
+
+        // Create Slate editor with our custom plugin
+        const editor = useMemo(() => {
+          const editorInstance = withPlaceholders(withHistory(withReact(createEditor())));
+
+          // Register editor for debugging
+          if (window.nightingaleSlateEditors) {
+            window.nightingaleSlateEditors.push(editorInstance);
+          }
+
+          return editorInstance;
+        }, []);
+
+        // Position autocomplete near caret with viewport awareness
+        const updateAutocompletePosition = useCallback(() => {
+          try {
+            if (!editor.selection) return;
+            const domRange = ReactEditor.toDOMRange(editor, editor.selection);
+            const rect = domRange.getBoundingClientRect();
+
+            // Measure current menu size if rendered
+            if (autocompleteRef.current) {
+              const menuRect = autocompleteRef.current.getBoundingClientRect();
+              const menuW = menuRect.width || 320;
+              const menuH = menuRect.height || 220;
+
+              const vw = window.innerWidth;
+              const vh = window.innerHeight;
+              const pad = 8; // viewport padding
+              const gap = 6; // gap from caret
+
+              const spaceBelow = vh - rect.bottom;
+              const placeAbove = spaceBelow < menuH + gap + pad;
+
+              // Compute top
+              let top = placeAbove ? rect.top - menuH - gap : rect.bottom + gap;
+              // Clamp vertically
+              top = Math.max(pad, Math.min(top, vh - menuH - pad));
+
+              // Compute left and clamp horizontally
+              let left = rect.left;
+              left = Math.max(pad, Math.min(left, vw - menuW - pad));
+
+              setAutocompletePosition({ top, left });
+            } else {
+              // First render, position simply
+              setAutocompletePosition({
+                top: rect.bottom + 6,
+                left: rect.left,
+              });
+            }
+          } catch (e) {
+            // selection may be stale; ignore
+          }
+        }, [editor]);
+
+        // Recompute position when opening or moving caret
+        useEffect(() => {
+          if (showAutocomplete) {
+            updateAutocompletePosition();
+            // Reposition after DOM updates for accurate menu size
+            const raf = requestAnimationFrame(updateAutocompletePosition);
+            return () => cancelAnimationFrame(raf);
+          }
+        }, [showAutocomplete, editor.selection, updateAutocompletePosition]);
+
+        // Keep menu anchored on resize/scroll while open
+        useEffect(() => {
+          if (!showAutocomplete) return;
+          const handler = () => updateAutocompletePosition();
+          window.addEventListener('resize', handler);
+          window.addEventListener('scroll', handler, true);
+          return () => {
+            window.removeEventListener('resize', handler);
+            window.removeEventListener('scroll', handler, true);
+          };
+        }, [showAutocomplete, updateAutocompletePosition]);
+
+        // Available placeholders
+        const availablePlaceholders = useMemo(
+          () => [
+            {
+              key: 'ClientName',
+              description: 'Client full name',
+              category: 'Client Info',
+            },
+            {
+              key: 'MCN',
+              description: 'Master Case Number',
+              category: 'Client Info',
+            },
+            {
+              key: 'ApplicationDate',
+              description: 'Application submission date',
+              category: 'Client Info',
+            },
+            {
+              key: 'TodayDate',
+              description: "Today's date",
+              category: 'Dates',
+            },
+            {
+              key: 'DueDate',
+              description: 'Due date (Today + 15 days)',
+              category: 'Dates',
+            },
+            {
+              key: 'OrganizationName',
+              description: 'Facility/Organization name',
+              category: 'Organization',
+            },
+            {
+              key: 'OrganizationPhone',
+              description: 'Facility phone number',
+              category: 'Organization',
+            },
+            {
+              key: 'AdminName',
+              description: 'Administrator name',
+              category: 'Organization',
+            },
+            {
+              key: 'AdminPhone',
+              description: 'Administrator phone',
+              category: 'Organization',
+            },
+            {
+              key: 'ItemName',
+              description: 'Financial item type/name',
+              category: 'Financial',
+            },
+            {
+              key: 'Location',
+              description: 'Financial item location',
+              category: 'Financial',
+            },
+            {
+              key: 'AccountNumber',
+              description: 'Financial account number',
+              category: 'Financial',
+            },
+            {
+              key: 'Value',
+              description: 'Financial item value',
+              category: 'Financial',
+            },
+          ],
+          []
+        );
+
+        // Convert string value to Slate value
+        const parseValueToSlate = useCallback((textValue) => {
+          if (!textValue) {
+            return [{ type: 'paragraph', children: [{ text: '' }] }];
+          }
+
+          const placeholderRegex = /\{(\w+)\}/g;
+          const parts = [];
+          let lastIndex = 0;
+          let match;
+
+          while ((match = placeholderRegex.exec(textValue)) !== null) {
+            // Add text before placeholder
+            if (match.index > lastIndex) {
+              parts.push({ text: textValue.substring(lastIndex, match.index) });
+            }
+
+            // Add placeholder chip
+            parts.push({
+              type: 'placeholder',
+              key: match[1],
+              children: [{ text: '' }],
+            });
+
+            lastIndex = match.index + match[0].length;
+          }
+
+          // Add remaining text
+          if (lastIndex < textValue.length) {
+            parts.push({ text: textValue.substring(lastIndex) });
+          }
+
+          return [
+            {
+              type: 'paragraph',
+              children: parts.length > 0 ? parts : [{ text: '' }],
+            },
+          ];
+        }, []);
+
+        // Convert Slate value to string
+        const serializeSlateValue = useCallback((slateValue) => {
+          return slateValue
+            .map((node) => {
+              if (Text.isText(node)) {
+                return node.text;
+              }
+              if (node.type === 'placeholder') {
+                return `{${node.key}}`;
+              }
+              // For paragraphs, serialize their children
+              return node.children
+                .map((child) => {
+                  if (Text.isText(child)) {
+                    return child.text;
+                  }
+                  if (child.type === 'placeholder') {
+                    return `{${child.key}}`;
+                  }
+                  return '';
+                })
+                .join('');
+            })
+            .join('\n');
+        }, []);
+
+        // Slate value state
+        const [slateValue, setSlateValue] = useState(() => parseValueToSlate(value));
+
+        // Update Slate value when prop value changes
+        useEffect(() => {
+          setSlateValue(parseValueToSlate(value));
+        }, [value, parseValueToSlate]);
+
+        // Handle Slate value changes
+        const handleSlateChange = (newValue) => {
+          setSlateValue(newValue);
+          const stringValue = serializeSlateValue(newValue);
+          onChange(stringValue);
+        };
+
+        // Render elements
+        const renderElement = useCallback(
+          (props) => {
+            switch (props.element.type) {
+              case 'placeholder':
+                return e(PlaceholderChip, { ...props, activeCase, fullData });
+              default:
+                return e('div', { ...props.attributes }, props.children);
+            }
+          },
+          [activeCase, fullData]
+        );
+
+        // Handle key events
+        const handleKeyDown = (event) => {
+          // Backspace: delete a chip when caret is just after it
+          if (event.key === 'Backspace') {
+            const { selection } = editor;
+            // Safe check for Range.isCollapsed - handle API changes gracefully
+            let isCollapsed = false;
+            try {
+              if (selection && window.Slate?.Range?.isCollapsed) {
+                isCollapsed = window.Slate.Range.isCollapsed(selection);
+              } else if (selection && selection.anchor && selection.focus) {
+                // Fallback: check if anchor and focus are the same
+                isCollapsed =
+                  selection.anchor.path.toString() === selection.focus.path.toString() &&
+                  selection.anchor.offset === selection.focus.offset;
+              }
+            } catch (e) {
+              console.warn('Slate Range.isCollapsed error:', e);
+              // Fallback to safe default
+              isCollapsed =
+                selection &&
+                selection.anchor &&
+                selection.focus &&
+                selection.anchor.path.toString() === selection.focus.path.toString() &&
+                selection.anchor.offset === selection.focus.offset;
+            }
+
+            if (selection && isCollapsed) {
+              const before = Editor.before(editor, selection, {
+                unit: 'character',
+              });
+              if (before) {
+                const [match] = Editor.nodes(editor, {
+                  at: before,
+                  match: (n) => !Text.isText(n) && n.type === 'placeholder',
+                });
+                if (match) {
+                  event.preventDefault();
+                  const [, path] = match;
+                  Transforms.delete(editor, { at: path });
+                  return;
+                }
+              }
+            }
+          }
+
+          // Handle autocomplete navigation
+          if (showAutocomplete) {
+            switch (event.key) {
+              case 'ArrowDown':
+                event.preventDefault();
+                setSelectedIndex((prev) => Math.min(prev + 1, availablePlaceholders.length - 1));
+                break;
+              case 'ArrowUp':
+                event.preventDefault();
+                setSelectedIndex((prev) => Math.max(prev - 1, 0));
+                break;
+              case 'Enter':
+              case 'Tab':
+                event.preventDefault();
+                if (availablePlaceholders[selectedIndex]) {
+                  insertPlaceholder(availablePlaceholders[selectedIndex]);
+                }
+                break;
+              case 'Escape':
+                setShowAutocomplete(false);
+                setSearchTerm('');
+                break;
+            }
+          }
+
+          // Trigger autocomplete on '/'
+          if (event.key === '/' && !showAutocomplete) {
+            setTimeout(() => {
+              setShowAutocomplete(true);
+              setSearchTerm('');
+              setSelectedIndex(0);
+              updateAutocompletePosition();
+            }, 0);
+          }
+        };
+
+        // Insert placeholder at current cursor position
+        const insertPlaceholder = (placeholderData) => {
+          const placeholderNode = {
+            type: 'placeholder',
+            key: placeholderData.key,
+            children: [{ text: '' }],
+          };
+
+          // Snapshot neighbor characters around current selection to avoid double spaces
+          const snapSelection = editor.selection;
+          let prevChar = '',
+            nextChar = '';
+          if (snapSelection) {
+            const beforePt = Editor.before(editor, snapSelection.anchor, {
+              distance: 1,
+            });
+            const afterPt = Editor.after(editor, snapSelection.anchor, {
+              distance: 1,
+            });
+            if (beforePt)
+              prevChar = Editor.string(editor, {
+                anchor: beforePt,
+                focus: snapSelection.anchor,
+              });
+            if (afterPt)
+              nextChar = Editor.string(editor, {
+                anchor: snapSelection.anchor,
+                focus: afterPt,
+              });
+          }
+
+          // Remove the '/' trigger and any search text that was typed
+          if (editor.selection) {
+            const { selection } = editor;
+            const [start] = Editor.edges(editor, selection);
+            let searchStart = start;
+            let foundSlash = false;
+            while (searchStart) {
+              const before = Editor.before(editor, searchStart);
+              if (!before) break;
+              const charRange = { anchor: before, focus: searchStart };
+              const char = Editor.string(editor, charRange);
+              if (char === '/') {
+                foundSlash = true;
+                Transforms.select(editor, { anchor: before, focus: start });
+                Transforms.delete(editor);
+                break;
+              }
+              searchStart = before;
+            }
+            if (!foundSlash) {
+              const before = Editor.before(editor, start);
+              if (before) {
+                const charBefore = Editor.string(editor, {
+                  anchor: before,
+                  focus: start,
+                });
+                if (charBefore === '/') {
+                  Transforms.select(editor, { anchor: before, focus: start });
+                  Transforms.delete(editor);
+                }
+              }
+            }
+          }
+
+          Transforms.insertNodes(editor, placeholderNode);
+
+          // Move cursor to the right of the inserted placeholder
+          const afterPlaceholder = Editor.after(editor, editor.selection);
+          if (afterPlaceholder) {
+            Transforms.select(editor, afterPlaceholder);
+          }
+
+          // Decide if we need a trailing space (avoid if nextChar already a space/newline/empty)
+          let shouldAddSpace = true;
+          if (nextChar === ' ' || nextChar === '\n' || nextChar === '') {
+            shouldAddSpace = false;
+          }
+
+          if (shouldAddSpace) {
+            Transforms.insertText(editor, ' ');
+          }
+
+          // Normalize: if both sides around caret are spaces, remove the one after the caret
+          const cursor = editor.selection?.anchor;
+          if (cursor) {
+            const before = Editor.before(editor, cursor, { distance: 1 });
+            const after = Editor.after(editor, cursor, { distance: 1 });
+            if (before && after) {
+              const left = Editor.string(editor, {
+                anchor: before,
+                focus: cursor,
+              });
+              const right = Editor.string(editor, {
+                anchor: cursor,
+                focus: after,
+              });
+              if (left === ' ' && right === ' ') {
+                Transforms.delete(editor, {
+                  at: { anchor: cursor, focus: after },
+                });
+              }
+            }
+          }
+
+          // Ensure the editor is focused and cursor is positioned correctly
+          ReactEditor.focus(editor);
+
+          setShowAutocomplete(false);
+          setSearchTerm('');
+        };
+
+        return e(
+          'div',
+          { className: 'relative' },
+          e(
+            'div',
+            {
+              className: 'bg-gray-700 border border-gray-600 rounded-lg focus-within:ring-2 focus-within:ring-blue-500',
+            },
+            e(
+              Slate,
+              {
+                editor: editor,
+                initialValue: slateValue,
+                onChange: handleSlateChange,
+              },
+              e(Editable, {
+                renderElement: renderElement,
+                onKeyDown: handleKeyDown,
+                onBlur: () => {
+                  setShowAutocomplete(false);
+                  setSearchTerm('');
+                },
+                placeholder: placeholder,
+                className: 'w-full min-h-32 p-3 text-white resize-none focus:outline-none',
+                style: {
+                  fontFamily: 'ui-monospace, monospace',
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                },
+              })
+            )
+          ),
+
+          // Autocomplete dropdown
+          showAutocomplete &&
+            e(
+              'div',
+              {
+                ref: autocompleteRef,
+                className: 'fixed bg-gray-800 border border-gray-600 rounded-lg shadow-xl z-50 max-w-md',
+                style: {
+                  top: autocompletePosition.top || '100px',
+                  left: autocompletePosition.left || '100px',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                },
+              },
+              e(
+                'div',
+                {
+                  className: 'p-2 text-xs text-gray-400 border-b border-gray-600',
+                },
+                'Type / to search placeholders...'
+              ),
+              availablePlaceholders.map((placeholder, index) =>
+                e(
+                  'div',
+                  {
+                    key: placeholder.key,
+                    className: `p-3 cursor-pointer transition-colors flex items-center justify-between ${
+                      index === selectedIndex ? 'bg-blue-600' : 'hover:bg-gray-700'
+                    }`,
+                    onClick: () => insertPlaceholder(placeholder),
+                  },
+                  e(
+                    'span',
+                    {
+                      className:
+                        'inline-flex items-center px-2 py-1 bg-blue-500 text-white text-sm rounded-md font-mono',
+                    },
+                    placeholder.key
+                  ),
+                  e('span', { className: 'text-gray-300 text-sm ml-2' }, placeholder.description)
+                )
+              )
+            )
+        );
+      }
+      PlaceholderEditor.displayName = 'SlateTextEditor';
+
+      function TemplateManagerModal({ isOpen, onClose, fullData, onUpdateData, fileService }) {
+        const [editingTemplate, setEditingTemplate] = useState(null);
+        const [showTemplateForm, setShowTemplateForm] = useState(false);
+        const [showCategoryForm, setShowCategoryForm] = useState(false);
+        const [newCategoryName, setNewCategoryName] = useState('');
+
+        const handleEditTemplate = (template) => {
+          setEditingTemplate(template);
+          setShowTemplateForm(true);
+        };
+
+        const handleDeleteTemplate = async (template) => {
+          if (confirm(`Delete template "${template.name}"?`)) {
+            const newData = _.cloneDeep(fullData);
+            newData.vrTemplates = newData.vrTemplates.filter((t) => t.id !== template.id);
+            onUpdateData(newData);
+
+            // 🔧 RACE CONDITION FIX: Immediately save to file and broadcast
+            try {
+              console.log('Template delete: Attempting immediate file write...');
+              const success = await fileService.writeFile(newData);
+              if (success) {
+                console.log('Template delete: File write successful, sending broadcast...');
+
+                // Send data integrity broadcast to notify CMS to refresh
+                const integrityChannel = new BroadcastChannel('nightingale_suite');
+                integrityChannel.postMessage({
+                  type: 'data_updated',
+                  source: 'correspondence',
+                  action: 'template_deleted',
+                  templateName: template.name,
+                  timestamp: dateUtils.now(),
+                });
+                integrityChannel.close();
+
+                console.log('Template delete: Broadcast sent successfully');
+                showToast('Template deleted and synced with CMS.', 'success');
+              } else {
+                console.error('Template delete: FileService.writeFile returned false');
+                showToast('Template deleted but failed to save to file.', 'warning');
+              }
+            } catch (error) {
+              console.error('Template delete: Error during immediate save:', error);
+              showToast(`Template deleted but save failed: ${error.message}`, 'warning');
+            }
+          }
+        };
+
+        const handleAddCategory = async () => {
+          if (!newCategoryName.trim()) {
+            showToast('Please enter a category name.', 'error');
+            return;
+          }
+          if (fullData.vrCategories.includes(newCategoryName.trim())) {
+            showToast('Category already exists.', 'error');
+            return;
+          }
+          const newData = _.cloneDeep(fullData);
+          newData.vrCategories = newData.vrCategories || [];
+          newData.vrCategories.push(newCategoryName.trim());
+          newData.vrCategories.sort();
+          onUpdateData(newData);
+
+          // 🔧 RACE CONDITION FIX: Immediately save to file and broadcast
+          try {
+            console.log('Category add: Attempting immediate file write...');
+            const success = await fileService.writeFile(newData);
+            if (success) {
+              console.log('Category add: File write successful, sending broadcast...');
+
+              // Send data integrity broadcast to notify CMS to refresh
+              const integrityChannel = new BroadcastChannel('nightingale_suite');
+              integrityChannel.postMessage({
+                type: 'data_updated',
+                source: 'correspondence',
+                action: 'category_added',
+                categoryName: newCategoryName.trim(),
+                timestamp: dateUtils.now(),
+              });
+              integrityChannel.close();
+
+              console.log('Category add: Broadcast sent successfully');
+              setNewCategoryName('');
+              showToast('Category added and synced with CMS.', 'success');
+            } else {
+              console.error('Category add: FileService.writeFile returned false');
+              setNewCategoryName('');
+              showToast('Category added but failed to save to file.', 'warning');
+            }
+          } catch (error) {
+            console.error('Category add: Error during immediate save:', error);
+            setNewCategoryName('');
+            showToast(`Category added but save failed: ${error.message}`, 'warning');
+          }
+        };
+
+        const templatesHTML =
+          (fullData?.vrTemplates || []).length > 0
+            ? (fullData.vrTemplates || []).map((template) =>
+                e(
+                  'div',
+                  {
+                    key: template.id,
+                    className: 'bg-gray-700/50 p-3 rounded-md flex items-center justify-between',
+                  },
+                  e(
+                    'div',
+                    { className: 'flex-1' },
+                    e('div', { className: 'font-medium' }, template.name),
+                    e('div', { className: 'text-sm text-gray-400' }, template.category)
+                  ),
+                  e(
+                    'div',
+                    { className: 'flex space-x-2' },
+                    e(
+                      'button',
+                      {
+                        onClick: () => handleEditTemplate(template),
+                        className: 'text-blue-400 hover:text-blue-300 p-1',
+                        title: 'Edit',
+                      },
+                      'Edit'
+                    ),
+                    e(
+                      'button',
+                      {
+                        onClick: () => handleDeleteTemplate(template),
+                        className: 'text-red-400 hover:text-red-300 p-1',
+                        title: 'Delete',
+                      },
+                      'Delete'
+                    )
+                  )
+                )
+              )
+            : e('p', { className: 'text-gray-500 text-center py-4' }, 'No templates created yet.');
+
+        if (showTemplateForm) {
+          return e(TemplateFormModal, {
+            isOpen: true,
+            onClose: () => {
+              setShowTemplateForm(false);
+              setEditingTemplate(null);
+            },
+            template: editingTemplate,
+            fullData: fullData,
+            onUpdateData: onUpdateData,
+            fileService: fileService,
+          });
+        }
+
+        const footer = e(
+          'button',
+          {
+            onClick: onClose,
+            className: 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md',
+          },
+          'Close'
+        );
+
+        return e(
+          Modal,
+          {
+            isOpen,
+            onClose,
+            title: 'VR Template Manager',
+            footerContent: footer,
+          },
+          e(
+            'div',
+            { className: 'space-y-6' },
+            e(
+              'div',
+              null,
+              e(
+                'div',
+                { className: 'flex justify-between items-center mb-4' },
+                e('h4', { className: 'text-lg font-semibold text-blue-400' }, 'VR Templates'),
+                e(
+                  'button',
+                  {
+                    onClick: () => setShowTemplateForm(true),
+                    className: 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md',
+                  },
+                  'Add Template'
+                )
+              ),
+              e('div', { className: 'space-y-2 max-h-64 overflow-y-auto' }, templatesHTML)
+            ),
+            e(
+              'div',
+              null,
+              e('h4', { className: 'text-lg font-semibold text-blue-400 mb-4' }, 'Manage Categories'),
+              e(
+                'div',
+                { className: 'flex space-x-2 items-center' },
+                e('input', {
+                  type: 'text',
+                  placeholder: 'New category name...',
+                  value: newCategoryName,
+                  onChange: (e) => setNewCategoryName(e.target.value),
+                  onKeyDown: (e) => e.key === 'Enter' && handleAddCategory(),
+                  className: 'flex-1 bg-gray-700 rounded-md p-2',
+                }),
+                e(
+                  'button',
+                  {
+                    onClick: handleAddCategory,
+                    className: 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md',
+                  },
+                  'Add Category'
+                )
+              ),
+              e(
+                'div',
+                { className: 'mt-3' },
+                e('div', { className: 'text-sm text-gray-400 mb-2' }, 'Current Categories:'),
+                e(
+                  'div',
+                  { className: 'flex flex-wrap gap-2' },
+                  (fullData?.vrCategories || []).map((category) =>
+                    e(
+                      'span',
+                      {
+                        key: category,
+                        className: 'bg-gray-700 px-2 py-1 rounded text-sm',
+                      },
+                      category
+                    )
+                  )
+                )
+              )
+            )
+          )
+        );
+      }
+
+      function TemplateFormModal({ isOpen, onClose, template, fullData, onUpdateData, fileService }) {
+        const [formData, setFormData] = useState({
+          name: template?.name || '',
+          category: template?.category || '',
+          content: template?.content || '',
+        });
+        const [errors, setErrors] = useState({});
+
+        const validateForm = () => {
+          const newErrors = {};
+
+          if (!formData.name.trim()) {
+            newErrors.name = 'Template name is required.';
+          } else if (formData.name.length < 3) {
+            newErrors.name = 'Template name must be at least 3 characters.';
+          } else if (formData.name.length > 100) {
+            newErrors.name = 'Template name must be no more than 100 characters.';
+          }
+
+          if (!formData.category) {
+            newErrors.category = 'Please select a category.';
+          }
+
+          if (!formData.content.trim()) {
+            newErrors.content = 'Template content is required.';
+          } else if (formData.content.length < 10) {
+            newErrors.content = 'Template content must be at least 10 characters.';
+          }
+
+          // Check for duplicate template names (excluding current template if editing)
+          const existingTemplate = fullData.vrTemplates.find(
+            (t) => t.name.toLowerCase() === formData.name.toLowerCase() && t.id !== template?.id
+          );
+          if (existingTemplate) {
+            newErrors.name = 'A template with this name already exists.';
+          }
+
+          setErrors(newErrors);
+          return Object.keys(newErrors).length === 0;
+        };
+
+        const handleSave = async () => {
+          console.log('Template form handleSave called');
+          if (!validateForm()) {
+            console.log('Form validation failed');
+            return;
+          }
+
+          console.log('Creating template with data:', formData);
+          const newData = _.cloneDeep(fullData);
+
+          if (template) {
+            // Editing existing template
+            const templateIndex = newData.vrTemplates.findIndex((t) => t.id === template.id);
+            if (templateIndex !== -1) {
+              newData.vrTemplates[templateIndex] = {
+                ...template,
+                name: formData.name.trim(),
+                category: formData.category,
+                content: formData.content.trim(),
+              };
+              console.log('Updated existing template at index:', templateIndex);
+            }
+            showToast('Template updated successfully.', 'success');
+          } else {
+            // Creating new template
+            const newTemplate = {
+              id: newData.nextVrTemplateId || Math.max(...(newData.vrTemplates || []).map((t) => t.id || 0), 0) + 1,
+              name: formData.name.trim(),
+              category: formData.category,
+              content: formData.content.trim(),
+            };
+            newData.vrTemplates = newData.vrTemplates || [];
+            newData.vrTemplates.push(newTemplate);
+            newData.nextVrTemplateId = newTemplate.id + 1;
+            console.log('Created new template:', newTemplate);
+            showToast('Template created successfully.', 'success');
+          }
+
+          console.log('Calling onUpdateData with new template count:', newData.vrTemplates.length);
+          onUpdateData(newData);
+
+          // 🔧 RACE CONDITION FIX: Immediately save to file and broadcast to prevent CMS auto-refresh overwrite
+          try {
+            console.log('Template save: Attempting immediate file write...');
+            const success = await fileService.writeFile(newData);
+            if (success) {
+              console.log('Template save: File write successful, sending broadcast...');
+
+              // Send data integrity broadcast to notify CMS to refresh
+              const integrityChannel = new BroadcastChannel('nightingale_suite');
+              integrityChannel.postMessage({
+                type: 'data_updated',
+                source: 'correspondence',
+                action: 'template_saved',
+                templateName: formData.name.trim(),
+                timestamp: dateUtils.now(),
+              });
+              integrityChannel.close();
+
+              console.log('Template save: Broadcast sent successfully');
+              showToast(`Template saved and synced with CMS.`, 'success');
+            } else {
+              console.error('Template save: FileService.writeFile returned false');
+              showToast('Template created but failed to save to file.', 'warning');
+            }
+          } catch (error) {
+            console.error('Template save: Error during immediate save:', error);
+            showToast(`Template created but save failed: ${error.message}`, 'warning');
+          }
+
+          onClose();
+        };
+
+        const handleFieldChange = (field, value) => {
+          setFormData((prev) => ({ ...prev, [field]: value }));
+          // Clear error for this field when user starts typing
+          if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: null }));
+          }
+        };
+
+        // Available placeholders for helper
+        const placeholderGroups = {
+          'Client Info': ['ClientName', 'MCN', 'ApplicationDate'],
+          Organization: ['OrganizationName', 'OrganizationPhone', 'AdminName', 'AdminPhone'],
+          Financial: ['ItemName', 'Location', 'AccountNumber', 'Value'],
+          Dates: ['TodayDate', 'DueDate'],
+        };
+
+        const footer = e(
+          'div',
+          { className: 'flex space-x-3' },
+          e(
+            'button',
+            {
+              onClick: onClose,
+              className: 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md',
+            },
+            'Cancel'
+          ),
+          e(
+            'button',
+            {
+              onClick: handleSave,
+              className: 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md',
+            },
+            template ? 'Update Template' : 'Create Template'
+          )
+        );
+
+        return e(
+          Modal,
+          {
+            isOpen,
+            onClose,
+            title: template ? 'Edit Template' : 'Create Template',
+            footerContent: footer,
+          },
+          e(
+            'div',
+            { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
+            // Form Section
+            e(
+              'div',
+              { className: 'space-y-4' },
+              e(
+                'div',
+                null,
+                e(
+                  'label',
+                  {
+                    htmlFor: 'template-name',
+                    className: 'block text-sm font-medium text-gray-400 mb-1',
+                  },
+                  'Template Name'
+                ),
+                e('input', {
+                  id: 'template-name',
+                  type: 'text',
+                  value: formData.name,
+                  onChange: (e) => handleFieldChange('name', e.target.value),
+                  placeholder: 'e.g., Bank Statement Request',
+                  className: `w-full bg-gray-700 rounded-md p-2 ${errors.name ? 'border border-red-500' : ''}`,
+                }),
+                errors.name && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.name)
+              ),
+              e(
+                'div',
+                null,
+                e(
+                  'label',
+                  {
+                    htmlFor: 'template-category',
+                    className: 'block text-sm font-medium text-gray-400 mb-1',
+                  },
+                  'Category'
+                ),
+                e(
+                  'select',
+                  {
+                    id: 'template-category',
+                    value: formData.category,
+                    onChange: (e) => handleFieldChange('category', e.target.value),
+                    className: `w-full bg-gray-700 rounded-md p-2 ${errors.category ? 'border border-red-500' : ''}`,
+                  },
+                  e('option', { value: '' }, 'Select a category...'),
+                  ...(fullData?.vrCategories || []).map((cat) => e('option', { key: cat, value: cat }, cat))
+                ),
+                errors.category && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.category)
+              ),
+              e(
+                'div',
+                null,
+                e(
+                  'label',
+                  {
+                    htmlFor: 'template-content',
+                    className: 'block text-sm font-medium text-gray-400 mb-1',
+                  },
+                  'Template Content'
+                ),
+                e(PlaceholderEditor, {
+                  value: formData.content,
+                  onChange: (value) => handleFieldChange('content', value),
+                  activeCase: null, // Template creation doesn't have an active case
+                  fullData: fullData,
+                  placeholder: 'Enter your template text here. Type / to see available placeholders...',
+                }),
+                errors.content && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.content)
+              )
+            ),
+            // Helper Section
+            e(
+              'div',
+              null,
+              e('h4', { className: 'text-lg font-semibold text-blue-400 mb-3' }, 'Available Placeholders'),
+              e(
+                'div',
+                { className: 'bg-gray-800 p-4 rounded-lg text-sm space-y-3' },
+                Object.entries(placeholderGroups).map(([group, placeholders]) =>
+                  e(
+                    'div',
+                    { key: group, className: 'mb-2' },
+                    e('strong', { className: 'text-blue-400' }, group + ':'),
+                    e('br'),
+                    e('span', { className: 'text-gray-400' }, placeholders.map((p) => `{${p}}`).join(', '))
+                  )
+                )
+              ),
+              e(
+                'div',
+                {
+                  className: 'mt-4 p-3 bg-blue-900/50 rounded-lg border border-blue-700',
+                },
+                e('h5', { className: 'text-blue-300 font-medium mb-2' }, '💡 Template Tips'),
+                e(
+                  'ul',
+                  { className: 'text-sm text-gray-300 space-y-1' },
+                  e('li', null, "• Use {ClientName} for the client's full name"),
+                  e('li', null, '• Use {MCN} for the Master Case Number'),
+                  e('li', null, '• Financial placeholders work with selected items'),
+                  e('li', null, '• Placeholders are case-sensitive')
+                )
+              )
+            )
+          )
+        );
+      }
+
+      // VR Request Management Modal Component
+      function VrManagementModal({ isOpen, onClose, request, fullData, onUpdateData, fileService }) {
+        if (!isOpen || !request) return null;
+
+        const [verificationSource, setVerificationSource] = useState('');
+        const [showVerificationInput, setShowVerificationInput] = useState(false);
+
+        const template = fullData?.vrTemplates?.find((t) => t.id == request.templateId);
+        const templateName = template?.name || 'Unknown Template';
+
+        const handleStatusChange = (newStatus) => {
+          const updatedData = { ...fullData };
+          const vrRequest = updatedData.vrRequests.find((r) => r.id === request.id);
+          if (vrRequest) {
+            vrRequest.status = newStatus;
+            if (newStatus === 'Returned' && !vrRequest.returnedDate) {
+              vrRequest.returnedDate = dateUtils.now();
+            }
+
+            // Update linked financial items based on VR status change
+            const linkedCase = updatedData.cases.find((c) => c.id === request.caseId);
+            if (linkedCase && request.financialItemIds) {
+              const allFinancials = [
+                ...(linkedCase.financials?.resources || []),
+                ...(linkedCase.financials?.income || []),
+                ...(linkedCase.financials?.expenses || []),
+              ];
+
+              request.financialItemIds.forEach((itemId) => {
+                const item = allFinancials.find((i) => i.id === itemId);
+                if (item) {
+                  switch (newStatus) {
+                    case 'Pending':
+                      // When VR is marked as pending, financial items should be "VR Pending"
+                      item.verificationStatus = 'VR Pending';
+                      break;
+                    case 'Returned':
+                      // When VR is returned, financial items should be "Review Pending" (awaiting verification source)
+                      item.verificationStatus = 'Review Pending';
+                      break;
+                    case 'Verified':
+                      // This case is handled in handleMarkAsVerified function
+                      break;
+                  }
+                }
+              });
+            }
+
+            onUpdateData(updatedData);
+            showToast(`VR Request marked as ${newStatus}.`, 'success');
+          }
+        };
+
+        const handleMarkAsVerified = () => {
+          if (!verificationSource.trim()) {
+            showToast('Please enter a verification source.', 'error');
+            return;
+          }
+
+          const updatedData = { ...fullData };
+          const vrRequest = updatedData.vrRequests.find((r) => r.id === request.id);
+          if (vrRequest) {
+            vrRequest.status = 'Verified';
+            vrRequest.verifiedDate = dateUtils.now();
+            vrRequest.verificationSource = verificationSource.trim();
+
+            // Update linked financial items
+            const linkedCase = updatedData.cases.find((c) => c.id === request.caseId);
+            if (linkedCase && request.financialItemIds) {
+              const allFinancials = [
+                ...(linkedCase.financials?.resources || []),
+                ...(linkedCase.financials?.income || []),
+                ...(linkedCase.financials?.expenses || []),
+              ];
+
+              request.financialItemIds.forEach((itemId) => {
+                const item = allFinancials.find((i) => i.id === itemId);
+                if (item && item.verificationStatus === 'Review Pending') {
+                  item.verificationStatus = 'Verified';
+                  item.source = verificationSource.trim();
+                }
+              });
+            }
+
+            onUpdateData(updatedData);
+            setVerificationSource(''); // Clear the input field
+            setShowVerificationInput(false); // Hide the input field
+            showToast('VR Request marked as verified.', 'success');
+          }
+        };
+
+        const handleDeleteRequest = async () => {
+          const confirmMessage = `Delete VR Request #${request.id}?\n\nThis action cannot be undone. If this VR has already been sent, you should mark it as "Returned" instead of deleting it.\n\nAre you sure you want to delete this request?`;
+
+          if (confirm(confirmMessage)) {
+            const newData = _.cloneDeep(fullData);
+
+            // Remove the VR request
+            newData.vrRequests = newData.vrRequests.filter((r) => r.id !== request.id);
+
+            // Reset the financial items that were linked to this request back to their original status
+            const linkedCase = newData.cases.find((c) => c.id === request.caseId);
+            if (linkedCase && request.financialItemIds) {
+              const allFinancials = [
+                ...(linkedCase.financials?.resources || []),
+                ...(linkedCase.financials?.income || []),
+                ...(linkedCase.financials?.expenses || []),
+              ];
+
+              request.financialItemIds.forEach((itemId) => {
+                const item = allFinancials.find((i) => i.id === itemId);
+                if (item) {
+                  // Reset status based on what it would have been before the VR
+                  if (item.verificationStatus === 'VR Pending') {
+                    item.verificationStatus = 'Pending Verification';
+                  }
+                }
+              });
+            }
+
+            onUpdateData(newData);
+
+            // 🔧 RACE CONDITION FIX: Immediately save to file and broadcast
+            try {
+              console.log('VR delete: Attempting immediate file write...');
+              const success = await fileService.writeFile(newData);
+              if (success) {
+                console.log('VR delete: File write successful, sending broadcast...');
+
+                // Send data integrity broadcast to notify CMS to refresh
+                const integrityChannel = new BroadcastChannel('nightingale_suite');
+                integrityChannel.postMessage({
+                  type: 'data_updated',
+                  source: 'correspondence',
+                  action: 'vr_request_deleted',
+                  requestId: request.id,
+                  timestamp: dateUtils.now(),
+                });
+                integrityChannel.close();
+
+                console.log('VR delete: Broadcast sent successfully');
+                showToast(`VR Request #${request.id} deleted and synced with CMS.`, 'success');
+              } else {
+                console.error('VR delete: FileService.writeFile returned false');
+                showToast(`VR Request #${request.id} deleted but failed to save to file.`, 'warning');
+              }
+            } catch (error) {
+              console.error('VR delete: Error during immediate save:', error);
+              showToast(`VR Request #${request.id} deleted but save failed: ${error.message}`, 'warning');
+            }
+
+            onClose(); // Close the modal after deletion
+          }
+        };
+
+        const linkedCase = fullData?.cases?.find((c) => c.id === request.caseId);
+        const clientName =
+          fullData?.people?.find((p) => p.id === parseInt(linkedCase?.personId))?.name || 'Unknown Client';
+
+        // Get contextual actions based on status
+        const getContextualActions = () => {
+          switch (request.status) {
+            case 'Pending':
+              return [
+                e(
+                  'button',
+                  {
+                    onClick: () => handleStatusChange('Returned'),
+                    className: 'bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm',
+                  },
+                  'Mark as Returned'
+                ),
+                e(
+                  'button',
+                  {
+                    onClick: handleDeleteRequest,
+                    className: 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm',
+                  },
+                  'Delete'
+                ),
+              ];
+            case 'Returned':
+              return showVerificationInput
+                ? [
+                    e(
+                      'div',
+                      { className: 'flex items-center gap-2' },
+                      e('input', {
+                        type: 'text',
+                        placeholder: 'Verification source (e.g., Bank statement)',
+                        value: verificationSource,
+                        onChange: (e) => setVerificationSource(e.target.value),
+                        className:
+                          'bg-gray-700 text-white text-sm px-2 py-1 rounded border border-gray-600 focus:border-blue-500',
+                        onKeyDown: (e) => {
+                          if (e.key === 'Enter' && verificationSource.trim()) {
+                            handleMarkAsVerified();
+                          } else if (e.key === 'Escape') {
+                            setShowVerificationInput(false);
+                            setVerificationSource('');
+                          }
+                        },
+                        autoFocus: true,
+                      }),
+                      e(
+                        'button',
+                        {
+                          onClick: handleMarkAsVerified,
+                          disabled: !verificationSource.trim(),
+                          className:
+                            'bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded text-sm',
+                        },
+                        'Confirm'
+                      ),
+                      e(
+                        'button',
+                        {
+                          onClick: () => {
+                            setShowVerificationInput(false);
+                            setVerificationSource('');
+                          },
+                          className: 'bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm',
+                        },
+                        'Cancel'
+                      )
+                    ),
+                  ]
+                : [
+                    e(
+                      'button',
+                      {
+                        onClick: () => setShowVerificationInput(true),
+                        className: 'bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm',
+                      },
+                      'Mark as Verified'
+                    ),
+                  ];
+            case 'Verified':
+              return [
+                e(
+                  'span',
+                  { className: 'text-green-400 text-sm' },
+                  `✓ Verified ${request.verifiedDate ? dateUtils.format(request.verifiedDate) : ''}`
+                ),
+                request.verificationSource &&
+                  e('span', { className: 'text-gray-400 text-sm' }, `Source: ${request.verificationSource}`),
+              ];
+            default:
+              return [];
+          }
+        };
+
+        const footer = e(
+          'button',
+          {
+            onClick: onClose,
+            className: 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md',
+          },
+          'Close'
+        );
+
+        return e(
+          Modal,
+          {
+            isOpen: isOpen,
+            onClose: onClose,
+            title: `VR Request #${request.id}`,
+            footerContent: footer,
+          },
+          e(
+            'div',
+            { className: 'space-y-4' },
+
+            // Compact Header Card
+            e(
+              'div',
+              { className: 'bg-gray-700/50 p-4 rounded-md' },
+              e(
+                'div',
+                { className: 'flex justify-between items-start mb-3' },
+                e(
+                  'div',
+                  { className: 'flex-1' },
+                  e('h3', { className: 'text-lg font-semibold text-blue-400' }, templateName),
+                  e('div', { className: 'text-sm text-gray-400' }, `${clientName} (${request.mcn})`),
+                  e(
+                    'div',
+                    { className: 'flex gap-4 text-xs text-gray-500 mt-2' },
+                    e('span', null, `⏰ Due ${dateUtils.format(request.dueDate)}`),
+                    request.returnedDate && e('span', null, `📥 Returned ${dateUtils.format(request.returnedDate)}`)
+                  )
+                ),
+                e('div', { className: 'flex gap-2 flex-wrap' }, ...getContextualActions())
+              )
+            ),
+
+            // Request Content
+            e(
+              'div',
+              { className: 'bg-gray-700/50 p-4 rounded-md' },
+              e('h4', { className: 'font-semibold text-blue-400 mb-3' }, 'Request Content'),
+              e(
+                'div',
+                {
+                  className:
+                    'bg-gray-800 p-3 rounded font-mono text-sm whitespace-pre-wrap text-gray-200 border border-gray-600',
+                },
+                request.content
+              )
+            ),
+
+            // Financial Items (if any)
+            request.financialItemIds &&
+              request.financialItemIds.length > 0 &&
+              e(
+                'div',
+                { className: 'bg-gray-700/50 p-4 rounded-md' },
+                e(
+                  'h4',
+                  { className: 'font-semibold text-blue-400 mb-3' },
+                  `Linked Financial Items (${request.financialItemIds.length})`
+                ),
+                e(
+                  'div',
+                  { className: 'space-y-2' },
+                  request.financialItemIds.map((itemId) => {
+                    const linkedCase = fullData?.cases?.find((c) => c.id === request.caseId);
+                    if (!linkedCase) return null;
+
+                    const allFinancials = [
+                      ...(linkedCase.financials?.resources || []),
+                      ...(linkedCase.financials?.income || []),
+                      ...(linkedCase.financials?.expenses || []),
+                    ];
+
+                    const item = allFinancials.find((i) => i.id === itemId);
+                    if (!item) return null;
+
+                    return e(
+                      'div',
+                      {
+                        key: itemId,
+                        className: 'bg-gray-800 p-2 rounded text-sm',
+                      },
+                      e('div', { className: 'font-medium' }, `${item.type} - ${item.location}`),
+                      e('div', { className: 'text-gray-400 text-xs' }, `$${item.value?.toFixed(2) || '0.00'}`)
+                    );
+                  })
+                )
+              )
+          )
+        );
+      }
+
+      function VrHistoryModal({ isOpen, onClose, fullData, onUpdateData, currentCaseId, fileService }) {
+        const [selectedRequestIds, setSelectedRequestIds] = useState(new Set());
+        const [individualVerificationSources, setIndividualVerificationSources] = useState({});
+        const [selectedRequest, setSelectedRequest] = useState(null);
+        const [isManagementModalOpen, setIsManagementModalOpen] = useState(false);
+
+        const vrRequests = fullData?.vrRequests || [];
+
+        // Filter requests to current case only - VR app is now case-specific only
+        const filteredRequests = useMemo(() => {
+          if (!currentCaseId) {
+            return [];
+          }
+          return vrRequests.filter((request) => request.caseId === currentCaseId);
+        }, [vrRequests, currentCaseId]);
+
+        // Group requests by status for better organization
+        const requestsByStatus = useMemo(() => {
+          const groups = { Pending: [], Returned: [], Verified: [] };
+          filteredRequests.forEach((request) => {
+            if (groups[request.status]) {
+              groups[request.status].push(request);
+            }
+          });
+          return groups;
+        }, [filteredRequests]);
+
+        // Update selectedRequest when fullData changes to reflect real-time updates
+        useEffect(() => {
+          if (selectedRequest && fullData?.vrRequests) {
+            const updatedRequest = fullData.vrRequests.find((r) => r.id === selectedRequest.id);
+            if (updatedRequest) {
+              setSelectedRequest(updatedRequest);
+            }
+          }
+        }, [fullData, selectedRequest]);
+
+        const handleSelectRequest = (requestId) => {
+          setSelectedRequestIds((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(requestId)) {
+              newSet.delete(requestId);
+            } else {
+              newSet.add(requestId);
+            }
+            return newSet;
+          });
+        };
+
+        const handleSelectAllPending = () => {
+          const returnedIds = requestsByStatus.Returned.map((r) => r.id);
+          setSelectedRequestIds(new Set(returnedIds));
+        };
+
+        const handleClearSelection = () => {
+          setSelectedRequestIds(new Set());
+        };
+
+        const handleMarkAsReturned = (requestId) => {
+          const newData = _.cloneDeep(fullData);
+          const request = newData.vrRequests.find((r) => r.id === requestId);
+
+          if (!request || request.status !== 'Pending') {
+            showToast('Only pending VR requests can be marked as returned.', 'error');
+            return;
+          }
+
+          // Update VR request status
+          request.status = 'Returned';
+          request.returnedDate = dateUtils.now();
+
+          // Update linked financial items to "Review Pending"
+          const linkedCase = newData.cases.find((c) => c.id === request.caseId);
+          if (linkedCase) {
+            const allFinancials = [
+              ...(linkedCase.financials?.resources || []),
+              ...(linkedCase.financials?.income || []),
+              ...(linkedCase.financials?.expenses || []),
+            ];
+
+            request.financialItemIds.forEach((itemId) => {
+              const item = allFinancials.find((i) => i.id === itemId);
+              if (item && item.verificationStatus === 'VR Pending') {
+                item.verificationStatus = 'Review Pending';
+              }
+            });
+          }
+
+          onUpdateData(newData);
+          showToast(`VR Request #${requestId} marked as returned.`, 'success');
+        };
+
+        const handleMarkAsVerified = (requestId, verificationSource) => {
+          if (!verificationSource.trim()) {
+            showToast('Please enter a verification source.', 'error');
+            return;
+          }
+
+          const newData = _.cloneDeep(fullData);
+          const request = newData.vrRequests.find((r) => r.id === requestId);
+
+          if (!request || request.status !== 'Returned') {
+            showToast('Only returned VR requests can be marked as verified.', 'error');
+            return;
+          }
+
+          // Update VR request status
+          request.status = 'Verified';
+          request.verifiedDate = dateUtils.now();
+          request.verificationSource = verificationSource.trim();
+
+          // Update linked financial items to "Verified"
+          const linkedCase = newData.cases.find((c) => c.id === request.caseId);
+          if (linkedCase) {
+            const allFinancials = [
+              ...(linkedCase.financials?.resources || []),
+              ...(linkedCase.financials?.income || []),
+              ...(linkedCase.financials?.expenses || []),
+            ];
+
+            request.financialItemIds.forEach((itemId) => {
+              const item = allFinancials.find((i) => i.id === itemId);
+              if (item && item.verificationStatus === 'Review Pending') {
+                item.verificationStatus = 'Verified';
+                item.source = verificationSource.trim();
+              }
+            });
+          }
+
+          onUpdateData(newData);
+          showToast(`VR Request #${requestId} marked as verified.`, 'success');
+        };
+
+        const handleBulkMarkAsVerified = () => {
+          if (selectedRequestIds.size === 0) {
+            showToast('Please select at least one VR request to mark as verified.', 'error');
+            return;
+          }
+
+          const bulkVerificationSource = prompt("Enter verification source (e.g., 'Bank statement 07/2025'):");
+
+          if (!bulkVerificationSource || !bulkVerificationSource.trim()) {
+            return; // User cancelled or entered empty string
+          }
+
+          const newData = _.cloneDeep(fullData);
+          let updatedCount = 0;
+          let financialItemsUpdated = 0;
+
+          selectedRequestIds.forEach((requestId) => {
+            const request = newData.vrRequests.find((r) => r.id === requestId);
+            if (request && request.status === 'Returned') {
+              // Update VR request status
+              request.status = 'Verified';
+              request.verifiedDate = dateUtils.now();
+              request.verificationSource = bulkVerificationSource.trim();
+              updatedCount++;
+
+              // Update linked financial items to "Verified"
+              const linkedCase = newData.cases.find((c) => c.id === request.caseId);
+              if (linkedCase) {
+                const allFinancials = [
+                  ...(linkedCase.financials?.resources || []),
+                  ...(linkedCase.financials?.income || []),
+                  ...(linkedCase.financials?.expenses || []),
+                ];
+
+                request.financialItemIds.forEach((itemId) => {
+                  const item = allFinancials.find((i) => i.id === itemId);
+                  if (item && item.verificationStatus === 'Review Pending') {
+                    item.verificationStatus = 'Verified';
+                    item.source = bulkVerificationSource.trim();
+                    financialItemsUpdated++;
+                  }
+                });
+              }
+            }
+          });
+
+          if (updatedCount > 0) {
+            onUpdateData(newData);
+            setSelectedRequestIds(new Set());
+
+            // Clear individual verification sources for bulk-verified requests
+            setIndividualVerificationSources((prev) => {
+              const newSources = { ...prev };
+              selectedRequestIds.forEach((requestId) => {
+                delete newSources[requestId];
+              });
+              return newSources;
+            });
+
+            showToast(
+              `${updatedCount} VR request(s) marked as verified. ${financialItemsUpdated} financial item(s) updated.`,
+              'success'
+            );
+          } else {
+            showToast("No eligible VR requests found. Only 'Returned' requests can be marked as verified.", 'error');
+          }
+        };
+
+        const handleDeleteRequest = async (requestId) => {
+          const request = fullData.vrRequests.find((r) => r.id === requestId);
+          if (!request) return;
+
+          const confirmMessage = `Delete VR Request #${requestId}?\n\nThis action cannot be undone. If this VR has already been sent, you should mark it as "Returned" instead of deleting it.`;
+
+          if (confirm(confirmMessage)) {
+            const newData = _.cloneDeep(fullData);
+
+            // Remove the VR request
+            newData.vrRequests = newData.vrRequests.filter((r) => r.id !== requestId);
+
+            // Reset the financial items that were linked to this request back to their original status
+            const linkedCase = newData.cases.find((c) => c.id === request.caseId);
+            if (linkedCase && request.financialItemIds) {
+              const allFinancials = [
+                ...(linkedCase.financials?.resources || []),
+                ...(linkedCase.financials?.income || []),
+                ...(linkedCase.financials?.expenses || []),
+              ];
+
+              request.financialItemIds.forEach((itemId) => {
+                const item = allFinancials.find((i) => i.id === itemId);
+                if (item) {
+                  // Reset status based on what it would have been before the VR
+                  if (item.verificationStatus === 'VR Pending') {
+                    // If it was pending, reset to whatever the default unverified state should be
+                    item.verificationStatus = 'Pending Verification';
+                  }
+                  // Note: Don't reset items that are "Review Pending" or "Verified" as they may have been
+                  // processed through other means
+                }
+              });
+            }
+
+            onUpdateData(newData);
+
+            // 🔧 RACE CONDITION FIX: Immediately save to file and broadcast
+            try {
+              console.log('VR History delete: Attempting immediate file write...');
+              const success = await fileService.writeFile(newData);
+              if (success) {
+                console.log('VR History delete: File write successful, sending broadcast...');
+
+                // Send data integrity broadcast to notify CMS to refresh
+                const integrityChannel = new BroadcastChannel('nightingale_suite');
+                integrityChannel.postMessage({
+                  type: 'data_updated',
+                  source: 'correspondence',
+                  action: 'vr_request_deleted',
+                  requestId: requestId,
+                  timestamp: dateUtils.now(),
+                });
+                integrityChannel.close();
+
+                console.log('VR History delete: Broadcast sent successfully');
+                showToast(`VR Request #${requestId} deleted and synced with CMS.`, 'success');
+              } else {
+                console.error('VR History delete: FileService.writeFile returned false');
+                showToast(`VR Request #${requestId} deleted but failed to save to file.`, 'warning');
+              }
+            } catch (error) {
+              console.error('VR History delete: Error during immediate save:', error);
+              showToast(`VR Request #${requestId} deleted but save failed: ${error.message}`, 'warning');
+            }
+          }
+        };
+
+        const renderRequestCard = (request) => {
+          const statusColors = {
+            Pending: 'bg-yellow-600 text-yellow-100',
+            Returned: 'bg-orange-600 text-orange-100',
+            Verified: 'bg-green-600 text-green-100',
+          };
+
+          const isSelectable = request.status === 'Returned';
+
+          // Get template name for display
+          const template = fullData?.vrTemplates?.find((t) => t.id == request.templateId);
+          const templateName = template?.name || 'Unknown Template';
+
+          const handleRequestClick = () => {
+            setSelectedRequest(request);
+            setIsManagementModalOpen(true);
+          };
+
+          return e(
+            'div',
+            {
+              key: request.id,
+              className:
+                'bg-gray-700/50 hover:bg-gray-600/50 transition-colors cursor-pointer border border-transparent hover:border-blue-500/50 rounded-md',
+            },
+            e(
+              'div',
+              {
+                className: 'p-4 flex items-center justify-between',
+                onClick: handleRequestClick,
+              },
+              e(
+                'div',
+                { className: 'flex items-center space-x-3' },
+                isSelectable &&
+                  e('input', {
+                    type: 'checkbox',
+                    className: 'h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500/50',
+                    checked: selectedRequestIds.has(request.id),
+                    onChange: (e) => {
+                      e.stopPropagation();
+                      handleSelectRequest(request.id);
+                    },
+                    onClick: (e) => e.stopPropagation(),
+                  }),
+                e(
+                  'div',
+                  null,
+                  e('div', { className: 'font-medium text-blue-400' }, templateName),
+                  e(
+                    'div',
+                    { className: 'text-xs text-gray-500 mt-1' },
+                    `Created: ${dateUtils.format(request.createdDate)} • Due: ${dateUtils.format(request.dueDate)}`
+                  )
+                )
+              ),
+              e(
+                'div',
+                { className: 'flex items-center space-x-2' },
+                // Only show status badge for non-pending requests
+                request.status !== 'Pending' &&
+                  e(
+                    'span',
+                    {
+                      className: `px-2 py-1 text-xs rounded-full ${statusColors[request.status]}`,
+                    },
+                    request.status
+                  ),
+                e(
+                  'div',
+                  { className: 'flex space-x-1' },
+                  request.status === 'Pending' &&
+                    e(
+                      'button',
+                      {
+                        onClick: (e) => {
+                          e.stopPropagation();
+                          handleMarkAsReturned(request.id);
+                        },
+                        className: 'bg-orange-600 hover:bg-orange-700 text-white text-xs px-2 py-1 rounded',
+                        title: 'Mark as returned',
+                      },
+                      'Mark as Returned'
+                    )
+                )
+              )
+            )
+          );
+        };
+
+        const footer = e(
+          'button',
+          {
+            onClick: onClose,
+            className: 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md',
+          },
+          'Close'
+        );
+
+        return e(
+          React.Fragment,
+          null,
+          e(
+            Modal,
+            {
+              isOpen,
+              onClose,
+              title: 'VR Request History',
+              footerContent: footer,
+            },
+            e(
+              'div',
+              { className: 'space-y-6' },
+              e(
+                'div',
+                { className: 'flex justify-between items-center' },
+                e(
+                  'div',
+                  null,
+                  e('h4', { className: 'text-lg font-semibold text-blue-400' }, 'VR Request History'),
+                  currentCaseId &&
+                    e('div', { className: 'text-sm text-gray-400 mt-1' }, 'Case-specific VR requests only')
+                ),
+                e(
+                  'div',
+                  { className: 'flex items-center space-x-3' },
+                  selectedRequestIds.size > 0 &&
+                    e(
+                      'button',
+                      {
+                        onClick: handleBulkMarkAsVerified,
+                        className: 'bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded',
+                      },
+                      `Verify Selected (${selectedRequestIds.size})`
+                    ),
+                  e('div', { className: 'text-sm text-gray-400' }, `${filteredRequests.length} requests`)
+                )
+              ),
+
+              // Status Summary
+              e(
+                'div',
+                { className: 'grid grid-cols-3 gap-4' },
+                ['Pending', 'Returned', 'Verified'].map((status) => {
+                  const count = requestsByStatus[status].length;
+                  const colors = {
+                    Pending: 'bg-yellow-600/20 border-yellow-600',
+                    Returned: 'bg-orange-600/20 border-orange-600',
+                    Verified: 'bg-green-600/20 border-green-600',
+                  };
+                  return e(
+                    'div',
+                    {
+                      key: status,
+                      className: `p-3 rounded border ${colors[status]}`,
+                    },
+                    e('div', { className: 'text-2xl font-bold' }, count),
+                    e('div', { className: 'text-sm text-gray-400' }, status)
+                  );
+                })
+              ),
+
+              // Requests by Status
+              ['Pending', 'Returned', 'Verified'].map(
+                (status) =>
+                  requestsByStatus[status].length > 0 &&
+                  e(
+                    'div',
+                    { key: status },
+                    e(
+                      'h5',
+                      { className: 'text-md font-semibold text-blue-300 mb-3' },
+                      `${status} Requests (${requestsByStatus[status].length})`
+                    ),
+                    e(
+                      'div',
+                      { className: 'space-y-3 max-h-64 overflow-y-auto' },
+                      requestsByStatus[status].map(renderRequestCard)
+                    )
+                  )
+              )
+            )
+          ),
+
+          // VR Management Modal
+          isManagementModalOpen &&
+            e(VrManagementModal, {
+              isOpen: isManagementModalOpen,
+              onClose: () => {
+                setIsManagementModalOpen(false);
+                setSelectedRequest(null);
+              },
+              request: selectedRequest,
+              fullData: fullData,
+              onUpdateData: onUpdateData,
+              fileService: fileService,
+            })
+        );
+      }
+
+      function VrBuilderPanel({ activeCase, fullData, selectedFinItemIds, onCreateVr, onComplete }) {
+        const [selectedCategory, setSelectedCategory] = useState('');
+        const [selectedTemplateId, setSelectedTemplateId] = useState('');
+        const [finalContent, setFinalContent] = useState('');
+        const [dueDays, setDueDays] = useState('15');
+        const [currentTemplateId, setCurrentTemplateId] = useState(null); // Track template used for content
+
+        const templates = useMemo(() => {
+          if (!fullData?.vrTemplates) return [];
+          if (!selectedCategory) return fullData.vrTemplates;
+          return fullData.vrTemplates.filter((t) => t.category === selectedCategory);
+        }, [fullData, selectedCategory]);
+
+        const handleAddToRequest = () => {
+          if (!selectedTemplateId) return;
+          const template = fullData.vrTemplates.find((t) => t.id == selectedTemplateId);
+          if (!template) return;
+
+          const selectedIdsArray = Array.from(selectedFinItemIds);
+          let processedContent = '';
+          let toastMessage = '';
+
+          if (selectedIdsArray.length > 0) {
+            // Logic for when financial items ARE selected
+            const allFinancials = [
+              ...(activeCase.financials?.resources || []),
+              ...(activeCase.financials?.income || []),
+              ...(activeCase.financials?.expenses || []),
+            ];
+            const selectedItems = selectedIdsArray
+              .map((id) => allFinancials.find((item) => item.id === id))
+              .filter(Boolean);
+
+            processedContent = selectedItems
+              .map((item) => {
+                return processPlaceholders(template.content, activeCase, fullData, {
+                  ItemName: item.type,
+                  Location: item.location,
+                  AccountNumber: item.accountNumber || '',
+                  Value: `$${(item.value || 0).toFixed(2)}`,
+                });
+              })
+              .join('\n\n');
+            toastMessage = `Added text for ${selectedItems.length} item(s) to the request.`;
+          } else {
+            // Logic for when NO financial items are selected
+            processedContent = processPlaceholders(template.content, activeCase, fullData, {});
+            toastMessage = 'Added general template text to the request.';
+          }
+
+          setFinalContent((prevContent) => (prevContent ? `${prevContent}\n\n${processedContent}` : processedContent));
+
+          // Track which template was used for this content
+          if (!currentTemplateId) {
+            setCurrentTemplateId(parseInt(selectedTemplateId, 10)); // Convert to number
+          }
+
+          showToast(toastMessage, 'success');
+        };
+
+        const handleCreateClick = () => {
+          const success = onCreateVr(finalContent, parseInt(dueDays, 10), currentTemplateId);
+          if (success) {
+            setFinalContent('');
+            setCurrentTemplateId(null); // Reset template tracking
+            onComplete(); // This clears the selected items in the App state
+          }
+        };
+
+        if (!activeCase) {
+          return e(
+            'div',
+            {
+              className: 'bg-gray-800 p-6 rounded-lg shadow-lg flex items-center justify-center h-full',
+            },
+            e('p', { className: 'text-gray-500' }, 'Select a case to begin building a VR.')
+          );
+        }
+
+        return e(
+          'div',
+          {
+            className: 'bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col space-y-6 overflow-y-auto',
+          },
+          e(
+            'h2',
+            {
+              className: 'text-2xl font-bold text-blue-300 border-b border-gray-700 pb-2',
+            },
+            'Request Builder'
+          ),
+          e(
+            'div',
+            { className: 'space-y-4' },
+            e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Template Selection'),
+            e(
+              'div',
+              { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+              e(
+                'div',
+                null,
+                e(
+                  'label',
+                  {
+                    htmlFor: 'vr-template-category-select',
+                    className: 'block text-sm font-medium text-gray-400 mb-1',
+                  },
+                  'Category'
+                ),
+                e(
+                  'select',
+                  {
+                    id: 'vr-template-category-select',
+                    className: 'w-full bg-gray-700 rounded-md p-2',
+                    value: selectedCategory,
+                    onChange: (e) => setSelectedCategory(e.target.value),
+                  },
+                  e('option', { value: '' }, 'All Categories'),
+                  ...(fullData.vrCategories || []).map((cat) => e('option', { key: cat, value: cat }, cat))
+                )
+              ),
+              e(
+                'div',
+                null,
+                e(
+                  'label',
+                  {
+                    htmlFor: 'vr-template-select',
+                    className: 'block text-sm font-medium text-gray-400 mb-1',
+                  },
+                  'Template'
+                ),
+                e(
+                  'select',
+                  {
+                    id: 'vr-template-select',
+                    className: 'w-full bg-gray-700 rounded-md p-2',
+                    value: selectedTemplateId,
+                    onChange: (e) => setSelectedTemplateId(e.target.value),
+                    disabled: templates.length === 0,
+                  },
+                  e('option', { value: '' }, 'Select a template...'),
+                  ...templates.map((t) => e('option', { key: t.id, value: t.id }, t.name))
+                )
+              )
+            )
+          ),
+          e(
+            'div',
+            { className: 'space-y-4 flex-grow flex flex-col' },
+            e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Final Request Content'),
+            e('textarea', {
+              placeholder: 'Your compiled verification request will appear here...',
+              className: 'flex-grow w-full bg-gray-700 rounded-md p-3 text-sm font-mono',
+              value: finalContent,
+              onChange: (e) => setFinalContent(e.target.value),
+            }),
+            e(
+              'div',
+              { className: 'flex space-x-2 pt-2' },
+              e(
+                'button',
+                {
+                  onClick: handleAddToRequest,
+                  className: 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50',
+                  disabled: !selectedTemplateId,
+                },
+                'Add to Request'
+              ),
+              e(
+                'button',
+                {
+                  onClick: () => setFinalContent(''),
+                  className: 'bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md',
+                },
+                'Clear'
+              ),
+              e(
+                'button',
+                {
+                  onClick: () => navigator.clipboard.writeText(finalContent),
+                  className: 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md ml-auto',
+                },
+                'Copy to Clipboard'
+              )
+            )
+          ),
+          e(
+            'div',
+            { className: 'space-y-4 border-t border-gray-700 pt-4' },
+            e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Due Date & Create'),
+            e(
+              'div',
+              { className: 'flex items-center justify-between' },
+              e(
+                'div',
+                { className: 'flex space-x-4 items-center' },
+                e(
+                  'label',
+                  { className: 'flex items-center' },
+                  e('input', {
+                    type: 'radio',
+                    name: 'vr-due-date',
+                    value: '15',
+                    checked: dueDays === '15',
+                    onChange: (e) => setDueDays(e.target.value),
+                    className: 'h-4 w-4 text-blue-500 border-gray-500 mr-2',
+                  }),
+                  e('span', null, '15 days')
+                ),
+                e(
+                  'label',
+                  { className: 'flex items-center' },
+                  e('input', {
+                    type: 'radio',
+                    name: 'vr-due-date',
+                    value: '30',
+                    checked: dueDays === '30',
+                    onChange: (e) => setDueDays(e.target.value),
+                    className: 'h-4 w-4 text-blue-500 border-gray-500 mr-2',
+                  }),
+                  e('span', null, '30 days')
+                )
+              ),
+              e(
+                'button',
+                {
+                  onClick: handleCreateClick,
+                  className:
+                    'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md disabled:opacity-50',
+                  disabled: !finalContent.trim(),
+                },
+                'Create VR & Update Statuses'
+              )
+            )
+          )
+        );
+      }
+
+      function CaseSelectionPanel({
+        cases,
+        onCaseSelect,
+        activeCase,
+        fullData,
+        selectedFinItemIds,
+        onFinancialItemToggle,
+        externalSearchTerm,
+      }) {
+        const [searchTerm, setSearchTerm] = useState('');
+        const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+        const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+        const [searchResults, setSearchResults] = useState([]);
+        const [highlightedIndex, setHighlightedIndex] = useState(-1);
+        const inputRef = useRef(null);
+        const dropdownRef = useRef(null);
+
+        // Update search term when external search term changes (from MCN broadcast)
+        useEffect(() => {
+          if (externalSearchTerm && cases.length > 0) {
+            setSearchTerm(externalSearchTerm);
+            setIsSearchExpanded(true); // Auto-expand for external searches
+            // Auto-search when MCN broadcast arrives
+            const results = caseSearchService.search(externalSearchTerm);
+            if (results.length > 0) {
+              onCaseSelect(results[0]);
+              // Collapse after selectionw
+              setTimeout(() => setIsSearchExpanded(false), 1000);
+            }
+          }
+        }, [externalSearchTerm, cases]);
+
+        const caseSearchService = useMemo(
+          () =>
+            new NightingaleSearchService(cases, {
+              keys: ['mcn', 'name'],
+              threshold: 0.2,
+            }),
+          [cases]
+        );
+
+        // Prepare searchable cases with display labels
+        const searchableCases = useMemo(() => {
+          return cases.map((caseItem) => {
+            const person = fullData.people.find((p) => p.id === parseInt(caseItem.personId));
+            return {
+              ...caseItem,
+              displayName: person?.name || 'Unknown Client',
+              searchLabel: `${person?.name || 'Unknown'} (MCN: ${caseItem.mcn})`,
+            };
+          });
+        }, [cases, fullData]);
+
+        // Handle search input changes - simplified for SearchBar component
+        const handleInputChange = (value) => {
+          setSearchTerm(value);
+        };
+
+        const handleCaseSelect = (selectedCase) => {
+          setSearchTerm(''); // Clear search term after selection
+          setIsSearchExpanded(false); // Collapse after selection
+          onCaseSelect(selectedCase);
+        };
+
+        const handleSearchToggle = () => {
+          const newExpanded = !isSearchExpanded;
+          setIsSearchExpanded(newExpanded);
+
+          if (!newExpanded) {
+            // Clear search when collapsing
+            setSearchTerm('');
+          }
+        };
+
+        // SearchBar component handles keyboard navigation, focus, and blur internally
+
+        return e(
+          'div',
+          {
+            className: 'bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col space-y-6 overflow-y-auto',
+          },
+          e(
+            'h2',
+            {
+              className: 'text-2xl font-bold text-blue-300 border-b border-gray-700 pb-2',
+            },
+            'Case Data'
+          ),
+          e(
+            'div',
+            { className: 'space-y-4 relative' },
+            // Combined search and case info container
+            e(
+              'div',
+              {
+                className: 'bg-gray-700/50 p-4 rounded-md border border-gray-600',
+              },
+              // Case is selected - show case info with Change button
+              activeCase
+                ? e(
+                    'div',
+                    { className: 'flex items-center justify-between' },
+                    e(
+                      'div',
+                      { className: 'flex-1' },
+                      e(
+                        'div',
+                        { className: 'font-medium text-blue-300 text-lg' },
+                        activeCase.displayName ||
+                          fullData.people.find((p) => p.id === parseInt(activeCase.personId))?.name ||
+                          'Unknown Client'
+                      ),
+                      e('div', { className: 'text-sm text-gray-400' }, `MCN: ${activeCase.mcn}`)
+                    ),
+                    e(
+                      'button',
+                      {
+                        onClick: handleSearchToggle,
+                        className:
+                          'ml-3 px-3 py-1 text-sm text-blue-400 hover:text-blue-300 hover:bg-gray-600 rounded-md transition-colors border border-gray-600',
+                        title: 'Change case',
+                      },
+                      'Change'
+                    )
+                  )
+                : // No case selected - show search interface
+                  e(
+                    'div',
+                    null,
+                    e(
+                      'div',
+                      { className: 'flex items-center justify-between mb-3' },
+                      e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Find Case')
+                    ),
+                    e(SearchBar, {
+                      value: searchTerm,
+                      onChange: (e) => handleInputChange(e.target.value),
+                      placeholder: 'Search by client name or MCN...',
+                      className: 'w-full',
+                      size: 'md',
+                      showDropdown: true,
+                      data: searchableCases,
+                      searchKeys: ['mcn', 'displayName'],
+                      onResultSelect: handleCaseSelect,
+                      renderResult: (result, index, highlightedIndex) =>
+                        e(
+                          'div',
+                          {
+                            key: result.id || index,
+                            className: `
+                            p-3 cursor-pointer border-b border-gray-600 last:border-b-0 transition-colors
+                            ${index === highlightedIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}
+                          `
+                              .replace(/\s+/g, ' ')
+                              .trim(),
+                            onMouseDown: (e) => e.preventDefault(),
+                            onClick: () => handleCaseSelect(result),
+                          },
+                          e(
+                            'div',
+                            { className: 'flex flex-col' },
+                            e('div', { className: 'font-medium text-blue-300' }, result.displayName),
+                            e('div', { className: 'text-sm text-gray-400' }, `MCN: ${result.mcn}`)
+                          )
+                        ),
+                      maxResults: 6,
+                      minQueryLength: 0,
+                    })
+                  ),
+              // Show search when case is selected and Change was clicked
+              activeCase &&
+                isSearchExpanded &&
+                e(
+                  'div',
+                  { className: 'mt-3 pt-3 border-t border-gray-600' },
+                  e(
+                    'div',
+                    { className: 'flex items-center justify-between mb-2' },
+                    e('h4', { className: 'text-md font-semibold text-blue-400' }, 'Search for Different Case'),
+                    e(
+                      'button',
+                      {
+                        onClick: handleSearchToggle,
+                        className: 'text-sm text-gray-400 hover:text-red-400 transition-colors',
+                        title: 'Cancel search',
+                      },
+                      'Cancel'
+                    )
+                  ),
+                  e(SearchBar, {
+                    value: searchTerm,
+                    onChange: (e) => handleInputChange(e.target.value),
+                    placeholder: 'Search by client name or MCN...',
+                    className: 'w-full',
+                    size: 'md',
+                    showDropdown: true,
+                    data: searchableCases,
+                    searchKeys: ['mcn', 'displayName'],
+                    onResultSelect: handleCaseSelect,
+                    renderResult: (result, index, highlightedIndex) =>
+                      e(
+                        'div',
+                        {
+                          key: result.id || index,
+                          className: `
+                          p-3 cursor-pointer border-b border-gray-600 last:border-b-0 transition-colors
+                          ${index === highlightedIndex ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}
+                        `
+                            .replace(/\s+/g, ' ')
+                            .trim(),
+                          onMouseDown: (e) => e.preventDefault(),
+                          onClick: () => handleCaseSelect(result),
+                        },
+                        e(
+                          'div',
+                          { className: 'flex flex-col' },
+                          e('div', { className: 'font-medium text-blue-300' }, result.displayName),
+                          e('div', { className: 'text-sm text-gray-400' }, `MCN: ${result.mcn}`)
+                        )
+                      ),
+                    maxResults: 6,
+                    minQueryLength: 0,
+                    autoFocus: true,
+                  })
+                )
+              // SearchBar component now handles dropdown internally
+            )
+          ),
+          activeCase &&
+            e(CaseDetailsPanel, {
+              activeCase,
+              fullData,
+              selectedFinItemIds,
+              onFinancialItemToggle,
+            })
+        );
+      }
+
+      // --- Main Application Component ---
+      function App() {
+        const [fullData, setFullData] = useState(null);
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState(null);
+        const [activeCase, setActiveCase] = useState(null);
+        const [selectedFinItemIds, setSelectedFinItemIds] = useState(new Set());
+        const [isTemplateManagerOpen, setTemplateManagerOpen] = useState(false);
+        const [isVrHistoryOpen, setVrHistoryOpen] = useState(false);
+        const [isDirty, setIsDirty] = useState(false);
+        const [externalSearchTerm, setExternalSearchTerm] = useState('');
+        const [pendingMcn, setPendingMcn] = useState(null);
+
+        // Expose data to global scope for React DevTools debugging
+        React.useEffect(() => {
+          window.nightingaleAppData = fullData;
+          window.nightingaleActiveCase = activeCase;
+          window.nightingaleIsDirty = isDirty;
+        }, [fullData, activeCase, isDirty]);
+
+        // Parse URL parameters on load
+        const urlParams = useMemo(() => {
+          const params = new URLSearchParams(window.location.search);
+          return {
+            mcn: params.get('mcn'),
+            caseId: params.get('caseId'),
+          };
+        }, []);
+
+        // Derive current case ID from active case
+        const currentCaseId = activeCase?.id || null;
+
+        const handleUpdateData = useCallback((newData) => {
+          // Use custom DevTools helper for better debugging
+          if (window.NightingaleDevTools) {
+            window.NightingaleDevTools.logDataFlow('Data Update', {
+              hasVrTemplates: !!newData?.vrTemplates,
+              templateCount: newData?.vrTemplates?.length || 0,
+              hasVrRequests: !!newData?.vrRequests,
+              requestCount: newData?.vrRequests?.length || 0,
+            });
+          }
+
+          console.log('handleUpdateData called with:', {
+            hasVrTemplates: !!newData?.vrTemplates,
+            templateCount: newData?.vrTemplates?.length || 0,
+          });
+          setFullData(newData);
+          setIsDirty(true);
+          console.log('Set isDirty to true');
+        }, []);
+
+        const handleSave = async () => {
+          if (!fullData) {
+            console.error('No fullData available for saving');
+            showToast('No data to save.', 'error');
+            return;
+          }
+
+          console.log('Attempting to save data...', {
+            isDirty,
+            fullDataExists: !!fullData,
+          });
+
+          try {
+            const success = await fileService.writeFile(fullData);
+            if (success) {
+              setIsDirty(false);
+              showToast('Data saved successfully.', 'success');
+
+              // Send data integrity broadcast to notify other apps
+              const integrityChannel = new BroadcastChannel('nightingale_suite');
+              integrityChannel.postMessage({
+                type: 'data_updated',
+                source: 'correspondence',
+                timestamp: dateUtils.now(),
+              });
+              integrityChannel.close();
+              console.log('Sent data integrity broadcast: data updated');
+            } else {
+              console.error('FileService.writeFile returned false');
+              showToast('Failed to save data.', 'error');
+            }
+          } catch (error) {
+            console.error('Error during save:', error);
+            showToast(`Save failed: ${error.message}`, 'error');
+          }
+        };
+
+        const handleFinancialItemToggle = useCallback((itemId) => {
+          setSelectedFinItemIds((prevSelectedIds) => {
+            const newSelectedIds = new Set(prevSelectedIds);
+            if (newSelectedIds.has(itemId)) {
+              newSelectedIds.delete(itemId);
+            } else {
+              newSelectedIds.add(itemId);
+            }
+            return newSelectedIds;
+          });
+        }, []);
+
+        const handleCreateVrRequest = useCallback(
+          (finalContent, dueDays, templateId = null) => {
+            if (!activeCase || !finalContent.trim()) return;
+
+            const newVrRequest = {
+              id: fullData.nextVrRequestId++,
+              caseId: activeCase.id,
+              mcn: activeCase.mcn,
+              clientName: fullData.people.find((p) => p.id === parseInt(activeCase.personId))?.name || 'Unknown',
+              content: finalContent,
+              createdDate: dateUtils.now(),
+              dueDate: dateUtils.addDays(dueDays),
+              status: 'Pending',
+              financialItemIds: Array.from(selectedFinItemIds),
+              templateId: templateId, // Store the template ID that was used
+            };
+
+            // Create a deep copy to modify
+            const newData = _.cloneDeep(fullData);
+
+            // Add the new request
+            newData.vrRequests = newData.vrRequests || [];
+            newData.vrRequests.push(newVrRequest);
+
+            // Update the statuses of the financial items in the active case
+            const caseToUpdate = newData.cases.find((c) => c.id === activeCase.id);
+            if (caseToUpdate) {
+              const allFinancials = [
+                ...(caseToUpdate.financials?.resources || []),
+                ...(caseToUpdate.financials?.income || []),
+                ...(caseToUpdate.financials?.expenses || []),
+              ];
+              selectedFinItemIds.forEach((itemId) => {
+                const itemToUpdate = allFinancials.find((item) => item.id === itemId);
+                if (itemToUpdate) {
+                  itemToUpdate.verificationStatus = 'VR Pending';
+                }
+              });
+            }
+
+            setFullData(newData);
+            setIsDirty(true);
+            showToast(`VR Request #${newVrRequest.id} created successfully!`, 'success');
+
+            // Return true to signal completion for UI cleanup
+            return true;
+          },
+          [activeCase, fullData, selectedFinItemIds]
+        );
+
+        const fileService = useMemo(
+          () =>
+            new FileSystemService({
+              tabId: `corr-react-tab-${Date.now()}`,
+              errorCallback: showToast,
+              sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
+            }),
+          []
+        );
+
+        const loadInitialData = useCallback(async () => {
+          try {
+            const { handle, permission } = await fileService.restoreLastDirectoryAccess();
+            if (!handle || permission !== 'granted') {
+              setError('Please connect to your Nightingale data directory to use this app.');
+              setLoading(false);
+              return;
+            }
+            const data = await fileService.readFile();
+            if (data) {
+              // Ensure default VR data structures exist
+              const normalizedData = {
+                ...data,
+                vrTemplates: data.vrTemplates || [],
+                vrCategories: data.vrCategories || ['Banking', 'Facility', 'Government'],
+                vrRequests: data.vrRequests || [],
+                nextVrTemplateId: data.nextVrTemplateId || 1,
+                nextVrRequestId: data.nextVrRequestId || 1,
+              };
+
+              // Migrate existing VR requests that don't have templateId
+              if (normalizedData.vrRequests && normalizedData.vrRequests.length > 0) {
+                let migrationNeeded = false;
+                normalizedData.vrRequests.forEach((request) => {
+                  if (!request.templateId) {
+                    // Try to infer template from content or default to first available template
+                    const firstTemplate = normalizedData.vrTemplates[0];
+                    if (firstTemplate) {
+                      request.templateId = firstTemplate.id;
+                      migrationNeeded = true;
+                    }
+                  }
+                });
+
+                // Save the migration if needed
+                if (migrationNeeded) {
+                  console.log('Migrated VR requests to include templateId');
+                  await fileService.writeFile(normalizedData);
+                }
+              }
+
+              setFullData(normalizedData);
+              window.appDataLoaded = true; // Global flag for debugging
+            } else {
+              setError('Could not find a valid nightingale-data.json file in the connected directory.');
+            }
+          } catch (err) {
+            setError(`Failed to load data: ${err.message}`);
+          } finally {
+            setLoading(false);
+          }
+        }, [fileService]);
+
+        useEffect(() => {
+          loadInitialData();
+        }, [loadInitialData]);
+
+        // ✅ IMPLEMENTED: MCN broadcast listener from CMS for auto-case selection
+        useEffect(() => {
+          const channel = new BroadcastChannel('nightingale-app-communication');
+
+          const handleMessage = (event) => {
+            console.log('Received broadcast message:', event.data); // Debug log
+            console.log('URL params:', urlParams); // Debug log
+            console.log('Current fullData loaded:', !!fullData); // Debug log
+
+            if (event.data.type === 'SELECT_CASE' && event.data.mcn) {
+              // Update the search term first
+              setExternalSearchTerm(event.data.mcn);
+
+              // Check if data is loaded
+              if (!fullData || !fullData.cases || !fullData.people) {
+                setPendingMcn(event.data.mcn);
+                showToast(
+                  `Received MCN ${event.data.mcn} from CMS broadcast. Loading when data is ready...`,
+                  'success'
+                );
+                return;
+              }
+
+              // Auto-search for the case by MCN in the raw data
+              const foundCase = fullData.cases.find((c) => c.mcn === event.data.mcn);
+
+              if (foundCase) {
+                // Find the corresponding person to create the searchable case format
+                const person = fullData.people.find((p) => p.id === parseInt(foundCase.personId));
+                const searchableCase = {
+                  ...foundCase,
+                  name: person?.name || 'Unknown Person',
+                };
+
+                handleFindCase(searchableCase);
+                showToast(`Auto-loaded case from CMS broadcast: ${event.data.mcn}`, 'success');
+              } else {
+                showToast(`Case ${event.data.mcn} not found in current data.`, 'error');
+              }
+            }
+          };
+
+          channel.addEventListener('message', handleMessage);
+
+          // Also check for broadcasts sent just before this page loaded
+          // Store a global flag so we can detect early broadcasts
+          if (window.nightingaleBroadcastPending) {
+            console.log('Found pending broadcast from before page load:', window.nightingaleBroadcastPending);
+            handleMessage({ data: window.nightingaleBroadcastPending });
+            window.nightingaleBroadcastPending = null;
+          }
+
+          return () => {
+            channel.removeEventListener('message', handleMessage);
+            channel.close();
+          };
+        }, [fullData, handleFindCase, urlParams]);
+
+        // Process pending MCN when data becomes available (from URL params or broadcasts)
+        useEffect(() => {
+          const mcnToProcess = pendingMcn || urlParams.mcn;
+
+          if (mcnToProcess && fullData && fullData.cases && fullData.people) {
+            console.log('Processing MCN from URL params or pending:', mcnToProcess);
+
+            const foundCase = fullData.cases.find((c) => c.mcn === mcnToProcess);
+
+            if (foundCase) {
+              const person = fullData.people.find((p) => p.id === parseInt(foundCase.personId));
+              const searchableCase = {
+                ...foundCase,
+                name: person?.name || 'Unknown Person',
+              };
+
+              setExternalSearchTerm(mcnToProcess);
+              handleFindCase(searchableCase);
+
+              // Different messages for URL vs broadcast
+              if (urlParams.mcn) {
+                showToast(`Auto-loaded case from URL: ${mcnToProcess}`, 'success');
+              } else {
+                showToast(`Auto-loaded pending case: ${mcnToProcess}`, 'success');
+              }
+
+              setPendingMcn(null); // Clear any pending MCN
+
+              // Clean up URL params after successful load to prevent re-loading
+              if (urlParams.mcn) {
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+              }
+            } else {
+              const source = urlParams.mcn ? 'URL' : 'broadcast';
+              showToast(`Case ${mcnToProcess} not found in loaded data (from ${source}).`, 'error');
+              setPendingMcn(null); // Clear pending MCN even on failure
+            }
+          }
+        }, [fullData, pendingMcn, urlParams.mcn, handleFindCase]);
+
+        // ✅ IMPLEMENTED: Data integrity broadcast listener for case creation/updates
+        useEffect(() => {
+          const dataIntegrityChannel = new BroadcastChannel('nightingale_suite');
+
+          const handleDataIntegrityMessage = (event) => {
+            console.log('Received data integrity broadcast:', event.data);
+
+            if (event.data.type === 'case_created') {
+              console.log('Correspondence App: Case created elsewhere. Refreshing data silently.');
+              // Refresh data silently when cases are created in other apps
+              setTimeout(() => {
+                loadInitialData();
+              }, 250);
+              showToast('Data refreshed - new case detected.', 'success');
+            } else if (event.data.type === 'data_updated' && event.data.source !== 'correspondence') {
+              console.log('Correspondence App: Data updated elsewhere. Refreshing data silently.');
+              // Refresh data when other apps update data (but not when we update it ourselves)
+              setTimeout(() => {
+                loadInitialData();
+              }, 250);
+              showToast('Data refreshed - external update detected.', 'success');
+            }
+          };
+
+          dataIntegrityChannel.addEventListener('message', handleDataIntegrityMessage);
+
+          return () => {
+            dataIntegrityChannel.removeEventListener('message', handleDataIntegrityMessage);
+            dataIntegrityChannel.close();
+          };
+        }, [loadInitialData]);
+
+        const searchableCases = useMemo(() => {
+          if (!fullData?.cases || !fullData?.people) return [];
+          const peopleMap = new Map(fullData.people.map((p) => [p.id, p.name]));
+          return fullData.cases.map((c) => ({
+            ...c,
+            name: peopleMap.get(c.personId) || 'Unknown Person',
+          }));
+        }, [fullData]);
+
+        const handleFindCase = useCallback((foundCase) => {
+          setActiveCase(foundCase);
+          // Removed redundant toast - URL/broadcast processing already shows feedback
+          if (!foundCase) {
+            showToast('Case not found.', 'error');
+          }
+        }, []);
+
+        const renderContent = () => {
+          if (loading) {
+            return e('p', { className: 'text-center text-gray-400' }, 'Loading data from directory...');
+          }
+          if (error) {
+            return e(
+              'div',
+              {
+                className: 'bg-red-800 border border-red-600 text-red-200 p-4 rounded-lg text-center',
+              },
+              e('h3', { className: 'font-bold' }, 'Connection Error'),
+              e('p', null, error)
+            );
+          }
+          if (!fullData) {
+            return e('p', { className: 'text-center text-gray-400' }, 'No data loaded.');
+          }
+
+          return e(
+            'main',
+            {
+              className: 'flex-grow p-6 bg-gray-900 overflow-auto grid grid-cols-1 lg:grid-cols-2 gap-6',
+            },
+            e(CaseSelectionPanel, {
+              cases: searchableCases,
+              onCaseSelect: handleFindCase,
+              activeCase: activeCase,
+              fullData: fullData,
+              selectedFinItemIds: selectedFinItemIds,
+              onFinancialItemToggle: handleFinancialItemToggle,
+              externalSearchTerm: externalSearchTerm,
+            }),
+            e(VrBuilderPanel, {
+              activeCase: activeCase,
+              fullData: fullData,
+              selectedFinItemIds: selectedFinItemIds,
+              onCreateVr: handleCreateVrRequest,
+              onComplete: () => setSelectedFinItemIds(new Set()), // Function to clear selections
+            })
+          );
+        };
+
+        return e(
+          'div',
+          { className: 'flex flex-col h-screen bg-gray-900 text-gray-200' },
+          e(
+            'div',
+            {
+              id: 'title-bar',
+              className: 'flex items-center justify-between bg-gray-800 p-3 shadow-md flex-shrink-0',
+            },
+            e(
+              'div',
+              { className: 'flex items-center' },
+              e(
+                'svg',
+                {
+                  xmlns: 'http://www.w3.org/2000/svg',
+                  className: 'h-6 w-6 mr-2 text-blue-400',
+                  fill: 'none',
+                  viewBox: '0 0 24 24',
+                  stroke: 'currentColor',
+                },
+                e('path', {
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round',
+                  strokeWidth: 2,
+                  d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                })
+              ),
+              e('span', { className: 'font-bold text-lg' }, 'Standalone VR Generator')
+            ),
+            // Management buttons will be added here in a later step
+            e(
+              'div',
+              { className: 'flex items-center space-x-3' },
+              e(
+                'button',
+                {
+                  onClick: () => setTemplateManagerOpen(true),
+                  className:
+                    'bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 text-sm inline-flex items-center',
+                  title: 'Manage VR Templates',
+                },
+                e(
+                  'svg',
+                  {
+                    xmlns: 'http://www.w3.org/2000/svg',
+                    className: 'h-4 w-4 inline mr-1',
+                    fill: 'none',
+                    viewBox: '0 0 24 24',
+                    stroke: 'currentColor',
+                  },
+                  e('path', {
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: 2,
+                    d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                  })
+                ),
+                'Templates'
+              ),
+              e(
+                'button',
+                {
+                  onClick: () => setVrHistoryOpen(true),
+                  className:
+                    'bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 text-sm inline-flex items-center',
+                  title: 'View VR Request History',
+                },
+                e(
+                  'svg',
+                  {
+                    xmlns: 'http://www.w3.org/2000/svg',
+                    className: 'h-4 w-4 inline mr-1',
+                    fill: 'none',
+                    viewBox: '0 0 24 24',
+                    stroke: 'currentColor',
+                  },
+                  e('path', {
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: 2,
+                    d: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+                  })
+                ),
+                'History'
+              ),
+              e(
+                'button',
+                {
+                  onClick: handleSave,
+                  disabled: !isDirty,
+                  className:
+                    'bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 text-sm inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed',
+                  title: 'Save Data File',
+                },
+                e(
+                  'svg',
+                  {
+                    xmlns: 'http://www.w3.org/2000/svg',
+                    className: 'h-4 w-4 inline mr-1',
+                    fill: 'none',
+                    viewBox: '0 0 24 24',
+                    stroke: 'currentColor',
+                  },
+                  e('path', {
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: 2,
+                    d: 'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4',
+                  })
+                ),
+                'Save'
+              )
+            )
+          ),
+          renderContent(),
+          isTemplateManagerOpen &&
+            e(TemplateManagerModal, {
+              isOpen: isTemplateManagerOpen,
+              onClose: () => setTemplateManagerOpen(false),
+              fullData: fullData,
+              onUpdateData: handleUpdateData,
+              fileService: fileService,
+            }),
+          isVrHistoryOpen &&
+            e(VrHistoryModal, {
+              isOpen: isVrHistoryOpen,
+              onClose: () => setVrHistoryOpen(false),
+              fullData: fullData,
+              onUpdateData: handleUpdateData,
+              currentCaseId: currentCaseId,
+              fileService: fileService,
+            })
+        );
+      }
+
+      // --- Nightingale React DevTools Custom Configurations ---
+
+      // Custom component display names for better DevTools experience
+      window.NightingaleDevTools = {
+        // Debug helpers for React DevTools
+        logComponentState: (componentName, state) => {
+          console.group(`🔍 ${componentName} State`);
+          console.table(state);
+          console.groupEnd();
+        },
+
+        logDataFlow: (operation, data) => {
+          console.group(`📊 Data Flow: ${operation}`);
+          console.log('Timestamp:', dateUtils.now());
+          console.log('Data:', data);
+          console.groupEnd();
+        },
+
+        // Template debugging helpers
+        debugTemplates: () => {
+          const data = window.nightingaleAppData || {};
+          console.group('📝 Template Debug Info');
+          console.log('Total Templates:', data.vrTemplates?.length || 0);
+          console.log('Categories:', data.vrCategories || []);
+          console.table(data.vrTemplates || []);
+          console.groupEnd();
+        },
+
+        // Case data debugging
+        debugActiveCase: () => {
+          const activeCase = window.nightingaleActiveCase;
+          if (!activeCase) {
+            console.warn('No active case selected');
+            return;
+          }
+          console.group('📁 Active Case Debug');
+          console.log('Case ID:', activeCase.id);
+          console.log('MCN:', activeCase.mcn);
+          console.log('Financial Items:', {
+            resources: activeCase.financials?.resources?.length || 0,
+            income: activeCase.financials?.income?.length || 0,
+            expenses: activeCase.financials?.expenses?.length || 0,
+          });
+          console.groupEnd();
+        },
+
+        // Slate.js editor debugging
+        debugSlateEditor: () => {
+          const editors = window.nightingaleSlateEditors || [];
+          console.group('✏️ Slate Editors Debug');
+          console.log('Active editors:', editors.length);
+          editors.forEach((editor, index) => {
+            console.log(`Editor ${index}:`, {
+              selection: editor.selection,
+              children: editor.children,
+              operations: editor.operations,
+            });
+          });
+          console.groupEnd();
+        },
+
+        // React DevTools connection status
+        checkDevToolsConnection: () => {
+          console.group('🔌 React DevTools Connection Status');
+          console.log('DevTools Hook Available:', !!window.__REACT_DEVTOOLS_GLOBAL_HOOK__);
+          console.log('React Available:', typeof React !== 'undefined');
+          console.log('ReactDOM Available:', typeof ReactDOM !== 'undefined');
+          console.log('React Version:', React?.version || 'Unknown');
+          console.log('File Protocol:', window.location.protocol === 'file:');
+
+          if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+            console.log('DevTools Renderers:', Object.keys(window.__REACT_DEVTOOLS_GLOBAL_HOOK__.renderers || {}));
+            console.log('DevTools Operations:', typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__.onCommitFiberRoot);
+          }
+          console.groupEnd();
+
+          if (!window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+            console.warn('React DevTools not detected. Make sure the browser extension is installed and enabled.');
+          }
+        },
+      };
+
+      // Global references for debugging (accessible in React DevTools)
+      window.nightingaleSlateEditors = [];
+
+      // Enhanced component display names for React DevTools
+      if (typeof window !== 'undefined') {
+        // This will help identify components in React DevTools
+        window.displayName = {
+          App: 'NightingaleApp',
+          PlaceholderEditor: 'SlateTextEditor',
+          TemplateFormModal: 'TemplateForm',
+          CaseSelectionPanel: 'CaseSelector',
+          VrBuilderPanel: 'VRBuilder',
+        };
+      }
+
+      // Test function for MCN broadcast (available in console)
+      window.testMcnBroadcast = function (mcn) {
+        const channel = new BroadcastChannel('nightingale-app-communication');
+        channel.postMessage({
+          type: 'SELECT_CASE',
+          mcn: mcn,
+        });
+        channel.close();
+        console.log(`Sent test broadcast for MCN: ${mcn}`);
+        console.log('Check for broadcast reception in the app...');
+      };
+
+      // Enhanced status checker with React DevTools info
+      window.checkAppStatus = function () {
+        const params = new URLSearchParams(window.location.search);
+        console.group('--- 🔍 Nightingale App Status ---');
+        console.log('✅ Data loaded:', window.appDataLoaded || false);
+        console.log('🔗 URL MCN:', params.get('mcn'));
+        console.log('🆔 URL Case ID:', params.get('caseId'));
+        console.log('🌐 Current URL:', window.location.href);
+        console.log('💾 Templates:', window.nightingaleAppData?.vrTemplates?.length || 0);
+        console.log('📋 Active Case:', window.nightingaleActiveCase?.mcn || 'None');
+        console.log('💾 Data Dirty:', window.nightingaleIsDirty || false);
+        console.log('✏️ Slate Editors:', window.nightingaleSlateEditors?.length || 0);
+        console.groupEnd();
+        console.log('💡 Use React DevTools to inspect component state and props!');
+        console.log('🛠️ Available DevTools commands:');
+        console.log('  - window.NightingaleDevTools.debugTemplates()');
+        console.log('  - window.NightingaleDevTools.debugActiveCase()');
+        console.log('  - window.testMcnBroadcast("YOUR_MCN")');
+      };
+
+      // Test function for data integrity broadcasts
+      window.testDataIntegrityBroadcast = function () {
+        const channel = new BroadcastChannel('nightingale_suite');
+        channel.postMessage({
+          type: 'case_created',
+          mcn: 'TEST123',
+        });
+        channel.close();
+        console.log('Sent test data integrity broadcast (case_created)');
+        console.log('Should trigger data refresh in all apps...');
+      };
+
+      // Log initial state with DevTools info
+      console.group('🚀 Nightingale Correspondence App Starting...');
+      console.log('📱 React DevTools Available');
+      const initialParams = new URLSearchParams(window.location.search);
+      if (initialParams.get('mcn')) {
+        console.log('Found MCN in URL params:', initialParams.get('mcn'));
+      }
+      console.groupEnd();
+
+      // Show available DevTools commands
+      setTimeout(() => {
+        console.group('🛠️ Nightingale DevTools Commands Available');
+        console.log('📝 Debug Templates: window.NightingaleDevTools.debugTemplates()');
+        console.log('📁 Debug Active Case: window.NightingaleDevTools.debugActiveCase()');
+        console.log('✏️ Debug Slate Editors: window.NightingaleDevTools.debugSlateEditor()');
+        console.log('� Check DevTools Connection: window.NightingaleDevTools.checkDevToolsConnection()');
+        console.log('�📤 Test MCN Broadcast: window.testMcnBroadcast("YOUR_MCN")');
+        console.log('🔄 Test Data Refresh: window.testDataIntegrityBroadcast()');
+        console.log('📊 App Status: window.checkAppStatus()');
+        console.groupEnd();
+        console.log('💡 Open React DevTools to inspect component state and props!');
+
+        // Auto-check DevTools connection
+        if (window.NightingaleDevTools) {
+          window.NightingaleDevTools.checkDevToolsConnection();
+        }
+      }, 1000);
+
+      // --- Mount the React Application ---
+      const container = document.getElementById('root');
+      const root = ReactDOM.createRoot(container);
+      root.render(e(App));
+    </script>
+  </body>
+</html>

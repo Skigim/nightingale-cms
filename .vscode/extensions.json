@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-react-native",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.live-server",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one",
+    "github.copilot",
+    "github.copilot-chat"
+  ]
+}

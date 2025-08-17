@@ -1,0 +1,59 @@
+{
+  "name": "nightingale-cms",
+  "version": "2.0.0",
+  "description": "A comprehensive React-based case management system for vocational rehabilitation services",
+  "main": "App/NightingaleCMS-React.html",
+  "scripts": {
+    "start": "npx serve App",
+    "dev": "npx live-server App --port=3000 --open=NightingaleCMS-React.html",
+    "build": "node build-bundle.js",
+    "test": "echo \"Tests to be implemented\" && exit 0",
+    "lint": "eslint App/Components/**/*.js App/js/**/*.js",
+    "lint:fix": "eslint App/Components/**/*.js App/js/**/*.js --fix",
+    "lint:report": "eslint App/Components/**/*.js App/js/**/*.js --format=json --output-file=lint-report.json",
+    "audit": "npm audit && npm run lint",
+    "audit:security": "npm audit --audit-level=moderate",
+    "format": "prettier --write App/Components/**/*.js App/js/**/*.js",
+    "docs": "jsdoc -r App/Components App/js -d docs/api"
+  },
+  "keywords": [
+    "case-management",
+    "vocational-rehabilitation",
+    "react",
+    "cms",
+    "healthcare",
+    "disability-services"
+  ],
+  "author": "Nightingale Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/nightingale-cms.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/nightingale-cms/issues"
+  },
+  "homepage": "https://github.com/your-org/nightingale-cms#readme",
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
+    "@eslint/js": "^9.33.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "jsdoc": "^4.0.0",
+    "live-server": "^1.2.2",
+    "prettier": "^3.0.0",
+    "serve": "^14.2.0"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
+}

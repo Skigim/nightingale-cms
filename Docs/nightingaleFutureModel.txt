@@ -1,0 +1,93 @@
+Essential Data for Nightingale/
+├── Person Data (maps to people[])/
+│   ├── Core Identity/
+│   │   ├── Names (First, Middle, Last, Suffix)
+│   │   ├── Date of Birth
+│   │   ├── SSN
+│   │   └── Preferred Language
+│   │
+│   ├── Contact Information/
+│   │   ├── Phone Numbers (Primary, Secondary, Type)
+│   │   └── Addresses/
+│   │       ├── Mailing Address
+│   │       └── Residential Address
+│   │
+│   ├── Demographics/
+│   │   ├── Sex/Gender
+│   │   ├── Race/Ethnicity
+│   │   └── Marital Status
+│   │
+│   ├── Status Information/
+│   │   ├── US Citizenship Status
+│   │   ├── Immigration Status (if non-citizen)
+│   │   ├── Disability Status
+│   │   └── Pregnancy Status
+│   │
+│   ├── Financial Information/
+│   │   ├── Income/
+│   │   │   ├── Employment Income
+│   │   ├── Self-Employment Income
+│   │   │   ├── Unearned Income (SSI, SSDI, etc.)
+│   │   │   └── Other Income Sources
+│   │   │
+│   │   ├── Resources (already in your AVS integration)/
+│   │   │   ├── Bank Accounts
+│   │   │   ├── Vehicles
+│   │   │   └── Property
+│   │   │
+│   │   └── Expenses/
+│       ├── Housing (Rent/Mortgage)
+│   │       ├── Utilities
+│   │       └── Medical Expenses
+│   │
+│   └── Relationships/
+│       ├── Authorized Representatives (already moved to Person)
+│       └── Household Members
+│
+├── Organization Data (maps to a new organizations[] array)/
+│   ├── Core Identity/
+│   │   ├── Organization Name (e.g., facilityName)
+│   │   └── Organization Type (e.g., "Nursing Facility", "Hospital")
+│   │
+│   ├── Location & Contact/
+│   │   ├── Main Phone Number
+│   │   └── Addresses/
+│   │       ├── Physical Address
+│   │       └── Mailing Address
+│   │
+│   └── Key Personnel/
+│       └── Contacts: [Array of Contact Person Objects]/
+│           ├── Name (e.g., adminName, bomName)
+│           ├── Title (e.g., "Administrator", "BOM")
+│           ├── Phone
+│           └── Email
+│
+├── Case Data (maps to cases[])/
+│   ├── Application Information/
+│   │   ├── Application Date
+│   │   ├── Application Type (Initial/Renewal)
+│   │   ├── Programs Requested (Medicaid, SNAP, etc.)
+│   ├── Priority/Expedited Status
+│   │   ├── Retroactive Coverage Request (already added)
+│   │   └── AVS Consent Date (already added)
+│   │
+│   ├── Case Management/
+│   │   ├── Case Number
+│   │   ├── Worker Assignment
+│   │   ├── Office/Unit
+│   │   ├── Case Status
+│   │   └── Review Dates
+│   │
+│   └── Household Composition/
+│       └── Links to Persons in Household
+│
+├── Verification Data (maps to vrRequests[])/
+│   ├── What Needs Verification
+│   ├── Due Dates
+│   ├── Status
+│   └── Source of Verification
+│
+└── Reference Data/
+    ├── Worker Information (for assignments)
+    ├── Office Locations
+    └── Program Types

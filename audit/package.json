@@ -1,0 +1,29 @@
+{
+  "name": "nightingale-react-audit",
+  "version": "1.0.0",
+  "description": "React compliance audit tools for Nightingale CMS",
+  "main": "compliance-test-suite.js",
+  "scripts": {
+    "audit": "node compliance-test-suite.js",
+    "audit:fix": "node compliance-test-suite.js --fix",
+    "audit:verbose": "node compliance-test-suite.js --verbose",
+    "audit:core": "node react-compliance-audit.js",
+    "audit:dom": "node react-dom-compliance.js",
+    "audit:performance": "node react-performance-audit.js",
+    "lint": "eslint ../App --ext .js,.jsx --config .eslintrc.json",
+    "lint:fix": "eslint ../App --ext .js,.jsx --config .eslintrc.json --fix"
+  },
+  "bin": {
+    "nightingale-audit": "./compliance-test-suite.js"
+  },
+  "keywords": ["react", "compliance", "audit", "nightingale", "cms"],
+  "author": "Nightingale CMS Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.33.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-jsx-a11y": "^6.7.0"
+  }
+}
