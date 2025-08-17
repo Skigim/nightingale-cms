@@ -4,11 +4,12 @@
 
 - **master**: Production-ready code, stable releases
 - **development**: Integration branch for new features
-- **feature/***: Individual feature development branches
+- **feature/\***: Individual feature development branches
 
 ## Common Commands
 
 ### Daily Workflow
+
 ```bash
 # Check status
 git status
@@ -27,6 +28,7 @@ git checkout -b feature/new-component
 ```
 
 ### Making Changes
+
 ```bash
 # Stage changes
 git add .
@@ -41,6 +43,7 @@ git push origin feature/new-component
 ```
 
 ### Merging Features
+
 ```bash
 # Switch to development
 git checkout development
@@ -57,7 +60,7 @@ git branch -d feature/new-component
 Use conventional commit format for clarity:
 
 - **feat**: New features
-- **fix**: Bug fixes  
+- **fix**: Bug fixes
 - **docs**: Documentation changes
 - **style**: Code style changes (formatting, etc.)
 - **refactor**: Code refactoring without behavior changes
@@ -65,6 +68,7 @@ Use conventional commit format for clarity:
 - **chore**: Maintenance tasks
 
 ### Examples
+
 ```bash
 git commit -m "feat: add DataTable pagination component"
 git commit -m "fix: resolve checkbox selection bug in DataTable"
@@ -76,18 +80,21 @@ git commit -m "style: apply consistent Tailwind spacing"
 ## Project Milestones
 
 ### Version 2.0 ✅ (Current)
+
 - Complete ES6 → Global Window migration
 - Component library standardization
 - DataTable rendering fixes
 - PropTypes cleanup
 
 ### Version 2.1 (Planned)
+
 - [ ] Enhanced search functionality
 - [ ] Component testing framework
 - [ ] Performance optimizations
 - [ ] Mobile responsive improvements
 
 ### Version 2.2 (Future)
+
 - [ ] Multi-user authentication
 - [ ] Real-time collaboration
 - [ ] Advanced reporting features
@@ -110,6 +117,7 @@ git push origin v2.0.0
 ## Backup Strategy
 
 The repository serves as the primary backup, but also maintain:
+
 - Regular data exports from `Data/nightingale-data.json`
 - Component documentation updates
 - Configuration file backups
@@ -117,6 +125,7 @@ The repository serves as the primary backup, but also maintain:
 ## Emergency Recovery
 
 If you need to restore to a previous version:
+
 ```bash
 # View available commits
 git log --oneline
