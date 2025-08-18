@@ -36,10 +36,10 @@ async function createComponent() {
   // Ask if it's a modal component (only for business components)
   let isModalComponent = false;
   if (!isUIComponent) {
-    const modalResponse = await question(
-      'Is this a modal component? [y/n]: '
-    );
-    isModalComponent = modalResponse.toLowerCase() === 'y' || modalResponse.toLowerCase() === 'yes';
+    const modalResponse = await question('Is this a modal component? [y/n]: ');
+    isModalComponent =
+      modalResponse.toLowerCase() === 'y' ||
+      modalResponse.toLowerCase() === 'yes';
   }
 
   const componentFileName = `${componentName}.js`;
@@ -164,7 +164,7 @@ if (typeof module !== 'undefined' && module.exports) {
     // Add to BUSINESS_COMPONENTS array for business components
     const businessComponentsRegex =
       /(  \/\/ Future business components will be added here:)/;
-    const componentPathForRegistry = isModalComponent 
+    const componentPathForRegistry = isModalComponent
       ? `js/components/business/modals/${componentFileName}`
       : `js/components/business/${componentFileName}`;
     const newBusinessComponent = `  {
