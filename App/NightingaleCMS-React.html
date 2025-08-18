@@ -3489,6 +3489,7 @@
               isOpen: isCreateModalOpen,
               onClose: () => setIsCreateModalOpen(false),
               fullData,
+              fileService,
               onPersonCreated: (newPersonData) => {
                 onUpdateData(newPersonData);
                 setIsCreateModalOpen(false);

@@ -73,83 +73,117 @@ function MyComponent() {
 
 ### **Component Architecture Patterns**
 
-#### **Generic UI Components (Base Layer)**
+### **Component Architecture Patterns**
+
+#### **Two-Layer Component Architecture**
+
+The Nightingale CMS uses a strict two-layer component architecture to separate concerns:
+
+**UI Layer (Generic Components)**
+
+- **Location**: `js/components/ui/`
+- **Purpose**: Framework-agnostic, reusable presentation components
+- **Rules**: No business logic, no domain knowledge, pure presentation
+- **Registry**: `window.NightingaleUI`
+- **Examples**: Button, Modal, DataTable, FormComponents
 
 ```javascript
-// ✅ Reusable, presentation-focused components
-function StepperModal({ isOpen, onClose, title, steps, children }) {
+// ✅ UI Component - Generic, reusable, no business logic
+function Button({ variant, size, onClick, children, disabled }) {
   const e = window.React.createElement;
 
-  if (!isOpen) return null;
+  const baseClasses = 'px-4 py-2 rounded font-medium transition-colors';
+  const variantClasses = {
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
+  };
 
-  // Only UI logic, no business rules
   return e(
-    Modal,
-    { onClose },
-    e(
-      'div',
-      { className: 'stepper-container' },
-      e('h2', null, title),
-      // ... stepper UI
-      children
-    )
+    'button',
+    {
+      className: `${baseClasses} ${variantClasses[variant] || variantClasses.primary}`,
+      onClick,
+      disabled,
+    },
+    children
   );
 }
 ```
 
-#### **Specialized Business Components**
+**Business Layer (Domain-Specific Components)**
+
+- **Location**: `js/components/business/`
+- **Purpose**: Nightingale CMS domain logic and workflows
+- **Rules**: Uses UI components as building blocks, implements business validation
+- **Registry**: `window.NightingaleBusiness`
+- **Examples**: CaseCreationModal, PersonDetailsModal
 
 ```javascript
-// ✅ Domain-specific components using base components
-function CaseCreationModal({ isOpen, onClose }) {
+// ✅ Business Component - Domain-specific logic using UI components
+function CaseCreationModal({ isOpen, onClose, onCaseCreated }) {
   const e = window.React.createElement;
+  const { useState } = window.React;
 
-  // Business logic: case validation, data transforms, workflow rules
   const [caseData, setCaseData] = useState(getInitialCaseData());
+  const [validationErrors, setValidationErrors] = useState({});
 
   const validateCaseData = (data) => {
-    // Case-specific business rules
+    // Nightingale CMS business rules
+    const errors = {};
+    if (!data.clientName) errors.clientName = 'Client name is required';
+    if (!data.serviceType) errors.serviceType = 'Service type is required';
+    return errors;
+  };
+
+  const handleSubmit = () => {
+    const errors = validateCaseData(caseData);
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    // Business logic: create case using Nightingale services
+    const newCase = window.NightingaleServices.createCase(caseData);
+    onCaseCreated(newCase);
+    onClose();
   };
 
   return e(
-    StepperModal,
+    window.StepperModal, // Uses UI component
     {
       isOpen,
       onClose,
       title: 'Create New Case',
-      steps: caseSteps,
-      // ... case-specific props
+      steps: getCaseCreationSteps(),
+      onComplete: handleSubmit,
     },
-    renderCaseSteps()
+    renderCaseForm() // Business-specific form logic
   );
 }
 ```
 
-### **Component Loading and Registration**
+#### **Component Loading and Registration**
 
-Components should be self-registering and handle both ES6 modules and global script loading:
+Components are loaded through a layered registry system:
 
 ```javascript
-// ✅ Proper component registration pattern
-function MyComponent() {
-  const e = window.React.createElement;
-  // ... component logic
-}
-
-// ES6 module export
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { MyComponent };
-}
-
-// Global registration for script loading
+// UI Components register with NightingaleUI
 if (typeof window !== 'undefined') {
-  window.MyComponent = MyComponent;
+  window.MyUIComponent = MyUIComponent;
 
-  // Optional: Register with component library
-  if (window.NightingaleComponentLibrary) {
-    window.NightingaleComponentLibrary.registerComponent(
-      'MyComponent',
-      MyComponent
+  if (window.NightingaleUI) {
+    window.NightingaleUI.registerComponent('MyUIComponent', MyUIComponent);
+  }
+}
+
+// Business Components register with NightingaleBusiness
+if (typeof window !== 'undefined') {
+  window.MyBusinessComponent = MyBusinessComponent;
+
+  if (window.NightingaleBusiness) {
+    window.NightingaleBusiness.registerComponent(
+      'MyBusinessComponent',
+      MyBusinessComponent
     );
   }
 }
@@ -162,25 +196,37 @@ Current project structure to maintain and extend:
 ```text
 CMSWorkspace/
   App/
-    Components/          # Reusable UI components
-      Button.js          # Primary/Secondary buttons with icons
-      DataTable.js       # Sortable, filterable table component
-      Modal.js           # Overlay dialogs and forms
-      SearchBar.js       # Search input with filtering
-      Badge.js           # Status indicators
-      FormComponents.js  # Form inputs and validation
-      modals/           # Specialized modal components
-    js/                 # Core services and utilities
-      nightingale.utils.js      # General utilities
-      nightingale.parsers.js    # Data parsing and validation
-      nightingale.fileservice.js # File I/O operations
-      nightingale.search.js     # Search and filtering
-      nightingale.dayjs.js      # Date/time utilities
-    lib/                # Third-party libraries
-    build/              # Build artifacts
-    Docs/               # Component documentation
-  Data/                 # JSON data files and backups
-  Docs/                 # Project documentation
+    js/                   # Unified JavaScript directory
+      components/         # Component library with layered architecture
+        ui/              # Generic UI components (framework-agnostic)
+          Button.js      # Primary/Secondary buttons with icons
+          DataTable.js   # Sortable, filterable table component
+          Modal.js       # Basic overlay dialogs
+          StepperModal.js # Multi-step modal workflows
+          SearchBar.js   # Search input with filtering
+          Badge.js       # Status indicators
+          FormComponents.js # Form inputs and validation
+          index.js       # UI component registry and loading
+        business/        # Domain-specific CMS components
+          CaseCreationModal.js   # Case creation workflows
+          CaseCreationSteps.js   # Case form step definitions
+          PersonDetailsModal.js  # Person management forms
+          index.js       # Business component registry and loading
+        README.md        # Component architecture documentation
+      services/          # Core utilities and services
+        nightingale.utils.js      # General utilities
+        nightingale.parsers.js    # Data parsing and validation
+        nightingale.fileservice.js # File I/O operations
+        nightingale.search.js     # Search and filtering
+        nightingale.dayjs.js      # Date/time utilities
+        nightingale.toast.js      # Toast notification system
+    lib/                 # Third-party libraries
+    build/               # Build artifacts
+    Docs/                # Component documentation
+  Data/                  # JSON data files and backups
+  Docs/                  # Project documentation
+  .vscode/               # Development tools and scripts
+    createcomponent.js   # Component generator script
 ```
 
 ## 🧶 Patterns
@@ -265,11 +311,13 @@ When creating or modifying components:
 
 ## 🧩 Example Prompts
 
-- `Copilot, create a React component for case status tracking with badge indicators`
-- `Copilot, implement a DataTable column renderer for financial amounts with currency formatting`
-- `Copilot, generate a modal form for adding new people with validation`
-- `Copilot, create a search filter function for the reports view`
-- `Copilot, implement data migration logic for legacy case data structures`
+- `Copilot, create a UI component for status badges with color variants`
+- `Copilot, implement a Business component for case status tracking with workflow logic`
+- `Copilot, generate a UI DataTable column renderer for financial amounts`
+- `Copilot, create a Business modal form for adding new people with Nightingale validation`
+- `Copilot, implement a UI search filter component with debounced input`
+- `Copilot, create a Business component for reports view with CMS-specific filtering`
+- `Copilot, generate data migration logic for legacy case data structures`
 
 ## 🔁 Iteration & Review
 
@@ -328,14 +376,16 @@ Specialized Business Components (Business Layer)
 ### **Script Loading Architecture**
 
 - React/ReactDOM loaded from CDN
-- Component library loaded via individual script tags
+- Component library loaded via individual script tags in layered order:
+  1. UI components first (js/components/ui/)
+  2. Business components second (js/components/business/)
 - Components can access each other via window.ComponentName
 - Proper ES6 module exports for future migration compatibility
 
 ## 🚀 Development Workflow
 
-1. **Component Development**: Create in Components/ directory with proper exports
-2. **Data Operations**: Use nightingale.fileservice.js for persistence
+1. **Component Development**: Create components in js/components/ui/ (generic) or js/components/business/ (domain-specific)
+2. **Data Operations**: Use js/services/nightingale.fileservice.js for persistence
 3. **Styling**: Apply Tailwind classes with consistent design system
 4. **Testing**: Validate components in main application context
 5. **Documentation**: Update component docs and integration guides

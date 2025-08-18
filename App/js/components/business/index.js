@@ -22,6 +22,12 @@ const BUSINESS_COMPONENTS = [
     category: 'case-management',
     dependencies: ['FormComponents'],
   },
+  {
+    name: 'PersonCreationModal',
+    path: 'js/components/business/createNewPersonModal.js',
+    category: 'people-management',
+    dependencies: ['StepperModal', 'FormComponents'],
+  },
 
   // Future business components will be added here:
   // { name: 'FinancialItemModal', path: 'business/modals/FinancialItemModal.js', category: 'financial' },

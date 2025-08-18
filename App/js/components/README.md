@@ -196,3 +196,21 @@ Components/
 - Component manages CMS-specific state or data transforms
 
 This architecture sets up Nightingale CMS for long-term maintainability and potential component library extraction while maintaining all existing functionality.
+
+### ✅ CreateNewPersonModal
+
+**Purpose**: Multi-step modal for creating and editing person entries in the Nightingale CMS.
+
+**Features:**
+
+- 4-step workflow using StepperModal (Basic Info, Contact Info, Additional Details, Review)
+- Real-time validation using Nightingale Validators service
+- Address management with separate physical and mailing addresses
+- Organization integration and relationship management
+- Edit mode for updating existing people
+- Data persistence through fileService
+- Toast notifications for user feedback
+
+**Dependencies**: StepperModal, FormComponents
+**Layer**: Business (Domain-Specific)
+**Status**: ✅ Complete and ready for use
