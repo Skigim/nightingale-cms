@@ -837,10 +837,10 @@
                   }`,
                 },
                 fileStatus === 'connected'
-                  ? 'ðŸŸ¢ Connected'
+                  ? 'Connected'
                   : fileStatus === 'disconnected'
-                    ? 'ðŸ”´ Disconnected'
-                    : 'ðŸŸ¡ Connecting...'
+                    ? 'Disconnected'
+                    : 'Connecting...'
               )
             ),
             // Save Status
@@ -1123,160 +1123,25 @@
               )
             ),
 
-            // Items List
+            // Items List - Using FinancialItemCard Component
             e(
               'div',
               { className: 'space-y-2' },
               displayItems.length === 0
                 ? e('p', { className: 'text-gray-500 text-sm text-center py-4' }, `No ${type} items`)
                 : displayItems.map((item) =>
-                    e(
-                      'div',
-                      {
-                        key: item.id,
-                        className:
-                          'bg-gray-700 p-3 pl-8 rounded border border-gray-600 hover:border-blue-500 transition-colors cursor-pointer group',
-                        onClick: () => updateFinancialItem(type, item.id),
-                      },
-                      e(
-                        'div',
-                        { className: 'flex justify-between items-start' },
-
-                        // Left Side: Description, Location, Account Number
-                        e(
-                          'div',
-                          { className: 'flex-1 space-y-1' },
-                          e(
-                            'div',
-                            { className: 'text-white font-medium' },
-                            item.description || item.type || 'Untitled Item'
-                          ),
-                          item.location && e('div', { className: 'text-sm text-gray-400' }, item.location),
-                          item.accountNumber &&
-                            e('div', { className: 'text-xs text-gray-500' }, `Acct: ${item.accountNumber}`)
-                        ),
-
-                        // Right Side: Amount + Frequency, Verification Status
-                        e(
-                          'div',
-                          {
-                            className: 'flex flex-col items-end space-y-1 ml-4',
-                          },
-                          e(
-                            'div',
-                            { className: 'text-white font-medium' },
-                            `$${item.amount || item.value || 0}${
-                              item.frequency
-                                ? ` ${
-                                    item.frequency === 'monthly'
-                                      ? '/mo'
-                                      : item.frequency === 'yearly'
-                                        ? '/yr'
-                                        : item.frequency === 'weekly'
-                                          ? '/wk'
-                                          : item.frequency === 'daily'
-                                            ? '/day'
-                                            : item.frequency === 'one-time'
-                                              ? ' (1x)'
-                                              : ''
-                                  }`
-                                : ''
-                            }`
-                          ),
-                          e('div', {}), // Empty div for spacing
-                          e(Badge, {
-                            status: item.verificationStatus || 'Needs VR',
-                            variant: 'verification',
-                            size: 'sm',
-                          })
-                        ),
-
-                        // Delete Button with Inline Confirmation (only visible on hover)
-                        confirmingDelete === item.id
-                          ? e(
-                              'div',
-                              { className: 'flex items-center space-x-2 ml-2' },
-                              // Confirm (Green Check) - requires mouse movement
-                              e(
-                                'button',
-                                {
-                                  onClick: (e) => {
-                                    e.stopPropagation();
-                                    handleDeleteConfirm(type, item.id);
-                                  },
-                                  className: 'text-green-400 hover:text-green-300',
-                                },
-                                e(
-                                  'svg',
-                                  {
-                                    className: 'w-4 h-4',
-                                    fill: 'none',
-                                    viewBox: '0 0 24 24',
-                                    stroke: 'currentColor',
-                                  },
-                                  e('path', {
-                                    strokeLinecap: 'round',
-                                    strokeLinejoin: 'round',
-                                    strokeWidth: 2,
-                                    d: 'M5 13l4 4L19 7',
-                                  })
-                                )
-                              ),
-                              // Cancel (Red X) - takes place of original button
-                              e(
-                                'button',
-                                {
-                                  onClick: (e) => {
-                                    e.stopPropagation();
-                                    handleDeleteCancel();
-                                  },
-                                  className: 'text-red-400 hover:text-red-300',
-                                },
-                                e(
-                                  'svg',
-                                  {
-                                    className: 'w-4 h-4',
-                                    fill: 'none',
-                                    viewBox: '0 0 24 24',
-                                    stroke: 'currentColor',
-                                  },
-                                  e('path', {
-                                    strokeLinecap: 'round',
-                                    strokeLinejoin: 'round',
-                                    strokeWidth: 2,
-                                    d: 'M6 18L18 6M6 6l12 12',
-                                  })
-                                )
-                              )
-                            )
-                          : e(
-                              'button',
-                              {
-                                onClick: (e) => {
-                                  e.stopPropagation();
-                                  confirmDelete(type, item);
-                                },
-                                className:
-                                  'text-red-400 hover:text-red-300 ml-2 opacity-0 group-hover:opacity-100 transition-opacity',
-                              },
-                              e(
-                                'svg',
-                                {
-                                  className: 'w-4 h-4',
-                                  fill: 'none',
-                                  viewBox: '0 0 24 24',
-                                  stroke: 'currentColor',
-                                },
-                                e('path', {
-                                  strokeLinecap: 'round',
-                                  strokeLinejoin: 'round',
-                                  strokeWidth: 2,
-                                  d: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
-                                })
-                              )
-                            )
-                      )
-                    )
+                    e(FinancialItemCard, {
+                      key: item.id,
+                      item: item,
+                      itemType: type,
+                      interactive: true,
+                      showActions: true,
+                      confirmingDelete: confirmingDelete === item.id,
+                      onEdit: () => updateFinancialItem(type, item.id),
+                      onDelete: () => confirmDelete(type, item),
+                      onDeleteConfirm: () => handleDeleteConfirm(type, item.id),
+                      onDeleteCancel: handleDeleteCancel,
+                    })
                   )
             ),
 

@@ -16,6 +16,7 @@ The Nightingale Component Library is now organized into two distinct layers:
 
 - `Button.js` - Button variants (Primary, Secondary, Success, Danger, etc.)
 - `Badge.js` - Status indicators and badges
+- `Cards.js` - Generic card components for content display (Card, CardGrid, CardList)
 - `DataTable.js` - Sortable, filterable data tables
 - `FormComponents.js` - Form inputs, validation, and field components
 - `SearchBar.js` - Search input with filtering capabilities
@@ -158,6 +159,7 @@ Components/
 │   ├── index.js               # UI component loader
 │   ├── Button.js              # ← No business logic
 │   ├── Badge.js               # ← Pure presentation
+│   ├── Cards.js               # ← Generic card layouts
 │   ├── DataTable.js           # ← Generic data display
 │   ├── FormComponents.js      # ← Form primitives
 │   ├── SearchBar.js           # ← Search UI only
@@ -214,3 +216,31 @@ This architecture sets up Nightingale CMS for long-term maintainability and pote
 **Dependencies**: StepperModal, FormComponents
 **Layer**: Business (Domain-Specific)
 **Status**: ✅ Complete and ready for use
+
+### ✅ Cards
+
+**Purpose**: Generic card component system for displaying information in flexible layouts.
+
+**Features:**
+
+- **Card** - Individual card with title, subtitle, content, and status indicators
+- **CardGrid** - Responsive grid layout for multiple cards
+- **CardList** - Stacked vertical layout for card sequences
+- **CardField** - Label/value pairs for structured data display
+- **CardActions** - Action buttons in card footer
+- Multiple variants (default, elevated, outlined, minimal)
+- Interactive states with hover and focus
+- Status indicators (success, warning, error, info)
+- Responsive design with size options (sm, md, lg)
+
+**Dependencies**: None (pure UI component)
+**Layer**: UI (Generic)
+**Status**: ✅ Complete and ready for use
+
+### ✅ FinancialItemCard
+
+Display financial items in the case details view.
+
+**Features:**
+- *TODO: Describe feature 1*
+- *TODO: Describe feature 2*

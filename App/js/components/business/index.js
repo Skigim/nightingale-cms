@@ -23,6 +23,13 @@ const BUSINESS_COMPONENTS = [
     dependencies: ['StepperModal', 'FormComponents'],
   },
 
+  {
+    name: 'FinancialItemCard',
+    path: 'js/components/business/FinancialItemCard.js',
+    category: 'financial',
+    dependencies: ['Cards', 'Badge', 'Button'],
+  },
+
   // Future business components will be added here:
   // { name: 'FinancialItemModal', path: 'business/modals/FinancialItemModal.js', category: 'financial' },
   // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },

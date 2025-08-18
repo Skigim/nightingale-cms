@@ -12,6 +12,7 @@ const UI_COMPONENTS = [
   // Core UI Components
   { name: 'Button', path: 'js/components/ui/Button.js', category: 'core' },
   { name: 'Badge', path: 'js/components/ui/Badge.js', category: 'core' },
+  { name: 'Cards', path: 'js/components/ui/Cards.js', category: 'core' },
   {
     name: 'SearchBar',
     path: 'js/components/ui/SearchBar.js',
