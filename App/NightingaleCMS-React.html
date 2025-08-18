@@ -289,6 +289,41 @@
         backdrop-filter: blur(2px);
       }
 
+      /* Search dropdown z-index layering */
+      .search-dropdown-container {
+        position: relative;
+        z-index: 1100;
+      }
+
+      .search-dropdown-client {
+        z-index: 1110 !important;
+      }
+
+      .search-dropdown-spouse {
+        z-index: 1100 !important;
+      }
+
+      .search-dropdown-rep {
+        z-index: 1090 !important;
+      }
+
+      /* Ensure dropdowns appear above other form elements */
+      .case-creation-step {
+        position: relative;
+      }
+
+      .case-creation-step:nth-child(1) {
+        z-index: 1020;
+      }
+
+      .case-creation-step:nth-child(2) {
+        z-index: 1010;
+      }
+
+      .case-creation-step:nth-child(3) {
+        z-index: 1000;
+      }
+
       /* Full viewport reset */
       * {
         box-sizing: border-box;

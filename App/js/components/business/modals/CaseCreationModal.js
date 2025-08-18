@@ -14,7 +14,10 @@ const getInitialCaseData = () => {
     applicationDate: dateUtils.todayForInput ? dateUtils.todayForInput() : '',
     description: '',
     caseType: 'LTC',
-    priority: 'Normal',
+    priority: false,
+    livingArrangement: '',
+    withWaiver: false,
+    admissionDate: '',
     address: '',
     unit: '',
     city: '',
@@ -73,44 +76,162 @@ function BasicInfoStep({ caseData, updateField, errors }) {
       )
     ),
     e(
-      window.FormField,
-      {
-        label: 'Retro Requested?',
-        required: true,
-        error: errors.retroRequested,
-      },
-      e(window.Select, {
-        value: caseData.retroRequested,
-        onChange: (e) => updateField('retroRequested', e.target.value),
-        options: [
-          { value: 'Yes', label: 'Yes' },
-          { value: 'No', label: 'No' },
-        ],
-        placeholder: 'Select...',
-      })
+      'div',
+      { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+      e(
+        window.FormField,
+        {
+          label: 'Retro Requested?',
+          required: true,
+          error: errors.retroRequested,
+        },
+        e(window.Select, {
+          value: caseData.retroRequested,
+          onChange: (e) => updateField('retroRequested', e.target.value),
+          options: [
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
+          ],
+          placeholder: 'Select...',
+        })
+      ),
+      e(
+        window.FormField,
+        { label: 'Priority Case' },
+        e(window.Select, {
+          value: caseData.priority ? 'Yes' : 'No',
+          onChange: (e) => updateField('priority', e.target.value === 'Yes'),
+          options: [
+            { value: 'No', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+          ],
+        })
+      )
     )
   );
 }
 
 function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
   const e = window.React.createElement;
+  const { useState } = window.React;
 
-  const peopleOptions = (fullData?.people || []).map((p) => ({
-    value: p.id,
-    label: `${p.name} (ID: ${p.id})`,
-  }));
+  // State for search values
+  const [clientSearchValue, setClientSearchValue] = useState('');
+  const [spouseSearchValue, setSpouseSearchValue] = useState('');
+  const [repSearchValue, setRepSearchValue] = useState('');
+
+  // Find selected client and spouse names
+  const selectedClient = fullData?.people?.find(
+    (p) => String(p.id) === String(caseData.personId)
+  );
+  const selectedSpouse = fullData?.people?.find(
+    (p) => String(p.id) === String(caseData.spouseId)
+  );
+
+  // Filter out client and spouse from rep options
+  const repOptions = (fullData?.people || []).filter(
+    (p) =>
+      String(p.id) !== String(caseData.personId) &&
+      String(p.id) !== String(caseData.spouseId)
+  );
+
+  // Find selected representative name
+  const selectedRep = repOptions.find(
+    (r) => String(r.id) === String(caseData.authorizedReps[0])
+  );
+
+  // Initialize search values when selections exist
+  window.React.useEffect(() => {
+    if (selectedClient) {
+      setClientSearchValue(selectedClient.name);
+    } else {
+      setClientSearchValue('');
+    }
+  }, [selectedClient?.id]);
+
+  window.React.useEffect(() => {
+    if (selectedSpouse) {
+      setSpouseSearchValue(selectedSpouse.name);
+    } else {
+      setSpouseSearchValue('');
+    }
+  }, [selectedSpouse?.id]);
+
+  window.React.useEffect(() => {
+    if (selectedRep) {
+      setRepSearchValue(selectedRep.name);
+    } else {
+      setRepSearchValue('');
+    }
+  }, [selectedRep?.id]);
+
+  const handleClientSelect = (person) => {
+    updateField('personId', person.id);
+    setClientSearchValue(person.name);
+    // Clear spouse if same person selected
+    if (String(person.id) === String(caseData.spouseId)) {
+      updateField('spouseId', '');
+      setSpouseSearchValue('');
+    }
+  };
+
+  const handleSpouseSelect = (person) => {
+    updateField('spouseId', person.id);
+    setSpouseSearchValue(person.name);
+  };
+
+  const handleClientClear = () => {
+    updateField('personId', '');
+    setClientSearchValue('');
+  };
+
+  const handleSpouseClear = () => {
+    updateField('spouseId', '');
+    setSpouseSearchValue('');
+  };
+
+  const handleRepSelect = (person) => {
+    updateField('authorizedReps', [person.id]);
+    setRepSearchValue(person.name);
+  };
+
+  const handleRepClear = () => {
+    updateField('authorizedReps', []);
+    setRepSearchValue('');
+  };
+
+  // Prepare people data for search
+  const peopleData = fullData?.people || [];
+  const spouseOptions = peopleData.filter(
+    (p) => String(p.id) !== String(caseData.personId)
+  );
 
   return e(
     'div',
-    { className: 'space-y-4' },
+    { className: 'space-y-4 case-creation-step', style: { zIndex: 1020 } },
     e(
       window.FormField,
       { label: 'Select Client', required: true, error: errors.personId },
-      e(window.Select, {
-        value: caseData.personId,
-        onChange: (e) => updateField('personId', e.target.value),
-        options: peopleOptions,
-        placeholder: 'Select a client...',
+      e(window.SearchBar, {
+        value: clientSearchValue,
+        onChange: (e) => setClientSearchValue(e.target.value),
+        placeholder: 'Search for a client...',
+        showDropdown: true,
+        data: peopleData,
+        searchKeys: ['name', 'id'],
+        onResultSelect: handleClientSelect,
+        onClear: handleClientClear,
+        maxResults: 8,
+        minQueryLength: 0,
+        className: 'search-dropdown-container search-dropdown-client',
+        style: { zIndex: 1110 },
+        renderResult: (person) => {
+          return e(
+            'div',
+            { className: 'flex justify-between items-center' },
+            e('span', { className: 'font-medium' }, person.name)
+          );
+        },
       })
     ),
     caseData.caseType === 'SIMP' &&
@@ -121,45 +242,105 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
           required: true,
           error: errors.spouseId,
         },
-        e(window.Select, {
-          value: caseData.spouseId,
-          onChange: (e) => updateField('spouseId', e.target.value),
-          options: peopleOptions.filter(
-            (p) => String(p.value) !== String(caseData.personId)
-          ),
-          placeholder: 'Select spouse...',
+        e(window.SearchBar, {
+          value: spouseSearchValue,
+          onChange: (e) => setSpouseSearchValue(e.target.value),
+          placeholder: 'Search for spouse...',
+          showDropdown: true,
+          data: spouseOptions,
+          searchKeys: ['name', 'id'],
+          onResultSelect: handleSpouseSelect,
+          onClear: handleSpouseClear,
+          maxResults: 8,
+          minQueryLength: 0,
+          className: 'search-dropdown-container search-dropdown-spouse',
+          style: { zIndex: 1100 },
+          renderResult: (person) => {
+            return e(
+              'div',
+              { className: 'flex justify-between items-center' },
+              e('span', { className: 'font-medium' }, person.name)
+            );
+          },
         })
-      )
+      ),
+    e(
+      window.FormField,
+      { label: 'Authorized Representative' },
+      e(window.SearchBar, {
+        value: repSearchValue,
+        onChange: (e) => setRepSearchValue(e.target.value),
+        placeholder: 'Search for a representative...',
+        showDropdown: true,
+        data: repOptions,
+        searchKeys: ['name', 'id'],
+        onResultSelect: handleRepSelect,
+        onClear: handleRepClear,
+        maxResults: 8,
+        minQueryLength: 0,
+        className: 'search-dropdown-container search-dropdown-rep',
+        style: { zIndex: 1080 },
+        renderResult: (person) => {
+          return e(
+            'div',
+            { className: 'flex justify-between items-center' },
+            e('span', { className: 'font-medium' }, person.name)
+          );
+        },
+      })
+    )
   );
 }
 
 function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
   const e = window.React.createElement;
+  const { useEffect } = window.React;
 
-  const livingArrangement = fullData?.people.find(
-    (p) => String(p.id) === String(caseData.personId)
-  )?.livingArrangement;
   const organizationOptions = (fullData?.organizations || []).map((o) => ({
     value: o.id,
     label: o.name,
   }));
-  const repOptions = (fullData?.people || [])
-    .filter(
-      (p) =>
-        String(p.id) !== String(caseData.personId) &&
-        String(p.id) !== String(caseData.spouseId)
-    )
-    .map((r) => ({ value: r.id, label: r.name }));
 
+  // Auto-populate living arrangement data from selected person
+  useEffect(() => {
+    if (caseData.personId && fullData?.people) {
+      const selectedPerson = fullData.people.find(
+        (p) => String(p.id) === String(caseData.personId)
+      );
+
+      if (selectedPerson && selectedPerson.livingArrangement) {
+        // Only auto-populate if current living arrangement is empty or default
+        if (!caseData.livingArrangement || caseData.livingArrangement === '') {
+          updateField('livingArrangement', selectedPerson.livingArrangement);
+
+          // Also populate organization if it exists and living arrangement matches
+          if (
+            selectedPerson.organizationId &&
+            (selectedPerson.livingArrangement === 'Assisted Living' ||
+              selectedPerson.livingArrangement === 'Nursing Home')
+          ) {
+            updateField('organizationId', selectedPerson.organizationId);
+          }
+        }
+      }
+    }
+  }, [
+    caseData.personId,
+    caseData.livingArrangement,
+    fullData?.people,
+    updateField,
+  ]);
+
+  // Living arrangement fields based on selected option
   let locationFields = null;
-  if (livingArrangement === 'Home') {
+  if (caseData.livingArrangement === 'Apartment/House') {
     locationFields = e(
       'div',
       { className: 'space-y-4 p-4 border border-gray-600 rounded-lg' },
       e(
         'h4',
         { className: 'text-lg font-semibold text-white' },
-        'Home Address'
+        'Address Information'
       ),
       e(
         window.FormField,
@@ -207,8 +388,8 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
       )
     );
   } else if (
-    livingArrangement === 'LTC' ||
-    livingArrangement === 'Assisted Living'
+    caseData.livingArrangement === 'Assisted Living' ||
+    caseData.livingArrangement === 'Nursing Home'
   ) {
     locationFields = e(
       'div',
@@ -221,7 +402,7 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
       e(
         window.FormField,
         {
-          label: `Select ${livingArrangement} Facility`,
+          label: `Select ${caseData.livingArrangement} Facility`,
           required: true,
           error: errors.organizationId,
         },
@@ -237,54 +418,71 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
 
   return e(
     'div',
-    { className: 'space-y-6' },
-    locationFields,
+    { className: 'space-y-6 case-creation-step' },
     e(
       'div',
       { className: 'p-4 border border-gray-600 rounded-lg' },
       e(
         'h4',
         { className: 'text-lg font-semibold text-white' },
-        'Additional Details'
+        'Living Arrangement'
       ),
       e(
         window.FormField,
-        { label: 'Authorized Representatives' },
+        {
+          label: 'Living Arrangement',
+          required: true,
+          error: errors.livingArrangement,
+        },
         e(window.Select, {
-          // Simple select for now - can be enhanced to multi-select later
-          value: caseData.authorizedReps[0] || '',
-          onChange: (e) =>
-            updateField(
-              'authorizedReps',
-              e.target.value ? [e.target.value] : []
-            ),
-          options: repOptions,
-          placeholder: 'Select a representative...',
-        })
-      ),
-      e(
-        window.FormField,
-        { label: 'Priority' },
-        e(window.Select, {
-          value: caseData.priority,
-          onChange: (e) => updateField('priority', e.target.value),
+          value: caseData.livingArrangement,
+          onChange: (e) => updateField('livingArrangement', e.target.value),
           options: [
-            { value: 'Low', label: 'Low' },
-            { value: 'Normal', label: 'Normal' },
-            { value: 'High', label: 'High' },
+            { value: 'Apartment/House', label: 'Apartment/House' },
+            { value: 'Assisted Living', label: 'Assisted Living' },
+            { value: 'Nursing Home', label: 'Nursing Home' },
+            { value: 'Other', label: 'Other' },
           ],
+          placeholder: 'Select living arrangement...',
         })
       ),
-      e(
-        window.FormField,
-        { label: 'Description / Notes' },
-        e(window.Textarea, {
-          value: caseData.description,
-          onChange: (e) => updateField('description', e.target.value),
-          rows: 3,
-        })
-      )
-    )
+      (caseData.livingArrangement === 'Apartment/House' ||
+        caseData.livingArrangement === 'Assisted Living' ||
+        caseData.livingArrangement === 'Nursing Home') &&
+        e(
+          'div',
+          {
+            className:
+              caseData.livingArrangement === 'Apartment/House'
+                ? 'mt-4'
+                : 'mt-4 grid grid-cols-1 md:grid-cols-2 gap-4',
+          },
+          e(
+            window.FormField,
+            { label: 'With Waiver?' },
+            e(window.Select, {
+              value: caseData.withWaiver ? 'Yes' : 'No',
+              onChange: (e) =>
+                updateField('withWaiver', e.target.value === 'Yes'),
+              options: [
+                { value: 'No', label: 'No' },
+                { value: 'Yes', label: 'Yes' },
+              ],
+            })
+          ),
+          (caseData.livingArrangement === 'Assisted Living' ||
+            caseData.livingArrangement === 'Nursing Home') &&
+            e(
+              window.FormField,
+              { label: 'Admission Date', error: errors.admissionDate },
+              e(window.DateInput, {
+                value: caseData.admissionDate,
+                onChange: (e) => updateField('admissionDate', e.target.value),
+              })
+            )
+        )
+    ),
+    locationFields
   );
 }
 
@@ -320,9 +518,6 @@ function ReviewStep({ fullData, caseData }) {
         fullData?.people.find((r) => String(r.id) === String(repId))?.name
     )
     .join(', ');
-  const livingArrangement = fullData?.people.find(
-    (p) => String(p.id) === String(caseData.personId)
-  )?.livingArrangement;
 
   return e(
     'div',
@@ -338,6 +533,7 @@ function ReviewStep({ fullData, caseData }) {
       e(SummaryItem, { label: 'MCN', value: caseData.mcn }),
       e(SummaryItem, { label: 'Client', value: clientName }),
       spouseName && e(SummaryItem, { label: 'Spouse', value: spouseName }),
+      e(SummaryItem, { label: 'Authorized Reps', value: repNames }),
       e(SummaryItem, { label: 'Case Type', value: caseData.caseType }),
       e(SummaryItem, {
         label: 'Application Date',
@@ -349,14 +545,37 @@ function ReviewStep({ fullData, caseData }) {
         label: 'Retro Requested',
         value: caseData.retroRequested,
       }),
-      e(SummaryItem, { label: 'Priority', value: caseData.priority }),
-      livingArrangement === 'Home' &&
+      e(SummaryItem, {
+        label: 'Priority Case',
+        value: caseData.priority ? 'Yes' : 'No',
+      }),
+      e(SummaryItem, {
+        label: 'Living Arrangement',
+        value: caseData.livingArrangement,
+      }),
+      (caseData.livingArrangement === 'Apartment/House' ||
+        caseData.livingArrangement === 'Assisted Living' ||
+        caseData.livingArrangement === 'Nursing Home') &&
+        e(SummaryItem, {
+          label: 'With Waiver',
+          value: caseData.withWaiver ? 'Yes' : 'No',
+        }),
+      (caseData.livingArrangement === 'Assisted Living' ||
+        caseData.livingArrangement === 'Nursing Home') &&
+        caseData.admissionDate &&
+        e(SummaryItem, {
+          label: 'Admission Date',
+          value: window.dateUtils?.format
+            ? window.dateUtils.format(caseData.admissionDate)
+            : caseData.admissionDate,
+        }),
+      caseData.livingArrangement === 'Apartment/House' &&
+        caseData.address &&
         e(SummaryItem, {
           label: 'Address',
-          value: `${caseData.address}, ${caseData.city}, ${caseData.state} ${caseData.zipCode}`,
+          value: `${caseData.address}${caseData.unit ? `, ${caseData.unit}` : ''}, ${caseData.city}, ${caseData.state} ${caseData.zipCode}`,
         }),
       orgName && e(SummaryItem, { label: 'Facility', value: orgName }),
-      e(SummaryItem, { label: 'Authorized Reps', value: repNames }),
       e(SummaryItem, { label: 'Description', value: caseData.description })
     )
   );
@@ -381,7 +600,7 @@ const stepsConfig = [
   },
   {
     title: 'Client Selection',
-    description: 'Select or create client',
+    description: 'Select client, spouse, and representative',
     component: ClientSelectionStep,
     validator: (data) => {
       const newErrors = {};
@@ -393,22 +612,22 @@ const stepsConfig = [
     },
   },
   {
-    title: 'Case Details',
-    description: 'Address and representatives',
+    title: 'Living Arrangement',
+    description: 'Living situation and location',
     component: CaseDetailsStep,
-    validator: (data, fullData) => {
+    validator: (data) => {
       const newErrors = {};
-      const livingArrangement = fullData?.people.find(
-        (p) => String(p.id) === String(data.personId)
-      )?.livingArrangement;
-      if (livingArrangement === 'Home') {
+      if (!data.livingArrangement) {
+        newErrors.livingArrangement = 'Living arrangement is required.';
+      }
+      if (data.livingArrangement === 'Apartment/House') {
         if (!data.address?.trim()) newErrors.address = 'Address is required.';
         if (!data.city?.trim()) newErrors.city = 'City is required.';
         if (!data.state?.trim()) newErrors.state = 'State is required.';
         if (!data.zipCode?.trim()) newErrors.zipCode = 'Zip code is required.';
       } else if (
-        livingArrangement === 'LTC' ||
-        livingArrangement === 'Assisted Living'
+        data.livingArrangement === 'Assisted Living' ||
+        data.livingArrangement === 'Nursing Home'
       ) {
         if (!data.organizationId)
           newErrors.organizationId = 'Facility selection is required.';
@@ -513,6 +732,27 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
         createdDate: new Date().toISOString(),
         updatedDate: new Date().toISOString(),
       };
+
+      // If a person was selected and living arrangement data was modified,
+      // update the person's record with the new living arrangement info
+      if (caseData.personId && fullData?.people) {
+        const personIndex = fullData.people.findIndex(
+          (p) => String(p.id) === String(caseData.personId)
+        );
+
+        if (personIndex !== -1) {
+          // Update person's living arrangement data
+          fullData.people[personIndex] = {
+            ...fullData.people[personIndex],
+            livingArrangement: caseData.livingArrangement,
+            organizationId: caseData.organizationId || null,
+          };
+
+          // Note: The parent component should handle saving the updated fullData
+          // This ensures the person's living arrangement is kept in sync
+        }
+      }
+
       onCaseCreated(newCase);
       window.showToast('Case created successfully!', 'success');
       onClose();
@@ -529,6 +769,32 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
     setCaseData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+
+    // Update person's living arrangement data when relevant fields change
+    if (
+      caseData.personId &&
+      (field === 'livingArrangement' || field === 'organizationId') &&
+      fullData?.people
+    ) {
+      const personIndex = fullData.people.findIndex(
+        (p) => String(p.id) === String(caseData.personId)
+      );
+
+      if (personIndex !== -1) {
+        // Update the person's data in the fullData object
+        // Note: This is a direct mutation for immediate UI updates
+        // The actual save will happen when the case is created
+        if (field === 'livingArrangement') {
+          fullData.people[personIndex].livingArrangement = value;
+          // Clear organizationId if switching to Apartment/House or Other
+          if (value === 'Apartment/House' || value === 'Other') {
+            fullData.people[personIndex].organizationId = null;
+          }
+        } else if (field === 'organizationId') {
+          fullData.people[personIndex].organizationId = value;
+        }
+      }
     }
   };
 

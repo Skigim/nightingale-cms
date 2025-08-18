@@ -599,9 +599,8 @@ function PersonCreationModal({
         // Additional Details
         const livingArrangementOptions = [
           { value: 'Apartment/House', label: 'Apartment/House' },
-          { value: 'Nursing Home', label: 'Nursing Home' },
           { value: 'Assisted Living', label: 'Assisted Living' },
-          { value: 'Family Home', label: 'Family Home' },
+          { value: 'Nursing Home', label: 'Nursing Home' },
           { value: 'Other', label: 'Other' },
         ];
 
