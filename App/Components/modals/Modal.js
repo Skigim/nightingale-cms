@@ -31,6 +31,8 @@ function Modal({
   closeOnBackdropClick = true,
   className = '',
 }) {
+  const e = window.React.createElement;
+
   // Use React hooks
   const { useEffect, useRef } = window.React;
   const modalRef = useRef(null);
@@ -78,14 +80,14 @@ function Modal({
     xlarge: 'max-w-6xl',
   };
 
-  return window.React.createElement(
+  return e(
     'div',
     {
       className:
         'fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 modal-backdrop',
       onClick: handleBackdropClick,
     },
-    window.React.createElement(
+    e(
       'div',
       {
         className: 'flex items-center justify-center min-h-screen p-4',
@@ -93,7 +95,7 @@ function Modal({
         'aria-modal': 'true',
         'aria-labelledby': title ? 'modal-title' : undefined,
       },
-      window.React.createElement(
+      e(
         'div',
         {
           ref: modalRef,
@@ -103,13 +105,13 @@ function Modal({
 
         // Header
         title &&
-          window.React.createElement(
+          e(
             'div',
             {
               className:
                 'flex items-center justify-between p-6 border-b border-gray-700',
             },
-            window.React.createElement(
+            e(
               'h3',
               {
                 id: 'modal-title',
@@ -118,14 +120,14 @@ function Modal({
               title
             ),
             showCloseButton &&
-              window.React.createElement(
+              e(
                 'button',
                 {
                   onClick: onClose,
                   className: 'text-gray-400 hover:text-white transition-colors',
                   'aria-label': 'Close modal',
                 },
-                window.React.createElement(
+                e(
                   'svg',
                   {
                     className: 'w-6 h-6',
@@ -133,7 +135,7 @@ function Modal({
                     viewBox: '0 0 24 24',
                     stroke: 'currentColor',
                   },
-                  window.React.createElement('path', {
+                  e('path', {
                     strokeLinecap: 'round',
                     strokeLinejoin: 'round',
                     strokeWidth: 2,
@@ -144,15 +146,11 @@ function Modal({
           ),
 
         // Body
-        window.React.createElement(
-          'div',
-          { className: 'p-6 overflow-auto max-h-[60vh]' },
-          children
-        ),
+        e('div', { className: 'p-6 overflow-auto max-h-[60vh]' }, children),
 
         // Footer
         footerContent &&
-          window.React.createElement(
+          e(
             'div',
             {
               className:
@@ -188,6 +186,8 @@ function ConfirmationModal({
   cancelText = 'Cancel',
   variant = 'danger',
 }) {
+  const e = window.React.createElement;
+
   const getButtonClasses = () => {
     const baseClasses = 'px-4 py-2 rounded-lg font-medium transition-colors';
     switch (variant) {
@@ -202,10 +202,10 @@ function ConfirmationModal({
     }
   };
 
-  const footerContent = window.React.createElement(
+  const footerContent = e(
     window.React.Fragment,
     {},
-    window.React.createElement(
+    e(
       'button',
       {
         onClick: onCancel,
@@ -214,7 +214,7 @@ function ConfirmationModal({
       },
       cancelText
     ),
-    window.React.createElement(
+    e(
       'button',
       {
         onClick: onConfirm,
@@ -224,7 +224,7 @@ function ConfirmationModal({
     )
   );
 
-  return window.React.createElement(
+  return e(
     Modal,
     {
       isOpen,
@@ -233,7 +233,7 @@ function ConfirmationModal({
       size: 'small',
       footerContent,
     },
-    window.React.createElement('p', { className: 'text-gray-300' }, message)
+    e('p', { className: 'text-gray-300' }, message)
   );
 }
 
@@ -262,6 +262,8 @@ function FormModal({
   isValid = true,
   isSubmitting = false,
 }) {
+  const e = window.React.createElement;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isValid && !isSubmitting && onSubmit) {
@@ -269,10 +271,10 @@ function FormModal({
     }
   };
 
-  const footerContent = window.React.createElement(
+  const footerContent = e(
     window.React.Fragment,
     {},
-    window.React.createElement(
+    e(
       'button',
       {
         type: 'button',
@@ -283,7 +285,7 @@ function FormModal({
       },
       cancelText
     ),
-    window.React.createElement(
+    e(
       'button',
       {
         type: 'submit',
@@ -295,7 +297,7 @@ function FormModal({
     )
   );
 
-  return window.React.createElement(
+  return e(
     Modal,
     {
       isOpen,
@@ -304,7 +306,7 @@ function FormModal({
       footerContent,
       closeOnBackdropClick: !isSubmitting,
     },
-    window.React.createElement('form', { onSubmit: handleSubmit }, children)
+    e('form', { onSubmit: handleSubmit }, children)
   );
 }
 

@@ -23,6 +23,8 @@ function Badge({
   className = '',
   customColors = null,
 }) {
+  const e = window.React.createElement;
+
   if (!status) return null;
 
   // Color mappings for different badge types
@@ -95,7 +97,7 @@ function Badge({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return React.createElement(
+  return e(
     'span',
     {
       className: finalClassName,
@@ -122,6 +124,8 @@ function ProgressBadge({
   size = 'md',
   showPercentage = true,
 }) {
+  const e = window.React.createElement;
+
   const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
 
   // Color based on completion percentage
@@ -150,7 +154,7 @@ function ProgressBadge({
       ? `${percentage}%`
       : `${current}/${total}`;
 
-  return React.createElement(
+  return e(
     'span',
     {
       className: `
@@ -181,6 +185,8 @@ function CountBadge({
   max = 99,
   showZero = false,
 }) {
+  const e = window.React.createElement;
+
   if (count === 0 && !showZero) return null;
 
   const colorClasses = {
@@ -193,7 +199,7 @@ function CountBadge({
 
   const displayCount = count > max ? `${max}+` : count.toString();
 
-  return React.createElement(
+  return e(
     'span',
     {
       className: `
@@ -219,6 +225,8 @@ function CountBadge({
  * @returns {React.Element} Multi-badge container
  */
 function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
+  const e = window.React.createElement;
+
   if (!badges.length) return null;
 
   const spacingClasses = {
@@ -233,7 +241,7 @@ function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
     truncate: 'flex-nowrap overflow-hidden',
   };
 
-  return React.createElement(
+  return e(
     'div',
     {
       className: `
@@ -245,7 +253,7 @@ function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
         .trim(),
     },
     badges.map((badgeProps, index) =>
-      React.createElement(Badge, {
+      e(Badge, {
         key: badgeProps.key || index,
         ...badgeProps,
       })

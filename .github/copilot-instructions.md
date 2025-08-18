@@ -13,6 +13,7 @@ These instructions define how GitHub Copilot should assist with the Nightingale 
 ## 🎯 Project Overview
 
 Nightingale CMS is a comprehensive case management system for vocational rehabilitation services, featuring:
+
 - **Case Management**: Track applications, statuses, and client information
 - **People & Organizations**: Manage contacts and service providers
 - **Financial Tracking**: Monitor resources, income, and expenses
@@ -23,12 +24,136 @@ Nightingale CMS is a comprehensive case management system for vocational rehabil
 
 - Use React functional components with hooks (useState, useEffect, useMemo, useCallback)
 - Follow React 18 patterns and createRoot for rendering
-- Use React.createElement (aliased as 'e') for component creation
+- Use React.createElement (aliased as 'e' within component functions) for component creation
 - Implement proper error boundaries for production resilience
 - Add comprehensive JSDoc comments for component interfaces
 - Use consistent formatting and React best practices
 - Prefer readability and maintainability over cleverness
 - Always include fallback UI states and loading indicators
+
+## ⚛️ React Component Patterns
+
+### **React.createElement Aliasing Pattern**
+
+Each component should declare its own `const e = window.React.createElement;` within the component function to maintain React's purity principles and avoid global namespace pollution.
+
+```javascript
+// ✅ CORRECT - Component-scoped React.createElement alias
+function MyComponent({ title, children }) {
+  const e = window.React.createElement; // Local scope only
+
+  return e(
+    'div',
+    { className: 'container' },
+    e('h1', null, title),
+    e('div', { className: 'content' }, children)
+  );
+}
+```
+
+**Why This Pattern**:
+
+- ✅ Maintains React component purity (no hidden global dependencies)
+- ✅ Prevents naming conflicts between components
+- ✅ Follows React best practices for component isolation
+- ✅ Makes dependencies explicit and traceable
+
+**Avoid These Anti-Patterns**:
+
+```javascript
+// ❌ WRONG - Global variable pollution
+window.e = window.React.createElement; // Violates React purity
+
+// ❌ WRONG - File-level scope conflicts
+const e = window.React.createElement; // Can cause script loading conflicts
+function MyComponent() {
+  /* uses e */
+}
+```
+
+### **Component Architecture Patterns**
+
+#### **Generic UI Components (Base Layer)**
+
+```javascript
+// ✅ Reusable, presentation-focused components
+function StepperModal({ isOpen, onClose, title, steps, children }) {
+  const e = window.React.createElement;
+
+  if (!isOpen) return null;
+
+  // Only UI logic, no business rules
+  return e(
+    Modal,
+    { onClose },
+    e(
+      'div',
+      { className: 'stepper-container' },
+      e('h2', null, title),
+      // ... stepper UI
+      children
+    )
+  );
+}
+```
+
+#### **Specialized Business Components**
+
+```javascript
+// ✅ Domain-specific components using base components
+function CaseCreationModal({ isOpen, onClose }) {
+  const e = window.React.createElement;
+
+  // Business logic: case validation, data transforms, workflow rules
+  const [caseData, setCaseData] = useState(getInitialCaseData());
+
+  const validateCaseData = (data) => {
+    // Case-specific business rules
+  };
+
+  return e(
+    StepperModal,
+    {
+      isOpen,
+      onClose,
+      title: 'Create New Case',
+      steps: caseSteps,
+      // ... case-specific props
+    },
+    renderCaseSteps()
+  );
+}
+```
+
+### **Component Loading and Registration**
+
+Components should be self-registering and handle both ES6 modules and global script loading:
+
+```javascript
+// ✅ Proper component registration pattern
+function MyComponent() {
+  const e = window.React.createElement;
+  // ... component logic
+}
+
+// ES6 module export
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { MyComponent };
+}
+
+// Global registration for script loading
+if (typeof window !== 'undefined') {
+  window.MyComponent = MyComponent;
+
+  // Optional: Register with component library
+  if (window.NightingaleComponentLibrary) {
+    window.NightingaleComponentLibrary.registerComponent(
+      'MyComponent',
+      MyComponent
+    );
+  }
+}
+```
 
 ## 📁 File Structure
 
@@ -64,10 +189,17 @@ CMSWorkspace/
 
 - **Component Design**:
   - Pure functional components with clear prop interfaces
+  - Each component declares `const e = window.React.createElement;` within function scope
   - Use controlled components for form inputs
   - Implement proper prop validation and default values
   - Include loading states, error states, and empty states
-  
+
+- **React Best Practices**:
+  - Maintain component purity (no side effects in render)
+  - Use component-scoped aliases, never global variables
+  - Follow separation of concerns: generic UI vs business logic
+  - Components should be self-registering for both module and script loading
+
 - **Data Management**:
   - Use localStorage for persistence with JSON serialization
   - Implement comprehensive data migration and normalization
@@ -79,6 +211,12 @@ CMSWorkspace/
   - Lift state up to parent components when needed
   - Use useMemo and useCallback for performance optimization
   - Implement proper cleanup in useEffect
+
+- **Component Architecture**:
+  - Generic UI components (StepperModal, Button, DataTable) handle presentation only
+  - Specialized components (CaseCreationModal, PersonDetailsModal) contain business logic
+  - Use composition over inheritance for component relationships
+  - Maintain clear separation between base and specialized components
 
 - **Error Handling**:
   - Wrap components in ErrorBoundary for graceful failure
@@ -94,6 +232,8 @@ CMSWorkspace/
 
 ### 🚫 Patterns to Avoid
 
+### 🚫 Patterns to Avoid
+
 - Don't use class components unless specifically needed (ErrorBoundary exception)
 - Don't mutate state directly; always use setState functions
 - Avoid inline styles; use Tailwind CSS classes
@@ -101,6 +241,9 @@ CMSWorkspace/
 - Don't ignore PropTypes or component validation
 - Avoid deep component nesting; prefer composition
 - Don't block the UI thread with heavy computations
+- Never use global variables for React.createElement (use component-scoped `const e`)
+- Don't declare `const e` at file level (causes conflicts in script loading)
+- Avoid mixing embedded HTML components with external component files
 
 ## 🧪 Testing Guidelines
 
@@ -157,6 +300,37 @@ When creating or modifying components:
 - **Browser Support**: Modern browsers with ES6+ support
 - **Development**: File-based development with in-browser compilation
 - **Production**: Optimized builds with pre-compilation for performance
+
+## 🏗️ Architecture Decisions
+
+### **Component Loading Strategy**
+
+- Components are loaded as individual script files in HTML
+- Each component file is self-contained and self-registering
+- React.createElement is aliased as `e` within each component function
+- No global namespace pollution for component-specific variables
+
+### **Component Hierarchy**
+
+```
+Generic UI Components (Base Layer)
+├── StepperModal.js (reusable multi-step UI)
+├── Modal.js (basic modal functionality)
+├── Button.js (button variants)
+└── DataTable.js (data display)
+
+Specialized Business Components (Business Layer)
+├── CaseCreationModal.js (case-specific logic + StepperModal)
+├── PersonDetailsModal.js (person-specific logic + StepperModal)
+└── [Future specialized components]
+```
+
+### **Script Loading Architecture**
+
+- React/ReactDOM loaded from CDN
+- Component library loaded via individual script tags
+- Components can access each other via window.ComponentName
+- Proper ES6 module exports for future migration compatibility
 
 ## 🚀 Development Workflow
 

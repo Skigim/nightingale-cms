@@ -29,33 +29,30 @@ function FormField({
   required = false,
   className = '',
 }) {
+  const e = window.React.createElement;
+
   const fieldId = id || `field-${Math.random().toString(36).substr(2, 9)}`;
   const hasError =
     error && (Array.isArray(error) ? error.length > 0 : error.trim() !== '');
 
-  return window.React.createElement(
+  return e(
     'div',
     { className: `space-y-2 ${className}` },
 
     // Label
     label &&
-      window.React.createElement(
+      e(
         'label',
         {
           htmlFor: fieldId,
           className: 'block text-sm font-medium text-gray-300',
         },
         label,
-        required &&
-          window.React.createElement(
-            'span',
-            { className: 'text-red-400 ml-1' },
-            '*'
-          )
+        required && e('span', { className: 'text-red-400 ml-1' }, '*')
       ),
 
     // Input wrapper with error styling
-    window.React.createElement(
+    e(
       'div',
       { className: hasError ? 'relative' : '' },
       window.React.isValidElement(children)
@@ -72,7 +69,7 @@ function FormField({
 
     // Error message(s)
     hasError &&
-      window.React.createElement(
+      e(
         'div',
         {
           id: `${fieldId}-error`,
@@ -80,19 +77,12 @@ function FormField({
           role: 'alert',
         },
         Array.isArray(error)
-          ? error.map((err, index) =>
-              window.React.createElement('div', { key: index }, err)
-            )
+          ? error.map((err, index) => e('div', { key: index }, err))
           : error
       ),
 
     // Hint text
-    hint &&
-      window.React.createElement(
-        'p',
-        { className: 'text-gray-500 text-sm' },
-        hint
-      )
+    hint && e('p', { className: 'text-gray-500 text-sm' }, hint)
   );
 }
 
@@ -120,8 +110,9 @@ function TextInput({
   formatter = null,
   ...props
 }) {
-  const { useState } = window.React;
-  const [, setLocalError] = useState(null);
+  const e = window.React.createElement;
+  const { useState: useStateHook } = window.React;
+  const [, setLocalError] = useStateHook(null);
 
   const handleChange = (e) => {
     let newValue = e.target.value;
@@ -169,7 +160,7 @@ function TextInput({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return window.React.createElement('input', {
+  return e('input', {
     type,
     value,
     onChange: handleChange,
@@ -200,6 +191,8 @@ function Select({
   className = '',
   ...props
 }) {
+  const e = window.React.createElement;
+
   const baseClasses = `
     w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2
     text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -209,7 +202,7 @@ function Select({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return window.React.createElement(
+  return e(
     'select',
     {
       value,
@@ -218,14 +211,9 @@ function Select({
       className: `${baseClasses} ${className}`,
       ...props,
     },
-    placeholder &&
-      window.React.createElement(
-        'option',
-        { value: '', disabled: true },
-        placeholder
-      ),
+    placeholder && e('option', { value: '', disabled: true }, placeholder),
     options.map((option) =>
-      window.React.createElement(
+      e(
         'option',
         {
           key: option.value,
@@ -257,6 +245,8 @@ function DateInput({
   className = '',
   ...props
 }) {
+  const e = window.React.createElement;
+
   // Convert ISO date to YYYY-MM-DD format for input
   const inputValue = value
     ? typeof window.toInputDateFormat === 'function'
@@ -294,7 +284,7 @@ function DateInput({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return window.React.createElement('input', {
+  return e('input', {
     type: 'date',
     value: inputValue,
     onChange: handleChange,
@@ -326,6 +316,8 @@ function Textarea({
   className = '',
   ...props
 }) {
+  const e = window.React.createElement;
+
   const baseClasses = `
     w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2
     text-white placeholder-gray-400 resize-none
@@ -336,7 +328,7 @@ function Textarea({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return window.React.createElement('textarea', {
+  return e('textarea', {
     value,
     onChange,
     placeholder,
@@ -365,15 +357,17 @@ function Checkbox({
   className = '',
   ...props
 }) {
+  const e = window.React.createElement;
+
   const id = props.id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
 
-  return window.React.createElement(
+  return e(
     'label',
     {
       htmlFor: id,
       className: `flex items-center cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`,
     },
-    window.React.createElement('input', {
+    e('input', {
       type: 'checkbox',
       id,
       checked,
@@ -388,12 +382,7 @@ function Checkbox({
         .trim(),
       ...props,
     }),
-    label &&
-      window.React.createElement(
-        'span',
-        { className: 'ml-3 text-gray-300' },
-        label
-      )
+    label && e('span', { className: 'ml-3 text-gray-300' }, label)
   );
 }
 

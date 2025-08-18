@@ -143,6 +143,8 @@ async function loadComponents(componentNames) {
 
       const script = document.createElement('script');
       script.src = scriptSrc;
+      script.type = 'text/javascript'; // Explicitly set type to prevent Babel processing
+      script.setAttribute('data-babel', 'false'); // Additional hint for Babel to ignore
       script.onload = () => {
         loadedScripts.add(fileName);
         // After script loads, the component should be available globally

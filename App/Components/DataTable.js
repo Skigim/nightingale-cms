@@ -26,20 +26,24 @@ const DataTable = ({
   onSelectionChange = null,
   ...props
 }) => {
-  const { useState, useMemo, useCallback } = window.React;
+  const {
+    useState: useStateHook,
+    useMemo: useMemoHook,
+    useCallback: useCallbackHook,
+  } = window.React;
   const e = window.React.createElement;
 
   // State management
-  const [sortField, setSortField] = useState(null);
-  const [sortDirection, setSortDirection] = useState('asc');
-  const [currentPage, setCurrentPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(pageSize);
+  const [sortField, setSortField] = useStateHook(null);
+  const [sortDirection, setSortDirection] = useStateHook('asc');
+  const [currentPage, setCurrentPage] = useStateHook(0);
+  const [rowsPerPage, setRowsPerPage] = useStateHook(pageSize);
 
   // Use external search term
   const activeSearchTerm = searchTerm;
 
   // Column configuration with defaults
-  const processedColumns = useMemo(() => {
+  const processedColumns = useMemoHook(() => {
     return columns.map((col) => ({
       field: col.field || col.key,
       label: col.label || col.title || col.field || col.key,
@@ -55,7 +59,7 @@ const DataTable = ({
   }, [columns, sortable]);
 
   // Data processing with search and sort
-  const processedData = useMemo(() => {
+  const processedData = useMemoHook(() => {
     let filtered = [...data];
 
     // Apply search filter
@@ -106,14 +110,14 @@ const DataTable = ({
   }, [data, activeSearchTerm, sortField, sortDirection, processedColumns]);
 
   // Pagination
-  const paginatedData = useMemo(() => {
+  const paginatedData = useMemoHook(() => {
     if (!paginated) return processedData;
     const start = currentPage * rowsPerPage;
     return processedData.slice(start, start + rowsPerPage);
   }, [processedData, paginated, currentPage, rowsPerPage]);
 
   // Handlers
-  const handleSort = useCallback(
+  const handleSort = useCallbackHook(
     (field) => {
       if (!field) return;
 
@@ -127,16 +131,16 @@ const DataTable = ({
     [sortField]
   );
 
-  const handlePageChange = useCallback((event, newPage) => {
+  const handlePageChange = useCallbackHook((event, newPage) => {
     setCurrentPage(newPage);
   }, []);
 
-  const handleRowsPerPageChange = useCallback((event) => {
+  const handleRowsPerPageChange = useCallbackHook((event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setCurrentPage(0);
   }, []);
 
-  const handleRowSelect = useCallback(
+  const handleRowSelect = useCallbackHook(
     (row, isSelected) => {
       if (!selectable || !onSelectionChange) return;
 
@@ -154,7 +158,7 @@ const DataTable = ({
     [selectable, selectedRows, onSelectionChange]
   );
 
-  const handleSelectAll = useCallback(
+  const handleSelectAll = useCallbackHook(
     (isSelected) => {
       if (!selectable || !onSelectionChange) return;
 

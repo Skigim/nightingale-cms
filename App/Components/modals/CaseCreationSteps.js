@@ -1,7 +1,7 @@
 // CaseCreationSteps configuration - uses global window.React
 // Uses global window.window.dateUtils and global window form components
 
-const e = window.React.createElement;
+// Note: Each component function declares its own `const e = window.React.createElement;`
 
 const stepsConfig = [
   {
@@ -65,6 +65,8 @@ const stepsConfig = [
 ];
 
 function BasicInfoStep({ caseData, updateField, errors }) {
+  const e = window.React.createElement;
+
   return e(
     'div',
     { className: 'space-y-4' },
@@ -128,6 +130,8 @@ function BasicInfoStep({ caseData, updateField, errors }) {
 }
 
 function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
+  const e = window.React.createElement;
+
   const peopleOptions = (fullData?.people || []).map((p) => ({
     value: p.id,
     label: `${p.name} (ID: ${p.id})`,
@@ -166,6 +170,8 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
 }
 
 function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
+  const e = window.React.createElement;
+
   const livingArrangement = fullData?.people.find(
     (p) => String(p.id) === String(caseData.personId)
   )?.livingArrangement;
@@ -319,6 +325,8 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
 }
 
 function ReviewStep({ fullData, caseData }) {
+  const e = window.React.createElement;
+
   const SummaryItem = ({ label, value }) =>
     e(
       'div',

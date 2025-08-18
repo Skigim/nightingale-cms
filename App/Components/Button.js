@@ -21,6 +21,9 @@ function Button({
   fullWidth = false,
   ...props
 }) {
+  const e = window.React.createElement;
+  const { cloneElement } = window.React;
+
   // Base button classes
   const baseClasses = [
     'inline-flex',
@@ -134,7 +137,7 @@ function Button({
 
   // Loading spinner component
   const LoadingSpinner = () =>
-    window.React.createElement(
+    e(
       'svg',
       {
         className: 'animate-spin -ml-1 mr-2 h-4 w-4',
@@ -142,7 +145,7 @@ function Button({
         fill: 'none',
         viewBox: '0 0 24 24',
       },
-      window.React.createElement('circle', {
+      e('circle', {
         className: 'opacity-25',
         cx: '12',
         cy: '12',
@@ -150,7 +153,7 @@ function Button({
         stroke: 'currentColor',
         strokeWidth: '4',
       }),
-      window.React.createElement('path', {
+      e('path', {
         className: 'opacity-75',
         fill: 'currentColor',
         d: 'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z',
@@ -177,7 +180,7 @@ function Button({
 
     // If it's an SVG path string, create the SVG element
     if (typeof resolvedIcon === 'string') {
-      return window.React.createElement(
+      return e(
         'svg',
         {
           className: iconSizeClasses[size],
@@ -186,7 +189,7 @@ function Button({
           viewBox: '0 0 24 24',
           xmlns: 'http://www.w3.org/2000/svg',
         },
-        window.React.createElement('path', {
+        e('path', {
           strokeLinecap: 'round',
           strokeLinejoin: 'round',
           strokeWidth: 2,
@@ -196,7 +199,7 @@ function Button({
     }
 
     // If it's already a React element, just return it with proper sizing
-    return React.cloneElement(resolvedIcon, {
+    return cloneElement(resolvedIcon, {
       className: `${iconSizeClasses[size]} ${resolvedIcon.props?.className || ''}`,
     });
   };
@@ -224,7 +227,7 @@ function Button({
     }
   };
 
-  return window.React.createElement(
+  return e(
     'button',
     {
       type,
@@ -234,12 +237,12 @@ function Button({
       ...props,
     },
     // Loading state
-    loading && window.React.createElement(LoadingSpinner),
+    loading && e(LoadingSpinner),
 
     // Icon (left side)
     iconPosition === 'left' &&
       !loading &&
-      window.React.createElement(
+      e(
         IconWrapper,
         {
           position: 'left',
@@ -253,7 +256,7 @@ function Button({
     // Icon (right side)
     iconPosition === 'right' &&
       !loading &&
-      window.React.createElement(
+      e(
         IconWrapper,
         {
           position: 'right',
@@ -265,31 +268,38 @@ function Button({
 
 // Convenience button variants as separate components
 function PrimaryButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'primary' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'primary' });
 }
 
 function SecondaryButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'secondary' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'secondary' });
 }
 
 function DangerButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'danger' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'danger' });
 }
 
 function SuccessButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'success' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'success' });
 }
 
 function OutlineButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'outline' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'outline' });
 }
 
 function GhostButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'ghost' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'ghost' });
 }
 
 function LinkButton(props) {
-  return window.React.createElement(Button, { ...props, variant: 'link' });
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'link' });
 }
 
 // Icon constants for common use cases

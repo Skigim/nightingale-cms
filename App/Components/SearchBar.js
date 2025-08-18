@@ -30,6 +30,8 @@ function SearchBar({
   maxResults = 8,
   minQueryLength = 0,
 }) {
+  const e = window.React.createElement;
+
   // State for dropdown functionality (only used when showDropdown=true)
   const [isDropdownOpen, setIsDropdownOpen] = window.React.useState(false);
   const [searchResults, setSearchResults] = window.React.useState([]);
@@ -246,7 +248,7 @@ function SearchBar({
         `${result.mcn || result.masterCaseNumber || ''} ${result.personName || result.name || ''}`.trim() ||
         JSON.stringify(result);
 
-      return window.React.createElement(
+      return e(
         'div',
         {
           key: result.id || index,
@@ -288,22 +290,22 @@ function SearchBar({
     [highlightedIndex, usingKeyboardNav, handleResultSelect]
   );
 
-  return window.React.createElement(
+  return e(
     'div',
     { className: `relative ${className}` },
-    window.React.createElement(
+    e(
       'div',
       { className: 'relative' },
 
       // Search icon
       showSearchIcon &&
-        window.React.createElement(
+        e(
           'div',
           {
             className:
               'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none',
           },
-          window.React.createElement(
+          e(
             'svg',
             {
               className: `${iconSizes[size]} text-gray-400`,
@@ -311,7 +313,7 @@ function SearchBar({
               viewBox: '0 0 24 24',
               stroke: 'currentColor',
             },
-            window.React.createElement('path', {
+            e('path', {
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
               strokeWidth: 2,
@@ -321,7 +323,7 @@ function SearchBar({
         ),
 
       // Input field
-      window.React.createElement('input', {
+      e('input', {
         ref: inputRef,
         type: 'text',
         value: value,
@@ -345,14 +347,14 @@ function SearchBar({
       // Clear button
       showClearButton &&
         value &&
-        window.React.createElement(
+        e(
           'button',
           {
             type: 'button',
             onClick: handleClear,
             className: 'absolute inset-y-0 right-0 pr-3 flex items-center',
           },
-          window.React.createElement(
+          e(
             'svg',
             {
               className: `${iconSizes[size]} text-gray-400 hover:text-gray-300`,
@@ -360,7 +362,7 @@ function SearchBar({
               viewBox: '0 0 24 24',
               stroke: 'currentColor',
             },
-            window.React.createElement('path', {
+            e('path', {
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
               strokeWidth: 2,
@@ -374,7 +376,7 @@ function SearchBar({
     shouldUseDropdown &&
       isDropdownOpen &&
       searchResults.length > 0 &&
-      window.React.createElement(
+      e(
         'div',
         {
           ref: dropdownRef,
@@ -396,7 +398,7 @@ function SearchBar({
 
           // If using custom renderer, wrap with click handlers
           if (renderResult) {
-            return window.React.createElement(
+            return e(
               'div',
               {
                 key: result.id || index,

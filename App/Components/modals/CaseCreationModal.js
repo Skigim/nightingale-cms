@@ -1,12 +1,9 @@
-// Access React hooks from global window (loaded via script tag)
-const { useState, useEffect } = window.React;
+// CaseCreationModal - uses component-scoped React patterns
+// Note: React hooks declared within component functions for purity
 
 // Access utilities from global window (loaded via script tags)
 const dateUtils = window.dateUtils;
-const StepperModal = window.StepperModal;
 const stepsConfig = window.stepsConfig;
-
-const e = window.React.createElement;
 
 const getInitialCaseData = () => ({
   mcn: '',
@@ -28,9 +25,12 @@ const getInitialCaseData = () => ({
 });
 
 function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [caseData, setCaseData] = useState(getInitialCaseData());
-  const [errors, setErrors] = useState({});
+  const e = window.React.createElement;
+  const { useState: useStateHook, useEffect: useEffectHook } = window.React;
+
+  const [currentStep, setCurrentStep] = useStateHook(0);
+  const [caseData, setCaseData] = useStateHook(getInitialCaseData());
+  const [errors, setErrors] = useStateHook({});
 
   const steps = stepsConfig.map(({ title, description }) => ({
     title,
@@ -55,7 +55,7 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
     return true;
   };
 
-  useEffect(() => {
+  useEffectHook(() => {
     if (isOpen) {
       setCaseData(getInitialCaseData());
       setCurrentStep(0);
@@ -129,7 +129,7 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
   };
 
   return e(
-    StepperModal,
+    window.StepperModal,
     {
       isOpen,
       onClose,

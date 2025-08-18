@@ -2,8 +2,6 @@
 // StepperModal component - uses global window.React
 // Uses global window.Modal and window.FormComponents
 
-const e = window.React.createElement;
-
 /**
  * Nightingale Component Library - Stepper Modal
  *
@@ -22,6 +20,8 @@ function StepperModal({
   isStepClickable = () => true, // Function to determine if a step is clickable
 }) {
   if (!isOpen) return null;
+
+  const e = window.React.createElement;
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
