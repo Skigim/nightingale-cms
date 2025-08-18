@@ -2,27 +2,30 @@
 // Note: React hooks declared within component functions for purity
 
 // Access utilities from global window (loaded via script tags)
-const dateUtils = window.dateUtils;
-const stepsConfig = window.stepsConfig;
+const getDateUtils = () => window.dateUtils || {};
+const getStepsConfig = () => window.stepsConfig || [];
 
-const getInitialCaseData = () => ({
-  mcn: '',
-  personId: '',
-  spouseId: '',
-  status: 'Pending',
-  applicationDate: dateUtils.todayForInput(),
-  description: '',
-  caseType: 'LTC',
-  priority: 'Normal',
-  address: '',
-  unit: '',
-  city: '',
-  state: '',
-  zipCode: '',
-  organizationId: '',
-  authorizedReps: [],
-  retroRequested: '',
-});
+const getInitialCaseData = () => {
+  const dateUtils = getDateUtils();
+  return {
+    mcn: '',
+    personId: '',
+    spouseId: '',
+    status: 'Pending',
+    applicationDate: dateUtils.todayForInput ? dateUtils.todayForInput() : '',
+    description: '',
+    caseType: 'LTC',
+    priority: 'Normal',
+    address: '',
+    unit: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    organizationId: '',
+    authorizedReps: [],
+    retroRequested: '',
+  };
+};
 
 function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
   const e = window.React.createElement;
@@ -32,13 +35,24 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
   const [caseData, setCaseData] = useStateHook(getInitialCaseData());
   const [errors, setErrors] = useStateHook({});
 
-  const steps = stepsConfig.map(({ title, description }) => ({
-    title,
-    description,
-  }));
+  // Get steps configuration safely
+  const stepsConfig = getStepsConfig();
+  const steps = Array.isArray(stepsConfig)
+    ? stepsConfig.map(({ title, description }) => ({
+        title: title || 'Untitled Step',
+        description: description || '',
+      }))
+    : [];
 
   const validateStep = (stepIndex) => {
-    const validator = stepsConfig[stepIndex].validator;
+    const stepsConfig = getStepsConfig();
+    const stepConfig = stepsConfig[stepIndex];
+
+    if (!stepConfig || !stepConfig.validator) {
+      return true; // Default to valid if no validator
+    }
+
+    const validator = stepConfig.validator;
     const newErrors = validator(caseData, fullData);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -46,8 +60,16 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
 
   const isStepAccessible = (stepIndex) => {
     if (stepIndex === 0) return true;
+
+    const stepsConfig = getStepsConfig();
+
     for (let i = 0; i < stepIndex; i++) {
-      const validator = stepsConfig[i].validator;
+      const stepConfig = stepsConfig[i];
+      if (!stepConfig || !stepConfig.validator) {
+        continue; // Skip if no validator available
+      }
+
+      const validator = stepConfig.validator;
       if (Object.keys(validator(caseData, fullData)).length > 0) {
         return false;
       }
@@ -81,11 +103,14 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
 
   const handleComplete = async () => {
     // Final validation of all steps before completing
+    const stepsConfig = getStepsConfig();
+
     for (let i = 0; i < stepsConfig.length - 1; i++) {
       if (!validateStep(i)) {
         setCurrentStep(i);
+        const stepTitle = stepsConfig[i]?.title || `Step ${i + 1}`;
         window.showToast(
-          `Please fix the errors on the '${stepsConfig[i].title}' step.`,
+          `Please fix the errors on the '${stepTitle}' step.`,
           'error'
         );
         return;
@@ -119,7 +144,18 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
   };
 
   const renderStepContent = () => {
-    const CurrentStepComponent = stepsConfig[currentStep].component;
+    const stepsConfig = getStepsConfig();
+    const currentStepConfig = stepsConfig[currentStep];
+
+    if (!currentStepConfig || !currentStepConfig.component) {
+      return e(
+        'div',
+        { className: 'p-4 text-center text-gray-500' },
+        'Step configuration not found'
+      );
+    }
+
+    const CurrentStepComponent = currentStepConfig.component;
     return e(CurrentStepComponent, {
       caseData,
       updateField,

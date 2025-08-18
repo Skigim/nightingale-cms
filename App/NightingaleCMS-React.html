@@ -156,24 +156,25 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <!-- Nightingale Core Services -->
-    <script src="js/nightingale.utils.js"></script>
-    <script src="js/nightingale.parsers.js"></script>
-    <script src="js/nightingale.fileservice.js"></script>
-    <script src="js/nightingale.search.js"></script>
-    <script src="js/nightingale.toast.js"></script>
+    <script src="js/services/nightingale.utils.js"></script>
+    <script src="js/services/nightingale.parsers.js"></script>
+    <script src="js/services/nightingale.fileservice.js"></script>
+    <script src="js/services/nightingale.search.js"></script>
+    <script src="js/services/nightingale.toast.js"></script>
 
-    <!-- Nightingale Component Library -->
-    <script src="Components/index.js"></script>
+    <!-- Nightingale Component Library - Layered Architecture -->
+    <script src="js/components/index.js"></script>
 
-    <!-- Modal Components -->
-    <script src="Components/modals/StepperModal.js"></script>
-    <script src="Components/modals/CaseCreationModal.js"></script>
+    <!-- Components will be loaded automatically by the layered architecture:
+         🎨 UI Layer: Button, Badge, DataTable, FormComponents, SearchBar, Modal, StepperModal
+         🏢 Business Layer: CaseCreationModal, CaseCreationSteps
+    -->
 
     <!-- Day.js for date management -->
     <script src="lib/dayjs.min.js"></script>
     <script src="lib/dayjs-relativeTime.min.js"></script>
     <script src="lib/dayjs-customParseFormat.min.js"></script>
-    <script src="js/nightingale.dayjs.js"></script>
+    <script src="js/services/nightingale.dayjs.js"></script>
 
     <!-- Lodash for reliable utility functions -->
     <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
@@ -1401,7 +1402,8 @@
         };
 
         const formatNoteTimestamp = (timestamp) => {
-          return dateUtils.format(timestamp, 'MM/DD/YYYY hh:mm A');
+          if (!window.dateUtils || !window.dateUtils.format) return timestamp;
+          return window.dateUtils.format(timestamp, 'MM/DD/YYYY hh:mm A');
         };
 
         return e(
@@ -2135,7 +2137,8 @@
 
         const formatDate = (dateString) => {
           if (!dateString) return 'Not set';
-          return dateUtils.format(dateString);
+          if (!window.dateUtils || !window.dateUtils.format) return dateString;
+          return window.dateUtils.format(dateString);
         };
 
         const handleStartEdit = (field, currentValue, dataType = 'case') => {
