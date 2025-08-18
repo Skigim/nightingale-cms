@@ -1576,6 +1576,23 @@
         );
       }
 
+      // Helper function to find person by ID with flexible matching
+      function findPersonById(people, personId) {
+        if (!people || !personId) return null;
+
+        return people.find((p) => {
+          // Convert both to strings and try exact match
+          if (String(p.id) === String(personId)) return true;
+          // Try with zero-padding (legacy format)
+          if (String(p.id) === String(personId).padStart(2, '0')) return true;
+          // Try reverse: personId might be zero-padded
+          if (String(p.id).padStart(2, '0') === String(personId)) return true;
+          // Try numeric comparison
+          if (Number(p.id) === Number(personId)) return true;
+          return false;
+        });
+      }
+
       // Helper functions for Case Details actions
       function generateCaseSummary(caseData) {
         // Generate summary functionality - similar to OldCMS
@@ -2119,10 +2136,8 @@
         const [editValues, setEditValues] = useState({});
         const [errors, setErrors] = useState({});
 
-        const person = fullData?.people?.find((p) => p.id === String(caseData?.personId || '').padStart(2, '0'));
-        const spouse = caseData?.spouseId
-          ? fullData?.people?.find((p) => p.id === String(caseData.spouseId).padStart(2, '0'))
-          : null;
+        const person = findPersonById(fullData?.people, caseData?.personId);
+        const spouse = caseData?.spouseId ? findPersonById(fullData?.people, caseData.spouseId) : null;
         const organization = caseData?.organizationId
           ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId).padStart(2, '0'))
           : null;
@@ -2626,10 +2641,8 @@
         const [isPersonModalOpen, setIsPersonModalOpen] = useState(false);
 
         const caseData = fullData?.cases?.find((c) => c.id === caseId);
-        const person = fullData?.people?.find((p) => p.id === String(caseData?.personId || '').padStart(2, '0'));
-        const spouse = caseData?.spouseId
-          ? fullData?.people?.find((p) => p.id === String(caseData.spouseId || '').padStart(2, '0'))
-          : null;
+        const person = findPersonById(fullData?.people, caseData?.personId);
+        const spouse = caseData?.spouseId ? findPersonById(fullData?.people, caseData.spouseId) : null;
         const organization = caseData?.organizationId
           ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0'))
           : null;
@@ -2827,7 +2840,7 @@
           if (searchTerm.trim()) {
             const term = searchTerm.toLowerCase();
             filtered = filtered.filter((caseItem) => {
-              const person = fullData.people?.find((p) => p.id === String(caseItem.personId || '').padStart(2, '0'));
+              const person = findPersonById(fullData.people, caseItem.personId);
               const personName = person?.name?.toLowerCase() || '';
 
               return (
@@ -3011,7 +3024,7 @@
                 sortable: true,
                 render: (value, row) => {
                   if (!row || !fullData?.people) return 'Unknown';
-                  const person = fullData.people.find((p) => p.id === String(row.personId).padStart(2, '0'));
+                  const person = findPersonById(fullData.people, row.personId);
                   return person?.name || 'Unknown';
                 },
               },
@@ -3920,7 +3933,7 @@
         };
 
         const availablePeople = fullData?.people || [];
-        const currentPerson = availablePeople.find((p) => p.id === String(editData.personId || '').padStart(2, '0'));
+        const currentPerson = findPersonById(availablePeople, editData.personId);
 
         if (!isOpen || !caseData) return null;
 
@@ -4081,7 +4094,7 @@
           }
         }, [isOpen, caseData]);
 
-        const person = fullData?.people?.find((p) => p.id === String(caseData?.personId || '').padStart(2, '0'));
+        const person = findPersonById(fullData?.people, caseData?.personId);
         const caseNotes = fullData?.notes?.filter((n) => n.caseId === caseData?.id) || [];
 
         const formatDate = (dateString) => {

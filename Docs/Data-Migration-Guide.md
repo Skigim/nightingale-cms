@@ -17,6 +17,7 @@ The data migration script (`data-migration.js`) safely migrates legacy Nightinga
 ## Usage
 
 ### Basic Usage
+
 ```bash
 # Migrate a single case
 node .vscode/data-migration.js Data/legacy-single-case.json Data/nightingale-data.json
@@ -31,6 +32,7 @@ node .vscode/data-migration.js
 ### Input Formats Supported
 
 #### Format 1: Single Case Record
+
 ```json
 {
   "id": 1,
@@ -53,6 +55,7 @@ node .vscode/data-migration.js
 ```
 
 #### Format 2: Complete Data Structure
+
 ```json
 {
   "people": [
@@ -78,44 +81,47 @@ node .vscode/data-migration.js
 
 ### People Records
 
-| Legacy Field | Current Field | Notes |
-|--------------|---------------|-------|
-| `dob` | `dateOfBirth` | Date normalization |
-| `address`, `city`, `state`, `zipCode` | `address: {street, city, state, zip}` | Structured address object |
-| `authorizedRepIds` | `authorizedRepIds` | Converted to string array |
-| `spouseId` | Added to `familyMembers` | Relationship establishment |
+| Legacy Field                          | Current Field                         | Notes                      |
+| ------------------------------------- | ------------------------------------- | -------------------------- |
+| `dob`                                 | `dateOfBirth`                         | Date normalization         |
+| `address`, `city`, `state`, `zipCode` | `address: {street, city, state, zip}` | Structured address object  |
+| `authorizedRepIds`                    | `authorizedRepIds`                    | Converted to string array  |
+| `spouseId`                            | Added to `familyMembers`              | Relationship establishment |
 
 ### Case Records
 
-| Legacy Field | Current Field | Notes |
-|--------------|---------------|-------|
-| `masterCaseNumber` | `masterCaseNumber`, `mcn` | Backward compatibility |
-| `appDetails.*` | `appDetails.*` | Structure preserved |
-| `financials.*` | `financials.*` | Enhanced with additional fields |
-| `retroStatus` | `retroStatus`, `retroRequested` | Boolean + string format |
+| Legacy Field       | Current Field                   | Notes                           |
+| ------------------ | ------------------------------- | ------------------------------- |
+| `masterCaseNumber` | `masterCaseNumber`, `mcn`       | Backward compatibility          |
+| `appDetails.*`     | `appDetails.*`                  | Structure preserved             |
+| `financials.*`     | `financials.*`                  | Enhanced with additional fields |
+| `retroStatus`      | `retroStatus`, `retroRequested` | Boolean + string format         |
 
 ### Financial Items
 
-| Legacy Field | Current Field | Notes |
-|--------------|---------------|-------|
-| `type` | `type`, `description` | Dual field support |
-| `value` | `value`, `amount` | Backward compatibility |
-| `source` | `source`, `verificationSource` | Enhanced verification tracking |
-| `owner` | `owner` | Preserved (applicant/spouse/joint) |
+| Legacy Field | Current Field                  | Notes                              |
+| ------------ | ------------------------------ | ---------------------------------- |
+| `type`       | `type`, `description`          | Dual field support                 |
+| `value`      | `value`, `amount`              | Backward compatibility             |
+| `source`     | `source`, `verificationSource` | Enhanced verification tracking     |
+| `owner`      | `owner`                        | Preserved (applicant/spouse/joint) |
 
 ## Safety Features
 
 ### Automatic Backups
+
 - Creates timestamped backups in `Data/backups/`
 - Preserves original data before migration
 - Enables easy rollback if needed
 
 ### Validation
+
 - Validates required fields before migration
 - Checks data integrity after migration
 - Reports missing or invalid data
 
 ### Duplicate Prevention
+
 - Checks for existing records by ID
 - Prevents duplicate case/people records
 - Merges with existing data safely
@@ -192,20 +198,22 @@ If migration fails or produces unexpected results:
 ## Advanced Configuration
 
 ### Customizing Default Paths
+
 ```javascript
 const CONFIG = {
   backupDir: './Data/backups',
   defaultInput: './Data/legacy-data.json',
-  defaultOutput: './Data/nightingale-data.json'
+  defaultOutput: './Data/nightingale-data.json',
 };
 ```
 
 ### Required Fields Validation
+
 ```javascript
 const requiredFields = {
   cases: ['id', 'personId', 'status'],
   people: ['id', 'name'],
-  organizations: ['id', 'name']
+  organizations: ['id', 'name'],
 };
 ```
 
@@ -221,6 +229,7 @@ const requiredFields = {
 ## Support
 
 For migration issues or questions:
+
 1. Check the migration logs for specific error messages
 2. Verify legacy data format matches expected structure
 3. Review the backup files to ensure data preservation
