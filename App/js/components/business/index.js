@@ -14,13 +14,7 @@ const BUSINESS_COMPONENTS = [
     name: 'CaseCreationModal',
     path: 'js/components/business/modals/CaseCreationModal.js',
     category: 'case-management',
-    dependencies: ['StepperModal'],
-  },
-  {
-    name: 'CaseCreationSteps',
-    path: 'js/components/business/modals/CaseCreationSteps.js',
-    category: 'case-management',
-    dependencies: ['FormComponents'],
+    dependencies: ['StepperModal', 'FormComponents'],
   },
   {
     name: 'PersonCreationModal',

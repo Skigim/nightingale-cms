@@ -25,7 +25,7 @@
  * │   │   ├── index.js         <- Business component loader
  * │   │   └── 📁 modals/
  * │   │       ├── CaseCreationModal.js     <- Case creation workflow
- * │   │       ├── CaseCreationSteps.js     <- Case creation step definitions
+ * │   │       ├── CaseCreationModal.js     <- Case creation workflow (with integrated steps)
  * │   │       ├── FinancialItemModal.js    <- (Future) Financial management
  * │   │       ├── PersonDetailsModal.js    <- (Future) Person management
  * │   │       └── CasePreviewModal.js      <- (Future) Case preview

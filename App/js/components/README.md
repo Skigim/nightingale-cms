@@ -33,7 +33,7 @@ The Nightingale Component Library is now organized into two distinct layers:
 **Components:**
 
 - `CaseCreationModal.js` - Case creation workflow using StepperModal
-- `CaseCreationSteps.js` - Step definitions for case creation process
+- `CaseCreationModal.js` - Complete case creation workflow with integrated step components
 - `FinancialItemModal.js` - _(Future)_ Financial item management
 - `PersonDetailsModal.js` - _(Future)_ Person and contact management
 - `CasePreviewModal.js` - _(Future)_ Case overview and preview
@@ -169,7 +169,7 @@ Components/
 │   ├── index.js               # Business component loader
 │   └── modals/
 │       ├── CaseCreationModal.js     # ← Case management logic
-│       ├── CaseCreationSteps.js     # ← Domain workflows
+│       ├── CaseCreationModal.js     # ← Integrated case creation workflow
 │       ├── FinancialItemModal.js    # ← Financial business rules
 │       ├── PersonDetailsModal.js    # ← Person management logic
 │       └── CasePreviewModal.js      # ← Case preview logic
