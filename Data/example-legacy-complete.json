@@ -1,0 +1,103 @@
+{
+  "people": [
+    {
+      "id": 101,
+      "name": "Doe, John",
+      "dob": "1945-05-20",
+      "phone": "5551234567",
+      "email": "john.doe@example.com",
+      "livingArrangement": "Facility",
+      "organizationId": 201,
+      "spouseId": 102,
+      "authorizedRepIds": [103]
+    },
+    {
+      "id": 102,
+      "name": "Doe, Jane",
+      "dob": "1948-11-30",
+      "phone": "5551234567",
+      "email": "jane.doe@example.com",
+      "livingArrangement": "Home",
+      "address": "123 Main St",
+      "city": "Anytown",
+      "state": "NE",
+      "zipCode": "68001",
+      "organizationId": null,
+      "spouseId": 101
+    },
+    {
+      "id": 103,
+      "name": "Smith, Robert",
+      "dob": "1975-02-10",
+      "phone": "5559876543",
+      "email": "robert.smith@example.com",
+      "livingArrangement": "Home",
+      "address": "456 Oak Ave",
+      "city": "Anytown",
+      "state": "NE",
+      "zipCode": "68001",
+      "organizationId": null,
+      "spouseId": null
+    }
+  ],
+  "cases": [
+    {
+      "id": 1,
+      "personId": 101,
+      "masterCaseNumber": "2025001",
+      "status": "Active",
+      "priority": true,
+      "retroStatus": true,
+      "createdAt": "2025-01-15T08:00:00.000Z",
+      "lastOpened": "2025-08-18T13:45:00.000Z",
+      "appDetails": {
+        "appDate": "2025-01-15",
+        "caseType": "SIMP",
+        "applicationType": "Application",
+        "avsConsentDate": "2025-01-14",
+        "admissionDate": "2025-01-10",
+        "medicareAExpDate": "2025-02-10"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": 1001,
+            "type": "Checking Account",
+            "location": "First National Bank",
+            "accountNumber": "1111",
+            "value": 1250.75,
+            "verificationStatus": "Verified",
+            "source": "AVS 08/18/2025",
+            "notes": "",
+            "owner": "applicant"
+          },
+          {
+            "id": 1002,
+            "type": "Savings Account",
+            "location": "Community Credit Union",
+            "accountNumber": "2222",
+            "value": 115000,
+            "verificationStatus": "Verified",
+            "source": "AVS 08/18/2025",
+            "notes": "",
+            "owner": "spouse"
+          },
+          {
+            "id": 1003,
+            "type": "Certificate of Deposit",
+            "location": "First National Bank",
+            "accountNumber": "3333",
+            "value": 50000,
+            "verificationStatus": "Needs VR",
+            "source": "",
+            "notes": "",
+            "owner": "joint"
+          }
+        ],
+        "income": [],
+        "expenses": []
+      },
+      "notes": []
+    }
+  ]
+}
