@@ -99,7 +99,7 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
     value: p.id,
     label: `${p.name} (ID: ${p.id})`,
   }));
-  
+
   return e(
     'div',
     { className: 'space-y-4' },
@@ -278,7 +278,7 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
       e(
         window.FormField,
         { label: 'Description / Notes' },
-        e(window.TextArea, {
+        e(window.Textarea, {
           value: caseData.description,
           onChange: (e) => updateField('description', e.target.value),
           rows: 3,
@@ -341,7 +341,9 @@ function ReviewStep({ fullData, caseData }) {
       e(SummaryItem, { label: 'Case Type', value: caseData.caseType }),
       e(SummaryItem, {
         label: 'Application Date',
-        value: window.dateUtils?.format ? window.dateUtils.format(caseData.applicationDate) : caseData.applicationDate,
+        value: window.dateUtils?.format
+          ? window.dateUtils.format(caseData.applicationDate)
+          : caseData.applicationDate,
       }),
       e(SummaryItem, {
         label: 'Retro Requested',
@@ -568,20 +570,20 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
 
 // Export for ES6 modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { 
+  module.exports = {
     CaseCreationModal,
     BasicInfoStep,
     ClientSelectionStep,
     CaseDetailsStep,
     ReviewStep,
-    stepsConfig
+    stepsConfig,
   };
 }
 
 // Make available globally
 if (typeof window !== 'undefined') {
   window.CaseCreationModal = CaseCreationModal;
-  
+
   // Also make individual components available for backward compatibility
   window.BasicInfoStep = BasicInfoStep;
   window.ClientSelectionStep = ClientSelectionStep;
