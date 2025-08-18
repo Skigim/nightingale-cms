@@ -24,6 +24,8 @@ logs
 # IDE files
 .vscode/settings.json
 .vscode/launch.json
+.vscode/tasks.json
+.vscode/createcomponent.js
 .idea/
 *.swp
 *.swo
