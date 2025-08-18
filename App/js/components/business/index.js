@@ -24,7 +24,7 @@ const BUSINESS_COMPONENTS = [
   },
   {
     name: 'PersonCreationModal',
-    path: 'js/components/business/createNewPersonModal.js',
+    path: 'js/components/business/modals/PersonCreationModal.js',
     category: 'people-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },

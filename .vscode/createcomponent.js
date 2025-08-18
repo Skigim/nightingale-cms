@@ -33,7 +33,17 @@ async function createComponent() {
     componentType.toLowerCase() === 'ui' || componentType.toLowerCase() === 'u';
   const componentLayer = isUIComponent ? 'ui' : 'business';
 
+  // Ask if it's a modal component (only for business components)
+  let isModalComponent = false;
+  if (!isUIComponent) {
+    const modalResponse = await question(
+      'Is this a modal component? [y/n]: '
+    );
+    isModalComponent = modalResponse.toLowerCase() === 'y' || modalResponse.toLowerCase() === 'yes';
+  }
+
   const componentFileName = `${componentName}.js`;
+  const componentSubPath = isModalComponent ? 'modals' : '';
   const componentPath = path.join(
     __dirname,
     '..',
@@ -41,6 +51,7 @@ async function createComponent() {
     'js',
     'components',
     componentLayer,
+    componentSubPath,
     componentFileName
   );
   const indexPath = path.join(
@@ -129,7 +140,8 @@ if (typeof module !== 'undefined' && module.exports) {
 
   if (isUIComponent) {
     // Add to UI_COMPONENTS array for UI components
-    const uiComponentsRegex = /(const UI_COMPONENTS = \[[^\]]*)(  \/\/ Future|])/;
+    const uiComponentsRegex =
+      /(const UI_COMPONENTS = \[[^\]]*)(  \/\/ Future|])/;
     const newUIComponent = `  {
     name: '${componentName}',
     path: 'js/components/ui/${componentFileName}',
@@ -139,25 +151,39 @@ if (typeof module !== 'undefined' && module.exports) {
 
   // Future`;
     if (indexContent.match(uiComponentsRegex)) {
-      indexContent = indexContent.replace(uiComponentsRegex, `$1${newUIComponent}`);
+      indexContent = indexContent.replace(
+        uiComponentsRegex,
+        `$1${newUIComponent}`
+      );
     } else {
-      console.warn('⚠️  Could not find UI_COMPONENTS array pattern in index.js');
+      console.warn(
+        '⚠️  Could not find UI_COMPONENTS array pattern in index.js'
+      );
     }
   } else {
     // Add to BUSINESS_COMPONENTS array for business components
-    const businessComponentsRegex = /(  \/\/ Future business components will be added here:)/;
+    const businessComponentsRegex =
+      /(  \/\/ Future business components will be added here:)/;
+    const componentPathForRegistry = isModalComponent 
+      ? `js/components/business/modals/${componentFileName}`
+      : `js/components/business/${componentFileName}`;
     const newBusinessComponent = `  {
     name: '${componentName}',
-    path: 'js/components/business/${componentFileName}',
+    path: '${componentPathForRegistry}',
     category: 'business',
     dependencies: [],
   },
 
   // Future business components will be added here:`;
     if (indexContent.match(businessComponentsRegex)) {
-      indexContent = indexContent.replace(businessComponentsRegex, newBusinessComponent);
+      indexContent = indexContent.replace(
+        businessComponentsRegex,
+        newBusinessComponent
+      );
     } else {
-      console.warn('⚠️  Could not find business components insertion point in index.js');
+      console.warn(
+        '⚠️  Could not find business components insertion point in index.js'
+      );
     }
   }
 
@@ -225,24 +251,28 @@ ${componentPurpose}
 
 ### ✅ **Component Library Integration**
 
-${isUIComponent ? 
-`- **Pure UI Component**: No dependencies on other UI components, provides building blocks for business components
-- **Generic Design**: Framework-agnostic, reusable across different contexts` :
-`- **Forms**: Uses \`FormField\`, \`TextInput\`, \`DateInput\`, \`Select\`, \`Checkbox\` from FormComponents
+${
+  isUIComponent
+    ? `- **Pure UI Component**: No dependencies on other UI components, provides building blocks for business components
+- **Generic Design**: Framework-agnostic, reusable across different contexts`
+    : `- **Forms**: Uses \`FormField\`, \`TextInput\`, \`DateInput\`, \`Select\`, \`Checkbox\` from FormComponents
 - **Modals**: Uses \`StepperModal\`, \`Modal\` for multi-step workflows or dialogs
-- **No custom form elements**: All form inputs use established component library`}
+- **No custom form elements**: All form inputs use established component library`
+}
 
 ### ✅ **Business Logic Implementation**
 
-${!isUIComponent ? 
-`- **Data Schema**: Follows Nightingale data structure conventions
+${
+  !isUIComponent
+    ? `- **Data Schema**: Follows Nightingale data structure conventions
 - **Validation Rules**: Implements business validation for required fields
 - **Data Relationships**: Integrates with organizations, people, cases as needed
 - **Error Handling**: Comprehensive validation and user feedback
-- **State Management**: Proper React state patterns with hooks` :
-`- **No Business Logic**: Pure presentation component only
+- **State Management**: Proper React state patterns with hooks`
+    : `- **No Business Logic**: Pure presentation component only
 - **Props Interface**: Well-defined props for data and event handling
-- **Styling**: Consistent with Nightingale dark theme design system`}
+- **Styling**: Consistent with Nightingale dark theme design system`
+}
 
 ### ✅ **Integration Points**
 
