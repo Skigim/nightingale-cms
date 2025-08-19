@@ -31,7 +31,15 @@
       "applicationType": "Initial",
       "avsConsentDate": "2025-08-14",
       "organizationAddress": "Not specified",
-      "livingArrangement": "Not specified"
+      "livingArrangement": "Not specified",
+      "notes": [
+        {
+          "id": 1755568025992,
+          "category": "AVS",
+          "text": "Day 5 - do the thing.",
+          "timestamp": "2025-08-19T01:47:05.992Z"
+        }
+      ]
     },
     {
       "id": "02",

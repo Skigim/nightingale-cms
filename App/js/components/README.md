@@ -244,3 +244,11 @@ Display financial items in the case details view.
 **Features:**
 - *TODO: Describe feature 1*
 - *TODO: Describe feature 2*
+
+### ✅ NotesModal
+
+View and edit notes with full CRUD compatibility. 
+
+**Features:**
+- *TODO: Describe feature 1*
+- *TODO: Describe feature 2*

@@ -2322,7 +2322,7 @@
                           'div',
                           { className: 'space-y-2' },
                           caseData.authorizedReps.map((repId) => {
-                            const rep = fullData?.people?.find((p) => p.id === String(repId || '').padStart(2, '0'));
+                            const rep = findPersonById(fullData?.people, repId);
                             return e(
                               'div',
                               {
@@ -2509,7 +2509,7 @@
                   'div',
                   { className: 'space-y-2' },
                   caseData.authorizedReps.map((repId) => {
-                    const rep = fullData?.people?.find((p) => p.id === String(repId || '').padStart(2, '0'));
+                    const rep = findPersonById(fullData?.people, repId);
                     return e(
                       'div',
                       {
@@ -2539,6 +2539,7 @@
       // Case Details View Component
       function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList }) {
         const [isPersonModalOpen, setIsPersonModalOpen] = useState(false);
+        const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
 
         const caseData = fullData?.cases?.find((c) => c.id === caseId);
         const person = findPersonById(fullData?.people, caseData?.personId);
@@ -2550,6 +2551,13 @@
         // Update case field helper
         const updateCaseField = (field, value) => {
           const updatedCase = { ...caseData, [field]: value };
+          const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+          onUpdateData({ ...fullData, cases: updatedCases });
+        };
+
+        // Update notes handler
+        const handleNotesUpdate = (caseId, updatedNotes) => {
+          const updatedCase = { ...caseData, notes: updatedNotes };
           const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
           onUpdateData({ ...fullData, cases: updatedCases });
         };
@@ -2674,6 +2682,30 @@
                 e(
                   'button',
                   {
+                    onClick: () => setIsNotesModalOpen(true),
+                    className: 'bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center gap-2',
+                  },
+                  e(
+                    'svg',
+                    {
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      className: 'h-4 w-4',
+                      fill: 'none',
+                      viewBox: '0 0 24 24',
+                      stroke: 'currentColor',
+                    },
+                    e('path', {
+                      strokeLinecap: 'round',
+                      strokeLinejoin: 'round',
+                      strokeWidth: 2,
+                      d: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+                    })
+                  ),
+                  `Notes (${caseData.notes?.length || 0})`
+                ),
+                e(
+                  'button',
+                  {
                     onClick: () => generateCaseSummary(caseData),
                     className: 'bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md',
                   },
@@ -2701,6 +2733,17 @@
             caseData,
             fullData,
             onUpdateData,
+          }),
+
+          // Notes Modal
+          e(window.NotesModal, {
+            isOpen: isNotesModalOpen,
+            onClose: () => setIsNotesModalOpen(false),
+            caseId: caseData.id,
+            notes: caseData.notes || [],
+            onNotesUpdate: handleNotesUpdate,
+            caseData: caseData,
+            fullData: fullData,
           })
         );
       }

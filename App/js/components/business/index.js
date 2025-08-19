@@ -30,6 +30,13 @@ const BUSINESS_COMPONENTS = [
     dependencies: ['Cards', 'Badge', 'Button'],
   },
 
+  {
+    name: 'NotesModal',
+    path: 'js/components/business/modals/NotesModal.js',
+    category: 'business',
+    dependencies: [],
+  },
+
   // Future business components will be added here:
   // { name: 'FinancialItemModal', path: 'business/modals/FinancialItemModal.js', category: 'financial' },
   // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },
