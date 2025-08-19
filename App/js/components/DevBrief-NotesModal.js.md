@@ -2,7 +2,7 @@
 
 ## 1. Component Purpose
 
-- **Goal**: View and edit notes with full CRUD compatibility. 
+- **Goal**: View and edit notes with full CRUD compatibility.
 
 ## 2. Core Requirements & Logic
 
@@ -14,15 +14,17 @@
   - `data`: Data object(s) passed to the component
   - `onUpdate`: Callback function for data updates
   - `fileService`: File service instance for data operations
-  - *TODO: Add specific props needed for this component*
+  - _TODO: Add specific props needed for this component_
 
 - **State**:
   - `isLoading`: Loading state during async operations
   - `validationErrors`: Object containing field validation errors
-  - *TODO: Add component-specific state variables*
+  - _TODO: Add component-specific state variables_
 
 - **Functionality**:
-  - *TODO: Detail the required user interactions and business logic*
+  - \*TODO: Full CRUD capability with:
+  - A category field using SearchBarWithDropdown - results should populate from an array of previously used categories in all notes across the suite. The field should also allow free input, and if the value is not equal to a previously used category title, add it to the results array as a whole.
+  - An RTF text field, allowing for future development of item linking, etc.\*
   - Implement proper data validation using Nightingale Validators
   - Handle data persistence using fileService prop
   - Provide user feedback via toast notifications for success/error states
