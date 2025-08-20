@@ -81,6 +81,84 @@ function sanitizeHTML(htmlString) {
 }
 
 /**
+ * Structured error handling function for the Nightingale suite.
+ * Provides consistent error logging, user notification, and debugging information
+ * across all applications and services.
+ *
+ * @param {Error|string} error - The error object or message to handle
+ * @param {string} origin - The source of the error (e.g., 'FileService', 'CaseCreation', 'SearchService')
+ * @param {Object} options - Optional configuration for error handling
+ * @param {boolean} options.showToast - Whether to show a user-facing toast notification (default: false)
+ * @param {string} options.userMessage - Custom user-friendly message for toast notifications
+ * @param {boolean} options.logToConsole - Whether to log to console (default: true)
+ * @param {Object} options.context - Additional context information for debugging
+ * @returns {void}
+ */
+function handleError(error, origin, options = {}) {
+  const {
+    showToast = false,
+    userMessage = 'An unexpected error occurred',
+    logToConsole = true,
+    context = null,
+  } = options;
+
+  // Extract error message and stack trace
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorStack = error instanceof Error ? error.stack : null;
+
+  // Create structured error object
+  const structuredError = {
+    message: errorMessage,
+    origin: origin,
+    timestamp: new Date().toISOString(),
+    context: context,
+    stack: errorStack,
+  };
+
+  // Log to console if enabled (with proper formatting)
+  if (logToConsole) {
+    console.group(`🚨 Nightingale Error: ${origin}`);
+    console.error('Message:', errorMessage);
+    console.error('Origin:', origin);
+    console.error('Timestamp:', structuredError.timestamp);
+    if (context) {
+      console.error('Context:', context);
+    }
+    if (errorStack) {
+      console.error('Stack Trace:', errorStack);
+    }
+    console.groupEnd();
+  }
+
+  // Show user notification if requested
+  if (showToast && typeof window !== 'undefined' && window.NightingaleToast) {
+    window.NightingaleToast.error(userMessage);
+  }
+
+  // Store error for potential reporting (could be extended for analytics)
+  if (typeof window !== 'undefined') {
+    window.NightingaleErrors = window.NightingaleErrors || [];
+    window.NightingaleErrors.push(structuredError);
+    
+    // Keep only last 50 errors to prevent memory leaks
+    if (window.NightingaleErrors.length > 50) {
+      window.NightingaleErrors = window.NightingaleErrors.slice(-50);
+    }
+  }
+
+  return structuredError;
+}
+
+// Global error handler setup - but only if Nightingale object exists
+if (typeof window !== 'undefined' && typeof window.Nightingale === 'undefined') {
+  window.Nightingale = {};
+}
+
+if (typeof window !== 'undefined') {
+  window.Nightingale.handleError = handleError;
+}
+
+/**
  * Formats a date string (e.g., ISO format) into a user-friendly MM/DD/YYYY format.
  * Includes a timezone offset correction to prevent date changes.
  * @param {string} dateString The date string to format.
@@ -675,9 +753,11 @@ class NightingaleClipboard {
         throw new Error('execCommand failed');
       }
     } catch (error) {
-      console.error('Fallback copy failed:', error);
-      if (config.showToast && window.NightingaleToast) {
-        window.NightingaleToast.error(config.errorMessage);
+      handleError(error, 'CopyToClipboard', {
+        showToast: config.showToast,
+        userMessage: config.errorMessage,
+        context: { text: text.substring(0, 100) + '...' }
+      });
       }
       return false;
     }
@@ -855,7 +935,10 @@ class NightingaleSearchService {
    */
   constructor(data, options = {}) {
     if (typeof Fuse === 'undefined') {
-      console.error('NightingaleSearchService: Fuse.js is not available');
+      handleError('Fuse.js library is not available', 'NightingaleSearchService', {
+        showToast: false,
+        context: { options }
+      });
       this.fuse = null;
       return;
     }
@@ -874,10 +957,10 @@ class NightingaleSearchService {
       this.data = data;
       this.options = defaultOptions;
     } catch (error) {
-      console.error(
-        'NightingaleSearchService: Error initializing Fuse.js:',
-        error
-      );
+      handleError(error, 'NightingaleSearchService', {
+        showToast: false,
+        context: { data: Array.isArray(data) ? `Array[${data.length}]` : typeof data, options }
+      });
       this.fuse = null;
     }
   }
@@ -897,7 +980,10 @@ class NightingaleSearchService {
       // Return the items directly (not wrapped in Fuse result objects)
       return results.map((result) => result.item || result);
     } catch (error) {
-      console.error('NightingaleSearchService: Search error:', error);
+      handleError(error, 'NightingaleSearchService.search', {
+        showToast: false,
+        context: { query, searchOptions }
+      });
       return [];
     }
   }
@@ -918,7 +1004,10 @@ class NightingaleSearchService {
         this.fuse.setCollection(newData);
       }
     } catch (error) {
-      console.error('NightingaleSearchService: Error updating data:', error);
+      handleError(error, 'NightingaleSearchService.updateData', {
+        showToast: false,
+        context: { dataType: Array.isArray(newData) ? `Array[${newData.length}]` : typeof newData }
+      });
     }
   }
 
@@ -946,7 +1035,10 @@ class NightingaleSearchService {
         this.fuse = new Fuse(this.data, this.options);
       }
     } catch (error) {
-      console.error('NightingaleSearchService: Error updating options:', error);
+      handleError(error, 'NightingaleSearchService.updateOptions', {
+        showToast: false,
+        context: { newOptions }
+      });
     }
   }
 

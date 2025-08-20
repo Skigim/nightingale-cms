@@ -343,7 +343,15 @@ function PersonCreationModal({
       onPersonCreated(resultPerson);
       onClose();
     } catch (error) {
-      console.error('Error saving person:', error);
+      if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+        window.Nightingale.handleError(error, 'PersonCreation', {
+          showToast: true,
+          userMessage: 'Error saving person. Please try again.',
+          context: { personData }
+        });
+      } else {
+        console.error('Error saving person:', error);
+      }
       window.showToast?.('Error saving person: ' + error.message, 'error');
     } finally {
       setIsLoading(false);

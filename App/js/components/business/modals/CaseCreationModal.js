@@ -791,11 +791,19 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
       window.showToast('Case created successfully!', 'success');
       onClose();
     } catch (error) {
-      console.error('Error creating case:', error);
-      window.showToast(
-        'Error creating case. See console for details.',
-        'error'
-      );
+      if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+        window.Nightingale.handleError(error, 'CaseCreation', {
+          showToast: true,
+          userMessage: 'Error creating case. Please try again.',
+          context: { caseData }
+        });
+      } else {
+        console.error('Error creating case:', error);
+        window.showToast(
+          'Error creating case. See console for details.',
+          'error'
+        );
+      }
     }
   };
 

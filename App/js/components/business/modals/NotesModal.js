@@ -165,7 +165,15 @@ function NotesModal({
 
       resetForm();
     } catch (error) {
-      console.error('Error saving note:', error);
+      if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+        window.Nightingale.handleError(error, 'NotesModal.saveNote', {
+          showToast: true,
+          userMessage: 'Error saving note. Please try again.',
+          context: { noteContent: editingNote.content.substring(0, 100) }
+        });
+      } else {
+        console.error('Error saving note:', error);
+      }
       if (window.showToast) {
         window.showToast('Error saving note. Please try again.', 'error');
       }
@@ -259,7 +267,15 @@ function NotesModal({
         window.showToast('Note deleted successfully', 'success');
       }
     } catch (error) {
-      console.error('Error deleting note:', error);
+      if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+        window.Nightingale.handleError(error, 'NotesModal.deleteNote', {
+          showToast: true,
+          userMessage: 'Error deleting note. Please try again.',
+          context: { noteId: noteToDelete.id }
+        });
+      } else {
+        console.error('Error deleting note:', error);
+      }
       if (window.showToast) {
         window.showToast('Error deleting note. Please try again.', 'error');
       }

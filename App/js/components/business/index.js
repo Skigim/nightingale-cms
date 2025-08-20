@@ -122,13 +122,28 @@ async function loadBusinessComponents() {
             resolve({ name, category, dependencies, status: 'loaded' });
           };
           script.onerror = () => {
-            console.error(`❌ Failed to load business component: ${name}`);
+            const errorMsg = `Failed to load business component: ${name}`;
+            if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+              window.Nightingale.handleError(errorMsg, 'BusinessComponentLoader', {
+                showToast: false,
+                context: { componentName: name }
+              });
+            } else {
+              console.error(`❌ ${errorMsg}`);
+            }
             reject(new Error(`Failed to load ${name}`));
           };
           document.head.appendChild(script);
         });
       } catch (error) {
-        console.error(`❌ Error loading business component ${name}:`, error);
+        if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+          window.Nightingale.handleError(error, 'BusinessComponentLoader', {
+            showToast: false,
+            context: { componentName: name }
+          });
+        } else {
+          console.error(`❌ Error loading business component ${name}:`, error);
+        }
         throw error;
       }
     }
@@ -149,7 +164,14 @@ async function loadBusinessComponents() {
 
     return results;
   } catch (error) {
-    console.error('❌ Failed to load business component library:', error);
+    if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+      window.Nightingale.handleError(error, 'BusinessComponentLibraryLoader', {
+        showToast: false,
+        context: { libraryType: 'business' }
+      });
+    } else {
+      console.error('❌ Failed to load business component library:', error);
+    }
     throw error;
   }
 }
@@ -160,7 +182,16 @@ async function loadBusinessComponents() {
  */
 if (typeof window !== 'undefined') {
   // Auto-load business components when this script loads
-  loadBusinessComponents().catch(console.error);
+  loadBusinessComponents().catch((error) => {
+    if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+      window.Nightingale.handleError(error, 'BusinessComponentAutoLoader', {
+        showToast: false,
+        context: { autoLoad: true }
+      });
+    } else {
+      console.error('Auto-load failed:', error);
+    }
+  });
 
   // Make loader available globally for manual loading
   window.loadNightingaleBusiness = loadBusinessComponents;

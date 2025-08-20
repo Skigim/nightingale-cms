@@ -10,7 +10,13 @@
 class FileSystemService {
   constructor({
     fileName = 'nightingale-data.json',
-    errorCallback = console.error,
+    errorCallback = (error, origin) => {
+      if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+        window.Nightingale.handleError(error, origin || 'FileService');
+      } else {
+        console.error('FileService Error:', error);
+      }
+    },
     sanitizeFn = (str) => str,
     tabId,
     dbKey = 'nightingaleDirectory',
@@ -46,7 +52,14 @@ class FileSystemService {
       return permissionGranted;
     } catch (err) {
       if (err.name !== 'AbortError') {
-        console.error('Error selecting directory:', err);
+        if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+          window.Nightingale.handleError(err, 'FileService.selectDirectory', {
+            showToast: false,
+            context: { errorName: err.name }
+          });
+        } else {
+          console.error('Error selecting directory:', err);
+        }
       }
       return false;
     }
@@ -168,7 +181,14 @@ class FileSystemService {
         return { handle, permission };
       }
     } catch (error) {
-      console.error('Error restoring directory access:', error);
+      if (typeof window !== 'undefined' && window.Nightingale?.handleError) {
+        window.Nightingale.handleError(error, 'FileService.restoreDirectoryAccess', {
+          showToast: false,
+          context: { fileName: this.fileName }
+        });
+      } else {
+        console.error('Error restoring directory access:', error);
+      }
       await this.clearStoredDirectoryHandle();
     }
     return { handle: null, permission: 'prompt' };
