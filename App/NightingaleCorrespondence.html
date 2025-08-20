@@ -2961,6 +2961,71 @@
         );
       }
 
+      // ErrorBoundary Component for graceful error handling
+      class ErrorBoundary extends window.React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { hasError: false, error: null, errorInfo: null };
+        }
+
+        static getDerivedStateFromError(error) {
+          return { hasError: true };
+        }
+
+        componentDidCatch(error, errorInfo) {
+          this.setState({
+            error: error,
+            errorInfo: errorInfo,
+          });
+          console.error('ErrorBoundary caught an error:', error, errorInfo);
+        }
+
+        render() {
+          const e = window.React?.createElement;
+          if (!e) return null; // Guard against missing React.createElement
+          
+          if (this.state.hasError) {
+            return e(
+              'div',
+              {
+                className: 'h-full w-full flex items-center justify-center bg-gray-900 text-white p-8',
+              },
+              e(
+                'div',
+                { className: 'max-w-2xl text-center' },
+                e('h1', { className: 'text-3xl font-bold mb-4' }, 'Something went wrong'),
+                e(
+                  'p',
+                  { className: 'text-gray-300 mb-6' },
+                  "The Nightingale Correspondence application encountered an error and couldn't recover."
+                ),
+                e(
+                  'button',
+                  {
+                    className: 'bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-medium',
+                    onClick: () => window.location.reload(),
+                  },
+                  'Reload Application'
+                ),
+                this.state.error &&
+                  e(
+                    'details',
+                    { className: 'mt-6 text-left' },
+                    e('summary', { className: 'cursor-pointer text-gray-400' }, 'Technical Details'),
+                    e(
+                      'pre',
+                      { className: 'mt-2 text-sm bg-gray-800 p-4 rounded overflow-auto' },
+                      this.state.error.toString() + '\n' + this.state.errorInfo.componentStack
+                    )
+                  )
+              )
+            );
+          }
+
+          return this.props.children;
+        }
+      }
+
       // --- Main Application Component ---
       function App() {
         if (!e) return null; // Guard against missing React.createElement
@@ -3679,7 +3744,8 @@
       // --- Mount the React Application ---
       const container = document.getElementById('root');
       const root = ReactDOM.createRoot(container);
-      root.render(e(App));
+      root.render(e(ErrorBoundary, null, e(App)));
+      console.log('✅ Nightingale Correspondence initialized with ErrorBoundary');
     </script>
   </body>
 </html>
