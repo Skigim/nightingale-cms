@@ -299,11 +299,13 @@
 
     <script type="text/babel">
       const { useState, useEffect, useCallback, useMemo, useRef } = React;
-      const e = React.createElement;
+      const e = window.React?.createElement;
 
       // ✅ IMPLEMENTED: MCN broadcast listener from CMS for auto-case selection
 
       function FinancialsList({ items, selectedIds, onToggleItem }) {
+        if (!e) return null; // Guard against missing React.createElement
+        
         if (!items || items.length === 0) {
           return e('p', { className: 'text-gray-500 text-center py-4' }, 'No financial items found for this case.');
         }
@@ -353,6 +355,8 @@
       }
 
       function CaseDetailsPanel({ activeCase, fullData, selectedFinItemIds, onFinancialItemToggle }) {
+        if (!e) return null; // Guard against missing React.createElement
+        
         const [showVerified, setShowVerified] = useState(false);
 
         const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
@@ -535,6 +539,8 @@
 
       // Custom Placeholder Chip Component
       function PlaceholderChip({ attributes, children, element, activeCase, fullData }) {
+        if (!e) return null; // Guard against missing React.createElement
+        
         const editor = useSlate();
         const selected = useSelected();
         const focused = useFocused();
@@ -2957,6 +2963,8 @@
 
       // --- Main Application Component ---
       function App() {
+        if (!e) return null; // Guard against missing React.createElement
+        
         const [fullData, setFullData] = useState(null);
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState(null);

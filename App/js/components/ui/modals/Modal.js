@@ -31,7 +31,7 @@ function Modal({
   closeOnBackdropClick = true,
   className = '',
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // Use React hooks
   const { useEffect, useRef } = window.React;
@@ -202,7 +202,7 @@ function ConfirmationModal({
   cancelText = 'Cancel',
   variant = 'danger',
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const getButtonClasses = () => {
     const baseClasses = 'px-4 py-2 rounded-lg font-medium transition-colors';
@@ -278,7 +278,7 @@ function FormModal({
   isValid = true,
   isSubmitting = false,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const handleSubmit = (e) => {
     e.preventDefault();

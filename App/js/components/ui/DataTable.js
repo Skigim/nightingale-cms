@@ -31,7 +31,9 @@ const DataTable = ({
     useMemo: useMemoHook,
     useCallback: useCallbackHook,
   } = window.React;
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
+
+  if (!e) return null; // Guard against missing React.createElement
 
   // State management
   const [sortField, setSortField] = useStateHook(null);

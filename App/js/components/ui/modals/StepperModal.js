@@ -19,7 +19,7 @@ function StepperModal({
   children,
   isStepClickable = () => true, // Function to determine if a step is clickable
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useRef } = window.React;
 
   // Reference to the step content area for focus management

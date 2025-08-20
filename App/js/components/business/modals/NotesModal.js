@@ -15,7 +15,7 @@ function NotesModal({
   caseData,
   fullData,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useState, useEffect, useMemo } = window.React;
 
   // Look up person name using the helper function

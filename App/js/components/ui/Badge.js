@@ -23,7 +23,7 @@ function Badge({
   className = '',
   customColors = null,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   if (!status) return null;
 
@@ -124,7 +124,7 @@ function ProgressBadge({
   size = 'md',
   showPercentage = true,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
 
@@ -185,7 +185,7 @@ function CountBadge({
   max = 99,
   showZero = false,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   if (count === 0 && !showZero) return null;
 
@@ -225,7 +225,7 @@ function CountBadge({
  * @returns {React.Element} Multi-badge container
  */
 function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   if (!badges.length) return null;
 

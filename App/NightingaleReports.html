@@ -289,7 +289,7 @@
       };
 
       const { useState, useEffect, useCallback, useMemo, useRef } = React;
-      const e = React.createElement;
+      const e = window.React?.createElement;
 
       // --- Utility Functions ---
 
@@ -323,6 +323,8 @@
       // --- Application-Specific Components ---
 
       function CustomReportModal({ isOpen, onClose, onGenerate, cases }) {
+        if (!e) return null; // Guard against missing React.createElement
+        
         const [selectedStatuses, setSelectedStatuses] = useState([]);
         const [selectedColumns, setSelectedColumns] = useState(['status', 'appDate']);
         const uniqueStatuses = useMemo(() => [...new Set(cases.map((c) => c.status).filter(Boolean))].sort(), [cases]);
@@ -650,6 +652,8 @@
       }
 
       function App() {
+        if (!e) return null; // Guard against missing React.createElement
+        
         const [fullData, setFullData] = useState(null);
         const [reportData, setReportData] = useState([]);
         const [sortState, setSortState] = useState({

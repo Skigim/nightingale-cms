@@ -14,7 +14,7 @@ function PersonCreationModal({
   fullData = null,
   fileService = null, // File service instance for data operations
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useState, useEffect, useMemo, useCallback } = window.React;
 
   // Initial person data structure

@@ -31,7 +31,7 @@ const getInitialCaseData = () => {
 
 // Step Components - Integrated directly into the modal
 function BasicInfoStep({ caseData, updateField, errors }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   return e(
     'div',
@@ -112,7 +112,7 @@ function BasicInfoStep({ caseData, updateField, errors }) {
 }
 
 function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useState } = window.React;
 
   // State for search values
@@ -293,7 +293,7 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
 }
 
 function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useEffect } = window.React;
 
   const organizationOptions = (fullData?.organizations || []).map((o) => ({
@@ -487,7 +487,7 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
 }
 
 function ReviewStep({ fullData, caseData }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const SummaryItem = ({ label, value }) =>
     e(
@@ -644,7 +644,7 @@ const stepsConfig = [
 ];
 
 function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useState: useStateHook, useEffect: useEffectHook } = window.React;
 
   const [currentStep, setCurrentStep] = useStateHook(0);

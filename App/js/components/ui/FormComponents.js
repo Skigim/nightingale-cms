@@ -29,7 +29,7 @@ function FormField({
   required = false,
   className = '',
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const fieldId = id || `field-${Math.random().toString(36).substr(2, 9)}`;
   const hasError =
@@ -110,7 +110,7 @@ function TextInput({
   formatter = null,
   ...props
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useState: useStateHook } = window.React;
   const [, setLocalError] = useStateHook(null);
 
@@ -191,7 +191,7 @@ function Select({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const baseClasses = `
     w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2
@@ -245,7 +245,7 @@ function DateInput({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // Convert ISO date to YYYY-MM-DD format for input
   const inputValue = value
@@ -316,7 +316,7 @@ function Textarea({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const baseClasses = `
     w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2
@@ -357,7 +357,7 @@ function Checkbox({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const id = props.id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
 

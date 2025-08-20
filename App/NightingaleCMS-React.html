@@ -456,7 +456,7 @@
       // Main app React hooks
       const { useState, useEffect, useMemo, useCallback } = React;
       const { createRoot } = ReactDOM;
-      const e = React.createElement;
+      const e = window.React?.createElement;
 
       // Component variables - will be assigned during initialization
       let PrimaryButton, SecondaryButton, Modal, SearchBar;
@@ -4675,6 +4675,8 @@
       // Main App Component
 
       function NightingaleCMSApp() {
+        if (!e) return null; // Guard against missing React.createElement
+        
         const [fullData, setFullData] = useState(null);
         const [activeTab, setActiveTab] = useState('dashboard');
         const [fileStatus, setFileStatus] = useState('disconnected');

@@ -18,7 +18,7 @@ function FinancialItemCard({
   confirmingDelete = false,
   showActions = true,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { useMemo, useCallback } = window.React;
 
   // Get verification status text for Badge component
@@ -237,7 +237,7 @@ function FinancialItemList({
   interactive = true,
   showActions = true,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   return e(
     'div',
@@ -304,7 +304,7 @@ function FinancialItemGrid({
   showActions = true,
   columns = 'auto', // 'auto', 1, 2, 3, 4
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // Determine grid columns class
   const getGridClass = () => {

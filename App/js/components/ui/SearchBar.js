@@ -30,7 +30,7 @@ function SearchBar({
   maxResults = 8,
   minQueryLength = 0,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // State for dropdown functionality (only used when showDropdown=true)
   const [isDropdownOpen, setIsDropdownOpen] = window.React.useState(false);

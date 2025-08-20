@@ -33,7 +33,7 @@ function Card({
   headerActions,
   status,
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // Base card classes
   const baseClasses = 'rounded-lg border transition-colors';
@@ -130,7 +130,7 @@ function Card({
  * @param {string} props.className - Additional CSS classes
  */
 function CardGrid({ children, columns = 'auto', gap = 'md', className = '' }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // Grid column classes
   const columnClasses = {
@@ -168,7 +168,7 @@ function CardGrid({ children, columns = 'auto', gap = 'md', className = '' }) {
  * @param {string} props.className - Additional CSS classes
  */
 function CardList({ children, gap = 'md', className = '' }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   // Gap classes for stacked layout
   const gapClasses = {
@@ -190,7 +190,7 @@ function CardList({ children, gap = 'md', className = '' }) {
  * Card Field - displays a label/value pair
  */
 function CardField({ label, value, className = '' }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   if (!value && value !== 0) return null;
 
@@ -206,7 +206,7 @@ function CardField({ label, value, className = '' }) {
  * Card Actions - action buttons in card footer
  */
 function CardActions({ children, align = 'right', className = '' }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
 
   const alignClasses = {
     left: 'justify-start',

@@ -21,8 +21,10 @@ function Button({
   fullWidth = false,
   ...props
 }) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   const { cloneElement } = window.React;
+
+  if (!e) return null; // Guard against missing React.createElement
 
   // Base button classes
   const baseClasses = [
@@ -268,37 +270,37 @@ function Button({
 
 // Convenience button variants as separate components
 function PrimaryButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'primary' });
 }
 
 function SecondaryButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'secondary' });
 }
 
 function DangerButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'danger' });
 }
 
 function SuccessButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'success' });
 }
 
 function OutlineButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'outline' });
 }
 
 function GhostButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'ghost' });
 }
 
 function LinkButton(props) {
-  const e = window.React.createElement;
+  const e = window.React?.createElement;
   return e(Button, { ...props, variant: 'link' });
 }
 
