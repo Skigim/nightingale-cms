@@ -4252,11 +4252,11 @@
                                       {
                                         className: 'text-sm font-medium text-blue-400',
                                       },
-                                      note.type || 'General'
+                                      note.category || note.type || 'General'
                                     ),
-                                    e('span', { className: 'text-xs text-gray-400' }, dateUtils.format(note.date))
+                                    e('span', { className: 'text-xs text-gray-400' }, dateUtils.format(note.timestamp || note.date))
                                   ),
-                                  e('p', { className: 'text-gray-300 text-sm' }, note.content || 'No content')
+                                  e('p', { className: 'text-gray-300 text-sm' }, note.text || note.content || 'No content')
                                 )
                               ),
                               caseNotes.length > 3 &&

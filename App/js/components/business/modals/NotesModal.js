@@ -286,7 +286,7 @@ function NotesModal({
                 e(window.Badge, {
                   variant: 'info',
                   size: 'sm',
-                  text: note.category,
+                  text: note.category || note.type || 'General',
                 }),
                 e(
                   'span',
