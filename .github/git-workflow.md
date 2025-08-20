@@ -20,8 +20,8 @@ git log --oneline --graph --all
 git lg  # (alias)
 
 # Switch branches
-git checkout development
-git co development  # (alias)
+git checkout dev
+git co dev # (alias)
 
 # Create feature branch
 git checkout -b feature/new-component
