@@ -72,6 +72,21 @@ function NotesModal({
     setCurrentNote(null);
     setIsEditMode(false);
     setIsSubmitting(false);
+    
+    // Enhanced focus management for state change to view mode
+    if (window.NightingaleFocusManager) {
+      setTimeout(() => {
+        window.NightingaleFocusManager.focusStateChange(
+          '.modal-container', // Target the modal container
+          'view',
+          {
+            onFocused: (element) => {
+              console.debug('Notes modal view mode focused:', element.tagName, element.type || '');
+            }
+          }
+        );
+      }, 100);
+    }
   };
 
   const validateForm = () => {
@@ -163,6 +178,21 @@ function NotesModal({
     });
     setIsEditMode(true);
     setFormErrors({});
+    
+    // Enhanced focus management for state change to edit mode
+    if (window.NightingaleFocusManager) {
+      setTimeout(() => {
+        window.NightingaleFocusManager.focusStateChange(
+          '.modal-container', // Target the modal container
+          'edit',
+          {
+            onFocused: (element) => {
+              console.debug('Notes modal edit mode focused:', element.tagName, element.type || '');
+            }
+          }
+        );
+      }, 100);
+    }
   };
 
   const handleDelete = async (noteId) => {
@@ -357,7 +387,24 @@ function NotesModal({
     modalActions.push({
       label: 'Add New Note',
       variant: 'primary',
-      onClick: () => setIsEditMode(true),
+      onClick: () => {
+        setIsEditMode(true);
+        
+        // Enhanced focus management for state change to edit mode (new note)
+        if (window.NightingaleFocusManager) {
+          setTimeout(() => {
+            window.NightingaleFocusManager.focusStateChange(
+              '.modal-container', // Target the modal container
+              'edit',
+              {
+                onFocused: (element) => {
+                  console.debug('Notes modal add mode focused:', element.tagName, element.type || '');
+                }
+              }
+            );
+          }, 100);
+        }
+      },
     });
   }
 

@@ -58,15 +58,27 @@ function Modal({
     }
   };
 
-  // Focus management
+  // Enhanced focus management using NightingaleFocusManager
   useEffect(() => {
     if (isOpen && modalRef.current) {
-      // Find first focusable element
-      const focusableElements = modalRef.current.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusableElements.length > 0) {
-        focusableElements[0].focus();
+      // Use NightingaleFocusManager if available, fallback to basic focus
+      if (window.NightingaleFocusManager) {
+        window.NightingaleFocusManager.focusModalOpen(modalRef.current, {
+          onFocused: (element) => {
+            console.debug('Modal focused element:', element.tagName, element.type || '');
+          },
+          onNoFocusable: () => {
+            console.warn('No focusable elements found in modal');
+          }
+        });
+      } else {
+        // Fallback focus management
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length > 0) {
+          focusableElements[0].focus();
+        }
       }
     }
   }, [isOpen]);

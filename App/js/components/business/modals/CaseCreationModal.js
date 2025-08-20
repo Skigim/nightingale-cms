@@ -699,6 +699,20 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
     if (newStep > currentStep) {
       if (validateStep(currentStep)) {
         setCurrentStep(newStep);
+        // Enhanced focus management for step progression
+        if (window.NightingaleFocusManager) {
+          setTimeout(() => {
+            window.NightingaleFocusManager.focusStepChange(
+              '.stepper-modal .w-3/4', // Target the step content area
+              newStep,
+              {
+                onFocused: (element) => {
+                  console.debug(`Case creation step ${newStep + 1} focused:`, element.tagName);
+                }
+              }
+            );
+          }, 100);
+        }
       } else {
         window.showToast('Please fix the errors before proceeding.', 'warning');
       }
@@ -707,6 +721,20 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
       if (isStepAccessible(newStep)) {
         setErrors({}); // Clear errors when moving back
         setCurrentStep(newStep);
+        // Enhanced focus management for step regression
+        if (window.NightingaleFocusManager) {
+          setTimeout(() => {
+            window.NightingaleFocusManager.focusStepChange(
+              '.stepper-modal .w-3/4', // Target the step content area
+              newStep,
+              {
+                onFocused: (element) => {
+                  console.debug(`Case creation step ${newStep + 1} focused (back):`, element.tagName);
+                }
+              }
+            );
+          }, 100);
+        }
       }
     }
   };
