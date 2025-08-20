@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/business/index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/business/index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Nightingale Business Component Library - Domain-Specific Components
+// This layer contains components with business logic specific to the Nightingale CMS
+
+/**
+ * Nightingale Business Component Library Loader
+ * Loads all business-specific components that contain domain logic
+ * These components are specific to case management and use the UI components
+ */
+
+// Business Component Loading Configuration
+const BUSINESS_COMPONENTS = [
+  // Case Management Modals
+  {
+    name: 'CaseCreationModal',
+    path: 'js/components/business/modals/CaseCreationModal.js',
+    category: 'case-management',
+    dependencies: ['StepperModal', 'FormComponents'],
+  },
+  {
+    name: 'PersonCreationModal',
+    path: 'js/components/business/modals/PersonCreationModal.js',
+    category: 'people-management',
+    dependencies: ['StepperModal', 'FormComponents'],
+  },
+
+  {
+    name: 'FinancialItemCard',
+    path: 'js/components/business/FinancialItemCard.js',
+    category: 'financial',
+    dependencies: ['Cards', 'Badge', 'Button'],
+  },
+
+  {
+    name: 'NotesModal',
+    path: 'js/components/business/modals/NotesModal.js',
+    category: 'business',
+    dependencies: [],
+  },
+
+  // Future business components will be added here:
+  // { name: 'FinancialItemModal', path: 'business/modals/FinancialItemModal.js', category: 'financial' },
+  // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },
+  // { name: 'CasePreviewModal', path: 'business/modals/CasePreviewModal.js', category: 'case-management' },
+  // { name: 'SettingsModal', path: 'business/modals/SettingsModal.js', category: 'system' },
+];
+
+// Business Component Registry
+window.NightingaleBusiness = window.NightingaleBusiness || {
+  components: {},
+  loaded: [],
+  dependencies: {},
+  version: '1.0.0',
+
+  // Register a business component
+  registerComponent(name, component, category = 'business', dependencies = []) {
+    this.components[name] = component;
+    this.dependencies[name] = dependencies;
+    this.loaded.push({ name, category, dependencies, timestamp: Date.now() });
+    console.log(`🏢 Business Component registered: ${name} (${category})`);
+  },
+
+  // Get a business component
+  getComponent(name) {
+    return this.components[name];
+  },
+
+  // List all loaded business components
+  listComponents() {
+    return this.loaded;
+  },
+
+  // Check if component is loaded
+  isLoaded(name) {
+    return !!this.components[name];
+  },
+
+  // Check if all dependencies are loaded
+  checkDependencies(name) {
+    const deps = this.dependencies[name] || [];
+    return deps.every(
+      (dep) => window.NightingaleUI?.isLoaded(dep) || this.isLoaded(dep)
+    );
+  },
+};
+
+/**
+ * Wait for UI components to be ready
+ */
+function waitForUIComponents() {
+  return new Promise((resolve) => {
+    if (window.NightingaleUI &amp;&amp; window.NightingaleUI.loaded.length > 0) {
+      resolve();
+    } else {
+      window.addEventListener('nightingale:ui:ready', resolve, { once: true });
+    }
+  });
+}
+
+/**
+ * Load Business Components
+ * Dynamically loads all business-specific components after UI components are ready
+ */
+async function loadBusinessComponents() {
+  console.log('🏢 Loading Nightingale Business Component Library...');
+
+  // Wait for UI components to be loaded first
+  await waitForUIComponents();
+  console.log('✅ UI components ready, proceeding with business components...');
+
+  const loadPromises = BUSINESS_COMPONENTS.map(
+    async ({ name, path, category, dependencies }) => {
+      try {
+        console.log(`🔄 Loading business component: ${name} (${category})`);
+
+        // Create script element for component
+        const script = document.createElement('script');
+        script.src = path; // path already includes full js/components/business/ prefix
+        script.async = true; // Return promise that resolves when script loads
+        return new Promise((resolve, reject) => {
+          script.onload = () => {
+            console.log(`✅ Business component loaded: ${name}`);
+            resolve({ name, category, dependencies, status: 'loaded' });
+          };
+          script.onerror = () => {
+            console.error(`❌ Failed to load business component: ${name}`);
+            reject(new Error(`Failed to load ${name}`));
+          };
+          document.head.appendChild(script);
+        });
+      } catch (error) {
+        console.error(`❌ Error loading business component ${name}:`, error);
+        throw error;
+      }
+    }
+  );
+
+  try {
+    const results = await Promise.all(loadPromises);
+    console.log(
+      `🏢 Nightingale Business Library loaded successfully! (${results.length} components)`
+    );
+
+    // Dispatch event for when business library is ready
+    window.dispatchEvent(
+      new CustomEvent('nightingale:business:ready', {
+        detail: { components: results, timestamp: Date.now() },
+      })
+    );
+
+    return results;
+  } catch (error) {
+    console.error('❌ Failed to load business component library:', error);
+    throw error;
+  }
+}
+
+/**
+ * Initialize Business Component Library
+ * Call this to start loading the business components
+ */
+if (typeof window !== 'undefined') {
+  // Auto-load business components when this script loads
+  loadBusinessComponents().catch(console.error);
+
+  // Make loader available globally for manual loading
+  window.loadNightingaleBusiness = loadBusinessComponents;
+}
+
+// Export for ES6 modules
+if (typeof module !== 'undefined' &amp;&amp; module.exports) {
+  module.exports = { loadBusinessComponents, BUSINESS_COMPONENTS };
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="FileSystemService.html">FileSystemService</a></li><li><a href="NightingaleSearchService.html">NightingaleSearchService</a></li><li><a href="ToastQueue.html">ToastQueue</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#CardActions">CardActions</a></li><li><a href="global.html#CardField">CardField</a></li><li><a href="global.html#CardGrid">CardGrid</a></li><li><a href="global.html#CardList">CardList</a></li><li><a href="global.html#Checkbox">Checkbox</a></li><li><a href="global.html#ConfirmationModal">ConfirmationModal</a></li><li><a href="global.html#CountBadge">CountBadge</a></li><li><a href="global.html#DataTable">DataTable</a></li><li><a href="global.html#DateInput">DateInput</a></li><li><a href="global.html#FinancialItemCard">FinancialItemCard</a></li><li><a href="global.html#FinancialItemGrid">FinancialItemGrid</a></li><li><a href="global.html#FinancialItemList">FinancialItemList</a></li><li><a href="global.html#FormField">FormField</a></li><li><a href="global.html#FormModal">FormModal</a></li><li><a href="global.html#Modal">Modal</a></li><li><a href="global.html#MultiBadge">MultiBadge</a></li><li><a href="global.html#NotesModal">NotesModal</a></li><li><a href="global.html#PersonCreationModal">PersonCreationModal</a></li><li><a href="global.html#ProgressBadge">ProgressBadge</a></li><li><a href="global.html#SearchBar">SearchBar</a></li><li><a href="global.html#Select">Select</a></li><li><a href="global.html#StepperModal">StepperModal</a></li><li><a href="global.html#TOAST_CONFIG">TOAST_CONFIG</a></li><li><a href="global.html#TextInput">TextInput</a></li><li><a href="global.html#Textarea">Textarea</a></li><li><a href="global.html#Validators">Validators</a></li><li><a href="global.html#clearAllToasts">clearAllToasts</a></li><li><a href="global.html#encodeURL">encodeURL</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatPersonName">formatPersonName</a></li><li><a href="global.html#formatPhoneNumber">formatPhoneNumber</a></li><li><a href="global.html#formatProperCase">formatProperCase</a></li><li><a href="global.html#getActiveToastCount">getActiveToastCount</a></li><li><a href="global.html#getAppDateLabel">getAppDateLabel</a></li><li><a href="global.html#getDefaultAppDetails">getDefaultAppDetails</a></li><li><a href="global.html#getFlatFinancials">getFlatFinancials</a></li><li><a href="global.html#getNextId">getNextId</a></li><li><a href="global.html#getUniqueNoteCategories">getUniqueNoteCategories</a></li><li><a href="global.html#initializeToastSystem">initializeToastSystem</a></li><li><a href="global.html#loadBusinessComponents">loadBusinessComponents</a></li><li><a href="global.html#loadComponentLayers">loadComponentLayers</a></li><li><a href="global.html#loadUIComponents">loadUIComponents</a></li><li><a href="global.html#parseAvsAccountBlock">parseAvsAccountBlock</a></li><li><a href="global.html#parseAvsData">parseAvsData</a></li><li><a href="global.html#sanitize">sanitize</a></li><li><a href="global.html#sanitizeHTML">sanitizeHTML</a></li><li><a href="global.html#setSanitizedInnerHTML">setSanitizedInnerHTML</a></li><li><a href="global.html#showSuccessToast">showSuccessToast</a></li><li><a href="global.html#showToast">showToast</a></li><li><a href="global.html#toInputDateFormat">toInputDateFormat</a></li><li><a href="global.html#updateToastConfig">updateToastConfig</a></li><li><a href="global.html#waitForUIComponents">waitForUIComponents</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Aug 20 2025 13:57:37 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

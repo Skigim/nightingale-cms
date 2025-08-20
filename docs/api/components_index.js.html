@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Nightingale Component Library - Main Index
+ *
+ * Orchestrates loading of both UI (generic) and Business (domain-specific) component layers
+ * This provides a clean separation between reusable UI components and business logic
+ */
+
+/**
+ * Component Library Structure:
+ *
+ * 📁 js/
+ * ├── 📁 components/            &lt;- All component files
+ * │   ├── 🎨 ui/               &lt;- Generic UI components (potential standalone library)
+ * │   │   ├── index.js         &lt;- UI component loader
+ * │   │   ├── Button.js
+ * │   │   ├── Badge.js
+ * │   │   ├── DataTable.js
+ * │   │   ├── FormComponents.js
+ * │   │   ├── SearchBar.js
+ * │   │   └── 📁 modals/
+ * │   │       ├── Modal.js     &lt;- Base modal component
+ * │   │       └── StepperModal.js &lt;- Generic stepper modal
+ * │   │
+ * │   ├── 🏢 business/         &lt;- Domain-specific components (CMS business logic)
+ * │   │   ├── index.js         &lt;- Business component loader
+ * │   │   └── 📁 modals/
+ * │   │       ├── CaseCreationModal.js     &lt;- Case creation workflow
+ * │   │       ├── CaseCreationModal.js     &lt;- Case creation workflow (with integrated steps)
+ * │   │       ├── FinancialItemModal.js    &lt;- (Future) Financial management
+ * │   │       ├── PersonDetailsModal.js    &lt;- (Future) Person management
+ * │   │       └── CasePreviewModal.js      &lt;- (Future) Case preview
+ * │   │
+ * │   └── index.js             &lt;- This file: orchestrates both layers
+ * │
+ * └── 📁 services/             &lt;- Nightingale services and utilities
+ *     ├── nightingale.dayjs.js        &lt;- Date/time utilities
+ *     ├── nightingale.fileservice.js  &lt;- File I/O operations
+ *     ├── nightingale.parsers.js      &lt;- Data parsing and validation
+ *     ├── nightingale.search.js       &lt;- Search and filtering
+ *     ├── nightingale.toast.js        &lt;- Toast notifications
+ *     └── nightingale.utils.js        &lt;- General utilities
+ */
+
+// Global Component Registry (for backward compatibility)
+window.NightingaleComponentLibrary = window.NightingaleComponentLibrary || {
+  ui: {},
+  business: {},
+  loaded: [],
+  version: '2.0.0',
+
+  // Register a component in the appropriate layer
+  registerComponent(name, component, layer = 'ui') {
+    if (layer === 'ui') {
+      this.ui[name] = component;
+      // Also register in UI registry
+      if (window.NightingaleUI) {
+        window.NightingaleUI.registerComponent(name, component);
+      }
+    } else if (layer === 'business') {
+      this.business[name] = component;
+      // Also register in business registry
+      if (window.NightingaleBusiness) {
+        window.NightingaleBusiness.registerComponent(name, component);
+      }
+    }
+
+    // Maintain global access for backward compatibility
+    window[name] = component;
+
+    this.loaded.push({ name, layer, timestamp: Date.now() });
+    console.log(`📦 Component registered: ${name} (${layer} layer)`);
+  },
+
+  // Get a component from any layer
+  getComponent(name) {
+    return this.ui[name] || this.business[name] || window[name] || null;
+  },
+
+  // List all loaded components
+  listComponents() {
+    return this.loaded;
+  },
+
+  // Check readiness of both layers
+  isReady() {
+    return (
+      window.NightingaleUI?.loaded.length > 0 &amp;&amp;
+      window.NightingaleBusiness?.loaded.length > 0
+    );
+  },
+};
+
+/**
+ * Load Component Layers
+ * Loads UI layer first, then business layer
+ */
+async function loadComponentLayers() {
+  console.log(
+    '🚀 Nightingale Component Library - Loading Layered Architecture...'
+  );
+
+  try {
+    // Load UI layer first (generic components)
+    console.log('🎨 Phase 1: Loading UI Component Layer...');
+    const uiScript = document.createElement('script');
+    uiScript.src = 'js/components/ui/index.js';
+    uiScript.async = true;
+
+    await new Promise((resolve, reject) => {
+      uiScript.onload = resolve;
+      uiScript.onerror = reject;
+      document.head.appendChild(uiScript);
+    });
+
+    // Wait for UI components to be ready
+    await new Promise((resolve) => {
+      if (window.NightingaleUI?.loaded.length > 0) {
+        resolve();
+      } else {
+        window.addEventListener('nightingale:ui:ready', resolve, {
+          once: true,
+        });
+      }
+    });
+
+    // Load business layer (domain-specific components)
+    console.log('🏢 Phase 2: Loading Business Component Layer...');
+    const businessScript = document.createElement('script');
+    businessScript.src = 'js/components/business/index.js';
+    businessScript.async = true;
+
+    await new Promise((resolve, reject) => {
+      businessScript.onload = resolve;
+      businessScript.onerror = reject;
+      document.head.appendChild(businessScript);
+    });
+
+    // Wait for business components to be ready
+    await new Promise((resolve) => {
+      if (window.NightingaleBusiness?.loaded.length > 0) {
+        resolve();
+      } else {
+        window.addEventListener('nightingale:business:ready', resolve, {
+          once: true,
+        });
+      }
+    });
+
+    console.log('🎯 Nightingale Component Library - Fully Loaded!');
+    console.log(
+      `   🎨 UI Components: ${window.NightingaleUI?.loaded.length || 0}`
+    );
+    console.log(
+      `   🏢 Business Components: ${window.NightingaleBusiness?.loaded.length || 0}`
+    );
+
+    // Dispatch event for when everything is ready
+    window.dispatchEvent(
+      new CustomEvent('nightingale:ready', {
+        detail: {
+          ui: window.NightingaleUI?.loaded || [],
+          business: window.NightingaleBusiness?.loaded || [],
+          timestamp: Date.now(),
+        },
+      })
+    );
+  } catch (error) {
+    console.error('❌ Failed to load component layers:', error);
+    throw error;
+  }
+}
+
+// Legacy function for backward compatibility
+function autoLoadCoreComponents() {
+  return loadComponentLayers();
+}
+
+// Make available globally
+if (typeof window !== 'undefined') {
+  window.loadNightingaleComponents = loadComponentLayers;
+  window.autoLoadCoreComponents = autoLoadCoreComponents; // Backward compatibility
+
+  // Auto-load when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      loadComponentLayers().catch(console.error);
+    });
+  } else {
+    // DOM already loaded
+    loadComponentLayers().catch(console.error);
+  }
+}
+
+// Export for ES6 modules
+if (typeof module !== 'undefined' &amp;&amp; module.exports) {
+  module.exports = {
+    loadComponentLayers,
+    autoLoadCoreComponents, // Backward compatibility
+  };
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="FileSystemService.html">FileSystemService</a></li><li><a href="NightingaleSearchService.html">NightingaleSearchService</a></li><li><a href="ToastQueue.html">ToastQueue</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#CardActions">CardActions</a></li><li><a href="global.html#CardField">CardField</a></li><li><a href="global.html#CardGrid">CardGrid</a></li><li><a href="global.html#CardList">CardList</a></li><li><a href="global.html#Checkbox">Checkbox</a></li><li><a href="global.html#ConfirmationModal">ConfirmationModal</a></li><li><a href="global.html#CountBadge">CountBadge</a></li><li><a href="global.html#DataTable">DataTable</a></li><li><a href="global.html#DateInput">DateInput</a></li><li><a href="global.html#FinancialItemCard">FinancialItemCard</a></li><li><a href="global.html#FinancialItemGrid">FinancialItemGrid</a></li><li><a href="global.html#FinancialItemList">FinancialItemList</a></li><li><a href="global.html#FormField">FormField</a></li><li><a href="global.html#FormModal">FormModal</a></li><li><a href="global.html#Modal">Modal</a></li><li><a href="global.html#MultiBadge">MultiBadge</a></li><li><a href="global.html#NotesModal">NotesModal</a></li><li><a href="global.html#PersonCreationModal">PersonCreationModal</a></li><li><a href="global.html#ProgressBadge">ProgressBadge</a></li><li><a href="global.html#SearchBar">SearchBar</a></li><li><a href="global.html#Select">Select</a></li><li><a href="global.html#StepperModal">StepperModal</a></li><li><a href="global.html#TOAST_CONFIG">TOAST_CONFIG</a></li><li><a href="global.html#TextInput">TextInput</a></li><li><a href="global.html#Textarea">Textarea</a></li><li><a href="global.html#Validators">Validators</a></li><li><a href="global.html#clearAllToasts">clearAllToasts</a></li><li><a href="global.html#encodeURL">encodeURL</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatPersonName">formatPersonName</a></li><li><a href="global.html#formatPhoneNumber">formatPhoneNumber</a></li><li><a href="global.html#formatProperCase">formatProperCase</a></li><li><a href="global.html#getActiveToastCount">getActiveToastCount</a></li><li><a href="global.html#getAppDateLabel">getAppDateLabel</a></li><li><a href="global.html#getDefaultAppDetails">getDefaultAppDetails</a></li><li><a href="global.html#getFlatFinancials">getFlatFinancials</a></li><li><a href="global.html#getNextId">getNextId</a></li><li><a href="global.html#getUniqueNoteCategories">getUniqueNoteCategories</a></li><li><a href="global.html#initializeToastSystem">initializeToastSystem</a></li><li><a href="global.html#loadBusinessComponents">loadBusinessComponents</a></li><li><a href="global.html#loadComponentLayers">loadComponentLayers</a></li><li><a href="global.html#loadUIComponents">loadUIComponents</a></li><li><a href="global.html#parseAvsAccountBlock">parseAvsAccountBlock</a></li><li><a href="global.html#parseAvsData">parseAvsData</a></li><li><a href="global.html#sanitize">sanitize</a></li><li><a href="global.html#sanitizeHTML">sanitizeHTML</a></li><li><a href="global.html#setSanitizedInnerHTML">setSanitizedInnerHTML</a></li><li><a href="global.html#showSuccessToast">showSuccessToast</a></li><li><a href="global.html#showToast">showToast</a></li><li><a href="global.html#toInputDateFormat">toInputDateFormat</a></li><li><a href="global.html#updateToastConfig">updateToastConfig</a></li><li><a href="global.html#waitForUIComponents">waitForUIComponents</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Aug 20 2025 13:57:37 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

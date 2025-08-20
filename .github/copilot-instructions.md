@@ -1,5 +1,7 @@
 # GitHub Copilot Instructions - Nightingale CMS
 
+**ALWAYS follow these instructions first and only fallback to additional search and context gathering if the information in these instructions is incomplete or found to be in error.**
+
 These instructions define how GitHub Copilot should assist with the Nightingale CMS project. The goal is to ensure consistent, high-quality code generation aligned with our conventions, stack, and best practices.
 
 ## 🧠 Context
@@ -392,3 +394,210 @@ Specialized Business Components (Business Layer)
 6. **Migration**: Ensure backward compatibility with existing data
 
 This project emphasizes rapid development, component reusability, and robust data management for case management workflows.
+
+---
+
+# Developer Workflow Instructions
+
+## 🚀 Quick Start for New Developers
+
+### Prerequisites
+- Node.js 16+ and npm 8+ (check with `node --version` and `npm --version`)
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Git for version control
+
+### Initial Setup (First Time)
+Run these commands EXACTLY in order:
+
+```bash
+# Clone and enter repository
+git clone <repository-url>
+cd nightingale-cms
+
+# Install dependencies - NEVER CANCEL: Takes ~20 seconds
+npm install
+
+# Verify all systems work
+npm run lint
+npm run format  
+npm run build
+npm test
+```
+
+**CRITICAL TIMING**: All commands complete in under 30 seconds except install. Set timeouts appropriately.
+
+### Daily Development Workflow
+```bash
+# Start development server - ALWAYS use this for development
+npm start
+# Opens static server at http://localhost:3000 (or next available port)
+# Navigate to NightingaleCMS-React.html in browser
+
+# Before making changes, ALWAYS run:
+npm run lint && npm run format
+
+# After making changes, ALWAYS run:
+npm run build && npm run lint:fix
+```
+
+## 🛠️ Build & Development Commands
+
+### Core Commands (VALIDATED AND TIMED)
+
+**Installation**
+```bash
+npm install
+```
+- **Duration**: ~20 seconds
+- **Timeout**: Set 60+ seconds, NEVER CANCEL
+- **Notes**: Downloads all development dependencies
+
+**Static Development Server**
+```bash
+npm start
+```
+- **Duration**: Instant startup
+- **Timeout**: N/A (runs continuously)
+- **URL**: Opens at http://localhost:3000 or next available port
+- **Usage**: Navigate to `/NightingaleCMS-React.html` for main application
+
+**Build Validation**
+```bash
+npm run build
+```
+- **Duration**: ~0.2 seconds
+- **Timeout**: 30 seconds is sufficient
+- **Purpose**: Validates project structure and prepares build artifacts
+- **Output**: Creates `App/build/` directory with deployment files
+
+**Code Quality**
+```bash
+npm run lint          # ~0.8 seconds - Check code style
+npm run lint:fix       # ~0.8 seconds - Fix code style automatically  
+npm run format         # ~0.5 seconds - Format code with Prettier
+npm run docs           # ~0.8 seconds - Generate API documentation
+```
+- **Timeout**: 30 seconds for all linting/formatting commands
+- **Critical**: ALWAYS run `lint:fix` and `format` before committing
+
+**Testing**
+```bash
+npm test
+```
+- **Duration**: Instant (placeholder)
+- **Status**: No automated tests implemented yet
+- **Manual Testing**: See validation scenarios below
+
+**Security & Dependencies**
+```bash
+npm audit              # ~0.8 seconds - Check for vulnerabilities
+npm run audit          # Runs audit + lint together
+```
+
+## 🧪 Manual Validation Scenarios
+
+**ALWAYS run these complete scenarios after making changes:**
+
+### Scenario 1: Application Startup
+1. Run `npm start`
+2. Navigate to `http://localhost:<port>/NightingaleCMS-React.html`
+3. **Verify**: Console shows component loading messages like:
+   ```
+   🚀 Nightingale Component Library - Loading Layered Architecture...
+   🎨 UI Components: 29
+   🏢 Business Components: 5
+   ```
+4. **Expected**: No JavaScript errors in browser console
+5. **Time**: ~5 seconds total
+
+### Scenario 2: Component System Validation
+1. Open browser DevTools Console
+2. Type: `window.NightingaleComponentLibrary.listComponents()`
+3. **Verify**: Returns array of loaded components
+4. Type: `window.NightingaleComponentLibrary.isReady()`
+5. **Verify**: Returns `true`
+
+### Scenario 3: Development Workflow
+1. Make a small code change to any `.js` file in `App/js/`
+2. Run: `npm run lint:fix && npm run format`
+3. **Verify**: No linting errors, code is auto-formatted
+4. Run: `npm run build`
+5. **Verify**: Build completes successfully
+6. Refresh browser page
+7. **Verify**: Changes are reflected (for file:// protocol) or restart `npm start`
+
+### Scenario 4: File Structure Validation
+1. Run: `npm run build`
+2. **Verify**: All these files exist and build reports success:
+   - `App/NightingaleCMS-React.html` ✅
+   - `App/js/components/index.js` ✅  
+   - `App/js/services/nightingale.utils.js` ✅
+   - `App/build/index.html` ✅ (created by build)
+
+## 🚨 Critical Warnings
+
+**NEVER CANCEL COMMANDS**: All build and install commands complete quickly. Only set generous timeouts:
+- `npm install`: 60+ seconds (but typically ~20s)
+- All other commands: 30+ seconds (but typically <1s)
+
+**ALWAYS VALIDATE CHANGES**: After any modification:
+1. Run `npm run lint:fix && npm run format` 
+2. Run `npm run build`
+3. Test in browser manually
+4. Verify no console errors
+
+**BROWSER COMPATIBILITY**: 
+- Development: Any modern browser with ES6+ support
+- CDN Dependencies: May be blocked in sandboxed environments
+- File Protocol: Works with `file://` for local development
+- Server Protocol: Recommended `npm start` for full functionality
+
+## 📁 Project Architecture Summary
+
+```
+nightingale-cms/
+├── .github/
+│   └── copilot-instructions.md  # This file
+├── App/
+│   ├── NightingaleCMS-React.html    # Main application entry point
+│   ├── js/
+│   │   ├── components/              # Two-layer component architecture  
+│   │   │   ├── ui/                 # Generic UI components (29 components)
+│   │   │   ├── business/           # Domain-specific components (5 components)
+│   │   │   └── index.js            # Component loading system
+│   │   └── services/               # Core services (6 files)
+│   ├── lib/                        # Third-party libraries
+│   └── build/                      # Build output (generated)
+├── Data/                           # JSON data files
+├── Docs/                           # Project documentation
+├── package.json                    # npm configuration
+└── build-bundle.js                 # Build script
+```
+
+**Key Numbers to Remember**:
+- **JavaScript Files**: 15 component files + 6 service files
+- **Main Entry**: `App/NightingaleCMS-React.html` 
+- **Component Types**: 29 UI + 5 Business = 34 total components
+- **Build Time**: <1 second for validation
+- **Install Time**: ~20 seconds
+
+## 🔧 Common Issues & Solutions
+
+**"No files matching pattern" Error**
+- Cause: Old package.json had wrong paths
+- Solution: Paths corrected to `App/js/**/*.js`
+
+**Build Script Missing Error** 
+- Cause: `build-bundle.js` was missing
+- Solution: Created simple validation script
+
+**External Dependencies Blocked**
+- Cause: CDN resources blocked in some environments
+- Solution: Use `npm start` for local server, not `file://`
+
+**Component Not Loading**
+- Check: Browser console for loading messages
+- Verify: `window.NightingaleComponentLibrary.isReady()` returns `true`
+- Debug: Check component registration in `/App/js/components/index.js`
+
+---

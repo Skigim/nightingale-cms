@@ -8,13 +8,13 @@
     "dev": "npx live-server App --port=3000 --open=NightingaleCMS-React.html",
     "build": "node build-bundle.js",
     "test": "echo \"Tests to be implemented\" && exit 0",
-    "lint": "eslint App/Components/**/*.js App/js/**/*.js",
-    "lint:fix": "eslint App/Components/**/*.js App/js/**/*.js --fix",
-    "lint:report": "eslint App/Components/**/*.js App/js/**/*.js --format=json --output-file=lint-report.json",
+    "lint": "eslint App/js/**/*.js",
+    "lint:fix": "eslint App/js/**/*.js --fix",
+    "lint:report": "eslint App/js/**/*.js --format=json --output-file=lint-report.json",
     "audit": "npm audit && npm run lint",
     "audit:security": "npm audit --audit-level=moderate",
-    "format": "prettier --write App/Components/**/*.js App/js/**/*.js",
-    "docs": "jsdoc -r App/Components App/js -d docs/api"
+    "format": "prettier --write App/js/**/*.js",
+    "docs": "jsdoc -r App/js -d docs/api"
   },
   "keywords": [
     "case-management",

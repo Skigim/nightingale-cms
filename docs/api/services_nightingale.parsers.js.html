@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: services/nightingale.parsers.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: services/nightingale.parsers.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Nightingale Application Suite - Shared Parser Functions
+ *
+ * This file contains logic for parsing complex, external data formats,
+ * such as raw text from AVS bank data reports.
+ */
+
+/**
+ * Parses a block of text representing a single bank account from an AVS report.
+ * @param {string} block - The raw text block for one account.
+ * @param {string[]} knownAccountTypes - An array of account type strings to help with parsing (e.g., ['Checking Account', 'Savings']).
+ * @returns {object|null} A structured object with the parsed account data, or null if parsing fails.
+ */
+function parseAvsAccountBlock(block, knownAccountTypes) {
+  const lines = block.split('\n').filter((line) => line.trim() !== '');
+  if (lines.length &lt; 2) return null;
+
+  const firstLine = lines[0].trim();
+  let accountType = 'N/A';
+  let owners = 'N/A';
+
+  // Sort known types by length, descending, to match longer phrases first (e.g., "Checking Account" before "Checking").
+  const sortedAccountTypes = [...knownAccountTypes].sort(
+    (a, b) => b.length - a.length
+  );
+
+  for (const type of sortedAccountTypes) {
+    // Use a case-insensitive match at the end of the line
+    if (firstLine.toUpperCase().endsWith(type.toUpperCase())) {
+      accountType = type;
+      owners = firstLine.slice(0, -type.length).trim();
+      break;
+    }
+  }
+
+  if (accountType === 'N/A') {
+    // If no specific type was found, assume the whole first line is the owner(s)
+    owners = firstLine;
+  }
+
+  const ownerList = owners
+    .split(';')
+    .map((o) => o.trim())
+    .join(', ');
+  const bankLine = lines[1] || '';
+  const bankNameMatch = bankLine.match(/([^\n]+) - \(/);
+  const accountNumberMatch = bankLine.match(/ - \((\d+)\)/);
+
+  const balanceLine = lines.find((l) =>
+    l.toLowerCase().includes('balance as of')
+  );
+  const balanceMatch = balanceLine
+    ? balanceLine.match(/Balance as of .* - (.*)/)
+    : null;
+
+  let accountNumber = accountNumberMatch ? accountNumberMatch[1].trim() : 'N/A';
+  if (accountNumber !== 'N/A' &amp;&amp; accountNumber.length > 4) {
+    accountNumber = accountNumber.slice(-4);
+  }
+
+  // Map the parsed data to the field names used in our financial items
+  return {
+    type: accountType.replace(/ account/i, '').trim(), // Remove the word "Account" for consistency
+    owner: ownerList, // This field is for display; the user will assign the final owner
+    location: bankNameMatch ? bankNameMatch[1].trim() : 'N/A',
+    accountNumber: accountNumber,
+    // Use a more robust regex to remove any non-numeric characters (except the decimal) before parsing.
+    value: balanceMatch
+      ? parseFloat(balanceMatch[1].replace(/[^0-9.]/g, '')) || 0
+      : 0,
+    verificationStatus: 'Verified', // Data from AVS is considered verified
+    source: `AVS as of ${window.dateUtils.formatToday()}`,
+  };
+}
+
+/**
+ * The main function to parse a full raw AVS data dump.
+ * @param {string} rawInput - The entire pasted text from the AVS report.
+ * @param {string[]} knownAccountTypes - An array of account type strings.
+ * @returns {object[]} An array of structured account objects.
+ */
+function parseAvsData(rawInput, knownAccountTypes) {
+  if (!rawInput || !rawInput.trim()) {
+    return [];
+  }
+  // Split the entire input text into blocks, where each block starts with "Account Owner: "
+  const accountBlocks = rawInput
+    .split(/Account Owner: /)
+    .filter((block) => block.trim() !== '');
+  if (accountBlocks.length === 0) {
+    return [];
+  }
+  // Parse each block and filter out any that are invalid
+  const parsedAccounts = accountBlocks
+    .map((block) => parseAvsAccountBlock(block, knownAccountTypes))
+    .filter(Boolean);
+  return parsedAccounts;
+}
+
+// Make parser functions available globally
+window.parseAvsAccountBlock = parseAvsAccountBlock;
+window.parseAvsData = parseAvsData;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="FileSystemService.html">FileSystemService</a></li><li><a href="NightingaleSearchService.html">NightingaleSearchService</a></li><li><a href="ToastQueue.html">ToastQueue</a></li></ul><h3>Global</h3><ul><li><a href="global.html#Badge">Badge</a></li><li><a href="global.html#Button">Button</a></li><li><a href="global.html#Card">Card</a></li><li><a href="global.html#CardActions">CardActions</a></li><li><a href="global.html#CardField">CardField</a></li><li><a href="global.html#CardGrid">CardGrid</a></li><li><a href="global.html#CardList">CardList</a></li><li><a href="global.html#Checkbox">Checkbox</a></li><li><a href="global.html#ConfirmationModal">ConfirmationModal</a></li><li><a href="global.html#CountBadge">CountBadge</a></li><li><a href="global.html#DataTable">DataTable</a></li><li><a href="global.html#DateInput">DateInput</a></li><li><a href="global.html#FinancialItemCard">FinancialItemCard</a></li><li><a href="global.html#FinancialItemGrid">FinancialItemGrid</a></li><li><a href="global.html#FinancialItemList">FinancialItemList</a></li><li><a href="global.html#FormField">FormField</a></li><li><a href="global.html#FormModal">FormModal</a></li><li><a href="global.html#Modal">Modal</a></li><li><a href="global.html#MultiBadge">MultiBadge</a></li><li><a href="global.html#NotesModal">NotesModal</a></li><li><a href="global.html#PersonCreationModal">PersonCreationModal</a></li><li><a href="global.html#ProgressBadge">ProgressBadge</a></li><li><a href="global.html#SearchBar">SearchBar</a></li><li><a href="global.html#Select">Select</a></li><li><a href="global.html#StepperModal">StepperModal</a></li><li><a href="global.html#TOAST_CONFIG">TOAST_CONFIG</a></li><li><a href="global.html#TextInput">TextInput</a></li><li><a href="global.html#Textarea">Textarea</a></li><li><a href="global.html#Validators">Validators</a></li><li><a href="global.html#clearAllToasts">clearAllToasts</a></li><li><a href="global.html#encodeURL">encodeURL</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatPersonName">formatPersonName</a></li><li><a href="global.html#formatPhoneNumber">formatPhoneNumber</a></li><li><a href="global.html#formatProperCase">formatProperCase</a></li><li><a href="global.html#getActiveToastCount">getActiveToastCount</a></li><li><a href="global.html#getAppDateLabel">getAppDateLabel</a></li><li><a href="global.html#getDefaultAppDetails">getDefaultAppDetails</a></li><li><a href="global.html#getFlatFinancials">getFlatFinancials</a></li><li><a href="global.html#getNextId">getNextId</a></li><li><a href="global.html#getUniqueNoteCategories">getUniqueNoteCategories</a></li><li><a href="global.html#initializeToastSystem">initializeToastSystem</a></li><li><a href="global.html#loadBusinessComponents">loadBusinessComponents</a></li><li><a href="global.html#loadComponentLayers">loadComponentLayers</a></li><li><a href="global.html#loadUIComponents">loadUIComponents</a></li><li><a href="global.html#parseAvsAccountBlock">parseAvsAccountBlock</a></li><li><a href="global.html#parseAvsData">parseAvsData</a></li><li><a href="global.html#sanitize">sanitize</a></li><li><a href="global.html#sanitizeHTML">sanitizeHTML</a></li><li><a href="global.html#setSanitizedInnerHTML">setSanitizedInnerHTML</a></li><li><a href="global.html#showSuccessToast">showSuccessToast</a></li><li><a href="global.html#showToast">showToast</a></li><li><a href="global.html#toInputDateFormat">toInputDateFormat</a></li><li><a href="global.html#updateToastConfig">updateToastConfig</a></li><li><a href="global.html#waitForUIComponents">waitForUIComponents</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Aug 20 2025 13:57:37 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
