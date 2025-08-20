@@ -65,12 +65,51 @@ pnpm-lock.yaml
 .cache/
 
 # Nightingale CMS specific
-# Data backup files (keep primary data files)
-Data/*backup*.json
-Data/*backup*/
+# Data folder - contains sensitive case management data
+Data/
+data/
 
 # Audit reports (can be regenerated)
 audit/compliance-report.json
+audit/
+
+# Development and local configuration
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/createcomponent.js
+.vscode/createComponent.js
 
 # Documentation build artifacts
 *.pdf
+
+# Local development files
+dev/
+development/
+local/
+test-data/
+sample-data/
+
+# Backup and temp files
+*.backup
+*~
+.#*
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+.atom/
+.brackets.json
+
+# Application logs and debug files
+debug.log
+error.log
+access.log
+
+# Node.js and npm
+.npm-cache/
+.node_repl_history
+
+# Git hooks and local git config
+.git/hooks/
+.git/config.local
