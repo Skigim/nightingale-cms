@@ -74,3 +74,6 @@ audit/compliance-report.json
 
 # Documentation build artifacts
 *.pdf
+
+# Ignore generated API docs
+docs/api/

@@ -1,0 +1,2 @@
+# Mark generated API docs as generated to reduce review noise
+docs/api/** linguist-generated=true
