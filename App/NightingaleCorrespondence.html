@@ -299,11 +299,11 @@
 
     <script type="text/babel">
       const { useState, useEffect, useCallback, useMemo, useRef } = React;
-      const e = React.createElement;
 
       // ✅ IMPLEMENTED: MCN broadcast listener from CMS for auto-case selection
 
       function FinancialsList({ items, selectedIds, onToggleItem }) {
+        const e = window.React.createElement;
         if (!items || items.length === 0) {
           return e('p', { className: 'text-gray-500 text-center py-4' }, 'No financial items found for this case.');
         }
@@ -353,6 +353,7 @@
       }
 
       function CaseDetailsPanel({ activeCase, fullData, selectedFinItemIds, onFinancialItemToggle }) {
+        const e = window.React.createElement;
         const [showVerified, setShowVerified] = useState(false);
 
         const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
@@ -535,6 +536,7 @@
 
       // Custom Placeholder Chip Component
       function PlaceholderChip({ attributes, children, element, activeCase, fullData }) {
+        const e = window.React.createElement;
         const editor = useSlate();
         const selected = useSelected();
         const focused = useFocused();
@@ -622,6 +624,7 @@
 
       // Enhanced Slate.js Placeholder Editor
       function PlaceholderEditor({ value, onChange, activeCase, fullData, placeholder }) {
+        const e = window.React.createElement;
         const [showAutocomplete, setShowAutocomplete] = useState(false);
         const [autocompletePosition, setAutocompletePosition] = useState({
           top: 0,
@@ -1149,6 +1152,7 @@
       PlaceholderEditor.displayName = 'SlateTextEditor';
 
       function TemplateManagerModal({ isOpen, onClose, fullData, onUpdateData, fileService }) {
+        const e = window.React.createElement;
         const [editingTemplate, setEditingTemplate] = useState(null);
         const [showTemplateForm, setShowTemplateForm] = useState(false);
         const [showCategoryForm, setShowCategoryForm] = useState(false);
@@ -1386,6 +1390,7 @@
       }
 
       function TemplateFormModal({ isOpen, onClose, template, fullData, onUpdateData, fileService }) {
+        const e = window.React.createElement;
         const [formData, setFormData] = useState({
           name: template?.name || '',
           category: template?.category || '',
@@ -1657,6 +1662,7 @@
 
       // VR Request Management Modal Component
       function VrManagementModal({ isOpen, onClose, request, fullData, onUpdateData, fileService }) {
+        const e = window.React.createElement;
         if (!isOpen || !request) return null;
 
         const [verificationSource, setVerificationSource] = useState('');
@@ -2010,6 +2016,7 @@
       }
 
       function VrHistoryModal({ isOpen, onClose, fullData, onUpdateData, currentCaseId, fileService }) {
+        const e = window.React.createElement;
         const [selectedRequestIds, setSelectedRequestIds] = useState(new Set());
         const [individualVerificationSources, setIndividualVerificationSources] = useState({});
         const [selectedRequest, setSelectedRequest] = useState(null);
@@ -2479,6 +2486,7 @@
       }
 
       function VrBuilderPanel({ activeCase, fullData, selectedFinItemIds, onCreateVr, onComplete }) {
+        const e = window.React.createElement;
         const [selectedCategory, setSelectedCategory] = useState('');
         const [selectedTemplateId, setSelectedTemplateId] = useState('');
         const [finalContent, setFinalContent] = useState('');
@@ -2718,6 +2726,7 @@
       }
 
       function CaseSelectionPanel({
+        const e = window.React.createElement;
         cases,
         onCaseSelect,
         activeCase,
@@ -2957,6 +2966,7 @@
 
       // --- Main Application Component ---
       function App() {
+        const e = window.React.createElement;
         const [fullData, setFullData] = useState(null);
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState(null);

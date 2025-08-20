@@ -289,7 +289,6 @@
       };
 
       const { useState, useEffect, useCallback, useMemo, useRef } = React;
-      const e = React.createElement;
 
       // --- Utility Functions ---
 
@@ -323,6 +322,7 @@
       // --- Application-Specific Components ---
 
       function CustomReportModal({ isOpen, onClose, onGenerate, cases }) {
+        const e = window.React.createElement;
         const [selectedStatuses, setSelectedStatuses] = useState([]);
         const [selectedColumns, setSelectedColumns] = useState(['status', 'appDate']);
         const uniqueStatuses = useMemo(() => [...new Set(cases.map((c) => c.status).filter(Boolean))].sort(), [cases]);
@@ -436,6 +436,7 @@
       }
 
       function VrDetailModal({ vr, fullData, onClose, onUpdate, onDelete }) {
+        const e = window.React.createElement;
         if (!vr) return null;
 
         const renderActions = () => {
@@ -540,6 +541,7 @@
         onRunSavedReport,
         onDeleteReportConfig,
       }) {
+        const e = window.React.createElement;
         const fileInputRef = useRef(null);
 
         const handleFileSelected = (event) => {
@@ -650,6 +652,7 @@
       }
 
       function App() {
+        const e = window.React.createElement;
         const [fullData, setFullData] = useState(null);
         const [reportData, setReportData] = useState([]);
         const [sortState, setSortState] = useState({
@@ -1041,6 +1044,7 @@
       }
 
       function Header() {
+        const e = window.React.createElement;
         return e(
           'div',
           {
@@ -1072,6 +1076,7 @@
       }
 
       function ReportControls({ onCustomReportClick, onSavedReportsClick }) {
+        const e = window.React.createElement;
         return e(
           'div',
           {
@@ -1114,6 +1119,7 @@
         setSelectedRows,
         onAddToTodo,
       }) {
+        const e = window.React.createElement;
         const isVrReport = useMemo(
           () => reportData.length > 0 && reportData[0].hasOwnProperty('Due Date'),
           [reportData]

@@ -456,7 +456,6 @@
       // Main app React hooks
       const { useState, useEffect, useMemo, useCallback } = React;
       const { createRoot } = ReactDOM;
-      const e = React.createElement;
 
       // Component variables - will be assigned during initialization
       let PrimaryButton, SecondaryButton, Modal, SearchBar;
@@ -472,6 +471,7 @@
         showProgress = true,
         isClickable: customIsClickable,
       }) {
+        const e = window.React.createElement;
         const getStepStatus = (stepIndex) => {
           if (stepIndex < currentStep) return 'completed';
           if (stepIndex === currentStep) return 'active';
@@ -602,6 +602,7 @@
       }
 
       function Sidebar({ activeTab, onTabChange, onSettingsClick, caseViewMode, onCaseBackToList }) {
+        const e = window.React.createElement;
         const tabs = [
           {
             id: 'dashboard',
@@ -767,6 +768,7 @@
       }
 
       function Header({ fileStatus, onSave, isDirty }) {
+        const e = window.React.createElement;
         return e(
           'div',
           {
@@ -889,6 +891,7 @@
       // --- TAB CONTENT COMPONENTS ---
 
       function DashboardTab({ fullData }) {
+        const e = window.React.createElement;
         const stats = useMemo(() => {
           if (!fullData)
             return {
@@ -1032,6 +1035,7 @@
 
       // Financial Management Section Component
       function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
+        const e = window.React.createElement;
         const [expandedSections, setExpandedSections] = useState({});
         const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
         const [modalItemType, setModalItemType] = useState('');
@@ -1262,6 +1266,7 @@
 
       // Notes Management Section Component
       function NotesManagementSection({ caseData, fullData, onUpdateData }) {
+        const e = window.React.createElement;
         const [isNotesExpanded, setIsNotesExpanded] = useState(false);
         const [newNoteText, setNewNoteText] = useState('');
         const [isAddingNote, setIsAddingNote] = useState(false);
@@ -1571,6 +1576,7 @@
 
       // Financial Item Management Modal Component
       function FinancialItemModal({ isOpen, onClose, caseData, fullData, onUpdateData, itemType, editingItem = null }) {
+        const e = window.React.createElement;
         const [formData, setFormData] = useState({
           id: editingItem?.id || null,
           description: editingItem?.description || editingItem?.type || '', // Migrate type â†’ description
@@ -2032,6 +2038,7 @@
 
       // Person and Application Details Modal Component
       function PersonApplicationDetailsModal({ isOpen, onClose, caseData, fullData, onUpdateData }) {
+        const e = window.React.createElement;
         const [editingField, setEditingField] = useState(null);
         const [editValues, setEditValues] = useState({});
         const [errors, setErrors] = useState({});
@@ -2749,6 +2756,7 @@
       }
 
       function CasesTab({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
+        const e = window.React.createElement;
         const [searchTerm, setSearchTerm] = useState('');
         const [selectedCase, setSelectedCase] = useState(null);
         const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -3105,6 +3113,7 @@
       }
 
       function PeopleTab({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
+        const e = window.React.createElement;
         const [searchTerm, setSearchTerm] = useState('');
         const [selectedPerson, setSelectedPerson] = useState(null);
         const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -3455,6 +3464,7 @@
       }
 
       function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
+        const e = window.React.createElement;
         const [searchTerm, setSearchTerm] = useState('');
         const [selectedOrganization, setSelectedOrganization] = useState(null);
         const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -3829,6 +3839,7 @@
       }
 
       function SimpleEditModal({ isOpen, onClose, caseData, fullData, onCaseUpdated }) {
+        const e = window.React.createElement;
         const [editData, setEditData] = useState({
           mcn: '',
           personId: '',
@@ -4026,6 +4037,7 @@
       }
 
       function CasePreviewModal({ isOpen, onClose, caseData, fullData, onUpdateData, fileService }) {
+        const e = window.React.createElement;
         const [activeTab, setActiveTab] = useState('overview');
         const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -4314,6 +4326,7 @@
       }
 
       function EligibilityTab({ fullData }) {
+        const e = window.React.createElement;
         return e(
           'div',
           { className: 'space-y-6' },
@@ -4327,6 +4340,7 @@
       }
 
       function SettingsModal({ isOpen, onClose, fileService, onDataLoaded }) {
+        const e = window.React.createElement;
         const [isConnecting, setIsConnecting] = useState(false);
         const [connectionStatus, setConnectionStatus] = useState('disconnected');
         const [loadingData, setLoadingData] = useState(false);
@@ -4675,6 +4689,7 @@
       // Main App Component
 
       function NightingaleCMSApp() {
+        const e = window.React.createElement;
         const [fullData, setFullData] = useState(null);
         const [activeTab, setActiveTab] = useState('dashboard');
         const [fileStatus, setFileStatus] = useState('disconnected');
