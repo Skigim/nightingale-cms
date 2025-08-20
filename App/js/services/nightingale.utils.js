@@ -300,33 +300,257 @@ function getUniqueNoteCategories(cases) {
 }
 
 /**
- * Simple click-to-copy utility function
+ * NightingaleFocusManager - Advanced focus management for modals and UI components
+ *
+ * Provides consistent, intelligent focus management with support for:
+ * - Modal opening focus
+ * - Step progression focus
+ * - State change focus (view/edit modes)
+ * - Fallback and error handling
  */
-async function copyToClipboard(text) {
-  if (!text) return false;
-  
-  try {
-    if (navigator.clipboard) {
-      await navigator.clipboard.writeText(text);
+class NightingaleFocusManager {
+  /**
+   * Intelligently focuses the first appropriate element in a container
+   * @param {HTMLElement|string} container - Container element or selector
+   * @param {Object} options - Focus configuration options
+   * @param {string[]} options.preferredSelectors - Priority order of selectors to focus
+   * @param {number} options.delay - Delay before focusing (default: 100ms)
+   * @param {boolean} options.debounce - Whether to debounce focus calls (default: true)
+   * @param {Function} options.onFocused - Callback when element is focused
+   * @param {Function} options.onNoFocusable - Callback when no focusable element found
+   * @returns {Promise<HTMLElement|null>} Promise resolving to focused element
+   */
+  static async focusFirst(container, options = {}) {
+    const config = {
+      preferredSelectors: [
+        'input:not([disabled]):not([readonly]):not([type="hidden"])',
+        'select:not([disabled])',
+        'textarea:not([disabled]):not([readonly])',
+        'button:not([disabled])',
+        '[href]:not([disabled])',
+        '[tabindex]:not([tabindex="-1"]):not([disabled])',
+      ],
+      delay: 100,
+      debounce: true,
+      onFocused: null,
+      onNoFocusable: null,
+      ...options,
+    };
+
+    // Get container element
+    const containerElement = typeof container === 'string' 
+      ? document.querySelector(container)
+      : container;
+
+    if (!containerElement) {
+      console.warn('NightingaleFocusManager: Container not found');
+      return null;
+    }
+
+    // Create focus function
+    const performFocus = () => {
+      return this._findAndFocusElement(containerElement, config);
+    };
+
+    // Apply debouncing if requested and Lodash is available
+    if (config.debounce && typeof _ !== 'undefined' && _.debounce) {
+      const debouncedFocus = _.debounce(performFocus, 50);
+      
+      // Use delay to ensure DOM is ready
+      if (typeof _ !== 'undefined' && _.delay) {
+        return new Promise(resolve => {
+          _.delay(() => {
+            resolve(debouncedFocus());
+          }, config.delay);
+        });
+      } else {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve(debouncedFocus());
+          }, config.delay);
+        });
+      }
     } else {
-      // Fallback for older browsers
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+      // Simple delay without debouncing
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve(performFocus());
+        }, config.delay);
+      });
     }
+  }
+
+  /**
+   * Finds and focuses the best available element
+   * @private
+   * @param {HTMLElement} container - Container to search within
+   * @param {Object} config - Configuration options
+   * @returns {HTMLElement|null} Focused element or null
+   */
+  static _findAndFocusElement(container, config) {
+    // Try preferred selectors in order
+    for (const selector of config.preferredSelectors) {
+      const element = container.querySelector(selector);
+      if (element && this._isVisible(element)) {
+        try {
+          element.focus();
+          
+          // Verify focus was successful
+          if (document.activeElement === element) {
+            if (typeof _ !== 'undefined' && _.isFunction && _.isFunction(config.onFocused)) {
+              config.onFocused(element);
+            } else if (typeof config.onFocused === 'function') {
+              config.onFocused(element);
+            }
+            return element;
+          }
+        } catch (error) {
+          console.warn('Focus failed for element:', element, error);
+        }
+      }
+    }
+
+    // No focusable element found
+    if (typeof _ !== 'undefined' && _.isFunction && _.isFunction(config.onNoFocusable)) {
+      config.onNoFocusable();
+    } else if (typeof config.onNoFocusable === 'function') {
+      config.onNoFocusable();
+    }
+
+    return null;
+  }
+
+  /**
+   * Checks if an element is visible and focusable
+   * @private
+   * @param {HTMLElement} element - Element to check
+   * @returns {boolean} True if element is visible
+   */
+  static _isVisible(element) {
+    return element.offsetParent !== null && 
+           window.getComputedStyle(element).visibility !== 'hidden' &&
+           window.getComputedStyle(element).display !== 'none';
+  }
+
+  /**
+   * Enhanced focus for modal opening
+   * @param {HTMLElement|string} modal - Modal element or selector
+   * @param {Object} options - Focus options
+   * @returns {Promise<HTMLElement|null>} Promise resolving to focused element
+   */
+  static async focusModalOpen(modal, options = {}) {
+    return this.focusFirst(modal, {
+      delay: 150, // Slightly longer delay for modal animations
+      onFocused: () => {
+        if (window.NightingaleToast && options.showToast !== false) {
+          // Optional: Show subtle focus indicator
+        }
+      },
+      onNoFocusable: () => {
+        console.warn('No focusable elements found in modal');
+      },
+      ...options,
+    });
+  }
+
+  /**
+   * Enhanced focus for stepper modal step changes
+   * @param {HTMLElement|string} stepContainer - Step container element or selector
+   * @param {number} stepIndex - Current step index (for logging)
+   * @param {Object} options - Focus options
+   * @returns {Promise<HTMLElement|null>} Promise resolving to focused element
+   */
+  static async focusStepChange(stepContainer, stepIndex = 0, options = {}) {
+    return this.focusFirst(stepContainer, {
+      delay: 200, // Longer delay for step transitions
+      onFocused: (element) => {
+        // Log step focus for accessibility
+        console.debug(`Focused step ${stepIndex + 1}:`, element.tagName, element.type || '');
+      },
+      preferredSelectors: [
+        // Prioritize form inputs for steps
+        'input[type="text"]:not([disabled]):not([readonly])',
+        'input[type="email"]:not([disabled]):not([readonly])',
+        'input[type="number"]:not([disabled]):not([readonly])',
+        'input:not([disabled]):not([readonly]):not([type="hidden"])',
+        'select:not([disabled])',
+        'textarea:not([disabled]):not([readonly])',
+        'button:not([disabled])',
+      ],
+      ...options,
+    });
+  }
+
+  /**
+   * Enhanced focus for modal state changes (view/edit mode)
+   * @param {HTMLElement|string} container - Container element or selector
+   * @param {string} newState - New state ('view', 'edit', etc.)
+   * @param {Object} options - Focus options
+   * @returns {Promise<HTMLElement|null>} Promise resolving to focused element
+   */
+  static async focusStateChange(container, newState, options = {}) {
+    const stateConfig = {
+      edit: {
+        delay: 100,
+        preferredSelectors: [
+          'input[type="text"]:not([disabled]):not([readonly])',
+          'textarea:not([disabled]):not([readonly])',
+          'input:not([disabled]):not([readonly]):not([type="hidden"])',
+          'select:not([disabled])',
+        ],
+      },
+      view: {
+        delay: 50,
+        preferredSelectors: [
+          'button[data-action="edit"]:not([disabled])',
+          'button:not([disabled])',
+          '[href]:not([disabled])',
+          '[tabindex]:not([tabindex="-1"]):not([disabled])',
+        ],
+      },
+    };
+
+    const config = stateConfig[newState] || stateConfig.edit;
     
-    if (window.NightingaleToast) {
-      window.NightingaleToast.success('Copied to clipboard!');
+    return this.focusFirst(container, {
+      ...config,
+      onFocused: (element) => {
+        console.debug(`Focused ${newState} state:`, element.tagName, element.type || '');
+      },
+      ...options,
+    });
+  }
+
+  /**
+   * Creates a focus manager instance bound to a specific container
+   * @param {HTMLElement|string} container - Container element or selector
+   * @returns {Object} Focus manager instance with bound methods
+   */
+  static createManagerFor(container) {
+    return {
+      focusFirst: (options) => this.focusFirst(container, options),
+      focusModalOpen: (options) => this.focusModalOpen(container, options),
+      focusStepChange: (stepIndex, options) => this.focusStepChange(container, stepIndex, options),
+      focusStateChange: (newState, options) => this.focusStateChange(container, newState, options),
+    };
+  }
+
+  /**
+   * Utility to create a debounced focus function for high-frequency updates
+   * @param {number} debounceMs - Debounce duration in milliseconds
+   * @returns {Function} Debounced focus function
+   */
+  static createDebouncedFocus(debounceMs = 300) {
+    if (typeof _ !== 'undefined' && _.debounce) {
+      return _.debounce((container, options) => this.focusFirst(container, options), debounceMs);
+    } else {
+      // Simple debounce fallback
+      let timeoutId;
+      return (container, options) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => this.focusFirst(container, options), debounceMs);
+      };
     }
-    return true;
-  } catch (error) {
-    if (window.NightingaleToast) {
-      window.NightingaleToast.error('Failed to copy');
-    }
-    return false;
   }
 }
 
@@ -711,7 +935,8 @@ class NightingaleSearchService {
 // Make NightingaleSearchService globally available
 if (typeof window !== 'undefined') {
   window.NightingaleSearchService = NightingaleSearchService;
-  window.copyToClipboard = copyToClipboard;
+  window.NightingaleClipboard = NightingaleClipboard;
+  window.NightingaleFocusManager = NightingaleFocusManager;
 
   // Make all utility functions globally available
   window.sanitize = sanitize;
