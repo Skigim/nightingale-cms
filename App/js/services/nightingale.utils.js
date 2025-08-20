@@ -338,9 +338,10 @@ class NightingaleFocusManager {
     };
 
     // Get container element
-    const containerElement = typeof container === 'string' 
-      ? document.querySelector(container)
-      : container;
+    const containerElement =
+      typeof container === 'string'
+        ? document.querySelector(container)
+        : container;
 
     if (!containerElement) {
       console.warn('NightingaleFocusManager: Container not found');
@@ -355,16 +356,16 @@ class NightingaleFocusManager {
     // Apply debouncing if requested and Lodash is available
     if (config.debounce && typeof _ !== 'undefined' && _.debounce) {
       const debouncedFocus = _.debounce(performFocus, 50);
-      
+
       // Use delay to ensure DOM is ready
       if (typeof _ !== 'undefined' && _.delay) {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           _.delay(() => {
             resolve(debouncedFocus());
           }, config.delay);
         });
       } else {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             resolve(debouncedFocus());
           }, config.delay);
@@ -372,7 +373,7 @@ class NightingaleFocusManager {
       }
     } else {
       // Simple delay without debouncing
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         setTimeout(() => {
           resolve(performFocus());
         }, config.delay);
@@ -394,10 +395,14 @@ class NightingaleFocusManager {
       if (element && this._isVisible(element)) {
         try {
           element.focus();
-          
+
           // Verify focus was successful
           if (document.activeElement === element) {
-            if (typeof _ !== 'undefined' && _.isFunction && _.isFunction(config.onFocused)) {
+            if (
+              typeof _ !== 'undefined' &&
+              _.isFunction &&
+              _.isFunction(config.onFocused)
+            ) {
               config.onFocused(element);
             } else if (typeof config.onFocused === 'function') {
               config.onFocused(element);
@@ -411,7 +416,11 @@ class NightingaleFocusManager {
     }
 
     // No focusable element found
-    if (typeof _ !== 'undefined' && _.isFunction && _.isFunction(config.onNoFocusable)) {
+    if (
+      typeof _ !== 'undefined' &&
+      _.isFunction &&
+      _.isFunction(config.onNoFocusable)
+    ) {
       config.onNoFocusable();
     } else if (typeof config.onNoFocusable === 'function') {
       config.onNoFocusable();
@@ -427,9 +436,11 @@ class NightingaleFocusManager {
    * @returns {boolean} True if element is visible
    */
   static _isVisible(element) {
-    return element.offsetParent !== null && 
-           window.getComputedStyle(element).visibility !== 'hidden' &&
-           window.getComputedStyle(element).display !== 'none';
+    return (
+      element.offsetParent !== null &&
+      window.getComputedStyle(element).visibility !== 'hidden' &&
+      window.getComputedStyle(element).display !== 'none'
+    );
   }
 
   /**
@@ -465,7 +476,11 @@ class NightingaleFocusManager {
       delay: 200, // Longer delay for step transitions
       onFocused: (element) => {
         // Log step focus for accessibility
-        console.debug(`Focused step ${stepIndex + 1}:`, element.tagName, element.type || '');
+        console.debug(
+          `Focused step ${stepIndex + 1}:`,
+          element.tagName,
+          element.type || ''
+        );
       },
       preferredSelectors: [
         // Prioritize form inputs for steps
@@ -511,11 +526,15 @@ class NightingaleFocusManager {
     };
 
     const config = stateConfig[newState] || stateConfig.edit;
-    
+
     return this.focusFirst(container, {
       ...config,
       onFocused: (element) => {
-        console.debug(`Focused ${newState} state:`, element.tagName, element.type || '');
+        console.debug(
+          `Focused ${newState} state:`,
+          element.tagName,
+          element.type || ''
+        );
       },
       ...options,
     });
@@ -530,8 +549,10 @@ class NightingaleFocusManager {
     return {
       focusFirst: (options) => this.focusFirst(container, options),
       focusModalOpen: (options) => this.focusModalOpen(container, options),
-      focusStepChange: (stepIndex, options) => this.focusStepChange(container, stepIndex, options),
-      focusStateChange: (newState, options) => this.focusStateChange(container, newState, options),
+      focusStepChange: (stepIndex, options) =>
+        this.focusStepChange(container, stepIndex, options),
+      focusStateChange: (newState, options) =>
+        this.focusStateChange(container, newState, options),
     };
   }
 
@@ -542,13 +563,19 @@ class NightingaleFocusManager {
    */
   static createDebouncedFocus(debounceMs = 300) {
     if (typeof _ !== 'undefined' && _.debounce) {
-      return _.debounce((container, options) => this.focusFirst(container, options), debounceMs);
+      return _.debounce(
+        (container, options) => this.focusFirst(container, options),
+        debounceMs
+      );
     } else {
       // Simple debounce fallback
       let timeoutId;
       return (container, options) => {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => this.focusFirst(container, options), debounceMs);
+        timeoutId = setTimeout(
+          () => this.focusFirst(container, options),
+          debounceMs
+        );
       };
     }
   }
