@@ -1,34 +1,34 @@
 # Nightingale CMS - Case Management System
 
-A comprehensive React-based case management system for vocational rehabilitation services, featuring modern UI components, robust data management, and streamlined workflows.
+A comprehensive React-based case management system, featuring modern UI components, robust data management, and streamlined workflows.
 
 ## 🎯 Project Overview
 
-Nightingale CMS helps case managers track applications, manage client relationships, monitor financial resources, and generate reports for vocational rehabilitation and long-term care services.
+Nightingale CMS helps social workers track applications, manage client relationships, monitor financial resources, and generate reports for and long-term care services.
 
 ### Key Features
 
 - **📋 Case Management**: Complete application lifecycle tracking
 - **👥 People & Organizations**: Contact and service provider management  
-- **💰 Financial Tracking**: Resources, income, and expense monitoring
-- **📊 Reports & Analytics**: Data insights and summary generation
-- **🧩 Component Library**: Reusable UI components with consistent design
-- **🔄 Data Migrations**: Backward compatibility with legacy data
+- **💰 Financial Tracking**: Resources, income, and expense monitoring 
+- **📊 Reports & Analytics**: Data insights and summary generation 
+- **🧩 Component Library**: Reusable UI components with consistent design 
+- **🔄 Data Migrations**: Backward compatibility with legacy data 
 
-## 🚀 Quick Start
+## 🚀 Quick Start 
 
-### Prerequisites
+### Prerequisites 
 
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Local file system access
-- No build tools required (uses in-browser Babel)
+- Modern web browser (Chrome, Firefox, Safari, Edge) 
+- Local file system access 
+- No build tools required (uses in-browser Babel) 
 
-### Running the Application
+### Running the Application 
 
-1. **Clone/Download** the project to your local machine
-2. **Open** `App/NightingaleCMS-React.html` in your web browser
-3. **Create Sample Data** using the "Create Sample Data" button
-4. **Start Managing Cases** with the intuitive interface
+1. **Clone/Download** the project to your local machine 
+2. **Open** `App/NightingaleCMS-React.html` in your web browser 
+3. **Create Sample Data** using the "Create Sample Data" button 
+4. **Start Managing Cases** with the intuitive interface 
 
 ### Development Setup
 
