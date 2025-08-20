@@ -65,11 +65,15 @@ function Modal({
       if (window.NightingaleFocusManager) {
         window.NightingaleFocusManager.focusModalOpen(modalRef.current, {
           onFocused: (element) => {
-            console.debug('Modal focused element:', element.tagName, element.type || '');
+            console.debug(
+              'Modal focused element:',
+              element.tagName,
+              element.type || ''
+            );
           },
           onNoFocusable: () => {
             console.warn('No focusable elements found in modal');
-          }
+          },
         });
       } else {
         // Fallback focus management

@@ -707,8 +707,11 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
               newStep,
               {
                 onFocused: (element) => {
-                  console.debug(`Case creation step ${newStep + 1} focused:`, element.tagName);
-                }
+                  console.debug(
+                    `Case creation step ${newStep + 1} focused:`,
+                    element.tagName
+                  );
+                },
               }
             );
           }, 100);
@@ -729,8 +732,11 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
               newStep,
               {
                 onFocused: (element) => {
-                  console.debug(`Case creation step ${newStep + 1} focused (back):`, element.tagName);
-                }
+                  console.debug(
+                    `Case creation step ${newStep + 1} focused (back):`,
+                    element.tagName
+                  );
+                },
               }
             );
           }, 100);

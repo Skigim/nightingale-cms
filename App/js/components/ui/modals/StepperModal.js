@@ -21,7 +21,7 @@ function StepperModal({
 }) {
   const e = window.React.createElement;
   const { useRef } = window.React;
-  
+
   // Reference to the step content area for focus management
   const stepContentRef = useRef(null);
 
@@ -30,18 +30,22 @@ function StepperModal({
   // Enhanced step change handler with focus management
   const handleStepChange = (newStep) => {
     onStepChange(newStep);
-    
+
     // Focus management for step change
     if (window.NightingaleFocusManager && stepContentRef.current) {
       // Use a slight delay to ensure the step content has updated
       setTimeout(() => {
         window.NightingaleFocusManager.focusStepChange(
-          stepContentRef.current, 
+          stepContentRef.current,
           newStep,
           {
             onFocused: (element) => {
-              console.debug(`Focused step ${newStep + 1}:`, element.tagName, element.type || '');
-            }
+              console.debug(
+                `Focused step ${newStep + 1}:`,
+                element.tagName,
+                element.type || ''
+              );
+            },
           }
         );
       }, 50);
@@ -168,10 +172,14 @@ function StepperModal({
         )
       ),
       // Step Content
-      e('div', { 
-        ref: stepContentRef,
-        className: 'w-3/4 p-4 border-l border-gray-700' 
-      }, children)
+      e(
+        'div',
+        {
+          ref: stepContentRef,
+          className: 'w-3/4 p-4 border-l border-gray-700',
+        },
+        children
+      )
     )
   );
 }

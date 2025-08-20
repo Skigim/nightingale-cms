@@ -72,7 +72,7 @@ function NotesModal({
     setCurrentNote(null);
     setIsEditMode(false);
     setIsSubmitting(false);
-    
+
     // Enhanced focus management for state change to view mode
     if (window.NightingaleFocusManager) {
       setTimeout(() => {
@@ -81,8 +81,12 @@ function NotesModal({
           'view',
           {
             onFocused: (element) => {
-              console.debug('Notes modal view mode focused:', element.tagName, element.type || '');
-            }
+              console.debug(
+                'Notes modal view mode focused:',
+                element.tagName,
+                element.type || ''
+              );
+            },
           }
         );
       }, 100);
@@ -178,7 +182,7 @@ function NotesModal({
     });
     setIsEditMode(true);
     setFormErrors({});
-    
+
     // Enhanced focus management for state change to edit mode
     if (window.NightingaleFocusManager) {
       setTimeout(() => {
@@ -187,8 +191,12 @@ function NotesModal({
           'edit',
           {
             onFocused: (element) => {
-              console.debug('Notes modal edit mode focused:', element.tagName, element.type || '');
-            }
+              console.debug(
+                'Notes modal edit mode focused:',
+                element.tagName,
+                element.type || ''
+              );
+            },
           }
         );
       }, 100);
@@ -389,7 +397,7 @@ function NotesModal({
       variant: 'primary',
       onClick: () => {
         setIsEditMode(true);
-        
+
         // Enhanced focus management for state change to edit mode (new note)
         if (window.NightingaleFocusManager) {
           setTimeout(() => {
@@ -398,8 +406,12 @@ function NotesModal({
               'edit',
               {
                 onFocused: (element) => {
-                  console.debug('Notes modal add mode focused:', element.tagName, element.type || '');
-                }
+                  console.debug(
+                    'Notes modal add mode focused:',
+                    element.tagName,
+                    element.type || ''
+                  );
+                },
               }
             );
           }, 100);
