@@ -18,11 +18,6 @@ const getInitialCaseData = () => {
     livingArrangement: '',
     withWaiver: false,
     admissionDate: '',
-    address: '',
-    unit: '',
-    city: '',
-    state: '',
-    zipCode: '',
     organizationId: '',
     authorizedReps: [],
     retroRequested: '',
@@ -40,7 +35,7 @@ function BasicInfoStep({ caseData, updateField, errors }) {
       window.FormField,
       { label: 'Master Case Number (MCN)', required: true, error: errors.mcn },
       e(window.TextInput, {
-        value: caseData.mcn,
+        value: caseData.mcn || '',
         onChange: (e) =>
           updateField('mcn', e.target.value.replace(/[^0-9]/g, '')),
         placeholder: 'Enter MCN',
@@ -292,7 +287,13 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
   );
 }
 
-function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
+function CaseDetailsStep({
+  fullData,
+  caseData,
+  updateField,
+  updatePersonAddress,
+  errors,
+}) {
   const e = window.React.createElement;
   const { useEffect } = window.React;
 
@@ -334,6 +335,10 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
   // Living arrangement fields based on selected option
   let locationFields = null;
   if (caseData.livingArrangement === 'Apartment/House') {
+    const selectedPerson = fullData?.people?.find(
+      (p) => String(p.id) === String(caseData.personId)
+    );
+
     locationFields = e(
       'div',
       { className: 'space-y-4 p-4 border border-gray-600 rounded-lg' },
@@ -342,50 +347,78 @@ function CaseDetailsStep({ fullData, caseData, updateField, errors }) {
         { className: 'text-lg font-semibold text-white' },
         'Address Information'
       ),
-      e(
-        window.FormField,
-        { label: 'Address', required: true, error: errors.address },
-        e(window.TextInput, {
-          value: caseData.address,
-          onChange: (e) => updateField('address', e.target.value),
-        })
-      ),
-      e(
-        window.FormField,
-        { label: 'Unit/Apt', error: errors.unit },
-        e(window.TextInput, {
-          value: caseData.unit,
-          onChange: (e) => updateField('unit', e.target.value),
-        })
-      ),
-      e(
-        'div',
-        { className: 'grid grid-cols-1 md:grid-cols-3 gap-4' },
-        e(
-          window.FormField,
-          { label: 'City', required: true, error: errors.city },
-          e(window.TextInput, {
-            value: caseData.city,
-            onChange: (e) => updateField('city', e.target.value),
-          })
-        ),
-        e(
-          window.FormField,
-          { label: 'State', required: true, error: errors.state },
-          e(window.TextInput, {
-            value: caseData.state,
-            onChange: (e) => updateField('state', e.target.value),
-          })
-        ),
-        e(
-          window.FormField,
-          { label: 'Zip Code', required: true, error: errors.zipCode },
-          e(window.TextInput, {
-            value: caseData.zipCode,
-            onChange: (e) => updateField('zipCode', e.target.value),
-          })
-        )
-      )
+      selectedPerson
+        ? e(
+            'div',
+            { className: 'space-y-4' },
+            e(
+              'div',
+              { className: 'text-sm text-blue-400 mb-3' },
+              'Editing address for: ' + selectedPerson.name
+            ),
+            e(
+              window.FormField,
+              {
+                label: 'Street Address',
+                required: true,
+                error: errors.address,
+              },
+              e(window.TextInput, {
+                value: selectedPerson.address?.street || '',
+                onChange: (e) => updatePersonAddress('street', e.target.value),
+                placeholder: '123 Main Street',
+              })
+            ),
+            e(
+              'div',
+              { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+              e(
+                window.FormField,
+                { label: 'City', required: true, error: errors.city },
+                e(window.TextInput, {
+                  value: selectedPerson.address?.city || '',
+                  onChange: (e) => updatePersonAddress('city', e.target.value),
+                  placeholder: 'Springfield',
+                })
+              ),
+              e(
+                window.FormField,
+                { label: 'State', required: true, error: errors.state },
+                e(window.Select, {
+                  value: selectedPerson.address?.state || 'IL',
+                  onChange: (e) => updatePersonAddress('state', e.target.value),
+                  options: [
+                    { value: 'IL', label: 'Illinois' },
+                    { value: 'IN', label: 'Indiana' },
+                    { value: 'IA', label: 'Iowa' },
+                    { value: 'KS', label: 'Kansas' },
+                    { value: 'KY', label: 'Kentucky' },
+                    { value: 'MI', label: 'Michigan' },
+                    { value: 'MN', label: 'Minnesota' },
+                    { value: 'MO', label: 'Missouri' },
+                    { value: 'NE', label: 'Nebraska' },
+                    { value: 'OH', label: 'Ohio' },
+                    { value: 'WI', label: 'Wisconsin' },
+                  ],
+                })
+              )
+            ),
+            e(
+              window.FormField,
+              { label: 'ZIP Code', required: true, error: errors.zip },
+              e(window.TextInput, {
+                value: selectedPerson.address?.zip || '',
+                onChange: (e) => updatePersonAddress('zip', e.target.value),
+                placeholder: '62701',
+                maxLength: 10,
+              })
+            )
+          )
+        : e(
+            'div',
+            { className: 'text-sm text-yellow-400' },
+            'Please select a person first to edit address information.'
+          )
     );
   } else if (
     caseData.livingArrangement === 'Assisted Living' ||
@@ -570,11 +603,27 @@ function ReviewStep({ fullData, caseData }) {
             : caseData.admissionDate,
         }),
       caseData.livingArrangement === 'Apartment/House' &&
-        caseData.address &&
-        e(SummaryItem, {
-          label: 'Address',
-          value: `${caseData.address}${caseData.unit ? `, ${caseData.unit}` : ''}, ${caseData.city}, ${caseData.state} ${caseData.zipCode}`,
-        }),
+        clientName &&
+        (() => {
+          const selectedPerson = fullData?.people.find(
+            (p) => String(p.id) === String(caseData.personId)
+          );
+          if (selectedPerson?.address) {
+            const addressParts = [
+              selectedPerson.address.street,
+              selectedPerson.address.city,
+              selectedPerson.address.state,
+              selectedPerson.address.zip,
+            ].filter(Boolean);
+            return addressParts.length > 0
+              ? e(SummaryItem, {
+                  label: 'Address',
+                  value: addressParts.join(', '),
+                })
+              : null;
+          }
+          return null;
+        })(),
       orgName && e(SummaryItem, { label: 'Facility', value: orgName }),
       e(SummaryItem, { label: 'Description', value: caseData.description })
     )
@@ -620,17 +669,13 @@ const stepsConfig = [
       if (!data.livingArrangement) {
         newErrors.livingArrangement = 'Living arrangement is required.';
       }
-      if (data.livingArrangement === 'Apartment/House') {
-        if (!data.address?.trim()) newErrors.address = 'Address is required.';
-        if (!data.city?.trim()) newErrors.city = 'City is required.';
-        if (!data.state?.trim()) newErrors.state = 'State is required.';
-        if (!data.zipCode?.trim()) newErrors.zipCode = 'Zip code is required.';
-      } else if (
-        data.livingArrangement === 'Assisted Living' ||
-        data.livingArrangement === 'Nursing Home'
+      // Note: Address validation is handled at the person level, not case level
+      if (
+        (data.livingArrangement === 'Assisted Living' ||
+          data.livingArrangement === 'Nursing Home') &&
+        !data.organizationId
       ) {
-        if (!data.organizationId)
-          newErrors.organizationId = 'Facility selection is required.';
+        newErrors.organizationId = 'Facility selection is required.';
       }
       return newErrors;
     },
@@ -672,6 +717,8 @@ function CaseCreationModal({
 
   // Load existing case data for editing
   useEffectHook(() => {
+    if (!isOpen) return; // Only run when modal is open
+
     if (editCaseId && fullData && fullData.cases) {
       const existingCase = fullData.cases.find((c) => c.id === editCaseId);
       if (existingCase) {
@@ -687,22 +734,11 @@ function CaseCreationModal({
       setCaseData(initialData);
       setOriginalCaseData(initialData);
     }
-  }, [editCaseId, fullData, isOpen]);
-
-  // Check if there are any changes from the original data
+  }, [editCaseId, fullData, isOpen]); // Check if there are any changes from the original data
   const hasChanges = useMemo(() => {
     if (!editCaseId) return true; // Always allow saving for new cases
     return JSON.stringify(caseData) !== JSON.stringify(originalCaseData);
   }, [caseData, originalCaseData, editCaseId]);
-
-  // Reset when modal opens (for create mode)
-  useEffectHook(() => {
-    if (isOpen && !editCaseId) {
-      setCaseData(getInitialCaseData());
-      setCurrentStep(0);
-      setErrors({});
-    }
-  }, [isOpen, editCaseId]);
 
   const validateStep = (stepIndex) => {
     const stepConfig = stepsConfig[stepIndex];
@@ -735,12 +771,13 @@ function CaseCreationModal({
   };
 
   useEffectHook(() => {
-    if (isOpen) {
+    if (isOpen && !editCaseId) {
+      // Only reset for create mode
       setCaseData(getInitialCaseData());
       setCurrentStep(0);
       setErrors({});
     }
-  }, [isOpen]);
+  }, [isOpen, editCaseId]);
 
   const handleStepChange = (newStep) => {
     if (newStep > currentStep) {
@@ -750,7 +787,7 @@ function CaseCreationModal({
         if (window.NightingaleFocusManager) {
           setTimeout(() => {
             window.NightingaleFocusManager.focusStepChange(
-              '.stepper-modal .w-3/4', // Target the step content area
+              '[data-step-content]', // Target the step content area
               newStep,
               {
                 onFocused: (element) => {
@@ -775,7 +812,7 @@ function CaseCreationModal({
         if (window.NightingaleFocusManager) {
           setTimeout(() => {
             window.NightingaleFocusManager.focusStepChange(
-              '.stepper-modal .w-3/4', // Target the step content area
+              '[data-step-content]', // Target the step content area
               newStep,
               {
                 onFocused: (element) => {
@@ -917,6 +954,41 @@ function CaseCreationModal({
     }
   };
 
+  const updatePersonAddress = (addressField, value) => {
+    if (!caseData.personId || !fullData?.people) return;
+
+    const personIndex = fullData.people.findIndex(
+      (p) => String(p.id) === String(caseData.personId)
+    );
+
+    if (personIndex !== -1) {
+      // Ensure address object exists
+      if (!fullData.people[personIndex].address) {
+        fullData.people[personIndex].address = {};
+      }
+
+      // Update the address field
+      fullData.people[personIndex].address[addressField] = value;
+
+      // Also update mailing address if it matches physical address
+      if (fullData.people[personIndex].mailingAddress?.sameAsPhysical) {
+        if (!fullData.people[personIndex].mailingAddress) {
+          fullData.people[personIndex].mailingAddress = {};
+        }
+        fullData.people[personIndex].mailingAddress[addressField] = value;
+      }
+
+      // Clear validation errors for address fields
+      const addressErrors = ['address', 'city', 'state', 'zip'];
+      if (addressErrors.includes(addressField)) {
+        setErrors((prev) => ({ ...prev, [addressField]: undefined }));
+      }
+
+      // Force a re-render by updating a timestamp or similar
+      setCaseData((prev) => ({ ...prev, lastUpdated: Date.now() }));
+    }
+  };
+
   const renderStepContent = () => {
     const currentStepConfig = stepsConfig[currentStep];
 
@@ -932,6 +1004,7 @@ function CaseCreationModal({
     return e(CurrentStepComponent, {
       caseData,
       updateField,
+      updatePersonAddress,
       errors,
       fullData,
     });
