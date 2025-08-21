@@ -643,12 +643,25 @@ const stepsConfig = [
   },
 ];
 
-function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
+function CaseCreationModal({
+  isOpen,
+  onClose,
+  fullData,
+  onCaseCreated,
+  editCaseId = null, // If provided, component will edit existing case
+  fileService = null, // File service instance for data operations
+}) {
   const e = window.React.createElement;
-  const { useState: useStateHook, useEffect: useEffectHook } = window.React;
+  const {
+    useState: useStateHook,
+    useEffect: useEffectHook,
+    useMemo,
+  } = window.React;
 
   const [currentStep, setCurrentStep] = useStateHook(0);
   const [caseData, setCaseData] = useStateHook(getInitialCaseData());
+  const [originalCaseData, setOriginalCaseData] =
+    useStateHook(getInitialCaseData());
   const [errors, setErrors] = useStateHook({});
 
   // Create steps array for StepperModal
@@ -656,6 +669,40 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
     title: title || 'Untitled Step',
     description: description || '',
   }));
+
+  // Load existing case data for editing
+  useEffectHook(() => {
+    if (editCaseId && fullData && fullData.cases) {
+      const existingCase = fullData.cases.find((c) => c.id === editCaseId);
+      if (existingCase) {
+        const caseDataWithDefaults = {
+          ...getInitialCaseData(),
+          ...existingCase,
+        };
+        setCaseData(caseDataWithDefaults);
+        setOriginalCaseData(caseDataWithDefaults);
+      }
+    } else {
+      const initialData = getInitialCaseData();
+      setCaseData(initialData);
+      setOriginalCaseData(initialData);
+    }
+  }, [editCaseId, fullData, isOpen]);
+
+  // Check if there are any changes from the original data
+  const hasChanges = useMemo(() => {
+    if (!editCaseId) return true; // Always allow saving for new cases
+    return JSON.stringify(caseData) !== JSON.stringify(originalCaseData);
+  }, [caseData, originalCaseData, editCaseId]);
+
+  // Reset when modal opens (for create mode)
+  useEffectHook(() => {
+    if (isOpen && !editCaseId) {
+      setCaseData(getInitialCaseData());
+      setCurrentStep(0);
+      setErrors({});
+    }
+  }, [isOpen, editCaseId]);
 
   const validateStep = (stepIndex) => {
     const stepConfig = stepsConfig[stepIndex];
@@ -760,42 +807,80 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
     }
 
     try {
-      const newCase = {
-        id: `case-${Date.now()}`,
-        ...caseData,
-        createdDate: new Date().toISOString(),
-        updatedDate: new Date().toISOString(),
-      };
+      if (!fileService) {
+        throw new Error('File service not available');
+      }
+
+      const currentData = await fileService.readFile();
+
+      let updatedData;
+      let resultCase;
+      let successMessage;
+
+      if (editCaseId) {
+        // Update existing case
+        updatedData = {
+          ...currentData,
+          cases: currentData.cases.map((caseItem) =>
+            caseItem.id === editCaseId
+              ? {
+                  ...caseItem,
+                  ...caseData,
+                  updatedDate: new Date().toISOString(),
+                  // Don't change the original creation date
+                  createdDate: caseItem.createdDate,
+                  id: caseItem.id, // Keep the original ID
+                }
+              : caseItem
+          ),
+        };
+        resultCase = updatedData.cases.find((c) => c.id === editCaseId);
+        successMessage = 'Case updated successfully!';
+      } else {
+        // Create new case
+        const newCase = {
+          id: `case-${Date.now()}`,
+          ...caseData,
+          createdDate: new Date().toISOString(),
+          updatedDate: new Date().toISOString(),
+        };
+
+        updatedData = {
+          ...currentData,
+          cases: [...(currentData.cases || []), newCase],
+        };
+        resultCase = newCase;
+        successMessage = 'Case created successfully!';
+      }
 
       // If a person was selected and living arrangement data was modified,
       // update the person's record with the new living arrangement info
-      if (caseData.personId && fullData?.people) {
-        const personIndex = fullData.people.findIndex(
+      if (caseData.personId && updatedData?.people) {
+        const personIndex = updatedData.people.findIndex(
           (p) => String(p.id) === String(caseData.personId)
         );
 
         if (personIndex !== -1) {
           // Update person's living arrangement data
-          fullData.people[personIndex] = {
-            ...fullData.people[personIndex],
+          updatedData.people[personIndex] = {
+            ...updatedData.people[personIndex],
             livingArrangement: caseData.livingArrangement,
             organizationId: caseData.organizationId || null,
           };
-
-          // Note: The parent component should handle saving the updated fullData
-          // This ensures the person's living arrangement is kept in sync
         }
       }
 
-      onCaseCreated(newCase);
-      window.showToast('Case created successfully!', 'success');
+      const saveResult = await fileService.writeFile(updatedData);
+      if (!saveResult) {
+        throw new Error('Failed to save data - writeFile returned false');
+      }
+
+      onCaseCreated(resultCase);
+      window.showToast(successMessage, 'success');
       onClose();
     } catch (error) {
-      console.error('Error creating case:', error);
-      window.showToast(
-        'Error creating case. See console for details.',
-        'error'
-      );
+      console.error('Error saving case:', error);
+      window.showToast('Error saving case: ' + error.message, 'error');
     }
   };
 
@@ -852,17 +937,55 @@ function CaseCreationModal({ isOpen, onClose, fullData, onCaseCreated }) {
     });
   };
 
+  // Custom footer for edit mode - single save button
+  const editModeFooter = editCaseId
+    ? e(
+        'div',
+        {
+          className:
+            'flex items-center justify-between px-6 py-4 border-t border-gray-600',
+        },
+        e(
+          'span',
+          { className: 'text-sm text-gray-400' },
+          hasChanges ? 'You have unsaved changes' : 'No changes made'
+        ),
+        e(
+          'div',
+          { className: 'flex space-x-3' },
+          e(
+            window.OutlineButton,
+            {
+              onClick: onClose,
+            },
+            'Cancel'
+          ),
+          e(
+            window.PrimaryButton,
+            {
+              onClick: handleComplete,
+              disabled: !hasChanges,
+            },
+            hasChanges ? 'Save Changes' : 'No Changes'
+          )
+        )
+      )
+    : null;
+
   return e(
     window.StepperModal,
     {
       isOpen,
       onClose,
-      title: 'Create New Case',
+      title: editCaseId ? 'Edit Case' : 'Create New Case',
       steps,
       currentStep,
       onStepChange: handleStepChange,
       onComplete: handleComplete,
       isStepClickable: isStepAccessible,
+      completButtonText: editCaseId ? 'Update Case' : 'Create Case',
+      isCompleteDisabled: editCaseId && !hasChanges,
+      customFooterContent: editModeFooter,
     },
     renderStepContent()
   );

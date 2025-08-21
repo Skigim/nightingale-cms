@@ -48,6 +48,9 @@ function PersonCreationModal({
   // Component state
   const [currentStep, setCurrentStep] = useState(0);
   const [personData, setPersonData] = useState(getInitialPersonData());
+  const [originalPersonData, setOriginalPersonData] = useState(
+    getInitialPersonData()
+  );
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -56,7 +59,7 @@ function PersonCreationModal({
     if (editPersonId && fullData && fullData.people) {
       const existingPerson = fullData.people.find((p) => p.id === editPersonId);
       if (existingPerson) {
-        setPersonData({
+        const personDataWithDefaults = {
           ...getInitialPersonData(),
           ...existingPerson,
           mailingAddress: {
@@ -66,12 +69,22 @@ function PersonCreationModal({
               JSON.stringify(existingPerson.address) ===
                 JSON.stringify(existingPerson.mailingAddress),
           },
-        });
+        };
+        setPersonData(personDataWithDefaults);
+        setOriginalPersonData(personDataWithDefaults);
       }
     } else {
-      setPersonData(getInitialPersonData());
+      const initialData = getInitialPersonData();
+      setPersonData(initialData);
+      setOriginalPersonData(initialData);
     }
   }, [editPersonId, fullData, isOpen]);
+
+  // Check if there are any changes from the original data
+  const hasChanges = useMemo(() => {
+    if (!editPersonId) return true; // Always allow saving for new people
+    return JSON.stringify(personData) !== JSON.stringify(originalPersonData);
+  }, [personData, originalPersonData, editPersonId]);
 
   // Step configuration
   const steps = useMemo(
@@ -790,6 +803,42 @@ function PersonCreationModal({
   // Don't render if not open
   if (!isOpen) return null;
 
+  // Custom footer for edit mode - single save button
+  const editModeFooter = editPersonId
+    ? e(
+        'div',
+        {
+          className:
+            'flex items-center justify-between px-6 py-4 border-t border-gray-600',
+        },
+        e(
+          'span',
+          { className: 'text-sm text-gray-400' },
+          hasChanges ? 'You have unsaved changes' : 'No changes made'
+        ),
+        e(
+          'div',
+          { className: 'flex space-x-3' },
+          e(
+            window.OutlineButton,
+            {
+              onClick: onClose,
+            },
+            'Cancel'
+          ),
+          e(
+            window.PrimaryButton,
+            {
+              onClick: handleSubmit,
+              disabled: isLoading || !hasChanges,
+              loading: isLoading,
+            },
+            isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'
+          )
+        )
+      )
+    : null;
+
   // Render the modal using StepperModal
   return e(
     window.StepperModal,
@@ -806,7 +855,8 @@ function PersonCreationModal({
         : editPersonId
           ? 'Update Person'
           : 'Create Person',
-      isCompleteDisabled: isLoading,
+      isCompleteDisabled: isLoading || (editPersonId && !hasChanges),
+      customFooterContent: editModeFooter,
     },
     renderStepContent()
   );

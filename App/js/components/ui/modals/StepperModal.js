@@ -18,6 +18,10 @@ function StepperModal({
   onComplete,
   children,
   isStepClickable = () => true, // Function to determine if a step is clickable
+  completButtonText = 'Complete', // Custom text for the complete button
+  isCompleteDisabled = false, // Whether the complete button should be disabled
+  hideNavigation = false, // Whether to hide the Next/Back buttons and use only custom buttons
+  customFooterContent = null, // Custom footer content to replace default buttons
 }) {
   const e = window.React.createElement;
   const { useRef } = window.React;
@@ -66,34 +70,40 @@ function StepperModal({
 
   const isLastStep = currentStep === steps.length - 1;
 
-  const footerContent = e(
-    'div',
-    { className: 'flex justify-between w-full' },
-    // Back Button
-    e(
-      'button',
-      {
-        onClick: handleBack,
-        disabled: currentStep === 0,
-        className:
-          'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50',
-      },
-      'Back'
-    ),
-    // Next/Complete Button
-    e(
-      'button',
-      {
-        onClick: isLastStep ? onComplete : handleNext,
-        className: `px-4 py-2 rounded-lg text-white transition-colors ${
-          isLastStep
-            ? 'bg-green-600 hover:bg-green-700'
-            : 'bg-blue-600 hover:bg-blue-700'
-        }`,
-      },
-      isLastStep ? 'Complete' : 'Next'
-    )
-  );
+  // Use custom footer content if provided, otherwise use default navigation
+  const footerContent =
+    customFooterContent ||
+    (!hideNavigation
+      ? e(
+          'div',
+          { className: 'flex justify-between w-full' },
+          // Back Button
+          e(
+            'button',
+            {
+              onClick: handleBack,
+              disabled: currentStep === 0,
+              className:
+                'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50',
+            },
+            'Back'
+          ),
+          // Next/Complete Button
+          e(
+            'button',
+            {
+              onClick: isLastStep ? onComplete : handleNext,
+              disabled: isLastStep ? isCompleteDisabled : false,
+              className: `px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                isLastStep
+                  ? 'bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`,
+            },
+            isLastStep ? completButtonText : 'Next'
+          )
+        )
+      : null);
 
   return e(
     window.Modal,
