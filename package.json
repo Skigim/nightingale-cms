@@ -15,6 +15,7 @@
     "audit:security": "npm audit --audit-level=moderate",
     "format": "prettier --write App/Components/**/*.js App/js/**/*.js",
     "docs": "jsdoc -r App/Components App/js -d docs/api",
+    "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose",
     "prepare": "husky"
   },
   "keywords": [
@@ -38,6 +39,8 @@
   "devDependencies": {
     "@babel/core": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.33.0",
     "eslint": "^8.57.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
