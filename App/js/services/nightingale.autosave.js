@@ -1,14 +1,14 @@
 /**
- * Nightingale CMS Autosave Service
+ * Nightingale CMS Autosave Service v2.0
  *
- * Provides intelligent autosave functionality with:
- * - Configurable save intervals
- * - Data change detection with debouncing
- * - Error handling and retry logic
- * - Status reporting for UI feedback
- * - Integration with existing file service
+ * Enhanced autosave functionality with:
+ * - Permission-aware operation
+ * - Enhanced error categorization and recovery
+ * - Multi-tab coordination
+ * - Configuration and statistics persistence
+ * - Intelligent retry strategies
  *
- * @version 1.0.0
+ * @version 2.0.0
  * @author Nightingale CMS Team
  */
 
@@ -16,11 +16,61 @@
   'use strict';
 
   /**
-   * AutosaveService - Manages automatic saving of application data
+   * Enhanced error types for better categorization
+   */
+  class AutosaveError extends Error {
+    constructor(message, type, recoverable = true, userAction = null) {
+      super(message);
+      this.name = 'AutosaveError';
+      this.type = type;
+      this.recoverable = recoverable;
+      this.userAction = userAction;
+      this.timestamp = Date.now();
+    }
+  }
+
+  /**
+   * Error types and their characteristics
+   */
+  const ERROR_TYPES = {
+    PERMISSION_DENIED: {
+      type: 'permission',
+      recoverable: true,
+      userAction: 'Please reconnect to your save folder in settings',
+      retryStrategy: 'manual',
+    },
+    NETWORK_ERROR: {
+      type: 'network',
+      recoverable: true,
+      userAction: 'Check your network connection and try again',
+      retryStrategy: 'exponential',
+    },
+    STORAGE_FULL: {
+      type: 'storage',
+      recoverable: false,
+      userAction: 'Free up disk space and try again',
+      retryStrategy: 'manual',
+    },
+    FILE_LOCKED: {
+      type: 'file-lock',
+      recoverable: true,
+      userAction: 'File may be open in another application',
+      retryStrategy: 'linear',
+    },
+    UNKNOWN: {
+      type: 'unknown',
+      recoverable: true,
+      userAction: 'Please try again or contact support',
+      retryStrategy: 'exponential',
+    },
+  };
+
+  /**
+   * AutosaveService - Enhanced automatic saving with permission awareness and persistence
    */
   class AutosaveService {
     constructor(options = {}) {
-      // Configuration with sensible defaults
+      // Enhanced configuration with persistence support
       this.config = {
         // Save interval in milliseconds (default: 30 seconds)
         saveInterval: options.saveInterval || 30000,
@@ -48,9 +98,26 @@
 
         // Minimum time between saves (prevents excessive saving)
         minSaveInterval: options.minSaveInterval || 5000,
+
+        // Permission checking interval (default: 10 seconds)
+        permissionCheckInterval: options.permissionCheckInterval || 10000,
+
+        // Persist configuration across sessions
+        persistConfig: options.persistConfig !== false,
+
+        // Persist statistics across sessions
+        persistStats: options.persistStats !== false,
+
+        // Multi-tab coordination
+        enableTabCoordination: options.enableTabCoordination !== false,
       };
 
-      // State management
+      // Generate unique tab ID for multi-tab coordination
+      this.tabId =
+        options.tabId ||
+        `tab-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Enhanced state management
       this.state = {
         isEnabled: this.config.enabled,
         lastSaveTime: 0,
@@ -59,6 +126,9 @@
         pendingSave: false,
         lastDataHash: null,
         saveQueue: [],
+        permissionStatus: 'unknown', // 'granted', 'denied', 'prompt', 'unknown'
+        lastPermissionCheck: 0,
+        isPermissionWatcherActive: false,
         statistics: {
           totalSaves: 0,
           successfulSaves: 0,
@@ -66,13 +136,24 @@
           lastSaveAttempt: null,
           lastSuccessfulSave: null,
           averageSaveTime: 0,
+          sessionStartTime: Date.now(),
+          errorsByType: {},
+          saveTimes: [], // Rolling window of save times
         },
+      };
+
+      // Storage keys for persistence
+      this.storageKeys = {
+        config: `nightingale-autosave-config-${this.getDirectoryKey()}`,
+        stats: `nightingale-autosave-stats-${this.getDirectoryKey()}`,
+        tabState: 'nightingale-autosave-tabs',
       };
 
       // Event handlers and timers
       this.saveIntervalTimer = null;
       this.debounceTimer = null;
       this.retryTimer = null;
+      this.permissionWatcherTimer = null;
       this.eventListeners = [];
 
       // Dependencies
@@ -80,14 +161,326 @@
       this.dataProvider = null;
       this.statusCallback = null;
 
+      // BroadcastChannel for tab coordination
+      this.broadcastChannel = null;
+
       // Bind methods
       this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
       this.handleBeforeUnload = this.handleBeforeUnload.bind(this);
       this.handlePageHide = this.handlePageHide.bind(this);
+      this.handleBroadcastMessage = this.handleBroadcastMessage.bind(this);
+      this.checkPermissions = this.checkPermissions.bind(this);
+
+      // Load persisted configuration and statistics
+      this.loadPersistedState();
     }
 
     /**
-     * Initialize the autosave service
+     * Get directory-specific key for storage
+     */
+    getDirectoryKey() {
+      // Use a simple hash based on current origin for now
+      // In a real implementation, this could be based on the connected directory path
+      return btoa(window.location.origin)
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .substr(0, 16);
+    }
+
+    /**
+     * Load persisted configuration and statistics
+     */
+    loadPersistedState() {
+      try {
+        // Load persisted configuration
+        if (this.config.persistConfig) {
+          const savedConfig = localStorage.getItem(this.storageKeys.config);
+          if (savedConfig) {
+            const parsed = JSON.parse(savedConfig);
+            // Only override non-constructor provided values
+            Object.keys(parsed).forEach((key) => {
+              if (
+                Object.prototype.hasOwnProperty.call(this.config, key) &&
+                key !== 'persistConfig' &&
+                key !== 'persistStats'
+              ) {
+                this.config[key] = parsed[key];
+              }
+            });
+            this.log('Loaded persisted configuration', 'info');
+          }
+        }
+
+        // Load persisted statistics
+        if (this.config.persistStats) {
+          const savedStats = localStorage.getItem(this.storageKeys.stats);
+          if (savedStats) {
+            const parsed = JSON.parse(savedStats);
+            // Merge with current statistics, keeping session-specific data
+            this.state.statistics = {
+              ...this.state.statistics,
+              ...parsed,
+              sessionStartTime: Date.now(), // Reset session start time
+              saveTimes: parsed.saveTimes || [], // Preserve save time history
+            };
+            this.log('Loaded persisted statistics', 'info');
+          }
+        }
+      } catch (error) {
+        this.log('Error loading persisted state: ' + error.message, 'warn');
+      }
+    }
+
+    /**
+     * Persist current configuration and statistics
+     */
+    persistState() {
+      try {
+        if (this.config.persistConfig) {
+          localStorage.setItem(
+            this.storageKeys.config,
+            JSON.stringify(this.config)
+          );
+        }
+
+        if (this.config.persistStats) {
+          // Keep only recent save times (last 100)
+          const recentSaveTimes = this.state.statistics.saveTimes.slice(-100);
+          const statsToSave = {
+            ...this.state.statistics,
+            saveTimes: recentSaveTimes,
+          };
+          localStorage.setItem(
+            this.storageKeys.stats,
+            JSON.stringify(statsToSave)
+          );
+        }
+      } catch (error) {
+        this.log('Error persisting state: ' + error.message, 'warn');
+      }
+    }
+
+    /**
+     * Set up multi-tab coordination
+     */
+    setupTabCoordination() {
+      if (!this.config.enableTabCoordination || !window.BroadcastChannel) {
+        return;
+      }
+
+      try {
+        this.broadcastChannel = new BroadcastChannel('nightingale-autosave');
+        this.broadcastChannel.addEventListener(
+          'message',
+          this.handleBroadcastMessage
+        );
+
+        // Register this tab
+        this.broadcastTabMessage('tab-registered', {
+          tabId: this.tabId,
+          timestamp: Date.now(),
+        });
+
+        this.log('Tab coordination enabled', 'info');
+      } catch (error) {
+        this.log('Failed to set up tab coordination: ' + error.message, 'warn');
+      }
+    }
+
+    /**
+     * Handle messages from other tabs
+     */
+    handleBroadcastMessage(event) {
+      const { type, tabId } = event.data;
+
+      // Ignore messages from this tab
+      if (tabId === this.tabId) return;
+
+      switch (type) {
+        case 'save-started':
+          this.updateStatus(
+            'other-tab-saving',
+            `Save in progress in another tab`
+          );
+          break;
+        case 'save-completed':
+          this.updateStatus('other-tab-saved', `Another tab completed save`);
+          // Check if we need to refresh our data
+          this.handleCrossSave();
+          break;
+        case 'save-failed':
+          // Other tab failed to save, we might need to take over
+          this.log(
+            'Another tab failed to save, checking if we should retry',
+            'warn'
+          );
+          break;
+      }
+    }
+
+    /**
+     * Broadcast message to other tabs
+     */
+    broadcastTabMessage(type, data = {}) {
+      if (this.broadcastChannel) {
+        this.broadcastChannel.postMessage({
+          type,
+          data,
+          tabId: this.tabId,
+          timestamp: Date.now(),
+        });
+      }
+    }
+
+    /**
+     * Handle when another tab saves data
+     */
+    handleCrossSave() {
+      // Reset our data hash to force a comparison on next change
+      this.state.lastDataHash = null;
+      this.log('Data potentially updated by another tab', 'info');
+    }
+
+    /**
+     * Start permission watcher
+     */
+    startPermissionWatcher() {
+      if (this.state.isPermissionWatcherActive || !this.fileService) {
+        return;
+      }
+
+      this.state.isPermissionWatcherActive = true;
+      this.permissionWatcherTimer = setInterval(
+        this.checkPermissions,
+        this.config.permissionCheckInterval
+      );
+      this.log('Permission watcher started', 'info');
+    }
+
+    /**
+     * Stop permission watcher
+     */
+    stopPermissionWatcher() {
+      if (this.permissionWatcherTimer) {
+        clearInterval(this.permissionWatcherTimer);
+        this.permissionWatcherTimer = null;
+      }
+      this.state.isPermissionWatcherActive = false;
+    }
+
+    /**
+     * Check file system permissions
+     */
+    async checkPermissions() {
+      try {
+        if (!this.fileService || !this.fileService.checkPermission) {
+          return;
+        }
+
+        const permission = await this.fileService.checkPermission();
+        const previousStatus = this.state.permissionStatus;
+        this.state.permissionStatus = permission;
+        this.state.lastPermissionCheck = Date.now();
+
+        // Handle permission state changes
+        if (previousStatus !== permission) {
+          await this.handlePermissionChange(previousStatus, permission);
+        }
+      } catch (error) {
+        this.log('Error checking permissions: ' + error.message, 'warn');
+        this.state.permissionStatus = 'unknown';
+      }
+    }
+
+    /**
+     * Handle permission status changes
+     */
+    async handlePermissionChange(previousStatus, newStatus) {
+      this.log(
+        `Permission changed from ${previousStatus} to ${newStatus}`,
+        'info'
+      );
+
+      switch (newStatus) {
+        case 'granted':
+          if (previousStatus === 'denied' || previousStatus === 'prompt') {
+            this.updateStatus(
+              'permission-restored',
+              'File system access restored'
+            );
+            // Resume autosave if it was paused due to permissions
+            if (!this.state.isEnabled && this.config.enabled) {
+              this.resume();
+            }
+          }
+          break;
+
+        case 'denied':
+          this.updateStatus('permission-lost', 'File system access denied', {
+            userAction: 'Please reconnect to your save folder in settings',
+          });
+          // Pause autosave but don't fully stop it
+          this.pause();
+          break;
+
+        case 'prompt':
+          this.updateStatus(
+            'permission-prompt',
+            'File system access requires permission'
+          );
+          break;
+      }
+    }
+
+    /**
+     * Classify error and create appropriate AutosaveError
+     */
+    classifyError(error) {
+      let errorType = ERROR_TYPES.UNKNOWN;
+
+      if (
+        error.name === 'NotAllowedError' ||
+        error.message.includes('permission')
+      ) {
+        errorType = ERROR_TYPES.PERMISSION_DENIED;
+      } else if (
+        error.name === 'NetworkError' ||
+        error.message.includes('network')
+      ) {
+        errorType = ERROR_TYPES.NETWORK_ERROR;
+      } else if (
+        error.message.includes('storage') ||
+        error.message.includes('disk')
+      ) {
+        errorType = ERROR_TYPES.STORAGE_FULL;
+      } else if (
+        error.message.includes('locked') ||
+        error.message.includes('busy')
+      ) {
+        errorType = ERROR_TYPES.FILE_LOCKED;
+      }
+
+      return new AutosaveError(
+        error.message,
+        errorType.type,
+        errorType.recoverable,
+        errorType.userAction
+      );
+    }
+
+    /**
+     * Record error statistics
+     */
+    recordError(error) {
+      const errorType = error.type || 'unknown';
+      if (!this.state.statistics.errorsByType[errorType]) {
+        this.state.statistics.errorsByType[errorType] = 0;
+      }
+      this.state.statistics.errorsByType[errorType]++;
+      this.persistState();
+    }
+
+    /**
+     * Initialize the autosave service with enhanced features
      * @param {Object} dependencies - Required dependencies
      * @param {Object} dependencies.fileService - File service for saving data
      * @param {Function} dependencies.dataProvider - Function that returns current data
@@ -106,16 +499,18 @@
       this.statusCallback =
         dependencies.statusCallback || this.defaultStatusCallback;
 
-      // Set up event listeners
+      // Set up enhanced features
       this.setupEventListeners();
+      this.setupTabCoordination();
+      this.startPermissionWatcher();
 
       // Start autosave if enabled
       if (this.state.isEnabled) {
         this.start();
       }
 
-      this.log('AutosaveService initialized', 'info');
-      this.updateStatus('initialized', 'Autosave service initialized');
+      this.log('AutosaveService v2.0 initialized', 'info');
+      this.updateStatus('initialized', 'Enhanced autosave service initialized');
     }
 
     /**
@@ -396,7 +791,10 @@
     }
 
     /**
-     * Perform the actual save operation
+     * Perform the actual save operation with enhanced error handling
+     * @param {Object} options - Save options
+     * @param {boolean} options.force - Force save even if no changes detected
+     * @returns {Promise<boolean>} - Save success status
      */
     async performSave(options = {}) {
       const { force = false } = options;
@@ -410,6 +808,16 @@
       this.log('Starting save operation', 'debug', { force });
 
       try {
+        // Check directory permissions first
+        const hasPermissions = await this.checkPermissions();
+        if (!hasPermissions) {
+          throw new AutosaveError(
+            'Insufficient permissions to write to directory',
+            ERROR_TYPES.PERMISSION_DENIED,
+            { directory: this.config.saveDirectory }
+          );
+        }
+
         // Check if data has changed unless forced
         if (!force && !this.hasDataChanged()) {
           this.log('No data changes detected - skipping save', 'debug');
@@ -421,53 +829,154 @@
         // Get current data
         const data = this.dataProvider();
         if (!data) {
-          throw new Error('No data available to save');
+          throw new AutosaveError(
+            'No data available to save',
+            ERROR_TYPES.DATA_ERROR,
+            { dataProvider: typeof this.dataProvider }
+          );
         }
 
-        // Perform the save
+        // Perform the save with proper error classification
         const success = await this.fileService.writeFile(data);
 
         if (success) {
-          const saveTime = Date.now() - startTime;
-          this.handleSaveSuccess(saveTime);
+          // Save successful
+          const saveTime = Date.now();
+          const duration = saveTime - startTime;
+
+          this.state.lastSaveTime = saveTime;
+          this.state.lastSuccessfulSave = saveTime;
+          this.state.consecutiveFailures = 0;
+          this.state.statistics.successfulSaves++;
+          this.state.statistics.totalSaveTime += duration;
+
+          // Update average save time
+          this.state.statistics.averageSaveTime =
+            this.state.statistics.totalSaveTime /
+            this.state.statistics.successfulSaves;
+
+          // Broadcast save to other tabs
+          this.broadcastTabMessage('save-completed', {
+            timestamp: saveTime,
+            statistics: {
+              duration,
+              dataSize: JSON.stringify(data).length,
+            },
+          });
+
+          this.updateStatus('saved', `Data saved successfully (${duration}ms)`);
+          this.log('Save completed successfully', 'info', {
+            duration,
+            saveTime,
+          });
+
+          // Persist updated statistics
+          this.persistState();
+
           return true;
         } else {
-          throw new Error('FileService returned false');
+          throw new AutosaveError(
+            'FileService returned false - save operation failed',
+            ERROR_TYPES.WRITE_ERROR,
+            { fileService: this.fileService.constructor.name }
+          );
         }
       } catch (error) {
-        this.handleSaveError(error);
+        // Enhanced error handling with classification
+        this.state.consecutiveFailures++;
+        this.state.statistics.failedSaves++;
+
+        let autosaveError;
+        if (error instanceof AutosaveError) {
+          autosaveError = error;
+        } else {
+          // Classify the error type
+          let errorType = ERROR_TYPES.UNKNOWN;
+          if (
+            error.name === 'NotAllowedError' ||
+            error.message.includes('permission')
+          ) {
+            errorType = ERROR_TYPES.PERMISSION_DENIED;
+          } else if (error.name === 'QuotaExceededError') {
+            errorType = ERROR_TYPES.QUOTA_EXCEEDED;
+          } else if (error.name === 'NetworkError') {
+            errorType = ERROR_TYPES.NETWORK_ERROR;
+          }
+
+          autosaveError = new AutosaveError(error.message, errorType, {
+            originalError: error.name,
+            stack: error.stack,
+          });
+        }
+
+        const duration = Date.now() - startTime;
+        this.log('Save operation failed', 'error', {
+          error: autosaveError.message,
+          type: autosaveError.type,
+          duration,
+          consecutiveFailures: this.state.consecutiveFailures,
+          context: autosaveError.context,
+        });
+
+        // Broadcast error to other tabs
+        this.broadcastTabMessage('save-failed', {
+          error: {
+            message: autosaveError.message,
+            type: autosaveError.type,
+            context: autosaveError.context,
+          },
+        });
+
+        this.updateStatus('error', `Save failed: ${autosaveError.message}`);
+
+        // Schedule retry based on error type and consecutive failures
+        this.scheduleRetry(autosaveError);
+
         return false;
       } finally {
         this.state.saveInProgress = false;
 
-        // Check if there's a pending save request
+        // Check for pending save request
         if (this.state.pendingSave) {
           this.state.pendingSave = false;
-          // Schedule another save attempt
-          setTimeout(() => this.saveNow(), 100);
+          setTimeout(() => {
+            this.debouncedSave();
+          }, this.config.debounceDelay);
         }
       }
     }
 
     /**
-     * Handle successful save
+     * Schedule retry based on error type and consecutive failures
+     * @param {AutosaveError} error - The error that occurred
      */
-    handleSaveSuccess(saveTime) {
-      this.state.lastSaveTime = Date.now();
-      this.state.retryCount = 0;
-      this.state.statistics.successfulSaves++;
-      this.state.statistics.lastSuccessfulSave = this.state.lastSaveTime;
+    scheduleRetry(error) {
+      // Don't retry for certain error types
+      if (
+        error.type === ERROR_TYPES.PERMISSION_DENIED &&
+        this.state.consecutiveFailures > 3
+      ) {
+        this.log('Too many permission errors - disabling autosave', 'warn');
+        this.stop();
+        return;
+      }
 
-      // Update average save time
-      const { averageSaveTime, totalSaves } = this.state.statistics;
-      this.state.statistics.averageSaveTime =
-        (averageSaveTime * (totalSaves - 1) + saveTime) / totalSaves;
+      // Calculate retry delay based on consecutive failures (exponential backoff)
+      const baseDelay = this.config.retryDelay;
+      const maxDelay = this.config.maxRetryDelay;
+      const delay = Math.min(
+        baseDelay * Math.pow(2, this.state.consecutiveFailures - 1),
+        maxDelay
+      );
 
-      this.log(`Save successful in ${saveTime}ms`, 'info');
-      this.updateStatus('saved', `Data saved successfully`);
+      this.log(`Scheduling retry in ${delay}ms`, 'debug', {
+        consecutiveFailures: this.state.consecutiveFailures,
+        errorType: error.type,
+      });
 
-      // Send broadcast notification
-      this.sendDataUpdateBroadcast();
+      this.retryTimer = setTimeout(() => {
+        this.saveNow({ force: true });
+      }, delay);
     }
 
     /**
@@ -488,28 +997,6 @@
         this.updateStatus('max-retries', 'Save failed after maximum retries');
         this.state.retryCount = 0;
       }
-    }
-
-    /**
-     * Schedule a retry attempt
-     */
-    scheduleRetry() {
-      const delay =
-        this.config.initialRetryDelay *
-        Math.pow(this.config.retryDelayMultiplier, this.state.retryCount - 1);
-
-      this.log(
-        `Scheduling retry ${this.state.retryCount} in ${delay}ms`,
-        'info'
-      );
-      this.updateStatus(
-        'retry-scheduled',
-        `Retry scheduled in ${Math.round(delay / 1000)}s`
-      );
-
-      this.retryTimer = setTimeout(() => {
-        this.saveNow({ force: true, skipThrottle: true });
-      }, delay);
     }
 
     /**

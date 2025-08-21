@@ -4115,9 +4115,8 @@
         );
       }
 
-      function SettingsModal({ isOpen, onClose, fileService, onDataLoaded }) {
+      function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus, onFileStatusChange }) {
         const [isConnecting, setIsConnecting] = useState(false);
-        const [connectionStatus, setConnectionStatus] = useState('disconnected');
         const [loadingData, setLoadingData] = useState(false);
 
         const handleConnect = async () => {
@@ -4125,15 +4124,15 @@
           try {
             const connected = await fileService.connect();
             if (connected) {
-              setConnectionStatus('connected');
+              onFileStatusChange('connected');
               showToast('Directory connected successfully!', 'success');
             } else {
-              setConnectionStatus('disconnected');
+              onFileStatusChange('disconnected');
               showToast('Failed to connect to directory', 'error');
             }
           } catch (error) {
             console.error('Connection error:', error);
-            setConnectionStatus('disconnected');
+            onFileStatusChange('disconnected');
             showToast('Error connecting to directory', 'error');
           } finally {
             setIsConnecting(false);
@@ -4334,10 +4333,10 @@
                   'div',
                   {
                     className: `px-3 py-1 rounded-full text-xs font-medium ${
-                      connectionStatus === 'connected' ? 'bg-green-600 text-green-100' : 'bg-red-600 text-red-100'
+                      fileStatus === 'connected' ? 'bg-green-600 text-green-100' : 'bg-red-600 text-red-100'
                     }`,
                   },
-                  connectionStatus === 'connected' ? 'Connected' : 'Disconnected'
+                  fileStatus === 'connected' ? 'Connected' : 'Disconnected'
                 )
               )
             ),
@@ -4355,9 +4354,9 @@
                   'button',
                   {
                     onClick: handleLoadData,
-                    disabled: loadingData || connectionStatus !== 'connected',
+                    disabled: loadingData || fileStatus !== 'connected',
                     className: `px-4 py-3 rounded-lg font-medium transition-colors ${
-                      loadingData || connectionStatus !== 'connected'
+                      loadingData || fileStatus !== 'connected'
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-green-600 hover:bg-green-700 text-white'
                     }`,
@@ -4368,9 +4367,9 @@
                   'button',
                   {
                     onClick: handleCreateSample,
-                    disabled: connectionStatus !== 'connected',
+                    disabled: fileStatus !== 'connected',
                     className: `px-4 py-3 rounded-lg font-medium transition-colors ${
-                      connectionStatus !== 'connected'
+                      fileStatus !== 'connected'
                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                         : 'bg-orange-600 hover:bg-orange-700 text-white'
                     }`,
@@ -4685,6 +4684,8 @@
             onClose: () => setIsSettingsOpen(false),
             fileService,
             onDataLoaded: handleDataLoaded,
+            fileStatus,
+            onFileStatusChange: setFileStatus,
           })
         );
       }

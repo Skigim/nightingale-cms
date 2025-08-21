@@ -1,10 +1,20 @@
-# Nightingale CMS Autosave Service
+# Nightingale CMS Autosave Service v2.0
 
 ## Overview
 
-Intelligent automatic saving for the Nightingale CMS with change detection, error recovery, and configurable intervals.
+Intelligent automatic saving for the Nightingale CMS with enhanced permission awareness, multi-tab coordination, and production-grade error handling.
 
-## Features
+## Key Features
+
+### v2.0 Enhancements ✨
+
+- **Permission Awareness**: Real-time directory permission monitoring
+- **Multi-Tab Coordination**: Cross-tab communication prevents save conflicts
+- **Enhanced Error Classification**: Structured error types with appropriate responses
+- **Configuration Persistence**: Settings survive browser sessions
+- **Advanced Statistics**: Comprehensive performance and reliability tracking
+
+### Core Features
 
 - **Smart Saving**: Only saves when data actually changes (uses hashing)
 - **Configurable**: Customizable save intervals and debounce timing
@@ -35,7 +45,7 @@ useEffect(() => {
     saveInterval: 30000, // Save every 30 seconds
     debounceDelay: 3000, // Wait 3 seconds after changes
     maxRetries: 3, // Retry failed saves 3 times
-    enabled: connectionStatus === 'connected',
+    enabled: fileStatus === 'connected',
   });
 
   autosaveServiceRef.current.initialize({
@@ -45,7 +55,7 @@ useEffect(() => {
   });
 
   return () => autosaveServiceRef.current?.destroy();
-}, [fullData, connectionStatus]);
+}, [fullData, fileStatus]);
 ```
 
 ### 3. Notify on Data Changes
@@ -88,15 +98,40 @@ const handleDataUpdate = useCallback((newData, changeType) => {
 
 ## Configuration Options
 
-| Option                   | Default | Description                 |
-| ------------------------ | ------- | --------------------------- |
-| `saveInterval`           | 30000   | Auto-save interval (ms)     |
-| `debounceDelay`          | 2000    | Delay after changes (ms)    |
-| `maxRetries`             | 3       | Max retry attempts          |
-| `minSaveInterval`        | 5000    | Min time between saves (ms) |
-| `enabled`                | true    | Enable/disable autosave     |
-| `saveOnVisibilityChange` | true    | Save when switching tabs    |
-| `saveOnUnload`           | true    | Save on page unload         |
+| Option                    | Default | Description                         |
+| ------------------------- | ------- | ----------------------------------- |
+| `saveInterval`            | 30000   | Auto-save interval (ms)             |
+| `debounceDelay`           | 2000    | Delay after changes (ms)            |
+| `maxRetries`              | 3       | Max retry attempts                  |
+| `minSaveInterval`         | 5000    | Min time between saves (ms)         |
+| `enabled`                 | true    | Enable/disable autosave             |
+| `saveOnVisibilityChange`  | true    | Save when switching tabs            |
+| `saveOnUnload`            | true    | Save on page unload                 |
+| `retryDelay`              | 1000    | Initial retry delay (ms) **v2.0**   |
+| `maxRetryDelay`           | 30000   | Maximum retry delay (ms) **v2.0**   |
+| `permissionCheckInterval` | 60000   | Permission check frequency **v2.0** |
+
+## Enhanced Error Handling (v2.0)
+
+The service now includes structured error classification:
+
+```javascript
+ERROR_TYPES = {
+  PERMISSION_DENIED: 'permission_denied',
+  QUOTA_EXCEEDED: 'quota_exceeded',
+  NETWORK_ERROR: 'network_error',
+  DATA_ERROR: 'data_error',
+  WRITE_ERROR: 'write_error',
+  UNKNOWN: 'unknown',
+};
+```
+
+Different error types trigger appropriate retry strategies:
+
+- **Permission errors**: Check permissions before retry, disable after 3 failures
+- **Quota errors**: Longer delays, user notification
+- **Network errors**: Standard exponential backoff
+- **Data errors**: Immediate failure, no retry
 
 ## API Methods
 
@@ -118,6 +153,19 @@ The service reports these status types via the status callback:
 - `retry-scheduled` - Retry attempt scheduled
 - `no-changes` - No changes detected
 - `max-retries` - All retries exhausted
+- `permission-denied` - Directory access denied **v2.0**
+- `permission-restored` - Directory access restored **v2.0**
+
+## Multi-Tab Coordination (v2.0)
+
+The service coordinates saves across browser tabs using BroadcastChannel:
+
+```javascript
+// Automatic coordination - no configuration needed
+// Service prevents simultaneous saves from multiple tabs
+// Shared statistics and error states across tabs
+// Cross-tab notifications for save events
+```
 
 ## Integration Examples
 
@@ -198,11 +246,16 @@ const handleManualSave = async () => {
 4. **Configure by Environment**: Use different settings for dev vs production
 5. **Clean Up**: Call `destroy()` when the component unmounts
 6. **Monitor Performance**: Use statistics to track save success rates
+7. **Handle Permissions**: Monitor permission status for directory access **v2.0**
+8. **Multi-Tab Awareness**: Service automatically coordinates across tabs **v2.0**
 
-## Migration from Manual Save
+## v2.0 Migration Notes
 
-1. Keep existing manual save as fallback
-2. Initialize autosave alongside current system
-3. Replace manual save calls with `notifyDataChange()`
-4. Update UI to show autosave status
-5. Remove manual save UI once autosave is stable
+The v2.0 service is backward compatible with v1.0 integrations. New features are opt-in:
+
+- **Permission monitoring**: Automatic when FileSystemService supports `checkPermission()`
+- **Multi-tab coordination**: Automatic via BroadcastChannel
+- **Enhanced statistics**: Available in status callback
+- **Error classification**: Provides more detailed error information
+
+No breaking changes to existing API or integration patterns.
