@@ -382,7 +382,71 @@ Specialized Business Components (Business Layer)
 - Components can access each other via window.ComponentName
 - Proper ES6 module exports for future migration compatibility
 
-## 🚀 Development Workflow
+## � Git Commit Guidelines
+
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification for clear, consistent commit messages that improve project maintainability and enable automated tools.
+
+### **Commit Message Format**
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### **Commit Types**
+
+- **feat**: A new feature for the user
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that do not affect meaning (white-space, formatting, etc.)
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **test**: Adding missing tests or correcting existing tests
+- **chore**: Changes to build process, auxiliary tools, libraries, etc.
+
+### **Scope Examples**
+
+- **modals**: Modal component changes
+- **ui**: UI component library changes
+- **data**: Data handling and migration changes
+- **config**: Configuration file changes
+- **services**: Service layer changes
+
+### **Examples**
+
+```bash
+# New feature
+feat(modals): add cancel buttons to edit mode footers
+
+# Bug fix
+fix(data): resolve case MCN validation error
+
+# Breaking change
+feat(ui): redesign Button component API
+
+BREAKING CHANGE: Button component now requires variant prop
+
+# Documentation
+docs: update component integration guide
+
+# Refactoring
+refactor(services): simplify file service error handling
+```
+
+### **Breaking Changes**
+
+When introducing breaking changes, include `BREAKING CHANGE:` in the footer with a description of what changed and migration instructions.
+
+### **Benefits**
+
+- **Automated Changelog Generation**: Tools can generate release notes automatically
+- **Semantic Versioning**: Commits can trigger appropriate version bumps
+- **Clear History**: Easy to understand what each commit accomplishes
+- **Team Communication**: Consistent format improves collaboration
+
+## �🚀 Development Workflow
 
 1. **Component Development**: Create components in js/components/ui/ (generic) or js/components/business/ (domain-specific)
 2. **Data Operations**: Use js/services/nightingale.fileservice.js for persistence

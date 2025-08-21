@@ -104,6 +104,16 @@ function Button({
       'hover:border-gray-500',
       'focus:ring-gray-500',
     ],
+    cancel: [
+      'bg-transparent',
+      'hover:bg-gray-700',
+      'text-gray-300',
+      'hover:text-white',
+      'border',
+      'border-gray-600',
+      'hover:border-gray-500',
+      'focus:ring-gray-500',
+    ],
     ghost: [
       'bg-transparent',
       'hover:bg-gray-800',
@@ -292,6 +302,11 @@ function OutlineButton(props) {
   return e(Button, { ...props, variant: 'outline' });
 }
 
+function CancelButton(props) {
+  const e = window.React.createElement;
+  return e(Button, { ...props, variant: 'cancel' });
+}
+
 function GhostButton(props) {
   const e = window.React.createElement;
   return e(Button, { ...props, variant: 'ghost' });
@@ -344,6 +359,7 @@ if (typeof window !== 'undefined') {
   window.DangerButton = DangerButton;
   window.SuccessButton = SuccessButton;
   window.OutlineButton = OutlineButton;
+  window.CancelButton = CancelButton;
   window.GhostButton = GhostButton;
   window.LinkButton = LinkButton;
   window.ButtonIcons = ButtonIcons;
@@ -370,6 +386,10 @@ if (typeof window !== 'undefined') {
     window.NightingaleComponentLibrary.registerComponent(
       'OutlineButton',
       OutlineButton
+    );
+    window.NightingaleComponentLibrary.registerComponent(
+      'CancelButton',
+      CancelButton
     );
     window.NightingaleComponentLibrary.registerComponent(
       'GhostButton',

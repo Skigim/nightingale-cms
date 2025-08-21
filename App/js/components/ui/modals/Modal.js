@@ -16,7 +16,6 @@
  * @param {React.Element} props.footerContent - Optional footer content
  * @param {string} props.size - Modal size: 'small', 'default', 'large', 'xlarge'
  * @param {boolean} props.showCloseButton - Whether to show the X close button
- * @param {boolean} props.closeOnBackdropClick - Whether clicking backdrop closes modal
  * @param {string} props.className - Additional CSS classes
  * @returns {React.Element} Modal component
  */
@@ -28,7 +27,6 @@ function Modal({
   footerContent,
   size = 'default',
   showCloseButton = true,
-  closeOnBackdropClick = true,
   className = '',
 }) {
   const e = window.React.createElement;
@@ -50,13 +48,6 @@ function Modal({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
-
-  // Handle backdrop click
-  const handleBackdropClick = (e) => {
-    if (closeOnBackdropClick && e.target === e.currentTarget && onClose) {
-      onClose();
-    }
-  };
 
   // Enhanced focus management using NightingaleFocusManager
   useEffect(() => {
@@ -99,14 +90,13 @@ function Modal({
   return e(
     'div',
     {
-      className:
-        'fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 modal-backdrop',
-      onClick: handleBackdropClick,
+      className: 'fixed inset-0 z-50 overflow-auto pointer-events-none',
     },
     e(
       'div',
       {
-        className: 'flex items-center justify-center min-h-screen p-4',
+        className:
+          'flex items-center justify-center min-h-screen p-4 pointer-events-none',
         role: 'dialog',
         'aria-modal': 'true',
         'aria-labelledby': title ? 'modal-title' : undefined,
@@ -115,11 +105,8 @@ function Modal({
         'div',
         {
           ref: modalRef,
-          className: `bg-gray-800 rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden ${className}`,
-          onClick: (e) => e.stopPropagation(),
-        },
-
-        // Header
+          className: `bg-gray-800 rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden pointer-events-auto ${className}`,
+        }, // Header
         title &&
           e(
             'div',
@@ -320,7 +307,6 @@ function FormModal({
       onClose: onCancel,
       title,
       footerContent,
-      closeOnBackdropClick: !isSubmitting,
     },
     e('form', { onSubmit: handleSubmit }, children)
   );
