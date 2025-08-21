@@ -87,7 +87,7 @@ function PersonCreationModal({
   }, [personData, originalPersonData, editPersonId]);
 
   // Step configuration
-  const steps = useMemo(
+  const stepsConfig = useMemo(
     () => [
       {
         title: 'Basic Information',
@@ -108,6 +108,17 @@ function PersonCreationModal({
     ],
     []
   );
+
+  // Create filtered steps config for edit mode (removes Review step)
+  const filteredStepsConfig = editPersonId
+    ? stepsConfig.filter((step) => step.title !== 'Review & Save')
+    : stepsConfig;
+
+  // Create steps array for StepperModal
+  const steps = filteredStepsConfig.map(({ title, description }) => ({
+    title: title || 'Untitled Step',
+    description: description || '',
+  }));
 
   // Validation functions using Nightingale services
   const validateStep = useCallback(
@@ -179,6 +190,14 @@ function PersonCreationModal({
   // Handle step change with validation
   const handleStepChange = useCallback(
     (newStep) => {
+      if (editPersonId) {
+        // Edit mode: Allow free navigation to any step
+        setValidationErrors({});
+        setCurrentStep(newStep);
+        return;
+      }
+
+      // Creation mode: Validate before advancing
       if (newStep > currentStep) {
         // Validate current step before advancing
         const stepErrors = validateStep(currentStep);
@@ -195,7 +214,7 @@ function PersonCreationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep]
+    [currentStep, validateStep, editPersonId]
   );
 
   // Handle form data updates
@@ -251,7 +270,18 @@ function PersonCreationModal({
 
   // Handle form submission
   const handleSubmit = useCallback(async () => {
-    const finalErrors = validateStep(3);
+    // Final validation - check all available steps based on mode
+    const maxStepIndex = editPersonId ? filteredStepsConfig.length - 1 : 3;
+    const allStepErrors = [];
+    for (let i = 0; i <= maxStepIndex; i++) {
+      const stepErrors = validateStep(i);
+      allStepErrors.push(stepErrors);
+    }
+    const finalErrors = allStepErrors.reduce(
+      (acc, stepErrors) => ({ ...acc, ...stepErrors }),
+      {}
+    );
+
     if (Object.keys(finalErrors).length > 0) {
       setValidationErrors(finalErrors);
       window.showToast?.('Please fix all validation errors', 'error');
@@ -368,6 +398,7 @@ function PersonCreationModal({
     onClose,
     validateStep,
     fileService,
+    filteredStepsConfig.length,
   ]);
 
   // Render step content
@@ -540,15 +571,19 @@ function PersonCreationModal({
             })
           ),
           e(
-            'h4',
-            { className: 'font-medium text-gray-300 mt-6 mb-3' },
-            'Mailing Address'
+            'div',
+            { className: 'flex items-center justify-between mt-6 mb-3' },
+            e(
+              'h4',
+              { className: 'font-medium text-gray-300' },
+              'Mailing Address'
+            ),
+            e(Checkbox, {
+              checked: personData.mailingAddress.sameAsPhysical,
+              onChange: handleMailingAddressSync,
+              label: 'Same as physical address',
+            })
           ),
-          e(Checkbox, {
-            checked: personData.mailingAddress.sameAsPhysical,
-            onChange: handleMailingAddressSync,
-            label: 'Same as physical address',
-          }),
           !personData.mailingAddress.sameAsPhysical &&
             e(
               'div',
@@ -808,33 +843,23 @@ function PersonCreationModal({
     ? e(
         'div',
         {
-          className:
-            'flex items-center justify-between px-6 py-4 border-t border-gray-600',
+          className: 'flex items-center justify-end px-6 py-4 space-x-3',
         },
         e(
-          'span',
-          { className: 'text-sm text-gray-400' },
-          hasChanges ? 'You have unsaved changes' : 'No changes made'
+          window.OutlineButton,
+          {
+            onClick: onClose,
+          },
+          'Cancel'
         ),
         e(
-          'div',
-          { className: 'flex space-x-3' },
-          e(
-            window.OutlineButton,
-            {
-              onClick: onClose,
-            },
-            'Cancel'
-          ),
-          e(
-            window.PrimaryButton,
-            {
-              onClick: handleSubmit,
-              disabled: isLoading || !hasChanges,
-              loading: isLoading,
-            },
-            isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'
-          )
+          window.PrimaryButton,
+          {
+            onClick: handleSubmit,
+            disabled: isLoading || !hasChanges,
+            loading: isLoading,
+          },
+          isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'
         )
       )
     : null;

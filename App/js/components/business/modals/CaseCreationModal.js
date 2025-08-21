@@ -695,6 +695,7 @@ function CaseCreationModal({
   onCaseCreated,
   editCaseId = null, // If provided, component will edit existing case
   fileService = null, // File service instance for data operations
+  onViewCaseDetails = null, // Callback to switch to case details view
 }) {
   const e = window.React.createElement;
   const {
@@ -709,8 +710,13 @@ function CaseCreationModal({
     useStateHook(getInitialCaseData());
   const [errors, setErrors] = useStateHook({});
 
+  // Create filtered steps config for edit mode (removes Review step)
+  const filteredStepsConfig = editCaseId
+    ? stepsConfig.filter((step) => step.title !== 'Review')
+    : stepsConfig;
+
   // Create steps array for StepperModal
-  const steps = stepsConfig.map(({ title, description }) => ({
+  const steps = filteredStepsConfig.map(({ title, description }) => ({
     title: title || 'Untitled Step',
     description: description || '',
   }));
@@ -780,6 +786,30 @@ function CaseCreationModal({
   }, [isOpen, editCaseId]);
 
   const handleStepChange = (newStep) => {
+    // In edit mode, allow free navigation between steps
+    if (editCaseId) {
+      setCurrentStep(newStep);
+      // Enhanced focus management for edit mode navigation
+      if (window.NightingaleFocusManager) {
+        setTimeout(() => {
+          window.NightingaleFocusManager.focusStepChange(
+            '[data-step-content]', // Target the step content area
+            newStep,
+            {
+              onFocused: (element) => {
+                console.debug(
+                  `Edit mode step ${newStep + 1} focused:`,
+                  element.tagName
+                );
+              },
+            }
+          );
+        }, 100);
+      }
+      return;
+    }
+
+    // Create mode: enforce validation for forward movement
     if (newStep > currentStep) {
       if (validateStep(currentStep)) {
         setCurrentStep(newStep);
@@ -990,7 +1020,7 @@ function CaseCreationModal({
   };
 
   const renderStepContent = () => {
-    const currentStepConfig = stepsConfig[currentStep];
+    const currentStepConfig = filteredStepsConfig[currentStep];
 
     if (!currentStepConfig || !currentStepConfig.component) {
       return e(
@@ -1010,22 +1040,33 @@ function CaseCreationModal({
     });
   };
 
-  // Custom footer for edit mode - single save button
+  // Custom footer for edit mode - with View Full Case option
   const editModeFooter = editCaseId
     ? e(
         'div',
         {
-          className:
-            'flex items-center justify-between px-6 py-4 border-t border-gray-600',
+          className: 'flex items-center justify-between px-6 py-4',
         },
         e(
-          'span',
-          { className: 'text-sm text-gray-400' },
-          hasChanges ? 'You have unsaved changes' : 'No changes made'
+          window.Button,
+          {
+            variant: 'outline',
+            onClick: () => {
+              if (onViewCaseDetails) {
+                onClose(); // Close the modal first
+                onViewCaseDetails(editCaseId); // Switch to case details view
+              } else {
+                console.log('View Full Case clicked for case:', editCaseId);
+                console.warn('onViewCaseDetails callback not provided');
+              }
+            },
+            icon: 'view',
+          },
+          'View Full Case'
         ),
         e(
           'div',
-          { className: 'flex space-x-3' },
+          { className: 'flex space-x-3 ml-6' }, // Added ml-6 for padding between sections
           e(
             window.OutlineButton,
             {

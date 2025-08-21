@@ -2272,6 +2272,12 @@
               editCaseId: caseData.id,
               fullData,
               fileService,
+              onViewCaseDetails: (caseId) => {
+                setIsEditModalOpen(false);
+                setDetailsCaseId(caseId);
+                setViewMode('details');
+                onViewModeChange?.('details');
+              },
               onCaseCreated: (updatedCaseData) => {
                 onUpdateData(updatedCaseData);
                 setIsEditModalOpen(false);
@@ -2499,6 +2505,13 @@
               editCaseId: editCaseId,
               fullData,
               fileService,
+              onViewCaseDetails: (caseId) => {
+                setIsEditModalOpen(false);
+                setEditCaseId(null);
+                setDetailsCaseId(caseId);
+                setViewMode('details');
+                onViewModeChange?.('details');
+              },
               onCaseCreated: (updatedCaseData) => {
                 onUpdateData(updatedCaseData);
                 setIsEditModalOpen(false);
