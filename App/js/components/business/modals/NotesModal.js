@@ -72,6 +72,25 @@ function NotesModal({
     setCurrentNote(null);
     setIsEditMode(false);
     setIsSubmitting(false);
+
+    // Enhanced focus management for state change to view mode
+    if (window.NightingaleFocusManager) {
+      setTimeout(() => {
+        window.NightingaleFocusManager.focusStateChange(
+          '.modal-container', // Target the modal container
+          'view',
+          {
+            onFocused: (element) => {
+              console.debug(
+                'Notes modal view mode focused:',
+                element.tagName,
+                element.type || ''
+              );
+            },
+          }
+        );
+      }, 100);
+    }
   };
 
   const validateForm = () => {
@@ -163,6 +182,59 @@ function NotesModal({
     });
     setIsEditMode(true);
     setFormErrors({});
+
+    // Enhanced focus management for state change to edit mode
+    if (window.NightingaleFocusManager) {
+      setTimeout(() => {
+        window.NightingaleFocusManager.focusStateChange(
+          '.modal-container', // Target the modal container
+          'edit',
+          {
+            preferredSelectors: [
+              '.form-field input[placeholder*="category" i]', // Category input by placeholder (case insensitive)
+              '.form-field input[placeholder*="Select or type" i]', // SearchBar placeholder
+              '.form-field .relative input', // Input within relative container (SearchBar structure)
+              '.form-field input:first-of-type', // First input in any form field
+              'input:not([disabled]):not([readonly]):not([type="hidden"])', // Any available input
+              'select:not([disabled])',
+              'textarea:not([disabled]):not([readonly])',
+              'button:not([disabled])',
+            ],
+            delay: 200, // Longer delay for SearchBar initialization
+            onFocused: (element) => {
+              console.debug(
+                'Notes modal edit mode focused:',
+                element.tagName,
+                element.type || '',
+                element.placeholder || '',
+                element.className || ''
+              );
+            },
+            onFailed: (attemptedSelectors) => {
+              console.warn(
+                'Notes modal edit mode focus failed. Attempted selectors:',
+                attemptedSelectors
+              );
+              // Debug: show what elements are actually available
+              const availableInputs = document.querySelectorAll(
+                '.modal-container input'
+              );
+              console.debug(
+                'Available inputs:',
+                Array.from(availableInputs).map((el) => ({
+                  tag: el.tagName,
+                  type: el.type,
+                  placeholder: el.placeholder,
+                  className: el.className,
+                  disabled: el.disabled,
+                  readonly: el.readOnly,
+                }))
+              );
+            },
+          }
+        );
+      }, 50); // Quick timeout for DOM update
+    }
   };
 
   const handleDelete = async (noteId) => {
@@ -223,7 +295,7 @@ function NotesModal({
           onResultSelect: handleCategorySelect,
           renderResult: (category) => e('span', null, category.name),
           className:
-            'w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400',
+            'w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 notes-category-search',
           maxResults: 6,
         })
       ),
@@ -357,7 +429,64 @@ function NotesModal({
     modalActions.push({
       label: 'Add New Note',
       variant: 'primary',
-      onClick: () => setIsEditMode(true),
+      onClick: () => {
+        setIsEditMode(true);
+
+        // Enhanced focus management for state change to edit mode (new note)
+        if (window.NightingaleFocusManager) {
+          setTimeout(() => {
+            window.NightingaleFocusManager.focusStateChange(
+              '.modal-container', // Target the modal container
+              'edit',
+              {
+                preferredSelectors: [
+                  '.notes-category-search input', // Specific category SearchBar input
+                  'input[placeholder*="category" i]', // Category input by placeholder (case insensitive)
+                  'input[placeholder*="Select or type" i]', // SearchBar placeholder
+                  '.space-y-2 .relative .relative input', // SearchBar: FormField > div > SearchBar > div > input
+                  '.space-y-2 .relative input', // SearchBar fallback: FormField > SearchBar > input
+                  '.relative .relative input', // Any nested relative containers with input
+                  'input:not([disabled]):not([readonly]):not([type="hidden"])', // Any available input
+                  'select:not([disabled])',
+                  'textarea:not([disabled]):not([readonly])',
+                  'button:not([disabled])',
+                ],
+                delay: 200, // Longer delay for SearchBar initialization
+                onFocused: (element) => {
+                  console.debug(
+                    'Notes modal add mode focused:',
+                    element.tagName,
+                    element.type || '',
+                    element.placeholder || '',
+                    element.className || ''
+                  );
+                },
+                onFailed: (attemptedSelectors) => {
+                  console.warn(
+                    'Notes modal add mode focus failed. Attempted selectors:',
+                    attemptedSelectors
+                  );
+                  // Debug: show what elements are actually available
+                  const availableInputs = document.querySelectorAll(
+                    '.modal-container input'
+                  );
+                  console.debug(
+                    'Available inputs:',
+                    Array.from(availableInputs).map((el) => ({
+                      tag: el.tagName,
+                      type: el.type,
+                      placeholder: el.placeholder,
+                      className: el.className,
+                      disabled: el.disabled,
+                      readonly: el.readOnly,
+                    }))
+                  );
+                },
+              }
+            );
+          }, 50); // Quick timeout for DOM update
+        }
+      },
     });
   }
 

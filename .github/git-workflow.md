@@ -21,7 +21,7 @@ git lg  # (alias)
 
 # Switch branches
 git checkout dev
-git co dev # (alias)
+git co dev  # (alias)
 
 # Create feature branch
 git checkout -b feature/new-component

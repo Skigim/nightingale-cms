@@ -14,7 +14,9 @@
     "audit": "npm audit && npm run lint",
     "audit:security": "npm audit --audit-level=moderate",
     "format": "prettier --write App/Components/**/*.js App/js/**/*.js",
-    "docs": "jsdoc -r App/Components App/js -d docs/api"
+    "docs": "jsdoc -r App/Components App/js -d docs/api",
+    "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose",
+    "prepare": "husky"
   },
   "keywords": [
     "case-management",
@@ -37,12 +39,16 @@
   "devDependencies": {
     "@babel/core": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.33.0",
     "eslint": "^8.57.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
+    "husky": "^9.1.7",
     "jsdoc": "^4.0.0",
+    "lint-staged": "^16.1.5",
     "live-server": "^1.2.2",
     "prettier": "^3.0.0",
     "serve": "^14.2.0"
@@ -54,6 +60,10 @@
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": ["prettier --write", "eslint --fix"],
+    "*.{json,md,html,css}": ["prettier --write"]
   },
   "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
 }
