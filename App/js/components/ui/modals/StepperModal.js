@@ -187,6 +187,7 @@ function StepperModal({
         {
           ref: stepContentRef,
           className: 'w-3/4 p-4 border-l border-gray-700',
+          'data-step-content': true,
         },
         children
       )
