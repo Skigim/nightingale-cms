@@ -167,7 +167,7 @@
 
     <!-- Components will be loaded automatically by the layered architecture:
          🎨 UI Layer: Button, Badge, DataTable, FormComponents, SearchBar, Modal, StepperModal
-         🏢 Business Layer: CaseCreationModal (with integrated steps), PersonCreationModal
+         🏢 Business Layer: CaseCreationModal (with integrated steps), PersonCreationModal, OrganizationModal
     -->
 
     <!-- Day.js for date management -->
@@ -2484,12 +2484,18 @@
             isOpen: isCreateModalOpen,
             onClose: () => setIsCreateModalOpen(false),
             fullData,
-            onCaseCreated: (newCase) => {
-              const updatedData = { ...fullData };
-              updatedData.cases = [...(updatedData.cases || []), newCase];
-              onUpdateData(updatedData);
+            onCaseCreated: async (newCase) => {
+              // Reload the full data after save instead of partial update
+              try {
+                const freshData = await fileService.readFile();
+                if (freshData) {
+                  onUpdateData(freshData);
+                  showToast('Case created successfully!', 'success');
+                }
+              } catch (error) {
+                console.error('Error reloading data after case creation:', error);
+              }
               setIsCreateModalOpen(false);
-              showToast('Case created successfully!', 'success');
             },
             fileService,
           }),
@@ -2512,8 +2518,16 @@
                 setViewMode('details');
                 onViewModeChange?.('details');
               },
-              onCaseCreated: (updatedCaseData) => {
-                onUpdateData(updatedCaseData);
+              onCaseCreated: async (updatedCaseData) => {
+                // Reload the full data after save instead of partial update
+                try {
+                  const freshData = await fileService.readFile();
+                  if (freshData) {
+                    onUpdateData(freshData);
+                  }
+                } catch (error) {
+                  console.error('Error reloading data after case update:', error);
+                }
                 setIsEditModalOpen(false);
                 setEditCaseId(null);
               },
@@ -2707,8 +2721,16 @@
               onClose: () => setIsCreateModalOpen(false),
               fullData,
               fileService,
-              onPersonCreated: (newPersonData) => {
-                onUpdateData(newPersonData);
+              onPersonCreated: async (newPersonData) => {
+                // Reload the full data after save instead of partial update
+                try {
+                  const freshData = await fileService.readFile();
+                  if (freshData) {
+                    onUpdateData(freshData);
+                  }
+                } catch (error) {
+                  console.error('Error reloading data after person creation:', error);
+                }
                 setIsCreateModalOpen(false);
               },
             }),
@@ -2724,8 +2746,16 @@
               editPersonId: editPersonId,
               fullData,
               fileService,
-              onPersonCreated: (updatedPersonData) => {
-                onUpdateData(updatedPersonData);
+              onPersonCreated: async (updatedPersonData) => {
+                // Reload the full data after save instead of partial update
+                try {
+                  const freshData = await fileService.readFile();
+                  if (freshData) {
+                    onUpdateData(freshData);
+                  }
+                } catch (error) {
+                  console.error('Error reloading data after person update:', error);
+                }
                 setIsEditModalOpen(false);
                 setEditPersonId(null);
               },
@@ -2735,11 +2765,9 @@
 
       function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
         const [searchTerm, setSearchTerm] = useState('');
-        const [selectedOrganization, setSelectedOrganization] = useState(null);
-        const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
         const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-        const [editingRowId, setEditingRowId] = useState(null);
-        const [editValues, setEditValues] = useState({});
+        const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+        const [editOrganizationId, setEditOrganizationId] = useState(null);
         const [viewMode, setViewMode] = useState('list'); // 'list' or 'details'
         const [detailsOrganizationId, setDetailsOrganizationId] = useState(null);
         const [confirmingOrganizationDelete, setConfirmingOrganizationDelete] = useState(null);
@@ -2783,14 +2811,14 @@
         }, [fullData, searchTerm]);
 
         const handleOrganizationClick = (organization) => {
-          setSelectedOrganization(organization);
-          setIsDetailsModalOpen(true);
+          setEditOrganizationId(organization.id);
+          setIsEditModalOpen(true);
         };
 
-        const handleViewSummary = (organization, e) => {
+        const handleEditOrganization = (organization, e) => {
           e.stopPropagation();
-          setSelectedOrganization(organization);
-          setIsDetailsModalOpen(true);
+          setEditOrganizationId(organization.id);
+          setIsEditModalOpen(true);
         };
 
         const handleOpenOrganizationDetails = (organization, e) => {
@@ -2815,45 +2843,6 @@
 
         const cancelOrganizationDelete = () => {
           setConfirmingOrganizationDelete(null);
-        };
-
-        const handleStartEdit = (organization) => {
-          setEditingRowId(organization.id);
-          setEditValues({
-            name: organization.name || '',
-            type: organization.type || '',
-            email: organization.email || '',
-            phone: organization.phone || '',
-          });
-        };
-
-        const handleCancelEdit = () => {
-          setEditingRowId(null);
-          setEditValues({});
-        };
-
-        const handleSaveEdit = async (organization) => {
-          try {
-            const updatedData = { ...fullData };
-            const orgIndex = updatedData.organizations.findIndex((o) => o.id === organization.id);
-            if (orgIndex !== -1) {
-              updatedData.organizations[orgIndex] = {
-                ...updatedData.organizations[orgIndex],
-                name: editValues.name,
-                type: editValues.type,
-                email: editValues.email,
-                phone: editValues.phone,
-              };
-              await fileService.writeFile(updatedData);
-              onUpdateData(updatedData);
-              setEditingRowId(null);
-              setEditValues({});
-              showToast('Organization updated successfully!', 'success');
-            }
-          } catch (error) {
-            console.error('Error saving organization:', error);
-            showToast('Error saving organization', 'error');
-          }
         };
 
         const formatDate = (dateString) => {
@@ -2941,70 +2930,30 @@
                 field: 'name',
                 label: 'Organization Name',
                 sortable: true,
-                render: (value, org) =>
-                  editingRowId === org?.id
-                    ? e('input', {
-                        type: 'text',
-                        value: editValues.name,
-                        onChange: (e) => setEditValues({ ...editValues, name: e.target.value }),
-                        className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
-                      })
-                    : e('div', { className: 'font-medium text-white' }, org?.name || 'N/A'),
+                render: (value, org) => e('div', { className: 'font-medium text-white' }, org?.name || 'N/A'),
               },
               {
                 field: 'type',
                 label: 'Type',
                 sortable: true,
                 render: (value, org) =>
-                  editingRowId === org?.id
-                    ? e(
-                        'select',
-                        {
-                          value: editValues.type,
-                          onChange: (e) => setEditValues({ ...editValues, type: e.target.value }),
-                          className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
-                        },
-                        e('option', { value: '' }, 'Select Type'),
-                        e('option', { value: 'healthcare' }, 'Healthcare'),
-                        e('option', { value: 'insurance' }, 'Insurance'),
-                        e('option', { value: 'government' }, 'Government'),
-                        e('option', { value: 'nonprofit' }, 'Nonprofit'),
-                        e('option', { value: 'legal' }, 'Legal'),
-                        e('option', { value: 'other' }, 'Other')
-                      )
-                    : e(
-                        'div',
-                        { className: 'text-gray-300' },
-                        org?.type ? org.type.charAt(0).toUpperCase() + org.type.slice(1) : 'N/A'
-                      ),
+                  e(
+                    'div',
+                    { className: 'text-gray-300' },
+                    org?.type ? org.type.charAt(0).toUpperCase() + org.type.slice(1) : 'N/A'
+                  ),
               },
               {
                 field: 'email',
                 label: 'Email',
                 sortable: true,
-                render: (value, org) =>
-                  editingRowId === org?.id
-                    ? e('input', {
-                        type: 'email',
-                        value: editValues.email,
-                        onChange: (e) => setEditValues({ ...editValues, email: e.target.value }),
-                        className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
-                      })
-                    : e('div', { className: 'text-gray-300' }, org?.email || 'N/A'),
+                render: (value, org) => e('div', { className: 'text-gray-300' }, org?.email || 'N/A'),
               },
               {
                 field: 'phone',
                 label: 'Phone',
                 sortable: true,
-                render: (value, org) =>
-                  editingRowId === org?.id
-                    ? e('input', {
-                        type: 'tel',
-                        value: editValues.phone,
-                        onChange: (e) => setEditValues({ ...editValues, phone: e.target.value }),
-                        className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
-                      })
-                    : e('div', { className: 'text-gray-300' }, org?.phone || 'N/A'),
+                render: (value, org) => e('div', { className: 'text-gray-300' }, org?.phone || 'N/A'),
               },
               {
                 header: 'Status',
@@ -3022,44 +2971,22 @@
                 header: 'Actions',
                 accessor: 'actions',
                 render: (org) =>
-                  editingRowId === org.id
-                    ? e(
-                        'div',
-                        { className: 'flex space-x-2' },
-                        e(SuccessButton, {
-                          onClick: () => handleSaveEdit(org),
-                          size: 'xs',
-                          icon: 'save',
-                          children: 'Save',
-                        }),
-                        e(SecondaryButton, {
-                          onClick: handleCancelEdit,
-                          size: 'xs',
-                          children: 'Cancel',
-                        })
-                      )
-                    : e(
-                        'div',
-                        { className: 'flex space-x-2' },
-                        e(SecondaryButton, {
-                          onClick: (e) => handleViewSummary(org, e),
-                          size: 'xs',
-                          icon: 'view',
-                          children: 'View',
-                        }),
-                        e(PrimaryButton, {
-                          onClick: (e) => handleOpenOrganizationDetails(org, e),
-                          size: 'xs',
-                          icon: 'edit',
-                          children: 'Details',
-                        }),
-                        e(DangerButton, {
-                          onClick: (e) => handleDeleteOrganization(org, e),
-                          size: 'xs',
-                          icon: 'delete',
-                          children: 'Delete',
-                        })
-                      ),
+                  e(
+                    'div',
+                    { className: 'flex space-x-2' },
+                    e(PrimaryButton, {
+                      onClick: (e) => handleEditOrganization(org, e),
+                      size: 'xs',
+                      icon: 'edit',
+                      children: 'Edit',
+                    }),
+                    e(DangerButton, {
+                      onClick: (e) => handleDeleteOrganization(org, e),
+                      size: 'xs',
+                      icon: 'delete',
+                      children: 'Delete',
+                    })
+                  ),
               },
             ],
             onRowClick: handleOrganizationClick,
@@ -3083,25 +3010,50 @@
               variant: 'danger',
             }),
 
-          // Organization Details Modal
-          isDetailsModalOpen &&
-            selectedOrganization &&
-            e(OrganizationDetailsModal, {
-              isOpen: isDetailsModalOpen,
-              onClose: () => setIsDetailsModalOpen(false),
-              organization: selectedOrganization,
-              fullData,
-            }),
-
           // Create Organization Modal
           isCreateModalOpen &&
-            e(OrganizationCreationModal, {
+            e(OrganizationModal, {
               isOpen: isCreateModalOpen,
               onClose: () => setIsCreateModalOpen(false),
               fullData,
-              onOrganizationCreated: (newOrganizationData) => {
-                onUpdateData(newOrganizationData);
+              fileService,
+              onOrganizationCreated: async (newOrganizationData) => {
+                // Reload the full data after save instead of partial update
+                try {
+                  const freshData = await fileService.readFile();
+                  if (freshData) {
+                    onUpdateData(freshData);
+                  }
+                } catch (error) {
+                  console.error('Error reloading data after organization creation:', error);
+                }
                 setIsCreateModalOpen(false);
+              },
+            }),
+
+          // Edit Organization Modal
+          isEditModalOpen &&
+            e(OrganizationModal, {
+              isOpen: isEditModalOpen,
+              onClose: () => {
+                setIsEditModalOpen(false);
+                setEditOrganizationId(null);
+              },
+              editOrganizationId: editOrganizationId,
+              fullData,
+              fileService,
+              onOrganizationCreated: async (updatedOrganizationData) => {
+                // Reload the full data after save instead of partial update
+                try {
+                  const freshData = await fileService.readFile();
+                  if (freshData) {
+                    onUpdateData(freshData);
+                  }
+                } catch (error) {
+                  console.error('Error reloading data after organization update:', error);
+                }
+                setIsEditModalOpen(false);
+                setEditOrganizationId(null);
               },
             })
         );

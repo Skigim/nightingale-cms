@@ -25,7 +25,7 @@ const getInitialCaseData = () => {
 };
 
 // Step Components - Integrated directly into the modal
-function BasicInfoStep({ caseData, updateField, errors }) {
+function BasicInfoStep({ caseData, updateField, validationErrors }) {
   const e = window.React.createElement;
 
   return e(
@@ -33,7 +33,11 @@ function BasicInfoStep({ caseData, updateField, errors }) {
     { className: 'space-y-4' },
     e(
       window.FormField,
-      { label: 'Master Case Number (MCN)', required: true, error: errors.mcn },
+      {
+        label: 'Master Case Number (MCN)',
+        required: true,
+        error: validationErrors.mcn,
+      },
       e(window.TextInput, {
         value: caseData.mcn || '',
         onChange: (e) =>
@@ -49,7 +53,7 @@ function BasicInfoStep({ caseData, updateField, errors }) {
         {
           label: 'Application Date',
           required: true,
-          error: errors.applicationDate,
+          error: validationErrors.applicationDate,
         },
         e(window.DateInput, {
           value: caseData.applicationDate,
@@ -58,7 +62,11 @@ function BasicInfoStep({ caseData, updateField, errors }) {
       ),
       e(
         window.FormField,
-        { label: 'Case Type', required: true, error: errors.caseType },
+        {
+          label: 'Case Type',
+          required: true,
+          error: validationErrors.caseType,
+        },
         e(window.Select, {
           value: caseData.caseType,
           onChange: (e) => updateField('caseType', e.target.value),
@@ -78,7 +86,7 @@ function BasicInfoStep({ caseData, updateField, errors }) {
         {
           label: 'Retro Requested?',
           required: true,
-          error: errors.retroRequested,
+          error: validationErrors.retroRequested,
         },
         e(window.Select, {
           value: caseData.retroRequested,
@@ -106,7 +114,12 @@ function BasicInfoStep({ caseData, updateField, errors }) {
   );
 }
 
-function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
+function ClientSelectionStep({
+  fullData,
+  caseData,
+  updateField,
+  validationErrors,
+}) {
   const e = window.React.createElement;
   const { useState } = window.React;
 
@@ -206,7 +219,11 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
     { className: 'space-y-4 case-creation-step', style: { zIndex: 1020 } },
     e(
       window.FormField,
-      { label: 'Select Client', required: true, error: errors.personId },
+      {
+        label: 'Select Client',
+        required: true,
+        error: validationErrors.personId,
+      },
       e(window.SearchBar, {
         value: clientSearchValue,
         onChange: (e) => setClientSearchValue(e.target.value),
@@ -235,7 +252,7 @@ function ClientSelectionStep({ fullData, caseData, updateField, errors }) {
         {
           label: 'Select Spouse (for SIMP)',
           required: true,
-          error: errors.spouseId,
+          error: validationErrors.spouseId,
         },
         e(window.SearchBar, {
           value: spouseSearchValue,
@@ -292,7 +309,7 @@ function CaseDetailsStep({
   caseData,
   updateField,
   updatePersonAddress,
-  errors,
+  validationErrors,
 }) {
   const e = window.React.createElement;
   const { useEffect } = window.React;
@@ -361,7 +378,7 @@ function CaseDetailsStep({
               {
                 label: 'Street Address',
                 required: true,
-                error: errors.address,
+                error: validationErrors.address,
               },
               e(window.TextInput, {
                 value: selectedPerson.address?.street || '',
@@ -374,7 +391,7 @@ function CaseDetailsStep({
               { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
               e(
                 window.FormField,
-                { label: 'City', required: true, error: errors.city },
+                { label: 'City', required: true, error: validationErrors.city },
                 e(window.TextInput, {
                   value: selectedPerson.address?.city || '',
                   onChange: (e) => updatePersonAddress('city', e.target.value),
@@ -383,7 +400,11 @@ function CaseDetailsStep({
               ),
               e(
                 window.FormField,
-                { label: 'State', required: true, error: errors.state },
+                {
+                  label: 'State',
+                  required: true,
+                  error: validationErrors.state,
+                },
                 e(window.Select, {
                   value: selectedPerson.address?.state || 'IL',
                   onChange: (e) => updatePersonAddress('state', e.target.value),
@@ -405,7 +426,11 @@ function CaseDetailsStep({
             ),
             e(
               window.FormField,
-              { label: 'ZIP Code', required: true, error: errors.zip },
+              {
+                label: 'ZIP Code',
+                required: true,
+                error: validationErrors.zip,
+              },
               e(window.TextInput, {
                 value: selectedPerson.address?.zip || '',
                 onChange: (e) => updatePersonAddress('zip', e.target.value),
@@ -437,7 +462,7 @@ function CaseDetailsStep({
         {
           label: `Select ${caseData.livingArrangement} Facility`,
           required: true,
-          error: errors.organizationId,
+          error: validationErrors.organizationId,
         },
         e(window.Select, {
           value: caseData.organizationId,
@@ -465,7 +490,7 @@ function CaseDetailsStep({
         {
           label: 'Living Arrangement',
           required: true,
-          error: errors.livingArrangement,
+          error: validationErrors.livingArrangement,
         },
         e(window.Select, {
           value: caseData.livingArrangement,
@@ -507,7 +532,10 @@ function CaseDetailsStep({
             caseData.livingArrangement === 'Nursing Home') &&
             e(
               window.FormField,
-              { label: 'Admission Date', error: errors.admissionDate },
+              {
+                label: 'Admission Date',
+                error: validationErrors.admissionDate,
+              },
               e(window.DateInput, {
                 value: caseData.admissionDate,
                 onChange: (e) => updateField('admissionDate', e.target.value),
@@ -688,27 +716,32 @@ const stepsConfig = [
   },
 ];
 
+/* eslint-disable react/prop-types */
+/**
+ * Nightingale Component Library - CaseCreationModal
+ * Layer: Business (Domain-Specific)
+ *
+ * Modal for creating and editing case entries in the Nightingale CMS.
+ * Utilizes StepperModal for multi-step workflow with proper validation.
+ */
 function CaseCreationModal({
-  isOpen,
-  onClose,
-  fullData,
-  onCaseCreated,
+  isOpen = false,
+  onClose = () => {},
+  onCaseCreated = () => {},
   editCaseId = null, // If provided, component will edit existing case
+  fullData = null,
   fileService = null, // File service instance for data operations
   onViewCaseDetails = null, // Callback to switch to case details view
 }) {
   const e = window.React.createElement;
-  const {
-    useState: useStateHook,
-    useEffect: useEffectHook,
-    useMemo,
-  } = window.React;
+  const { useState, useEffect, useMemo, useCallback } = window.React;
 
-  const [currentStep, setCurrentStep] = useStateHook(0);
-  const [caseData, setCaseData] = useStateHook(getInitialCaseData());
+  const [currentStep, setCurrentStep] = useState(0);
+  const [caseData, setCaseData] = useState(getInitialCaseData());
   const [originalCaseData, setOriginalCaseData] =
-    useStateHook(getInitialCaseData());
-  const [errors, setErrors] = useStateHook({});
+    useState(getInitialCaseData());
+  const [validationErrors, setValidationErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   // Create filtered steps config for edit mode (removes Review step)
   const filteredStepsConfig = editCaseId
@@ -722,7 +755,7 @@ function CaseCreationModal({
   }));
 
   // Load existing case data for editing
-  useEffectHook(() => {
+  useEffect(() => {
     if (!isOpen) return; // Only run when modal is open
 
     if (editCaseId && fullData && fullData.cases) {
@@ -746,125 +779,86 @@ function CaseCreationModal({
     return JSON.stringify(caseData) !== JSON.stringify(originalCaseData);
   }, [caseData, originalCaseData, editCaseId]);
 
-  const validateStep = (stepIndex) => {
-    const stepConfig = stepsConfig[stepIndex];
+  const validateStep = useCallback(
+    (stepIndex) => {
+      const configToUse = editCaseId ? filteredStepsConfig : stepsConfig;
+      const stepConfig = configToUse[stepIndex];
 
-    if (!stepConfig || !stepConfig.validator) {
-      return true; // Default to valid if no validator
-    }
-
-    const validator = stepConfig.validator;
-    const newErrors = validator(caseData, fullData);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const isStepAccessible = (stepIndex) => {
-    if (stepIndex === 0) return true;
-
-    for (let i = 0; i < stepIndex; i++) {
-      const stepConfig = stepsConfig[i];
       if (!stepConfig || !stepConfig.validator) {
-        continue; // Skip if no validator available
+        return {}; // Return empty errors object instead of boolean
       }
 
-      const validator = stepConfig.validator;
-      if (Object.keys(validator(caseData, fullData)).length > 0) {
-        return false;
-      }
-    }
-    return true;
-  };
+      // Add defensive check for fullData to handle legacy files
+      const safeFullData = fullData || {
+        people: [],
+        organizations: [],
+        cases: [],
+      };
 
-  useEffectHook(() => {
+      try {
+        const validator = stepConfig.validator;
+        const newErrors = validator(caseData, safeFullData);
+        return newErrors;
+      } catch (error) {
+        console.warn(`Step validation error for step ${stepIndex}:`, error);
+        // In case of validation error, return empty errors (allow the step)
+        return {};
+      }
+    },
+    [editCaseId, filteredStepsConfig, caseData, fullData]
+  );
+
+  useEffect(() => {
     if (isOpen && !editCaseId) {
       // Only reset for create mode
       setCaseData(getInitialCaseData());
       setCurrentStep(0);
-      setErrors({});
+      setValidationErrors({});
     }
   }, [isOpen, editCaseId]);
 
-  const handleStepChange = (newStep) => {
-    // In edit mode, allow free navigation between steps
-    if (editCaseId) {
-      setCurrentStep(newStep);
-      // Enhanced focus management for edit mode navigation
-      if (window.NightingaleFocusManager) {
-        setTimeout(() => {
-          window.NightingaleFocusManager.focusStepChange(
-            '[data-step-content]', // Target the step content area
-            newStep,
-            {
-              onFocused: (element) => {
-                console.debug(
-                  `Edit mode step ${newStep + 1} focused:`,
-                  element.tagName
-                );
-              },
-            }
-          );
-        }, 100);
+  const handleStepChange = useCallback(
+    (newStep) => {
+      if (editCaseId) {
+        // Edit mode: Allow free navigation to any step
+        setValidationErrors({});
+        setCurrentStep(newStep);
+        return;
       }
-      return;
-    }
 
-    // Create mode: enforce validation for forward movement
-    if (newStep > currentStep) {
-      if (validateStep(currentStep)) {
-        setCurrentStep(newStep);
-        // Enhanced focus management for step progression
-        if (window.NightingaleFocusManager) {
-          setTimeout(() => {
-            window.NightingaleFocusManager.focusStepChange(
-              '[data-step-content]', // Target the step content area
-              newStep,
-              {
-                onFocused: (element) => {
-                  console.debug(
-                    `Case creation step ${newStep + 1} focused:`,
-                    element.tagName
-                  );
-                },
-              }
-            );
-          }, 100);
-        }
-      } else {
-        window.showToast('Please fix the errors before proceeding.', 'warning');
-      }
-    } else {
-      // Allow moving back to any previously accessible step
-      if (isStepAccessible(newStep)) {
-        setErrors({}); // Clear errors when moving back
-        setCurrentStep(newStep);
-        // Enhanced focus management for step regression
-        if (window.NightingaleFocusManager) {
-          setTimeout(() => {
-            window.NightingaleFocusManager.focusStepChange(
-              '[data-step-content]', // Target the step content area
-              newStep,
-              {
-                onFocused: (element) => {
-                  console.debug(
-                    `Case creation step ${newStep + 1} focused (back):`,
-                    element.tagName
-                  );
-                },
-              }
-            );
-          }, 100);
+      // Creation mode: Validate before advancing
+      if (newStep > currentStep) {
+        // Validate current step before advancing
+        const stepErrors = validateStep(currentStep);
+        if (Object.keys(stepErrors).length > 0) {
+          setValidationErrors(stepErrors);
+          window.showToast?.(
+            'Please fix validation errors before continuing',
+            'error'
+          );
+          return;
         }
       }
-    }
-  };
+
+      setValidationErrors({});
+      setCurrentStep(newStep);
+    },
+    [currentStep, validateStep, editCaseId, setCurrentStep, setValidationErrors]
+  );
 
   const handleComplete = async () => {
     // Final validation of all steps before completing
-    for (let i = 0; i < stepsConfig.length - 1; i++) {
-      if (!validateStep(i)) {
+    const configToUse = editCaseId ? filteredStepsConfig : stepsConfig;
+    const maxStepIndex = editCaseId
+      ? configToUse.length - 1
+      : stepsConfig.length - 1;
+
+    for (let i = 0; i <= maxStepIndex; i++) {
+      const stepErrors = validateStep(i);
+      if (Object.keys(stepErrors).length > 0) {
+        setValidationErrors(stepErrors);
         setCurrentStep(i);
-        const stepTitle = stepsConfig[i]?.title || `Step ${i + 1}`;
+        const stepTitle = configToUse[i]?.title || `Step ${i + 1}`;
         window.showToast(
           `Please fix the errors on the '${stepTitle}' step.`,
           'error'
@@ -874,6 +868,7 @@ function CaseCreationModal({
     }
 
     try {
+      setIsLoading(true);
       if (!fileService) {
         throw new Error('File service not available');
       }
@@ -948,13 +943,15 @@ function CaseCreationModal({
     } catch (error) {
       console.error('Error saving case:', error);
       window.showToast('Error saving case: ' + error.message, 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const updateField = (field, value) => {
     setCaseData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
     }
 
     // Update person's living arrangement data when relevant fields change
@@ -1011,7 +1008,7 @@ function CaseCreationModal({
       // Clear validation errors for address fields
       const addressErrors = ['address', 'city', 'state', 'zip'];
       if (addressErrors.includes(addressField)) {
-        setErrors((prev) => ({ ...prev, [addressField]: undefined }));
+        setValidationErrors((prev) => ({ ...prev, [addressField]: undefined }));
       }
 
       // Force a re-render by updating a timestamp or similar
@@ -1035,7 +1032,7 @@ function CaseCreationModal({
       caseData,
       updateField,
       updatePersonAddress,
-      errors,
+      validationErrors,
       fullData,
     });
   };
@@ -1096,9 +1093,12 @@ function CaseCreationModal({
       currentStep,
       onStepChange: handleStepChange,
       onComplete: handleComplete,
-      isStepClickable: isStepAccessible,
-      completButtonText: editCaseId ? 'Update Case' : 'Create Case',
-      isCompleteDisabled: editCaseId && !hasChanges,
+      completButtonText: isLoading
+        ? 'Saving...'
+        : editCaseId
+          ? 'Update Case'
+          : 'Create Case',
+      isCompleteDisabled: isLoading || (editCaseId && !hasChanges),
       customFooterContent: editModeFooter,
     },
     renderStepContent()
