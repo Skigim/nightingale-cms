@@ -59,17 +59,86 @@ function PersonCreationModal({
     if (editPersonId && fullData && fullData.people) {
       const existingPerson = fullData.people.find((p) => p.id === editPersonId);
       if (existingPerson) {
+        // Handle address data - could be string or object format
+        let addressData = getInitialPersonData().address; // Default structure
+        if (existingPerson.address) {
+          if (typeof existingPerson.address === 'string') {
+            // Parse string format: "123 Main St, Springfield, IL 62701"
+            const addressParts = existingPerson.address.split(', ');
+            if (addressParts.length >= 3) {
+              const [street, city, stateZip] = addressParts;
+              const stateZipMatch = stateZip.match(
+                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/
+              );
+              if (stateZipMatch) {
+                addressData = {
+                  street: street || '',
+                  city: city || '',
+                  state: stateZipMatch[1] || 'NE',
+                  zip: stateZipMatch[2] || '',
+                };
+              }
+            }
+          } else if (typeof existingPerson.address === 'object') {
+            // Already in object format
+            addressData = {
+              ...getInitialPersonData().address,
+              ...existingPerson.address,
+            };
+          }
+        }
+
+        // Handle mailing address data - could be string, object, or missing
+        let mailingAddressData = {
+          ...getInitialPersonData().mailingAddress,
+          sameAsPhysical: true, // Default to same as physical
+        };
+
+        if (existingPerson.mailingAddress) {
+          if (typeof existingPerson.mailingAddress === 'string') {
+            // Parse string format for mailing address
+            const mailingParts = existingPerson.mailingAddress.split(', ');
+            if (mailingParts.length >= 3) {
+              const [street, city, stateZip] = mailingParts;
+              const stateZipMatch = stateZip.match(
+                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/
+              );
+              if (stateZipMatch) {
+                mailingAddressData = {
+                  street: street || '',
+                  city: city || '',
+                  state: stateZipMatch[1] || 'NE',
+                  zip: stateZipMatch[2] || '',
+                  sameAsPhysical: false,
+                };
+              }
+            }
+          } else if (typeof existingPerson.mailingAddress === 'object') {
+            mailingAddressData = {
+              ...getInitialPersonData().mailingAddress,
+              ...existingPerson.mailingAddress,
+              sameAsPhysical:
+                existingPerson.mailingAddress.sameAsPhysical !== undefined
+                  ? existingPerson.mailingAddress.sameAsPhysical
+                  : JSON.stringify(addressData) ===
+                    JSON.stringify(existingPerson.mailingAddress),
+            };
+          }
+        } else {
+          // No mailing address data, default to same as physical
+          mailingAddressData = {
+            ...addressData,
+            sameAsPhysical: true,
+          };
+        }
+
         const personDataWithDefaults = {
           ...getInitialPersonData(),
           ...existingPerson,
-          mailingAddress: {
-            ...existingPerson.mailingAddress,
-            sameAsPhysical:
-              !existingPerson.mailingAddress ||
-              JSON.stringify(existingPerson.address) ===
-                JSON.stringify(existingPerson.mailingAddress),
-          },
+          address: addressData,
+          mailingAddress: mailingAddressData,
         };
+
         setPersonData(personDataWithDefaults);
         setOriginalPersonData(personDataWithDefaults);
       }
@@ -123,71 +192,76 @@ function PersonCreationModal({
   // Validation functions using Nightingale services
   const validateStep = useCallback(
     (stepIndex) => {
+      // Add defensive check for fullData to handle legacy files (used in try-catch)
       const validators = window.Validators || {};
       const errors = {};
 
-      switch (stepIndex) {
-        case 0: // Basic Information
-          if (!personData.name?.trim()) {
-            errors.name = 'Name is required';
-          }
-          if (!personData.dateOfBirth) {
-            errors.dateOfBirth = 'Date of birth is required';
-          }
-          if (personData.ssn) {
-            // Simple SSN format validation (XXX-XX-XXXX)
-            const ssnPattern = /^\d{3}-\d{2}-\d{4}$/;
-            if (!ssnPattern.test(personData.ssn)) {
-              errors.ssn = 'Invalid SSN format (use XXX-XX-XXXX)';
+      try {
+        switch (stepIndex) {
+          case 0: // Basic Information
+            if (!personData.name?.trim()) {
+              errors.name = 'Name is required';
             }
-          }
-          break;
-
-        case 1: // Contact Information
-          if (personData.phone) {
-            const phoneValidator = validators.phone?.();
-            if (phoneValidator && !phoneValidator(personData.phone).isValid) {
-              errors.phone = 'Invalid phone number format';
+            if (!personData.dateOfBirth) {
+              errors.dateOfBirth = 'Date of birth is required';
             }
-          }
-          if (personData.email) {
-            const emailValidator = validators.email?.();
-            if (emailValidator && !emailValidator(personData.email).isValid) {
-              errors.email = 'Invalid email format';
+            if (personData.ssn) {
+              // Simple SSN format validation (XXX-XX-XXXX)
+              const ssnPattern = /^\d{3}-\d{2}-\d{4}$/;
+              if (!ssnPattern.test(personData.ssn)) {
+                errors.ssn = 'Invalid SSN format (use XXX-XX-XXXX)';
+              }
             }
-          }
-          if (!personData.address.street?.trim()) {
-            errors.address = 'Street address is required';
-          }
-          if (!personData.address.city?.trim()) {
-            errors.city = 'City is required';
-          }
-          if (!personData.address.zip?.trim()) {
-            errors.zip = 'ZIP code is required';
-          }
-          break;
+            break;
 
-        case 2: // Additional Details
-          // Optional validations for living arrangement, organization
-          break;
+          case 1: // Contact Information
+            if (personData.phone) {
+              const phoneValidator = validators.phone?.();
+              if (phoneValidator && !phoneValidator(personData.phone).isValid) {
+                errors.phone = 'Invalid phone number format';
+              }
+            }
+            if (personData.email) {
+              const emailValidator = validators.email?.();
+              if (emailValidator && !emailValidator(personData.email).isValid) {
+                errors.email = 'Invalid email format';
+              }
+            }
+            if (!personData.address.street?.trim()) {
+              errors.address = 'Street address is required';
+            }
+            if (!personData.address.city?.trim()) {
+              errors.city = 'City is required';
+            }
+            if (!personData.address.zip?.trim()) {
+              errors.zip = 'ZIP code is required';
+            }
+            break;
 
-        case 3: {
-          // Review & Save
-          // Final validation - check all previous steps
-          const allStepErrors = [0, 1, 2].reduce((acc, step) => {
-            return { ...acc, ...validateStep(step) };
-          }, {});
-          Object.assign(errors, allStepErrors);
-          break;
+          case 2: // Additional Details
+            // Optional validations for living arrangement, organization
+            break;
+
+          case 3: {
+            // Review & Save
+            // Final validation - check all previous steps
+            const allStepErrors = [0, 1, 2].reduce((acc, step) => {
+              return { ...acc, ...validateStep(step) };
+            }, {});
+            Object.assign(errors, allStepErrors);
+            break;
+          }
         }
-      }
 
-      return errors;
+        return errors;
+      } catch (error) {
+        console.warn(`Person validation error for step ${stepIndex}:`, error);
+        // In case of validation error, return empty errors (allow the step)
+        return {};
+      }
     },
     [personData]
-  );
-
-  // Handle step change with validation
+  ); // Handle step change with validation
   const handleStepChange = useCallback(
     (newStep) => {
       if (editPersonId) {
@@ -544,11 +618,56 @@ function PersonCreationModal({
                 onChange: (e) =>
                   updatePersonData('address.state', e.target.value),
                 options: [
-                  { value: 'NE', label: 'Nebraska' },
+                  { value: 'AL', label: 'Alabama' },
+                  { value: 'AK', label: 'Alaska' },
+                  { value: 'AZ', label: 'Arizona' },
+                  { value: 'AR', label: 'Arkansas' },
+                  { value: 'CA', label: 'California' },
+                  { value: 'CO', label: 'Colorado' },
+                  { value: 'CT', label: 'Connecticut' },
+                  { value: 'DE', label: 'Delaware' },
+                  { value: 'DC', label: 'District of Columbia' },
+                  { value: 'FL', label: 'Florida' },
+                  { value: 'GA', label: 'Georgia' },
+                  { value: 'HI', label: 'Hawaii' },
+                  { value: 'ID', label: 'Idaho' },
+                  { value: 'IL', label: 'Illinois' },
+                  { value: 'IN', label: 'Indiana' },
                   { value: 'IA', label: 'Iowa' },
                   { value: 'KS', label: 'Kansas' },
+                  { value: 'KY', label: 'Kentucky' },
+                  { value: 'LA', label: 'Louisiana' },
+                  { value: 'ME', label: 'Maine' },
+                  { value: 'MD', label: 'Maryland' },
+                  { value: 'MA', label: 'Massachusetts' },
+                  { value: 'MI', label: 'Michigan' },
+                  { value: 'MN', label: 'Minnesota' },
+                  { value: 'MS', label: 'Mississippi' },
                   { value: 'MO', label: 'Missouri' },
-                  { value: 'CO', label: 'Colorado' },
+                  { value: 'MT', label: 'Montana' },
+                  { value: 'NE', label: 'Nebraska' },
+                  { value: 'NV', label: 'Nevada' },
+                  { value: 'NH', label: 'New Hampshire' },
+                  { value: 'NJ', label: 'New Jersey' },
+                  { value: 'NM', label: 'New Mexico' },
+                  { value: 'NY', label: 'New York' },
+                  { value: 'NC', label: 'North Carolina' },
+                  { value: 'ND', label: 'North Dakota' },
+                  { value: 'OH', label: 'Ohio' },
+                  { value: 'OK', label: 'Oklahoma' },
+                  { value: 'OR', label: 'Oregon' },
+                  { value: 'PA', label: 'Pennsylvania' },
+                  { value: 'RI', label: 'Rhode Island' },
+                  { value: 'SC', label: 'South Carolina' },
+                  { value: 'SD', label: 'South Dakota' },
+                  { value: 'TN', label: 'Tennessee' },
+                  { value: 'TX', label: 'Texas' },
+                  { value: 'UT', label: 'Utah' },
+                  { value: 'VT', label: 'Vermont' },
+                  { value: 'VA', label: 'Virginia' },
+                  { value: 'WA', label: 'Washington' },
+                  { value: 'WV', label: 'West Virginia' },
+                  { value: 'WI', label: 'Wisconsin' },
                   { value: 'WY', label: 'Wyoming' },
                 ],
                 required: true,
@@ -619,11 +738,56 @@ function PersonCreationModal({
                     onChange: (e) =>
                       updatePersonData('mailingAddress.state', e.target.value),
                     options: [
-                      { value: 'NE', label: 'Nebraska' },
+                      { value: 'AL', label: 'Alabama' },
+                      { value: 'AK', label: 'Alaska' },
+                      { value: 'AZ', label: 'Arizona' },
+                      { value: 'AR', label: 'Arkansas' },
+                      { value: 'CA', label: 'California' },
+                      { value: 'CO', label: 'Colorado' },
+                      { value: 'CT', label: 'Connecticut' },
+                      { value: 'DE', label: 'Delaware' },
+                      { value: 'DC', label: 'District of Columbia' },
+                      { value: 'FL', label: 'Florida' },
+                      { value: 'GA', label: 'Georgia' },
+                      { value: 'HI', label: 'Hawaii' },
+                      { value: 'ID', label: 'Idaho' },
+                      { value: 'IL', label: 'Illinois' },
+                      { value: 'IN', label: 'Indiana' },
                       { value: 'IA', label: 'Iowa' },
                       { value: 'KS', label: 'Kansas' },
+                      { value: 'KY', label: 'Kentucky' },
+                      { value: 'LA', label: 'Louisiana' },
+                      { value: 'ME', label: 'Maine' },
+                      { value: 'MD', label: 'Maryland' },
+                      { value: 'MA', label: 'Massachusetts' },
+                      { value: 'MI', label: 'Michigan' },
+                      { value: 'MN', label: 'Minnesota' },
+                      { value: 'MS', label: 'Mississippi' },
                       { value: 'MO', label: 'Missouri' },
-                      { value: 'CO', label: 'Colorado' },
+                      { value: 'MT', label: 'Montana' },
+                      { value: 'NE', label: 'Nebraska' },
+                      { value: 'NV', label: 'Nevada' },
+                      { value: 'NH', label: 'New Hampshire' },
+                      { value: 'NJ', label: 'New Jersey' },
+                      { value: 'NM', label: 'New Mexico' },
+                      { value: 'NY', label: 'New York' },
+                      { value: 'NC', label: 'North Carolina' },
+                      { value: 'ND', label: 'North Dakota' },
+                      { value: 'OH', label: 'Ohio' },
+                      { value: 'OK', label: 'Oklahoma' },
+                      { value: 'OR', label: 'Oregon' },
+                      { value: 'PA', label: 'Pennsylvania' },
+                      { value: 'RI', label: 'Rhode Island' },
+                      { value: 'SC', label: 'South Carolina' },
+                      { value: 'SD', label: 'South Dakota' },
+                      { value: 'TN', label: 'Tennessee' },
+                      { value: 'TX', label: 'Texas' },
+                      { value: 'UT', label: 'Utah' },
+                      { value: 'VT', label: 'Vermont' },
+                      { value: 'VA', label: 'Virginia' },
+                      { value: 'WA', label: 'Washington' },
+                      { value: 'WV', label: 'West Virginia' },
+                      { value: 'WI', label: 'Wisconsin' },
                       { value: 'WY', label: 'Wyoming' },
                     ],
                   })
@@ -652,15 +816,22 @@ function PersonCreationModal({
           { value: 'Other', label: 'Other' },
         ];
 
-        const organizationOptions = fullData?.organizations
-          ? [
-              { value: null, label: 'No organization' },
-              ...fullData.organizations.map((org) => ({
-                value: org.id,
-                label: org.name,
-              })),
-            ]
-          : [{ value: null, label: 'No organization' }];
+        // Add defensive check for fullData to handle legacy files
+        const safeFullData = fullData || {
+          people: [],
+          organizations: [],
+          cases: [],
+        };
+        const organizationOptions =
+          safeFullData.organizations?.length > 0
+            ? [
+                { value: null, label: 'No organization' },
+                ...safeFullData.organizations.map((org) => ({
+                  value: org.id,
+                  label: org.name,
+                })),
+              ]
+            : [{ value: null, label: 'No organization' }];
 
         return e(
           'div',
@@ -705,7 +876,13 @@ function PersonCreationModal({
           );
         }
 
-        const selectedOrg = fullData?.organizations?.find(
+        // Add defensive check for fullData to handle legacy files
+        const safeFullData = fullData || {
+          people: [],
+          organizations: [],
+          cases: [],
+        };
+        const selectedOrg = safeFullData.organizations?.find(
           (org) => org.id === personData.organizationId
         );
 
