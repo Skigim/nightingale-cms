@@ -22,6 +22,12 @@ const BUSINESS_COMPONENTS = [
     category: 'people-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },
+  {
+    name: 'OrganizationModal',
+    path: 'js/components/business/modals/OrganizationModal.js',
+    category: 'organization-management',
+    dependencies: ['StepperModal', 'FormComponents'],
+  },
 
   {
     name: 'FinancialItemCard',
