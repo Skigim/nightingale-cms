@@ -355,12 +355,12 @@
       function CaseDetailsPanel({ activeCase, fullData, selectedFinItemIds, onFinancialItemToggle }) {
         const [showVerified, setShowVerified] = useState(false);
 
-        const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
+        const person = fullData.people.find((p) => p.id === activeCase.personId);
 
-        // Separate financials by category
-        const resources = activeCase.financials?.resources || [];
-        const income = activeCase.financials?.income || [];
-        const expenses = activeCase.financials?.expenses || [];
+        // Separate financials by category (legacy structure - kept for compatibility)
+        const resources = activeCase.finances?.resources || [];
+        const income = activeCase.finances?.income || [];
+        const expenses = activeCase.finances?.expenses || [];
 
         // Filter based on verification status if needed
         const filterByVerification = (items) => {
@@ -463,14 +463,18 @@
       // This is the core logic ported from the original app to handle template text generation.
       function processPlaceholders(templateContent, activeCase, fullData, customReplacements = {}) {
         if (!activeCase) return templateContent;
-        const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
-        const appDetails = activeCase.appDetails || {};
+        const person = fullData.people.find((p) => p.id === activeCase.personId);
 
-        const organization = person?.organizationId
-          ? fullData.organizations.find((o) => o.id === parseInt(person.organizationId))
-          : null;
+        // Find organization - check case first, then person
+        const organizationId = activeCase.organizationId || person?.organizationId;
+        const organization = organizationId ? fullData.organizations.find((o) => o.id === organizationId) : null;
+
+        // Find primary contact - look for Administrator first, then any personnel
         const primaryContact =
-          organization?.personnel?.find((p) => p.title === 'Administrator') || organization?.personnel?.[0] || null;
+          organization?.personnel?.find((p) => p.title === 'Administrator') ||
+          organization?.personnel?.find((p) => p.title === 'BOM') ||
+          organization?.personnel?.[0] ||
+          null;
 
         // Get today's date formatted
         const todayFormatted = dateUtils.format(dateUtils.now());
@@ -478,17 +482,41 @@
         const replacements = {
           ClientName: person?.name || '[CLIENT NAME]',
           MCN: activeCase?.mcn || '[MCN]',
-          ApplicationDate: dateUtils.format(appDetails.appDate),
+          ApplicationDate: activeCase?.applicationDate
+            ? dateUtils.format(activeCase.applicationDate)
+            : '[APPLICATION DATE]',
           TodayDate: todayFormatted,
 
           // Organization placeholders
           OrganizationName: organization?.name || '[ORGANIZATION NAME]',
           OrganizationPhone: organization?.phone || '[ORGANIZATION PHONE]',
-          AdminName: primaryContact?.name || '[ADMINISTRATOR NAME]',
-          AdminPhone: primaryContact?.phone || '[ADMINISTRATOR PHONE]',
+          AdminName: primaryContact?.name || organization?.contactPerson || '[ADMINISTRATOR NAME]',
+          AdminPhone: primaryContact?.phone || organization?.phone || '[ADMINISTRATOR PHONE]',
 
           // Due date (calculated based on current date + 15 days by default)
           DueDate: dateUtils.format(dateUtils.addDays(15)),
+
+          // Financial placeholders - map to actual case financial data
+          TotalIncome: activeCase?.finances?.income?.total
+            ? `$${activeCase.finances.income.total.toLocaleString()}`
+            : '[TOTAL INCOME]',
+          EmploymentIncome: activeCase?.finances?.income?.employment
+            ? `$${activeCase.finances.income.employment.toLocaleString()}`
+            : '[EMPLOYMENT INCOME]',
+          DisabilityIncome: activeCase?.finances?.income?.disability
+            ? `$${activeCase.finances.income.disability.toLocaleString()}`
+            : '[DISABILITY INCOME]',
+          TotalExpenses: activeCase?.finances?.expenses?.total
+            ? `$${activeCase.finances.expenses.total.toLocaleString()}`
+            : '[TOTAL EXPENSES]',
+          HousingCost: activeCase?.finances?.expenses?.housing
+            ? `$${activeCase.finances.expenses.housing.toLocaleString()}`
+            : '[HOUSING COST]',
+          // Legacy financial placeholders (for backward compatibility)
+          ItemName: '[FINANCIAL ITEM]',
+          Location: '[INSTITUTION]',
+          AccountNumber: '[ACCOUNT NUMBER]',
+          Value: '[AMOUNT]',
 
           ...customReplacements,
         };
@@ -543,30 +571,50 @@
         const getPreviewValue = () => {
           if (!activeCase || !fullData) return element.key;
 
-          const person = fullData.people.find((p) => p.id === parseInt(activeCase.personId));
-          const organization = person?.organizationId
-            ? fullData.organizations.find((o) => o.id === parseInt(person.organizationId))
-            : null;
+          const person = fullData.people.find((p) => p.id === activeCase.personId);
+
+          // Find organization - check case first, then person
+          const organizationId = activeCase.organizationId || person?.organizationId;
+          const organization = organizationId ? fullData.organizations.find((o) => o.id === organizationId) : null;
+
+          // Find primary contact - look for Administrator first, then any personnel
           const primaryContact =
-            organization?.personnel?.find((p) => p.title === 'Administrator') || organization?.personnel?.[0] || null;
+            organization?.personnel?.find((p) => p.title === 'Administrator') ||
+            organization?.personnel?.find((p) => p.title === 'BOM') ||
+            organization?.personnel?.[0] ||
+            null;
 
           const replacements = {
             ClientName: person?.name || element.key,
             MCN: activeCase?.mcn || element.key,
-            ApplicationDate: activeCase?.appDetails?.appDate
-              ? dateUtils.format(activeCase.appDetails.appDate)
-              : element.key,
+            ApplicationDate: activeCase?.applicationDate ? dateUtils.format(activeCase.applicationDate) : element.key,
             TodayDate: dateUtils.format(dateUtils.now()),
             DueDate: dateUtils.format(dateUtils.addDays(15)),
             OrganizationName: organization?.name || element.key,
             OrganizationPhone: organization?.phone || element.key,
-            AdminName: primaryContact?.name || element.key,
-            AdminPhone: primaryContact?.phone || element.key,
-            // Financial placeholders - these will show generic values in preview
-            ItemName: '[Item Type]',
-            Location: '[Location]',
-            AccountNumber: '[Account #]',
-            Value: '[$0.00]',
+            AdminName: primaryContact?.name || organization?.contactPerson || element.key,
+            AdminPhone: primaryContact?.phone || organization?.phone || element.key,
+            // Financial placeholders - map to actual case financial data
+            TotalIncome: activeCase?.finances?.income?.total
+              ? `$${activeCase.finances.income.total.toLocaleString()}`
+              : element.key,
+            EmploymentIncome: activeCase?.finances?.income?.employment
+              ? `$${activeCase.finances.income.employment.toLocaleString()}`
+              : element.key,
+            DisabilityIncome: activeCase?.finances?.income?.disability
+              ? `$${activeCase.finances.income.disability.toLocaleString()}`
+              : element.key,
+            TotalExpenses: activeCase?.finances?.expenses?.total
+              ? `$${activeCase.finances.expenses.total.toLocaleString()}`
+              : element.key,
+            HousingCost: activeCase?.finances?.expenses?.housing
+              ? `$${activeCase.finances.expenses.housing.toLocaleString()}`
+              : element.key,
+            // Legacy financial placeholders (for backward compatibility)
+            ItemName: '[Financial Item]',
+            Location: '[Institution]',
+            AccountNumber: '[Account Number]',
+            Value: '[Amount]',
           };
 
           return replacements[element.key] || element.key;
@@ -1511,7 +1559,17 @@
         const placeholderGroups = {
           'Client Info': ['ClientName', 'MCN', 'ApplicationDate'],
           Organization: ['OrganizationName', 'OrganizationPhone', 'AdminName', 'AdminPhone'],
-          Financial: ['ItemName', 'Location', 'AccountNumber', 'Value'],
+          Financial: [
+            'TotalIncome',
+            'EmploymentIncome',
+            'DisabilityIncome',
+            'TotalExpenses',
+            'HousingCost',
+            'ItemName',
+            'Location',
+            'AccountNumber',
+            'Value',
+          ],
           Dates: ['TodayDate', 'DueDate'],
         };
 
@@ -1811,8 +1869,7 @@
         };
 
         const linkedCase = fullData?.cases?.find((c) => c.id === request.caseId);
-        const clientName =
-          fullData?.people?.find((p) => p.id === parseInt(linkedCase?.personId))?.name || 'Unknown Client';
+        const clientName = fullData?.people?.find((p) => p.id === linkedCase?.personId)?.name || 'Unknown Client';
 
         // Get contextual actions based on status
         const getContextualActions = () => {
@@ -2503,9 +2560,9 @@
           if (selectedIdsArray.length > 0) {
             // Logic for when financial items ARE selected
             const allFinancials = [
-              ...(activeCase.financials?.resources || []),
-              ...(activeCase.financials?.income || []),
-              ...(activeCase.financials?.expenses || []),
+              ...(activeCase.finances?.resources || []),
+              ...(activeCase.finances?.income || []),
+              ...(activeCase.finances?.expenses || []),
             ];
             const selectedItems = selectedIdsArray
               .map((id) => allFinancials.find((item) => item.id === id))
@@ -2760,8 +2817,15 @@
 
         // Prepare searchable cases with display labels
         const searchableCases = useMemo(() => {
+          // Don't process if data isn't loaded yet
+          if (!fullData || !fullData.people || !cases || cases.length === 0) {
+            return [];
+          }
+
           return cases.map((caseItem) => {
-            const person = fullData.people.find((p) => p.id === parseInt(caseItem.personId));
+            // Fix: Don't use parseInt - IDs are strings like "person-001"
+            const person = fullData.people.find((p) => p.id === caseItem.personId);
+
             return {
               ...caseItem,
               displayName: person?.name || 'Unknown Client',
@@ -2826,7 +2890,7 @@
                         'div',
                         { className: 'font-medium text-blue-300 text-lg' },
                         activeCase.displayName ||
-                          fullData.people.find((p) => p.id === parseInt(activeCase.personId))?.name ||
+                          fullData.people.find((p) => p.id === activeCase.personId)?.name ||
                           'Unknown Client'
                       ),
                       e('div', { className: 'text-sm text-gray-400' }, `MCN: ${activeCase.mcn}`)
@@ -3064,7 +3128,7 @@
               id: fullData.nextVrRequestId++,
               caseId: activeCase.id,
               mcn: activeCase.mcn,
-              clientName: fullData.people.find((p) => p.id === parseInt(activeCase.personId))?.name || 'Unknown',
+              clientName: fullData.people.find((p) => p.id === activeCase.personId)?.name || 'Unknown',
               content: finalContent,
               createdDate: dateUtils.now(),
               dueDate: dateUtils.addDays(dueDays),
@@ -3201,7 +3265,7 @@
 
               if (foundCase) {
                 // Find the corresponding person to create the searchable case format
-                const person = fullData.people.find((p) => p.id === parseInt(foundCase.personId));
+                const person = fullData.people.find((p) => p.id === foundCase.personId);
                 const searchableCase = {
                   ...foundCase,
                   name: person?.name || 'Unknown Person',
@@ -3241,7 +3305,7 @@
             const foundCase = fullData.cases.find((c) => c.mcn === mcnToProcess);
 
             if (foundCase) {
-              const person = fullData.people.find((p) => p.id === parseInt(foundCase.personId));
+              const person = fullData.people.find((p) => p.id === foundCase.personId);
               const searchableCase = {
                 ...foundCase,
                 name: person?.name || 'Unknown Person',
@@ -3538,9 +3602,9 @@
           console.log('Case ID:', activeCase.id);
           console.log('MCN:', activeCase.mcn);
           console.log('Financial Items:', {
-            resources: activeCase.financials?.resources?.length || 0,
-            income: activeCase.financials?.income?.length || 0,
-            expenses: activeCase.financials?.expenses?.length || 0,
+            resources: activeCase.finances?.resources?.length || 0,
+            income: activeCase.finances?.income?.length || 0,
+            expenses: activeCase.finances?.expenses?.length || 0,
           });
           console.groupEnd();
         },
