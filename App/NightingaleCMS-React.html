@@ -176,6 +176,9 @@
     <script src="lib/dayjs-customParseFormat.min.js"></script>
     <script src="js/services/nightingale.dayjs.js"></script>
 
+    <!-- Optional: AVS Import Modal Integration Test -->
+    <script src="js/components/business/modals/AvsImportModal.test.js"></script>
+
     <!-- Lodash for reliable utility functions -->
     <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
 
@@ -1072,6 +1075,7 @@
         const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
         const [itemToDelete, setItemToDelete] = useState(null);
         const [confirmingDelete, setConfirmingDelete] = useState(null); // Store item ID being confirmed
+        const [isAvsImportOpen, setIsAvsImportOpen] = useState(false); // AVS import modal state
         const isSimpCase = caseData.appDetails?.caseType === 'SIMP';
 
         // Ensure financials structure exists
@@ -1129,6 +1133,51 @@
           setIsFinancialModalOpen(true);
         };
 
+        // AVS Import Handler
+        const handleAvsImport = (importedItems) => {
+          console.log('📥 Importing AVS data:', importedItems);
+
+          // Transform imported items to match our data structure
+          const transformedItems = importedItems.map((item) => ({
+            id: `avs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            description: `${item.type} - ${item.location}`,
+            location: item.location,
+            accountNumber: item.accountNumber,
+            amount: item.value,
+            type: item.type,
+            owner: item.owner,
+            verificationStatus: item.verificationStatus || 'Verified',
+            source: item.source || 'AVS Import',
+            dateAdded: new Date().toISOString(),
+            notes: `Imported from AVS${item.isDuplicate ? ' (Potential Duplicate)' : ''}`,
+          }));
+
+          // Add to case financial resources
+          const updatedCase = {
+            ...caseData,
+            financials: {
+              ...caseData.financials,
+              resources: [...(caseData.financials.resources || []), ...transformedItems],
+            },
+          };
+
+          // Update the full data
+          const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+          onUpdateData({ ...fullData, cases: updatedCases });
+
+          // Show success notification
+          if (window.NightingaleToast) {
+            window.NightingaleToast.show({
+              message: `Successfully imported ${transformedItems.length} financial item${transformedItems.length !== 1 ? 's' : ''} from AVS`,
+              type: 'success',
+              duration: 5000,
+            });
+          }
+
+          // Close the modal
+          setIsAvsImportOpen(false);
+        };
+
         const renderFinancialTable = (type, items, title) => {
           const isExpanded = expandedSections[type];
           const displayItems = isExpanded ? items : items.slice(0, 3);
@@ -1152,7 +1201,20 @@
                     className: 'bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-md',
                   },
                   'Add'
-                )
+                ),
+                // AVS Import button - only show for resources
+                type === 'resources' &&
+                  e(
+                    'button',
+                    {
+                      onClick: () => setIsAvsImportOpen(true),
+                      className:
+                        'bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded-md flex items-center space-x-1',
+                      title: 'Import financial data from AVS',
+                    },
+                    e('span', {}, '📄'),
+                    e('span', {}, 'Import AVS')
+                  )
               )
             ),
 
@@ -1289,7 +1351,18 @@
             onUpdateData,
             itemType: modalItemType,
             editingItem,
-          })
+          }),
+
+          // AVS Import Modal
+          window.AvsImportModal &&
+            e(window.AvsImportModal, {
+              isOpen: isAvsImportOpen,
+              onClose: () => setIsAvsImportOpen(false),
+              onImport: handleAvsImport,
+              masterCaseId: caseData.mcn || caseData.id,
+              ownerFilter: 'applicant',
+              existingResources: caseData.financials?.resources || [],
+            })
         );
       }
 

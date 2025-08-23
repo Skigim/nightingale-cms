@@ -69,6 +69,9 @@ pnpm-lock.yaml
 Data/
 data/
 
+# Archive folder - contains archived/legacy components and analysis
+Archive/
+
 # Audit reports (can be regenerated)
 audit/compliance-report.json
 audit/

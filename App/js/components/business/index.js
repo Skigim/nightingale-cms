@@ -28,6 +28,12 @@ const BUSINESS_COMPONENTS = [
     category: 'organization-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },
+  {
+    name: 'AvsImportModal',
+    path: 'js/components/business/modals/AvsImportModal.js',
+    category: 'financial',
+    dependencies: ['Modal', 'FormComponents', 'Button'],
+  },
 
   {
     name: 'FinancialItemCard',
