@@ -75,16 +75,16 @@
       }
     </script>
 
-    <script src="js/nightingale.utils.js"></script>
-    <script src="js/nightingale.dayjs.js"></script>
-    <script src="js/nightingale.parsers.js"></script>
-    <script src="js/nightingale.fileservice.js"></script>
-    <script src="js/nightingale.toast.js"></script>
+    <script src="js/services/nightingale.utils.js"></script>
+    <script src="js/services/nightingale.dayjs.js"></script>
+    <script src="js/services/nightingale.parsers.js"></script>
+    <script src="js/services/nightingale.fileservice.js"></script>
+    <script src="js/services/nightingale.toast.js"></script>
     <script src="lib/fuse.min.js"></script>
-    <script src="js/nightingale.search.js"></script>
+    <script src="js/services/nightingale.search.js"></script>
 
     <!-- Nightingale Component Library -->
-    <script src="../Components/index.js"></script>
+    <script src="js/components/index.js"></script>
 
     <!-- Lodash for reliable utility functions -->
     <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
@@ -3668,10 +3668,52 @@
         }
       }, 1000);
 
-      // --- Mount the React Application ---
-      const container = document.getElementById('root');
-      const root = ReactDOM.createRoot(container);
-      root.render(e(App));
+      // --- Wait for Dependencies and Mount React Application ---
+
+      // Function to check if all required dependencies are loaded
+      function checkDependencies() {
+        const requiredServices = ['FileSystemService', 'dateUtils', 'showToast', 'sanitize'];
+
+        const requiredGlobals = ['React', 'ReactDOM', 'dayjs'];
+
+        const missing = [];
+
+        // Check services
+        requiredServices.forEach((service) => {
+          if (typeof window[service] === 'undefined') {
+            missing.push(service);
+          }
+        });
+
+        // Check globals
+        requiredGlobals.forEach((global) => {
+          if (typeof window[global] === 'undefined') {
+            missing.push(global);
+          }
+        });
+
+        return missing;
+      }
+
+      // Initialize app when all dependencies are ready
+      function initializeApp() {
+        const missing = checkDependencies();
+
+        if (missing.length > 0) {
+          console.warn('⏳ Waiting for dependencies:', missing);
+          setTimeout(initializeApp, 100); // Check again in 100ms
+          return;
+        }
+
+        console.log('✅ All dependencies loaded, initializing app...');
+
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(e(App));
+      }
+
+      // Start initialization process
+      initializeApp();
     </script>
   </body>
 </html>
