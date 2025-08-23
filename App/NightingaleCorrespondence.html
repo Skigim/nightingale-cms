@@ -3692,6 +3692,18 @@
           }
         });
 
+        // Log detailed status for debugging
+        console.group('🔍 Dependency Check Status');
+        requiredServices.forEach((service) => {
+          const status = typeof window[service] !== 'undefined' ? '✅' : '❌';
+          console.log(`${status} ${service}:`, typeof window[service]);
+        });
+        requiredGlobals.forEach((global) => {
+          const status = typeof window[global] !== 'undefined' ? '✅' : '❌';
+          console.log(`${status} ${global}:`, typeof window[global]);
+        });
+        console.groupEnd();
+
         return missing;
       }
 
@@ -3705,11 +3717,22 @@
           return;
         }
 
-        console.log('✅ All dependencies loaded, initializing app...');
+        console.log('✅ All dependencies loaded, initializing React app...');
 
-        const container = document.getElementById('root');
-        const root = ReactDOM.createRoot(container);
-        root.render(e(App));
+        try {
+          const container = document.getElementById('root');
+          if (!container) {
+            console.error('❌ Root container not found');
+            return;
+          }
+
+          const root = ReactDOM.createRoot(container);
+          root.render(e(App));
+
+          console.log('🎉 Nightingale Correspondence app successfully initialized!');
+        } catch (error) {
+          console.error('❌ Failed to initialize app:', error);
+        }
       }
 
       // Start initialization process
