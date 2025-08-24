@@ -19,7 +19,10 @@ function NotesModal({
   const { useState, useEffect, useMemo } = window.React;
 
   // Look up person name using the helper function
-  const person = window.findPersonById(fullData?.people, caseData?.personId);
+  const person = window.NightingaleDataManagement.findPersonById(
+    fullData?.people,
+    caseData?.personId
+  );
   const clientName = person ? person.name : 'Unknown Client';
   const mcn = caseData?.mcn || 'No MCN';
 

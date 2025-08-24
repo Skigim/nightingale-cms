@@ -218,7 +218,7 @@ function FinancialItemModal({
     )
   );
 
-  return window.NightingaleUI.Modal({
+  return e(window.Modal, {
     isOpen,
     onClose,
     title: `${isEditing ? 'Edit' : 'Add'} ${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Item`,
