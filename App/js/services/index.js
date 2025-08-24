@@ -10,18 +10,22 @@
  *
  * 📁 js/services/
  * ├── 🔧 Core Services (loaded first)
- * │   ├── nightingale.utils.js        <- General utilities
+ * │   ├── nightingale.coreutilities.js <- Security, formatting, validation utilities
  * │   ├── nightingale.dayjs.js        <- Date/time utilities
  * │   └── nightingale.parsers.js      <- Data parsing
  * │
  * ├── 💾 Data Services (loaded second)
  * │   ├── nightingale.fileservice.js  <- File I/O operations
- * │   └── nightingale.search.js       <- Search and filtering
+ * │   ├── nightingale.search.js       <- Search and filtering
+ * │   └── nightingale.datamanagement.js <- Data management
  * │
  * ├── 🎨 UI Services (loaded third)
- * │   └── nightingale.toast.js        <- Toast notifications
+ * │   ├── nightingale.toast.js        <- Toast notifications
+ * │   ├── nightingale.clipboard.js    <- Clipboard operations
+ * │   └── nightingale.uiutilities.js  <- UI interaction utilities
  * │
  * └── 📄 Business Services (loaded last)
+ *     ├── nightingale.cmsutilities.js     <- CMS business logic
  *     ├── nightingale.placeholders.js    <- Placeholder processing
  *     ├── nightingale.templates.js       <- Template management
  *     └── nightingale.documentgeneration.js <- Document generation
@@ -126,7 +130,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'business',
     services: [
-      'nightingale.cmsutilities.v2.js', // New: CMS business logic only
+      'nightingale.cmsutilities.js', // CMS business logic only
       'nightingale.placeholders.js',
       'nightingale.templates.js',
       'nightingale.documentgeneration.js',

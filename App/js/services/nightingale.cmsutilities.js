@@ -1,21 +1,71 @@
 /**
- * Nightingale CMS Utilities Service
+ * Nightingale CMS Business Utilities Service
  *
- * Provides utility functions specific to CMS operations and workflows.
- * This service handles:
- * - Case action utilities (summary generation, navigation)
- * - UI interaction utilities (copy, scroll, toast helpers)
- * - Development and testing utilities
- * - Browser compatibility helpers
+ * Provides utility functions specific to CMS business operations and workflows.
+ * This service handles domain-specific logic for the Nightingale CMS application.
  *
  * @namespace NightingaleCMSUtilities
- * @version 1.0.0
+ * @version 2.0.0
  * @author Nightingale CMS Team
  * @created 2025-08-24
  */
 
 (function (window) {
   'use strict';
+
+  // ========================================================================
+  // CMS-SPECIFIC DATA UTILITIES
+  // ========================================================================
+
+  /**
+   * Flattens all financial items (resources, income, expenses) from a case object
+   * into a single array.
+   * @param {object} caseObject The case object containing the financials property.
+   * @returns {object[]} A single array containing all financial items.
+   */
+  function getFlatFinancials(caseObject) {
+    if (!caseObject || !caseObject.financials) return [];
+    return [
+      ...(caseObject.financials.resources || []),
+      ...(caseObject.financials.income || []),
+      ...(caseObject.financials.expenses || []),
+    ];
+  }
+
+  /**
+   * Determines the correct label for the application date field based on the application type.
+   * @param {string} applicationType The type of application (e.g., "Application" or "Renewal").
+   * @returns {string} The appropriate label.
+   */
+  function getAppDateLabel(applicationType) {
+    return applicationType === 'Renewal' ? 'Renewal Due' : 'Application Date';
+  }
+
+  /**
+   * Returns a new, default object for application details.
+   * @returns {object} The default appDetails object.
+   */
+  function getDefaultAppDetails() {
+    return {
+      appDate: '',
+      caseType: 'LTC',
+      applicationType: 'Application',
+      avsConsentDate: '',
+      admissionDate: '',
+      medicareAExpDate: '',
+    };
+  }
+
+  /**
+   * Extracts a unique, sorted list of note categories from all cases.
+   * @param {object[]} cases The array of case objects.
+   * @returns {string[]} A sorted array of unique note category strings.
+   */
+  function getUniqueNoteCategories(cases) {
+    if (!cases) return [];
+    const allNotes = cases.flatMap((c) => c.notes || []);
+    return [...new Set(allNotes.map((n) => n.category).filter(Boolean))].sort();
+  }
 
   // ========================================================================
   // CASE ACTION UTILITIES
@@ -95,155 +145,8 @@
   }
 
   // ========================================================================
-  // UI INTERACTION UTILITIES
-  // ========================================================================
-
-  /**
-   * Scroll to a specific section with smooth animation
-   * @param {string} sectionSelector - CSS selector for target section
-   * @param {Object} options - Scroll behavior options
-   */
-  function scrollToSection(
-    sectionSelector = '[data-section="notes"]',
-    options = {}
-  ) {
-    const defaultOptions = {
-      behavior: 'smooth',
-      block: 'start',
-      inline: 'nearest',
-    };
-
-    const scrollOptions = { ...defaultOptions, ...options };
-    const section = document.querySelector(sectionSelector);
-
-    if (section) {
-      section.scrollIntoView(scrollOptions);
-      console.log(`Scrolled to section: ${sectionSelector}`);
-    } else {
-      console.warn(`Section not found: ${sectionSelector}`);
-    }
-  }
-
-  /**
-   * Legacy wrapper for scrollToNotes - maintains backward compatibility
-   */
-  function scrollToNotes() {
-    scrollToSection('[data-section="notes"]');
-  }
-
-  /**
-   * Copy text to clipboard with modern and fallback methods
-   * @param {string} text - Text to copy
-   * @param {string} successMessage - Success toast message
-   * @param {string} errorMessage - Error toast message
-   */
-  function copyToClipboard(text, successMessage = null, errorMessage = null) {
-    if (!text) {
-      const message = errorMessage || 'No text to copy';
-      if (window.showToast) {
-        window.showToast(message, 'error');
-      }
-      return Promise.reject(new Error(message));
-    }
-
-    const success = successMessage || `Text copied to clipboard`;
-    const error = errorMessage || 'Failed to copy text';
-
-    // Try modern clipboard API first
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          if (window.showToast) {
-            window.showToast(success, 'success');
-          }
-          return true;
-        })
-        .catch(() => {
-          return fallbackCopyTextToClipboard(text, success, error);
-        });
-    } else {
-      return fallbackCopyTextToClipboard(text, success, error);
-    }
-  }
-
-  /**
-   * Copy MCN to clipboard - legacy wrapper for backward compatibility
-   * @param {string} mcn - MCN to copy
-   */
-  function copyMCN(mcn) {
-    return copyToClipboard(
-      mcn,
-      `MCN ${mcn} copied to clipboard`,
-      'No MCN to copy'
-    );
-  }
-
-  /**
-   * Fallback copy method for older browsers
-   * @param {string} text - Text to copy
-   * @param {string} successMessage - Success message
-   * @param {string} errorMessage - Error message
-   */
-  function fallbackCopyTextToClipboard(text, successMessage, errorMessage) {
-    return new Promise((resolve, reject) => {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.top = '0';
-      textArea.style.left = '0';
-      textArea.style.position = 'fixed';
-      textArea.style.opacity = '0';
-
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      try {
-        const success = document.execCommand('copy');
-        document.body.removeChild(textArea);
-
-        if (success) {
-          if (window.showToast) {
-            window.showToast(successMessage, 'success');
-          }
-          resolve(true);
-        } else {
-          throw new Error('execCommand failed');
-        }
-      } catch (err) {
-        document.body.removeChild(textArea);
-        if (window.showToast) {
-          window.showToast(errorMessage, 'error');
-        }
-        reject(err);
-      }
-    });
-  }
-
-  // ========================================================================
   // DEVELOPMENT AND TESTING UTILITIES
   // ========================================================================
-
-  /**
-   * Test data integrity broadcast system
-   */
-  function testDataIntegrityBroadcast() {
-    try {
-      const channel = new BroadcastChannel('nightingale_suite');
-      channel.postMessage({
-        type: 'data_updated',
-        source: 'cms-react',
-        timestamp: new Date().toISOString(),
-        testMode: true,
-      });
-      channel.close();
-      console.log('📤 Test broadcast sent successfully');
-      return true;
-    } catch (error) {
-      console.error('❌ Broadcast test failed:', error);
-      return false;
-    }
-  }
 
   /**
    * Test financial item migration functionality
@@ -287,91 +190,27 @@
     };
   }
 
-  /**
-   * Check application status and dependencies
-   */
-  function checkAppStatus() {
-    console.group('🔍 Nightingale CMS Status Check');
-
-    const status = {
-      timestamp: new Date().toISOString(),
-      services: {},
-      components: {},
-      data: {},
-      browser: {},
-    };
-
-    // Check services
-    status.services.nightingaleServices = !!window.NightingaleServices;
-    status.services.dataManagement = !!window.NightingaleDataManagement;
-    status.services.fileService = !!window.fileService;
-    status.services.toastService = !!window.showToast;
-
-    // Check components
-    status.components.react = !!window.React;
-    status.components.reactDOM = !!window.ReactDOM;
-    status.components.componentLibrary = !!window.NightingaleComponentLibrary;
-
-    // Check data
-    status.data.localStorage = !!window.localStorage;
-    status.data.savedData = !!localStorage.getItem('nightingale_data');
-
-    // Check browser features
-    status.browser.clipboard = !!navigator.clipboard;
-    status.browser.broadcastChannel = !!window.BroadcastChannel;
-    status.browser.fetch = !!window.fetch;
-
-    console.log('Application Status:', status);
-    console.groupEnd();
-
-    return status;
-  }
-
-  /**
-   * Debug utility to dump component library status
-   */
-  function debugComponentLibrary() {
-    if (window.NightingaleComponentLibrary) {
-      console.group('🧩 Component Library Debug');
-      console.log(
-        'Available components:',
-        window.NightingaleComponentLibrary.getAvailableComponents()
-      );
-      console.log(
-        'Library status:',
-        window.NightingaleComponentLibrary.getStatus()
-      );
-      console.groupEnd();
-    } else {
-      console.warn('Component library not available');
-    }
-  }
-
   // ========================================================================
   // SERVICE INITIALIZATION AND EXPORT
   // ========================================================================
 
   // Create service object
   const NightingaleCMSUtilities = {
+    // CMS-specific data utilities
+    getFlatFinancials,
+    getAppDateLabel,
+    getDefaultAppDetails,
+    getUniqueNoteCategories,
+
     // Case action functions
     generateCaseSummary,
     openVRApp,
 
-    // UI utilities
-    scrollToSection,
-    scrollToNotes, // Legacy compatibility
-    copyToClipboard,
-    copyMCN, // Legacy compatibility
-    fallbackCopyTextToClipboard,
-
     // Development utilities
-    testDataIntegrityBroadcast,
     testFinancialMigration,
-    checkAppStatus,
-    debugComponentLibrary,
 
     // Metadata
-    version: '1.0.0',
+    version: '2.0.0',
     name: 'NightingaleCMSUtilities',
   };
 
@@ -388,22 +227,21 @@
       window.NightingaleServices.registerService(
         'cmsUtilities',
         NightingaleCMSUtilities,
-        'ui'
+        'business'
       );
       console.log(
-        '🔧 CMS Utilities Service registered with Nightingale Services'
+        '🏢 CMS Utilities Service registered with Nightingale Services'
       );
     }
 
-    // Expose legacy global functions for backward compatibility
+    // Legacy global functions for backward compatibility
+    window.getFlatFinancials = getFlatFinancials;
+    window.getAppDateLabel = getAppDateLabel;
+    window.getDefaultAppDetails = getDefaultAppDetails;
+    window.getUniqueNoteCategories = getUniqueNoteCategories;
     window.generateCaseSummary = generateCaseSummary;
     window.openVRApp = openVRApp;
-    window.scrollToNotes = scrollToNotes;
-    window.copyMCN = copyMCN;
-    window.fallbackCopyTextToClipboard = fallbackCopyTextToClipboard;
-    window.testDataIntegrityBroadcast = testDataIntegrityBroadcast;
     window.testFinancialMigration = testFinancialMigration;
-    window.checkAppStatus = checkAppStatus;
   }
 
   // Return service for module systems
