@@ -122,12 +122,10 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
     onUpdateData({ ...fullData, cases: updatedCases });
 
     // Show success notification
-    if (window.NightingaleToast) {
-      window.NightingaleToast.show({
-        message: `Successfully imported ${transformedItems.length} financial item${transformedItems.length !== 1 ? 's' : ''} from AVS`,
-        type: 'success',
-        duration: 5000,
-      });
+    if (window.NightingaleToast && window.NightingaleToast.showSuccessToast) {
+      window.NightingaleToast.showSuccessToast(
+        `Successfully imported ${transformedItems.length} financial item${transformedItems.length !== 1 ? 's' : ''} from AVS`
+      );
     }
 
     // Close the modal

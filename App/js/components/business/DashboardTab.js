@@ -164,11 +164,13 @@ function DashboardTab({ fullData }) {
               onClick: () => {
                 if (action.action === 'createCase') {
                   // Will implement case creation modal
-                  if (window.NightingaleToast) {
-                    window.NightingaleToast.show({
-                      message: 'Case creation coming soon!',
-                      type: 'info',
-                    });
+                  if (
+                    window.NightingaleToast &&
+                    window.NightingaleToast.showInfoToast
+                  ) {
+                    window.NightingaleToast.showInfoToast(
+                      'Case creation coming soon!'
+                    );
                   }
                 } else if (action.action === 'searchCases') {
                   // Switch to cases tab

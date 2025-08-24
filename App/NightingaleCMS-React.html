@@ -2662,15 +2662,18 @@
         const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
 
         // File service initialization
-        const fileService = useMemo(
-          () =>
-            new FileSystemService({
+        const fileService = useMemo(() => {
+          if (typeof FileSystemService !== 'undefined') {
+            return new FileSystemService({
               tabId: `cms-react-tab-${Date.now()}`,
               errorCallback: showToast,
               sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
-            }),
-          []
-        );
+            });
+          } else {
+            console.warn('⚠️ FileSystemService not yet loaded, using fallback');
+            return null;
+          }
+        }, []);
 
         // Data update handler with immediate save + broadcast
         const handleUpdateData = useCallback(async (newData) => {
@@ -2880,9 +2883,44 @@
 
       console.log('🚀 Nightingale CMS React - Foundation Setup Complete');
 
-      // Wait for components to load before rendering React app
+      // Wait for components and services to load before rendering React app
       async function initializeApp() {
         try {
+          // Wait for services to be ready first
+          let servicesReady = false;
+          const checkServicesReady = () => {
+            servicesReady =
+              typeof FileSystemService !== 'undefined' &&
+              typeof window.NightingaleServices !== 'undefined' &&
+              window.NightingaleServices.loaded.length > 0;
+          };
+
+          // Check if services are already ready
+          checkServicesReady();
+
+          // If not ready, wait for the services ready event
+          if (!servicesReady) {
+            console.log('⏳ Waiting for services to load...');
+            await new Promise((resolve) => {
+              const handleServicesReady = () => {
+                console.log('✅ Services ready, proceeding with component check');
+                servicesReady = true;
+                window.removeEventListener('nightingale:services:ready', handleServicesReady);
+                resolve();
+              };
+              window.addEventListener('nightingale:services:ready', handleServicesReady);
+
+              // Fallback timeout after 10 seconds
+              setTimeout(() => {
+                if (!servicesReady) {
+                  console.warn('⚠️ Services loading timeout, proceeding anyway');
+                  window.removeEventListener('nightingale:services:ready', handleServicesReady);
+                  resolve();
+                }
+              }, 10000);
+            });
+          }
+
           // Wait for components to be available (index.js auto-loads them)
           if (window.NightingaleComponentLibrary) {
             // Wait for auto-loading to complete by checking if components are registered
