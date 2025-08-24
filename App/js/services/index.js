@@ -115,7 +115,7 @@ const SERVICE_LOAD_ORDER = [
   // Phase 3: UI Services (depend on core + data)
   {
     phase: 'ui',
-    services: ['nightingale.toast.js'],
+    services: ['nightingale.toast.js', 'nightingale.cmsutilities.js'],
   },
 
   // Phase 4: Business Services (depend on all above)

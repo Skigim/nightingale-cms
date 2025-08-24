@@ -162,6 +162,7 @@
     <script src="js/services/nightingale.search.js"></script>
     <script src="js/services/nightingale.datamanagement.js"></script>
     <script src="js/services/nightingale.toast.js"></script>
+    <script src="js/services/nightingale.cmsutilities.js"></script>
 
     <!-- Nightingale Component Library - Layered Architecture -->
     <script src="js/components/index.js"></script>
@@ -400,59 +401,6 @@
         // Quick debugging shortcuts
         debugCases: () => window.NightingaleDevTools.inspectData(window.nightingaleData?.cases),
         debugActiveView: () => console.log('Active View:', window.nightingaleActiveView),
-      };
-
-      // Global test functions
-      window.testDataIntegrityBroadcast = function () {
-        const channel = new BroadcastChannel('nightingale_suite');
-        channel.postMessage({
-          type: 'data_updated',
-          source: 'cms-react',
-          timestamp: new Date().toISOString(),
-        });
-        channel.close();
-        console.log('📤 Test broadcast sent');
-      };
-
-      // Test financial item migration
-      window.testFinancialMigration = function () {
-        console.group('🧪 Testing Financial Item Migration');
-
-        const legacyFinancialItem = {
-          id: 1,
-          type: 'Checking Account', // Legacy field
-          value: 1500.0, // Legacy field
-          source: 'Bank Statement', // Legacy field
-          location: 'Bank of America',
-          accountNumber: '1234',
-          verificationStatus: 'Verified',
-          owner: 'applicant',
-        };
-
-        console.log('Legacy Item:', legacyFinancialItem);
-
-        // Simulate migration
-        const migratedItem = {
-          ...legacyFinancialItem,
-          description: legacyFinancialItem.type,
-          amount: legacyFinancialItem.value,
-          verificationSource: legacyFinancialItem.source,
-          frequency: 'monthly',
-        };
-
-        console.log('Migrated Item:', migratedItem);
-        console.log('✅ Migration test completed - both type/description and value/amount fields preserved');
-        console.groupEnd();
-      };
-
-      window.checkAppStatus = function () {
-        console.group('📊 CMS React App Status');
-        console.log('Root Element:', document.getElementById('root'));
-        console.log('React Loaded:', !!window.React);
-        console.log('Babel Loaded:', !!window.Babel);
-        console.log('File Service Available:', !!window.FileSystemService);
-        console.log('Utils Available:', !!window.sanitize);
-        console.groupEnd();
       };
     </script>
 
@@ -1581,82 +1529,6 @@
 
       // ========================================================================
       // ========================================================================
-
-      // Helper functions for Case Details actions
-      function generateCaseSummary(caseData) {
-        // Generate summary functionality - similar to OldCMS
-        const summaryData = {
-          caseName: caseData.mcn || 'Unknown',
-          applicant: caseData.personId,
-          caseType: caseData.appDetails?.caseType,
-          status: caseData.status,
-          financialItems: {
-            resources: caseData.financials?.resources?.length || 0,
-            income: caseData.financials?.income?.length || 0,
-            expenses: caseData.financials?.expenses?.length || 0,
-          },
-          notes: caseData.notes?.length || 0,
-        };
-
-        console.log('Generating summary for case:', summaryData);
-        showToast('Case summary generation feature coming soon', 'info');
-      }
-
-      function openVRApp(caseData) {
-        // Open VR App with case context - similar to OldCMS
-        const vrUrl = `NightingaleCorrespondence.html?mcn=${encodeURIComponent(caseData.mcn || '')}`;
-        window.open(vrUrl, '_blank');
-      }
-
-      function scrollToNotes() {
-        // Scroll to notes section
-        const notesSection = document.querySelector('[data-section="notes"]');
-        if (notesSection) {
-          notesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-
-      function copyMCN(mcn) {
-        // Copy MCN to clipboard
-        if (!mcn) {
-          showToast('No MCN to copy', 'error');
-          return;
-        }
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard
-            .writeText(mcn)
-            .then(() => {
-              showToast(`MCN ${mcn} copied to clipboard`, 'success');
-            })
-            .catch(() => {
-              fallbackCopyTextToClipboard(mcn);
-            });
-        } else {
-          fallbackCopyTextToClipboard(mcn);
-        }
-      }
-
-      function fallbackCopyTextToClipboard(text) {
-        // Fallback copy method for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.top = '0';
-        textArea.style.left = '0';
-        textArea.style.position = 'fixed';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-          document.execCommand('copy');
-          showToast(`MCN ${text} copied to clipboard`, 'success');
-        } catch (err) {
-          showToast('Failed to copy MCN', 'error');
-        }
-
-        document.body.removeChild(textArea);
-      }
 
       // Financial Item Management Modal Component
       function FinancialItemModal({ isOpen, onClose, caseData, fullData, onUpdateData, itemType, editingItem = null }) {
