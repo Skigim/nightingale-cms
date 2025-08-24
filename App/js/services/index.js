@@ -105,7 +105,11 @@ const SERVICE_LOAD_ORDER = [
   // Phase 2: Data Services (depend on core)
   {
     phase: 'data',
-    services: ['nightingale.fileservice.js', 'nightingale.search.js'],
+    services: [
+      'nightingale.fileservice.js',
+      'nightingale.search.js',
+      'nightingale.datamanagement.js',
+    ],
   },
 
   // Phase 3: UI Services (depend on core + data)
