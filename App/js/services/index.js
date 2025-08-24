@@ -96,7 +96,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'core',
     services: [
-      'nightingale.utils.js',
+      'nightingale.coreutilities.js', // New: Core utilities (security, formatting, validation)
       'nightingale.dayjs.js',
       'nightingale.parsers.js',
     ],
@@ -115,13 +115,18 @@ const SERVICE_LOAD_ORDER = [
   // Phase 3: UI Services (depend on core + data)
   {
     phase: 'ui',
-    services: ['nightingale.toast.js', 'nightingale.cmsutilities.js'],
+    services: [
+      'nightingale.toast.js',
+      'nightingale.clipboard.js', // New: Dedicated clipboard service
+      'nightingale.uiutilities.js', // New: UI interaction utilities
+    ],
   },
 
   // Phase 4: Business Services (depend on all above)
   {
     phase: 'business',
     services: [
+      'nightingale.cmsutilities.v2.js', // New: CMS business logic only
       'nightingale.placeholders.js',
       'nightingale.templates.js',
       'nightingale.documentgeneration.js',
