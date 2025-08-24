@@ -50,6 +50,13 @@ const BUSINESS_COMPONENTS = [
   },
 
   {
+    name: 'DashboardTab',
+    path: 'js/components/business/DashboardTab.js',
+    category: 'dashboard',
+    dependencies: [],
+  },
+
+  {
     name: 'NotesModal',
     path: 'js/components/business/modals/NotesModal.js',
     category: 'business',
