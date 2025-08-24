@@ -1109,7 +1109,7 @@
             },
           };
 
-          const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+          const updatedCases = updateCaseInCollection(fullData.cases, caseData.id, updatedCase);
 
           onUpdateData({ ...fullData, cases: updatedCases });
         };
@@ -1137,20 +1137,8 @@
         const handleAvsImport = (importedItems) => {
           console.log('📥 Importing AVS data:', importedItems);
 
-          // Transform imported items to match our data structure
-          const transformedItems = importedItems.map((item) => ({
-            id: `avs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            description: `${item.type} - ${item.location}`,
-            location: item.location,
-            accountNumber: item.accountNumber,
-            amount: item.value,
-            type: item.type,
-            owner: item.owner,
-            verificationStatus: item.verificationStatus || 'Verified',
-            source: item.source || 'AVS Import',
-            dateAdded: new Date().toISOString(),
-            notes: `Imported from AVS${item.isDuplicate ? ' (Potential Duplicate)' : ''}`,
-          }));
+          // Transform imported items using helper function
+          const transformedItems = transformFinancialItems(importedItems);
 
           // Add to case financial resources
           const updatedCase = {
@@ -1161,8 +1149,8 @@
             },
           };
 
-          // Update the full data
-          const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+          // Update the full data using helper function
+          const updatedCases = updateCaseInCollection(fullData.cases, caseData.id, updatedCase);
           onUpdateData({ ...fullData, cases: updatedCases });
 
           // Show success notification
@@ -1582,6 +1570,13 @@
         );
       }
 
+      // ========================================================================
+      // DATA MANAGEMENT FUNCTIONS
+      // ========================================================================
+      // This section contains all data management, transformation, and utility
+      // functions that will be extracted to nightingale.datamanagement.js
+      // ========================================================================
+
       // Helper function to find person by ID with flexible matching
       function findPersonById(people, personId) {
         if (!people || !personId) return null;
@@ -1598,6 +1593,222 @@
           return false;
         });
       }
+
+      // Data Migration and Normalization Functions
+      async function normalizeDataMigrations(data) {
+        if (!data) return data;
+
+        console.log('🔄 Running data migrations for CMS React compatibility...');
+
+        // Normalize case data structure
+        if (data.cases) {
+          data.cases = data.cases.map((caseItem) => {
+            const normalizedCase = { ...caseItem };
+
+            // Ensure MCN field consistency - map both directions
+            // Legacy field migration: masterCaseNumber -> mcn
+            if (caseItem.masterCaseNumber && !caseItem.mcn) {
+              normalizedCase.mcn = caseItem.masterCaseNumber;
+            }
+
+            // Map appDetails.appDate to applicationDate
+            if (caseItem.appDetails?.appDate && !caseItem.applicationDate) {
+              normalizedCase.applicationDate = caseItem.appDetails.appDate;
+            }
+
+            // Map appDetails.caseType to caseType if missing
+            if (caseItem.appDetails?.caseType && !caseItem.caseType) {
+              normalizedCase.caseType = caseItem.appDetails.caseType;
+            }
+
+            // Add default values for new fields if they don't exist
+            if (!normalizedCase.livingArrangement) {
+              normalizedCase.livingArrangement = 'Not specified';
+            }
+
+            if (!normalizedCase.organizationAddress) {
+              normalizedCase.organizationAddress = 'Not specified';
+            }
+
+            // FINANCIAL ITEMS MIGRATION: type → description, value → amount
+            if (normalizedCase.financials) {
+              ['resources', 'income', 'expenses'].forEach((financialType) => {
+                if (normalizedCase.financials[financialType]) {
+                  normalizedCase.financials[financialType] = normalizedCase.financials[financialType].map((item) => {
+                    const migratedItem = { ...item };
+
+                    // Migrate type → description (CMSOld uses "type", React uses "description")
+                    if (item.type && !item.description) {
+                      migratedItem.description = item.type;
+                      console.log(`📝 Migrated financial item type "${item.type}" → description`);
+                    }
+
+                    // Migrate value → amount (CMSOld uses "value", React uses "amount")
+                    if (item.value !== undefined && item.amount === undefined) {
+                      migratedItem.amount = item.value;
+                      console.log(`💰 Migrated financial item value ${item.value} → amount`);
+                    }
+
+                    // Ensure backward compatibility: keep both fields
+                    if (item.description && !item.type) {
+                      migratedItem.type = item.description;
+                    }
+                    if (item.amount !== undefined && item.value === undefined) {
+                      migratedItem.value = item.amount;
+                    }
+
+                    // Add missing fields with defaults
+                    if (!migratedItem.frequency) {
+                      migratedItem.frequency = 'monthly'; // Default frequency for new React model
+                    }
+
+                    if (!migratedItem.dateAdded) {
+                      migratedItem.dateAdded = new Date().toISOString();
+                    }
+
+                    // Ensure verificationSource instead of just source
+                    if (item.source && !item.verificationSource) {
+                      migratedItem.verificationSource = item.source;
+                    }
+
+                    return migratedItem;
+                  });
+                }
+              });
+            }
+
+            return normalizedCase;
+          });
+        }
+
+        // Normalize people data structure
+        if (data.people) {
+          data.people = data.people.map((person, index) => {
+            const normalizedPerson = { ...person };
+
+            // Ensure every person has an ID
+            if (!normalizedPerson.id) {
+              normalizedPerson.id = `person-${Date.now()}-${index}`;
+            }
+
+            // Ensure default values for required fields
+            if (!normalizedPerson.name) {
+              normalizedPerson.name = 'Unknown Person';
+            }
+
+            if (!normalizedPerson.status) {
+              normalizedPerson.status = 'active';
+            }
+
+            if (!normalizedPerson.dateAdded) {
+              normalizedPerson.dateAdded = new Date().toISOString();
+            }
+
+            return normalizedPerson;
+          });
+        }
+
+        // Normalize organizations data structure
+        if (data.organizations) {
+          data.organizations = data.organizations.map((org, index) => {
+            const normalizedOrg = { ...org };
+
+            // Ensure every organization has an ID
+            if (!normalizedOrg.id) {
+              normalizedOrg.id = `org-${Date.now()}-${index}`;
+            }
+
+            // Ensure default values for required fields
+            if (!normalizedOrg.name) {
+              normalizedOrg.name = 'Unknown Organization';
+            }
+
+            if (!normalizedOrg.status) {
+              normalizedOrg.status = 'active';
+            }
+
+            if (!normalizedOrg.dateAdded) {
+              normalizedOrg.dateAdded = new Date().toISOString();
+            }
+
+            return normalizedOrg;
+          });
+        }
+
+        console.log('✅ Data migration completed successfully');
+        return data;
+      }
+
+      // Data Collection Update Helper Functions
+      function updateCaseInCollection(cases, caseId, updatedCase) {
+        return cases.map((c) => (c.id === caseId ? updatedCase : c));
+      }
+
+      function updatePersonInCollection(people, personId, updatedPerson) {
+        return people.map((p) => (p.id === personId ? updatedPerson : p));
+      }
+
+      function updateOrganizationInCollection(organizations, orgId, updatedOrg) {
+        return organizations.map((o) => (o.id === orgId ? updatedOrg : o));
+      }
+
+      // Financial Item Transformation Functions
+      function transformFinancialItems(importedItems) {
+        return importedItems.map((item) => ({
+          id: `financial-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          description: item.description || `${item.type} - ${item.location}` || item.type || 'Unknown Item',
+          location: item.location || '',
+          accountNumber: item.accountNumber || '',
+          amount: item.amount || item.value || 0,
+          type: item.type || '', // Keep legacy field for AVS compatibility
+          frequency: item.frequency || 'monthly',
+          owner: item.owner || 'applicant',
+          verificationStatus: item.verificationStatus || 'Verified',
+          verificationSource: item.verificationSource || item.source || 'AVS Import',
+          source: item.source || 'AVS Import', // Keep legacy field
+          notes: item.notes || `Imported from AVS${item.isDuplicate ? ' (Potential Duplicate)' : ''}`,
+          dateAdded: item.dateAdded || new Date().toISOString(),
+        }));
+      }
+
+      // Data Validation Functions
+      function validateCaseData(caseData) {
+        const errors = {};
+
+        if (!caseData.mcn) {
+          errors.mcn = 'MCN is required';
+        }
+
+        if (!caseData.personId) {
+          errors.personId = 'Person selection is required';
+        }
+
+        return errors;
+      }
+
+      function validatePersonData(personData) {
+        const errors = {};
+
+        if (!personData.name || personData.name.trim() === '') {
+          errors.name = 'Name is required';
+        }
+
+        return errors;
+      }
+
+      function validateOrganizationData(orgData) {
+        const errors = {};
+
+        if (!orgData.name || orgData.name.trim() === '') {
+          errors.name = 'Organization name is required';
+        }
+
+        return errors;
+      }
+
+      // ========================================================================
+      // END DATA MANAGEMENT FUNCTIONS
+      // ========================================================================
 
       // Helper functions for Case Details actions
       function generateCaseSummary(caseData) {
@@ -3987,149 +4198,144 @@
         initializeApp();
       }
 
-      // Helper function for data migrations (comprehensive)
-      async function normalizeDataMigrations(data) {
-        if (!data) return data;
+      // Initialize the app
+      if (!data) return data;
 
-        console.log('ðŸ”„ Running data migrations for CMS React compatibility...');
+      console.log('ðŸ”„ Running data migrations for CMS React compatibility...');
 
-        // Normalize case data structure
-        if (data.cases) {
-          data.cases = data.cases.map((caseItem) => {
-            const normalizedCase = { ...caseItem };
+      // Normalize case data structure
+      if (data.cases) {
+        data.cases = data.cases.map((caseItem) => {
+          const normalizedCase = { ...caseItem };
 
-            // Ensure MCN field consistency - map both directions
-            // Legacy field migration: masterCaseNumber -> mcn
-            if (caseItem.masterCaseNumber && !caseItem.mcn) {
-              normalizedCase.mcn = caseItem.masterCaseNumber;
-            }
+          // Ensure MCN field consistency - map both directions
+          // Legacy field migration: masterCaseNumber -> mcn
+          if (caseItem.masterCaseNumber && !caseItem.mcn) {
+            normalizedCase.mcn = caseItem.masterCaseNumber;
+          }
 
-            // Map appDetails.appDate to applicationDate
-            if (caseItem.appDetails?.appDate && !caseItem.applicationDate) {
-              normalizedCase.applicationDate = caseItem.appDetails.appDate;
-            }
+          // Map appDetails.appDate to applicationDate
+          if (caseItem.appDetails?.appDate && !caseItem.applicationDate) {
+            normalizedCase.applicationDate = caseItem.appDetails.appDate;
+          }
 
-            // Map appDetails.caseType to caseType if missing
-            if (caseItem.appDetails?.caseType && !caseItem.caseType) {
-              normalizedCase.caseType = caseItem.appDetails.caseType;
-            }
+          // Map appDetails.caseType to caseType if missing
+          if (caseItem.appDetails?.caseType && !caseItem.caseType) {
+            normalizedCase.caseType = caseItem.appDetails.caseType;
+          }
 
-            // Add default values for new fields if they don't exist
-            if (!normalizedCase.livingArrangement) {
-              normalizedCase.livingArrangement = 'Not specified';
-            }
+          // Add default values for new fields if they don't exist
+          if (!normalizedCase.livingArrangement) {
+            normalizedCase.livingArrangement = 'Not specified';
+          }
 
-            if (!normalizedCase.organizationAddress) {
-              normalizedCase.organizationAddress = 'Not specified';
-            }
+          if (!normalizedCase.organizationAddress) {
+            normalizedCase.organizationAddress = 'Not specified';
+          }
 
-            // FINANCIAL ITEMS MIGRATION: type â†’ description, value â†’ amount
-            if (normalizedCase.financials) {
-              ['resources', 'income', 'expenses'].forEach((financialType) => {
-                if (normalizedCase.financials[financialType]) {
-                  normalizedCase.financials[financialType] = normalizedCase.financials[financialType].map((item) => {
-                    const migratedItem = { ...item };
+          // FINANCIAL ITEMS MIGRATION: type â†’ description, value â†’ amount
+          if (normalizedCase.financials) {
+            ['resources', 'income', 'expenses'].forEach((financialType) => {
+              if (normalizedCase.financials[financialType]) {
+                normalizedCase.financials[financialType] = normalizedCase.financials[financialType].map((item) => {
+                  const migratedItem = { ...item };
 
-                    // Migrate type â†’ description (CMSOld uses "type", React uses "description")
-                    if (item.type && !item.description) {
-                      migratedItem.description = item.type;
-                      console.log(`ðŸ“ Migrated financial item type "${item.type}" â†’ description`);
-                    }
+                  // Migrate type â†’ description (CMSOld uses "type", React uses "description")
+                  if (item.type && !item.description) {
+                    migratedItem.description = item.type;
+                    console.log(`ðŸ“ Migrated financial item type "${item.type}" â†’ description`);
+                  }
 
-                    // Migrate value â†’ amount (CMSOld uses "value", React uses "amount")
-                    if (item.value !== undefined && item.amount === undefined) {
-                      migratedItem.amount = item.value;
-                      console.log(`ðŸ’° Migrated financial item value ${item.value} â†’ amount`);
-                    }
+                  // Migrate value â†’ amount (CMSOld uses "value", React uses "amount")
+                  if (item.value !== undefined && item.amount === undefined) {
+                    migratedItem.amount = item.value;
+                    console.log(`ðŸ’° Migrated financial item value ${item.value} â†’ amount`);
+                  }
 
-                    // Ensure backward compatibility: keep both fields
-                    if (item.description && !item.type) {
-                      migratedItem.type = item.description;
-                    }
-                    if (item.amount !== undefined && item.value === undefined) {
-                      migratedItem.value = item.amount;
-                    }
+                  // Ensure backward compatibility: keep both fields
+                  if (item.description && !item.type) {
+                    migratedItem.type = item.description;
+                  }
+                  if (item.amount !== undefined && item.value === undefined) {
+                    migratedItem.value = item.amount;
+                  }
 
-                    // Add missing fields with defaults
-                    if (!migratedItem.frequency) {
-                      migratedItem.frequency = 'monthly'; // Default frequency for new React model
-                    }
+                  // Add missing fields with defaults
+                  if (!migratedItem.frequency) {
+                    migratedItem.frequency = 'monthly'; // Default frequency for new React model
+                  }
 
-                    if (!migratedItem.dateAdded) {
-                      migratedItem.dateAdded = new Date().toISOString();
-                    }
+                  if (!migratedItem.dateAdded) {
+                    migratedItem.dateAdded = new Date().toISOString();
+                  }
 
-                    // Ensure verificationSource instead of just source
-                    if (item.source && !item.verificationSource) {
-                      migratedItem.verificationSource = item.source;
-                    }
+                  // Ensure verificationSource instead of just source
+                  if (item.source && !item.verificationSource) {
+                    migratedItem.verificationSource = item.source;
+                  }
 
-                    return migratedItem;
-                  });
-                }
-              });
-            }
+                  return migratedItem;
+                });
+              }
+            });
+          }
 
-            return normalizedCase;
-          });
-        }
+          return normalizedCase;
+        });
+      }
 
-        // Normalize people data structure
-        if (data.people) {
-          data.people = data.people.map((person, index) => {
-            const normalizedPerson = { ...person };
+      // Normalize people data structure
+      if (data.people) {
+        data.people = data.people.map((person, index) => {
+          const normalizedPerson = { ...person };
 
-            // Ensure every person has an ID
-            if (!normalizedPerson.id) {
-              normalizedPerson.id = `person-${Date.now()}-${index}`;
-            }
+          // Ensure every person has an ID
+          if (!normalizedPerson.id) {
+            normalizedPerson.id = `person-${Date.now()}-${index}`;
+          }
 
-            // Ensure default values for required fields
-            if (!normalizedPerson.name) {
-              normalizedPerson.name = 'Unknown Person';
-            }
+          // Ensure default values for required fields
+          if (!normalizedPerson.name) {
+            normalizedPerson.name = 'Unknown Person';
+          }
 
-            if (!normalizedPerson.status) {
-              normalizedPerson.status = 'active';
-            }
+          if (!normalizedPerson.status) {
+            normalizedPerson.status = 'active';
+          }
 
-            if (!normalizedPerson.dateAdded) {
-              normalizedPerson.dateAdded = new Date().toISOString();
-            }
+          if (!normalizedPerson.dateAdded) {
+            normalizedPerson.dateAdded = new Date().toISOString();
+          }
 
-            return normalizedPerson;
-          });
-        }
+          return normalizedPerson;
+        });
+      }
 
-        // Normalize organizations data structure
-        if (data.organizations) {
-          data.organizations = data.organizations.map((org, index) => {
-            const normalizedOrg = { ...org };
+      // Normalize organizations data structure
+      if (data.organizations) {
+        data.organizations = data.organizations.map((org, index) => {
+          const normalizedOrg = { ...org };
 
-            // Ensure every organization has an ID
-            if (!normalizedOrg.id) {
-              normalizedOrg.id = `org-${Date.now()}-${index}`;
-            }
+          // Ensure every organization has an ID
+          if (!normalizedOrg.id) {
+            normalizedOrg.id = `org-${Date.now()}-${index}`;
+          }
 
-            // Ensure default values for required fields
-            if (!normalizedOrg.name) {
-              normalizedOrg.name = 'Unknown Organization';
-            }
+          // Ensure default values for required fields
+          if (!normalizedOrg.name) {
+            normalizedOrg.name = 'Unknown Organization';
+          }
 
-            if (!normalizedOrg.status) {
-              normalizedOrg.status = 'active';
-            }
+          if (!normalizedOrg.status) {
+            normalizedOrg.status = 'active';
+          }
 
-            if (!normalizedOrg.dateAdded) {
-              normalizedOrg.dateAdded = new Date().toISOString();
-            }
+          if (!normalizedOrg.dateAdded) {
+            normalizedOrg.dateAdded = new Date().toISOString();
+          }
 
-            return normalizedOrg;
-          });
-        }
-
-        console.log('âœ… Data migration completed successfully');
-        return data;
+          return normalizedOrg;
+        });
       }
 
       // Initialize the app
