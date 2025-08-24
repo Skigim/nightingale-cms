@@ -43,6 +43,13 @@ const BUSINESS_COMPONENTS = [
   },
 
   {
+    name: 'FinancialManagementSection',
+    path: 'js/components/business/FinancialManagementSection.js',
+    category: 'financial',
+    dependencies: ['FinancialItemCard'],
+  },
+
+  {
     name: 'NotesModal',
     path: 'js/components/business/modals/NotesModal.js',
     category: 'business',
