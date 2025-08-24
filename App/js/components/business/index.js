@@ -48,9 +48,14 @@ const BUSINESS_COMPONENTS = [
     category: 'business',
     dependencies: [],
   },
+  {
+    name: 'FinancialItemModal',
+    path: 'js/components/business/modals/FinancialItemModal.js',
+    category: 'financial',
+    dependencies: ['Modal', 'FormComponents'],
+  },
 
   // Future business components will be added here:
-  // { name: 'FinancialItemModal', path: 'business/modals/FinancialItemModal.js', category: 'financial' },
   // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },
   // { name: 'CasePreviewModal', path: 'business/modals/CasePreviewModal.js', category: 'case-management' },
   // { name: 'SettingsModal', path: 'business/modals/SettingsModal.js', category: 'system' },
