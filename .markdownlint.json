@@ -1,0 +1,33 @@
+{
+  "MD033": {
+    "allowed_elements": [
+      "div",
+      "span",
+      "button",
+      "input",
+      "label",
+      "select",
+      "textarea",
+      "form",
+      "main",
+      "nav",
+      "section",
+      "head",
+      "link",
+      "meta",
+      "script",
+      "Fragment",
+      "Suspense",
+      "StrictMode",
+      "Profiler",
+      "Sidebar",
+      "StepperModal",
+      "ModalContent",
+      "NightingaleCMSApp"
+    ]
+  },
+  "MD041": false,
+  "MD013": {
+    "line_length": 120
+  }
+}
