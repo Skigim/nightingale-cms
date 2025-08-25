@@ -19,11 +19,13 @@ This document maps our existing Nightingale CMS architecture against the planned
 ```
 
 **✅ Implemented:**
+
 - Basic case management
 - Person management with living arrangements
 - Organization basic data
 
 **🔄 Recently Updated:**
+
 - Moved `livingArrangement` from cases to people (August 2025)
 - Enhanced PersonDetailsModal with relationship management
 - Integrated SearchBar components for family/authorized reps
@@ -35,18 +37,21 @@ This document maps our existing Nightingale CMS architecture against the planned
 ### ✅ **Currently Implemented (people[])**
 
 **Core Identity:**
+
 - ✅ `name` (single field - needs splitting)
 - ✅ `dateOfBirth`
 - ✅ `ssn`
 - ❌ Preferred Language (missing)
 
 **Contact Information:**
+
 - ✅ `phone` (single field)
 - ✅ `email`
 - ✅ `address` (full object: street, city, state, zip)
 - ✅ `mailingAddress` (full object)
 
 **Status Information:**
+
 - ✅ `livingArrangement` (newly moved from cases)
 - ❌ Demographics (Sex/Gender, Race/Ethnicity, Marital Status)
 - ❌ US Citizenship Status
@@ -55,11 +60,13 @@ This document maps our existing Nightingale CMS architecture against the planned
 - ❌ Pregnancy Status
 
 **Financial Information:**
+
 - ✅ Basic structure exists in cases.financials
 - ✅ Resources (income, expenses arrays)
 - ❌ Needs to be moved to person level per future model
 
 **Relationships:**
+
 - ✅ `authorizedRepIds` (array of person IDs)
 - ✅ `familyMembers` (array of person IDs)
 - ✅ Full relationship management in PersonDetailsModal
@@ -68,28 +75,31 @@ This document maps our existing Nightingale CMS architecture against the planned
 ### 🎯 **Future Model Alignment Needed**
 
 **Name Structure Enhancement:**
+
 ```javascript
 // Current: name: "John Doe"
-// Future: 
+// Future:
 names: {
   first: "John",
   middle: "",
-  last: "Doe", 
+  last: "Doe",
   suffix: ""
 }
 ```
 
 **Phone Numbers Enhancement:**
+
 ```javascript
 // Current: phone: "(555) 123-4567"
 // Future:
 phoneNumbers: [
-  { number: "(555) 123-4567", type: "primary" },
-  { number: "(555) 987-6543", type: "secondary" }
-]
+  { number: '(555) 123-4567', type: 'primary' },
+  { number: '(555) 987-6543', type: 'secondary' },
+];
 ```
 
 **Demographics Addition:**
+
 ```javascript
 demographics: {
   sex: "",
@@ -107,20 +117,24 @@ demographics: {
 ### ✅ **Currently Implemented (organizations[])**
 
 **Core Identity:**
+
 - ✅ `name` (organization name)
 - ✅ `type` (organization type)
 
 **Location & Contact:**
+
 - ✅ `address` (full object)
 - ✅ `phone`
 - ❌ Separate mailing address
 
 **Key Personnel:**
+
 - ❌ Contacts array (missing structured contact persons)
 
 ### 🎯 **Future Model Alignment Needed**
 
 **Enhanced Organization Structure:**
+
 ```javascript
 {
   id: 1,
@@ -133,12 +147,12 @@ demographics: {
   contacts: [
     {
       name: "Jane Administrator",
-      title: "Administrator", 
+      title: "Administrator",
       phone: "(555) 123-4567",
       email: "admin@sunset.com"
     },
     {
-      name: "Bob Manager", 
+      name: "Bob Manager",
       title: "BOM",
       phone: "(555) 123-4568",
       email: "bom@sunset.com"
@@ -154,14 +168,16 @@ demographics: {
 ### ✅ **Currently Implemented (cases[])**
 
 **Application Information:**
+
 - ✅ `applicationDate`
-- ✅ `caseType` 
+- ✅ `caseType`
 - ✅ `priority`
 - ✅ `retroRequested`
 - ❌ Application Type (Initial/Renewal)
 - ❌ Programs Requested array
 
 **Case Management:**
+
 - ✅ `mcn` (case number)
 - ✅ `status`
 - ✅ `personId` (links to primary person)
@@ -172,17 +188,20 @@ demographics: {
 - ❌ Review Dates
 
 **Financial Data:**
+
 - ✅ `financials` object with resources, income, expenses arrays
 - ✅ Verification tracking within financial items
 - ✅ Full CRUD operations in UI
 
 **Relationships:**
+
 - ✅ `authorizedReps` (array of person IDs)
 - ❌ Full household composition
 
 ### 🎯 **Future Model Alignment Needed**
 
 **Enhanced Case Structure:**
+
 ```javascript
 {
   // Keep existing fields
@@ -210,19 +229,19 @@ The future model calls for a separate `vrRequests[]` array for verification trac
 ```javascript
 vrRequests: [
   {
-    id: "vr-001",
-    caseId: "case-123",
+    id: 'vr-001',
+    caseId: 'case-123',
     personId: 1,
-    verificationType: "Income",
-    description: "Employment verification for John Doe",
-    dueDate: "2025-09-15",
-    status: "Pending",
-    source: "Employer",
-    dateRequested: "2025-08-15",
+    verificationType: 'Income',
+    description: 'Employment verification for John Doe',
+    dueDate: '2025-09-15',
+    status: 'Pending',
+    source: 'Employer',
+    dateRequested: '2025-08-15',
     dateReceived: null,
-    notes: "Sent request to HR department"
-  }
-]
+    notes: 'Sent request to HR department',
+  },
+];
 ```
 
 **Current State:** Verification is tracked within financial items but not as a separate system.
@@ -234,6 +253,7 @@ vrRequests: [
 ### ✅ **Fully Implemented**
 
 **People Management:**
+
 - ✅ DataTable with all current person fields
 - ✅ PersonDetailsModal with tabs (Basic Info, Address, Relationships)
 - ✅ SearchBar integration for relationship management
@@ -241,6 +261,7 @@ vrRequests: [
 - ✅ Organization/Address smart field display
 
 **Case Management:**
+
 - ✅ Full case CRUD operations
 - ✅ Financial management (resources, income, expenses)
 - ✅ Multi-step case creation wizard
@@ -248,6 +269,7 @@ vrRequests: [
 - ✅ Person selection integration
 
 **Search & Navigation:**
+
 - ✅ NightingaleSearchService with Fuse.js
 - ✅ SearchBar component with dropdown and keyboard navigation
 - ✅ Global search across people and cases
@@ -255,17 +277,20 @@ vrRequests: [
 ### 🔄 **Needs Enhancement**
 
 **Person Form Fields:**
+
 - Split name into components (First, Middle, Last, Suffix)
 - Add demographics section
 - Add multiple phone number support
 - Add citizenship/immigration status fields
 
 **Organization Management:**
+
 - Enhanced contact person management
 - Separate mailing address support
 - Better organization type categorization
 
 **Verification System:**
+
 - Separate verification request tracking
 - Due date management
 - Status workflow
@@ -295,22 +320,26 @@ vrRequests: [
 
 ## 📈 Migration Path
 
-### Phase 1: Data Model Enhancement *(Next Priority)*
+### Phase 1: Data Model Enhancement _(Next Priority)_
+
 - Split name fields in person objects
 - Add demographics section to PersonDetailsModal
 - Implement multiple phone number support
 
 ### Phase 2: Organization Enhancement
+
 - Add contacts array to organizations
 - Enhance organization management UI
 - Implement organization contact CRUD
 
 ### Phase 3: Verification System
+
 - Create vrRequests data structure
 - Build verification tracking UI
 - Implement due date and status workflows
 
 ### Phase 4: Case Enhancement
+
 - Add worker assignment and office tracking
 - Implement household composition management
 - Add program tracking and review dates
@@ -327,4 +356,4 @@ vrRequests: [
 
 ---
 
-*This document reflects the state as of August 16, 2025, after the livingArrangement migration and PersonDetailsModal enhancements.*
+_This document reflects the state as of August 16, 2025, after the livingArrangement migration and PersonDetailsModal enhancements._

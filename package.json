@@ -13,7 +13,7 @@
     "lint:report": "eslint App/Components/**/*.js App/js/**/*.js --format=json --output-file=lint-report.json",
     "audit": "npm audit && npm run lint",
     "audit:security": "npm audit --audit-level=moderate",
-    "format": "prettier --write App/Components/**/*.js App/js/**/*.js",
+    "format": "prettier --write \"**/*.{js,jsx,json,css,md,html}\"",
     "docs": "jsdoc -r App/Components App/js -d docs/api",
     "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose",
     "prepare": "husky"

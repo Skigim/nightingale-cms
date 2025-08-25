@@ -236,7 +236,7 @@
 
     if (section) {
       section.scrollIntoView(scrollOptions);
-      console.debug(`Scrolled to section: ${sectionSelector}`);
+      console.log(`Scrolled to section: ${sectionSelector}`);
     } else {
       console.warn(`Section not found: ${sectionSelector}`);
     }
@@ -262,7 +262,7 @@
         testMode: true,
       });
       channel.close();
-      console.debug('📤 Test broadcast sent successfully');
+      console.log('📤 Test broadcast sent successfully');
       return true;
     } catch (error) {
       console.error('❌ Broadcast test failed:', error);
@@ -274,7 +274,7 @@
    * Check application status and dependencies
    */
   function checkAppStatus() {
-    console.groupCollapsed('🔍 Nightingale CMS Status Check');
+    console.group('🔍 Nightingale CMS Status Check');
 
     const status = {
       timestamp: new Date().toISOString(),
@@ -304,7 +304,7 @@
     status.browser.broadcastChannel = !!window.BroadcastChannel;
     status.browser.fetch = !!window.fetch;
 
-    console.debug('Application Status:', status);
+    console.log('Application Status:', status);
     console.groupEnd();
 
     return status;
@@ -315,12 +315,12 @@
    */
   function debugComponentLibrary() {
     if (window.NightingaleComponentLibrary) {
-      console.groupCollapsed('🧩 Component Library Debug');
-      console.debug(
+      console.group('🧩 Component Library Debug');
+      console.log(
         'Available components:',
         window.NightingaleComponentLibrary.getAvailableComponents()
       );
-      console.debug(
+      console.log(
         'Library status:',
         window.NightingaleComponentLibrary.getStatus()
       );
@@ -353,7 +353,7 @@
   if (typeof window !== 'undefined') {
     window.NightingaleUIUtilities = NightingaleUIUtilities;
     window.NightingaleFocusManager = NightingaleFocusManager;
-    console.info('✅ Nightingale UI Utilities Service loaded');
+    console.log('✅ Nightingale UI Utilities Service loaded');
 
     // Register with service registry if available
     if (
@@ -365,7 +365,7 @@
         NightingaleUIUtilities,
         'ui'
       );
-      console.info(
+      console.log(
         '🎨 UI Utilities Service registered with Nightingale Services'
       );
     }

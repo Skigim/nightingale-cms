@@ -1,10 +1,26 @@
 // App/js/components/business/OrganizationsTab.js
 
-function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
+function OrganizationsTab({
+  fullData,
+  onUpdateData,
+  fileService,
+  onViewModeChange,
+  onBackToList,
+}) {
   const e = window.React.createElement;
   const { useState, useMemo, useEffect } = window.React;
-  const { PrimaryButton, SecondaryButton, DangerButton, SuccessButton, SearchBar, DataTable, Badge, ConfirmationModal, OrganizationDetailsModal, OrganizationCreationModal } = window.Nightingale.components;
-
+  const {
+    PrimaryButton,
+    SecondaryButton,
+    DangerButton,
+    SuccessButton,
+    SearchBar,
+    DataTable,
+    Badge,
+    ConfirmationModal,
+    OrganizationDetailsModal,
+    OrganizationCreationModal,
+  } = window.Nightingale.components;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrganization, setSelectedOrganization] = useState(null);
@@ -14,7 +30,8 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
   const [editValues, setEditValues] = useState({});
   const [viewMode, setViewMode] = useState('list'); // 'list' or 'details'
   const [detailsOrganizationId, setDetailsOrganizationId] = useState(null);
-  const [confirmingOrganizationDelete, setConfirmingOrganizationDelete] = useState(null);
+  const [confirmingOrganizationDelete, setConfirmingOrganizationDelete] =
+    useState(null);
 
   // Back to list function that can be called externally
   const backToList = () => {
@@ -79,9 +96,14 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
 
   const confirmOrganizationDelete = (organization) => {
     const updatedData = { ...fullData };
-    updatedData.organizations = updatedData.organizations.filter((o) => o.id !== organization.id);
+    updatedData.organizations = updatedData.organizations.filter(
+      (o) => o.id !== organization.id
+    );
     onUpdateData(updatedData);
-    window.showToast(`Organization ${organization.name} deleted successfully`, 'success');
+    window.showToast(
+      `Organization ${organization.name} deleted successfully`,
+      'success'
+    );
     setConfirmingOrganizationDelete(null);
   };
 
@@ -107,7 +129,9 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
   const handleSaveEdit = async (organization) => {
     try {
       const updatedData = { ...fullData };
-      const orgIndex = updatedData.organizations.findIndex((o) => o.id === organization.id);
+      const orgIndex = updatedData.organizations.findIndex(
+        (o) => o.id === organization.id
+      );
       if (orgIndex !== -1) {
         updatedData.organizations[orgIndex] = {
           ...updatedData.organizations[orgIndex],
@@ -145,7 +169,8 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
     e(
       'div',
       {
-        className: 'flex items-center justify-between bg-gray-800 p-3 rounded-lg shadow-md',
+        className:
+          'flex items-center justify-between bg-gray-800 p-3 rounded-lg shadow-md',
       },
       e(
         'div',
@@ -166,8 +191,16 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
             d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
           })
         ),
-        e('span', { className: 'font-bold text-white' }, 'Organizations Management'),
-        e('span', { className: 'ml-3 text-sm text-gray-400' }, `${filteredOrganizations.length} organizations`)
+        e(
+          'span',
+          { className: 'font-bold text-white' },
+          'Organizations Management'
+        ),
+        e(
+          'span',
+          { className: 'ml-3 text-sm text-gray-400' },
+          `${filteredOrganizations.length} organizations`
+        )
       ),
       e(PrimaryButton, {
         onClick: () => setIsCreateModalOpen(true),
@@ -191,7 +224,8 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
           e(SearchBar, {
             value: searchTerm,
             onChange: (e) => setSearchTerm(e.target.value),
-            placeholder: 'Search organizations by name, type, email, or phone...',
+            placeholder:
+              'Search organizations by name, type, email, or phone...',
             className: 'w-full',
             size: 'md',
             showClearButton: true,
@@ -214,10 +248,16 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
               ? e('input', {
                   type: 'text',
                   value: editValues.name,
-                  onChange: (e) => setEditValues({ ...editValues, name: e.target.value }),
-                  className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+                  onChange: (e) =>
+                    setEditValues({ ...editValues, name: e.target.value }),
+                  className:
+                    'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
                 })
-              : e('div', { className: 'font-medium text-white' }, org?.name || 'N/A'),
+              : e(
+                  'div',
+                  { className: 'font-medium text-white' },
+                  org?.name || 'N/A'
+                ),
         },
         {
           field: 'type',
@@ -229,8 +269,10 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
                   'select',
                   {
                     value: editValues.type,
-                    onChange: (e) => setEditValues({ ...editValues, type: e.target.value }),
-                    className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+                    onChange: (e) =>
+                      setEditValues({ ...editValues, type: e.target.value }),
+                    className:
+                      'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
                   },
                   e('option', { value: '' }, 'Select Type'),
                   e('option', { value: 'healthcare' }, 'Healthcare'),
@@ -243,7 +285,9 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
               : e(
                   'div',
                   { className: 'text-gray-300' },
-                  org?.type ? org.type.charAt(0).toUpperCase() + org.type.slice(1) : 'N/A'
+                  org?.type
+                    ? org.type.charAt(0).toUpperCase() + org.type.slice(1)
+                    : 'N/A'
                 ),
         },
         {
@@ -255,8 +299,10 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
               ? e('input', {
                   type: 'email',
                   value: editValues.email,
-                  onChange: (e) => setEditValues({ ...editValues, email: e.target.value }),
-                  className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+                  onChange: (e) =>
+                    setEditValues({ ...editValues, email: e.target.value }),
+                  className:
+                    'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
                 })
               : e('div', { className: 'text-gray-300' }, org?.email || 'N/A'),
         },
@@ -269,8 +315,10 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
               ? e('input', {
                   type: 'tel',
                   value: editValues.phone,
-                  onChange: (e) => setEditValues({ ...editValues, phone: e.target.value }),
-                  className: 'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+                  onChange: (e) =>
+                    setEditValues({ ...editValues, phone: e.target.value }),
+                  className:
+                    'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
                 })
               : e('div', { className: 'text-gray-300' }, org?.phone || 'N/A'),
         },
@@ -281,7 +329,12 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
           render: (org) => {
             const status = org.status || 'active';
             return e(Badge, {
-              variant: status === 'active' ? 'success' : status === 'pending' ? 'warning' : 'secondary',
+              variant:
+                status === 'active'
+                  ? 'success'
+                  : status === 'pending'
+                    ? 'warning'
+                    : 'secondary',
               children: status.charAt(0).toUpperCase() + status.slice(1),
             });
           },
@@ -341,7 +394,9 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
         isOpen: true,
         onClose: cancelOrganizationDelete,
         onConfirm: () => {
-          const org = fullData.organizations.find((o) => o.id === confirmingOrganizationDelete);
+          const org = fullData.organizations.find(
+            (o) => o.id === confirmingOrganizationDelete
+          );
           confirmOrganizationDelete(org);
         },
         title: 'Delete Organization',
@@ -374,7 +429,6 @@ function OrganizationsTab({ fullData, onUpdateData, fileService, onViewModeChang
       })
   );
 }
-
 
 if (typeof window.Nightingale !== 'undefined') {
   window.Nightingale.registerComponent('OrganizationsTab', OrganizationsTab);
