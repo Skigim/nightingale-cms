@@ -54,7 +54,7 @@ window.NightingaleServices = window.NightingaleServices || {
       version: service.version || '1.0.0',
     });
 
-    console.log(`⚙️ Service registered: ${name} (${category} category)`);
+    console.debug(`⚙️ Service registered: ${name} (${category} category)`);
   },
 
   // Get a service from any category
@@ -148,7 +148,7 @@ async function loadService(servicePath) {
     script.async = true;
 
     script.onload = () => {
-      console.log(`✅ Loaded: ${servicePath}`);
+      console.debug(`✅ Loaded: ${servicePath}`);
       resolve(servicePath);
     };
 
@@ -165,13 +165,13 @@ async function loadService(servicePath) {
  * Load services in phases with dependency resolution
  */
 async function loadServicesInPhases() {
-  console.log(
+  console.info(
     '🚀 Nightingale Services - Loading with dependency resolution...'
   );
 
   try {
     for (const phase of SERVICE_LOAD_ORDER) {
-      console.log(
+      console.debug(
         `📦 Phase ${phase.phase}: Loading ${phase.services.length} service(s)...`
       );
 
@@ -182,11 +182,11 @@ async function loadServicesInPhases() {
       // Wait a moment for services to register themselves
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      console.log(`✅ Phase ${phase.phase}: Complete`);
+      console.debug(`✅ Phase ${phase.phase}: Complete`);
     }
 
-    console.log('🎯 All Nightingale Services Loaded Successfully!');
-    console.log(
+    console.info('🎯 All Nightingale Services Loaded Successfully!');
+    console.debug(
       `   ⚙️ Total Services: ${window.NightingaleServices.loaded.length}`
     );
 
@@ -199,7 +199,7 @@ async function loadServicesInPhases() {
       ) {
         const count = Object.keys(window.NightingaleServices[category]).length;
         if (count > 0) {
-          console.log(`   📁 ${category}: ${count} service(s)`);
+          console.debug(`   📁 ${category}: ${count} service(s)`);
         }
       }
     });
@@ -238,7 +238,7 @@ async function loadNightingaleServices(options = {}) {
       );
 
       if (attempt < retryCount) {
-        console.log(`🔄 Retrying in ${retryDelay}ms...`);
+        console.debug(`🔄 Retrying in ${retryDelay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
       } else {
         console.error('💥 All service loading attempts failed');
@@ -320,13 +320,13 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Debug utilities available in console
 window.debugNightingaleServices = function () {
-  console.group('🔍 Nightingale Services Debug');
-  console.log('Loaded Services:', window.NightingaleServices.loaded);
-  console.log('Dependencies Status:', checkServiceDependencies());
-  console.log('Service Registry:', window.NightingaleServices);
+  console.groupCollapsed('🔍 Nightingale Services Debug');
+  console.debug('Loaded Services:', window.NightingaleServices.loaded);
+  console.debug('Dependencies Status:', checkServiceDependencies());
+  console.debug('Service Registry:', window.NightingaleServices);
   console.groupEnd();
 };
 
-console.log(
+console.info(
   '📋 Services registry initialized. Use debugNightingaleServices() for status.'
 );

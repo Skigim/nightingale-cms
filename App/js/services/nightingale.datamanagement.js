@@ -60,7 +60,7 @@
   async function normalizeDataMigrations(data) {
     if (!data) return data;
 
-    console.log('🔄 Running data migrations for CMS React compatibility...');
+    console.debug('🔄 Running data migrations for CMS React compatibility...');
 
     // Normalize case data structure
     if (data.cases) {
@@ -202,7 +202,7 @@
       });
     }
 
-    console.log('✅ Data migration completed successfully');
+    console.debug('✅ Data migration completed successfully');
     return data;
   }
 
@@ -365,7 +365,7 @@
   // Export to global scope
   if (typeof window !== 'undefined') {
     window.NightingaleDataManagement = NightingaleDataManagement;
-    console.log('✅ Nightingale Data Management Service loaded');
+    console.info('✅ Nightingale Data Management Service loaded');
 
     // Register with service registry if available
     if (
