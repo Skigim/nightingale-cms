@@ -39,6 +39,15 @@
       }
       .logo {
         margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        color: #3b82f6;
+        margin-bottom: 16px;
       }
       .logo h1 {
         color: #3b82f6;
@@ -101,6 +110,34 @@
   <body>
     <div class="loader">
       <div class="logo">
+        <!-- Nightingale CMS Branding Icon -->
+        <svg
+          class="logo-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <!-- Nightingale bird silhouette -->
+          <path
+            d="M12 3c-1.5 0-3 1-4 2.5C7 6.5 6.5 8 7 9.5c.5 1.5 1.5 2.5 2.5 3L8 15c-.5 1-1 2-1 3s.5 2 1.5 2.5c1 .5 2.5.5 3.5 0s1.5-1.5 1.5-2.5-0.5-2-1-3l-1.5-2.5c1-.5 2-1.5 2.5-3s.5-3-.5-4.5C16 4 14.5 3 12 3z"
+            fill="currentColor"
+            opacity="0.8"
+          />
+          <!-- Wing detail -->
+          <path
+            d="M10 7c.5.5 1 1.5 1.5 2.5S12.5 12 12 13"
+            stroke="currentColor"
+            stroke-width="1"
+            fill="none"
+            opacity="0.6"
+          />
+          <!-- Eye -->
+          <circle cx="11" cy="6.5" r="0.5" fill="currentColor" />
+          <!-- Healing cross symbolism (subtle) -->
+          <path d="M18 4v2M17 5h2" stroke="currentColor" stroke-width="1" opacity="0.4" />
+        </svg>
         <h1>Nightingale CMS</h1>
         <p>Case Management System</p>
       </div>
