@@ -160,20 +160,7 @@
     <script src="js/utilities/ui.js"></script>
     <script src="js/utilities/cms.js"></script>
 
-    <!-- Nightingale Services -->
-    <script src="js/services/nightingale.datamanagement.js"></script>
-    <script src="js/services/nightingale.fileservice.js"></script>
-    <script src="js/services/nightingale.toast.js"></script>
-    <script src="js/services/nightingale.search.js"></script>
-    <script src="js/services/nightingale.dayjs.js"></script>
-    <script src="js/services/nightingale.autosave.js"></script>
-    <script src="js/services/nightingale.clipboard.js"></script>
-    <script src="js/services/nightingale.documentgeneration.js"></script>
-    <script src="js/services/nightingale.placeholders.js"></script>
-    <script src="js/services/nightingale.templates.js"></script>
-    <script src="js/services/nightingale.parsers.js"></script>
-
-    <!-- Nightingale Service Initializer -->
+    <!-- Nightingale Service Initializer (loads services dynamically) -->
     <script src="js/services/index.js"></script>
 
     <!-- Nightingale Component Library - Layered Architecture -->
@@ -423,8 +410,9 @@
       const e = React.createElement;
 
       // Component variables - will be assigned during initialization
-      let PrimaryButton, SecondaryButton, Modal, SearchBar, ButtonIcons;
+      let PrimaryButton, SecondaryButton, Modal, SearchBar;
       // Note: DataTable is loaded separately from the component library
+      // Note: ButtonIcons is loaded from Button.js component
 
       // --- SHARED COMPONENTS ---
 
@@ -868,7 +856,7 @@
               children: isDirty ? 'Save' : 'Saved',
               onClick: onSave,
               disabled: !isDirty,
-              icon: ButtonIcons.save,
+              icon: window.ButtonIcons?.save,
               size: 'sm',
             }),
             // Status lights (matching original CMS)
@@ -2387,7 +2375,7 @@
             servicesReady =
               typeof FileSystemService !== 'undefined' &&
               typeof window.NightingaleServices !== 'undefined' &&
-              window.NightingaleServices.loaded.length > 0;
+              (window.NightingaleServices.loaded?.length || 0) > 0;
           };
 
           // Check if services are already ready
@@ -2443,7 +2431,6 @@
               // DataTable is globally available from the component library
               Modal = window.NightingaleComponentLibrary.getComponent('Modal') || (() => e('div', {}, 'Modal'));
               SearchBar = window.NightingaleComponentLibrary.getComponent('SearchBar') || (() => e('input', {}, ''));
-              ButtonIcons = window.ButtonIcons || {};
               console.log('✅ Components extracted from library');
             } else {
               // Fallback components if library is not available
@@ -2453,7 +2440,6 @@
                 e('button', { ...props, className: 'bg-gray-600 text-white px-4 py-2 rounded' }, props.children);
               Modal = (props) => e('div', { ...props }, props.children);
               SearchBar = (props) => e('input', { ...props, type: 'text', placeholder: 'Search...' });
-              ButtonIcons = {};
               console.log('⚠️ Using fallback components');
             }
           } else {

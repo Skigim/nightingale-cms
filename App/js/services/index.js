@@ -145,15 +145,24 @@ const SERVICE_LOAD_ORDER = [
  */
 async function loadService(servicePath) {
   return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    
-    // Handle both services and utilities directories
+    // Determine the actual script src
+    let scriptSrc;
     if (servicePath.startsWith('../utilities/')) {
-      script.src = `js/utilities/${servicePath.replace('../utilities/', '')}`;
+      scriptSrc = `js/utilities/${servicePath.replace('../utilities/', '')}`;
     } else {
-      script.src = `js/services/${servicePath}`;
+      scriptSrc = `js/services/${servicePath}`;
     }
     
+    // Check if script is already loaded
+    const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
+    if (existingScript) {
+      console.debug(`⏭️ Already loaded: ${servicePath}`);
+      resolve(servicePath);
+      return;
+    }
+    
+    const script = document.createElement('script');
+    script.src = scriptSrc;
     script.async = true;
 
     script.onload = () => {
