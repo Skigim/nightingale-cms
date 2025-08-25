@@ -8,9 +8,13 @@
 /**
  * Service Loading Architecture:
  *
- * 📁 js/services/
+ * 📁 js/utilities/ (Core utility functions)
+ * ├── 🔧 core.js                   <- Security, formatting, validation utilities
+ * ├── 🎨 ui.js                     <- UI interaction utilities  
+ * └── 🏢 cms.js                    <- CMS business logic
+ *
+ * 📁 js/services/ (Application services)
  * ├── 🔧 Core Services (loaded first)
- * │   ├── nightingale.coreutilities.js <- Security, formatting, validation utilities
  * │   ├── nightingale.dayjs.js        <- Date/time utilities
  * │   └── nightingale.parsers.js      <- Data parsing
  * │
@@ -21,11 +25,9 @@
  * │
  * ├── 🎨 UI Services (loaded third)
  * │   ├── nightingale.toast.js        <- Toast notifications
- * │   ├── nightingale.clipboard.js    <- Clipboard operations
- * │   └── nightingale.uiutilities.js  <- UI interaction utilities
+ * │   └── nightingale.clipboard.js    <- Clipboard operations
  * │
  * └── 📄 Business Services (loaded last)
- *     ├── nightingale.cmsutilities.js     <- CMS business logic
  *     ├── nightingale.placeholders.js    <- Placeholder processing
  *     ├── nightingale.templates.js       <- Template management
  *     └── nightingale.documentgeneration.js <- Document generation
@@ -100,7 +102,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'core',
     services: [
-      'nightingale.coreutilities.js', // New: Core utilities (security, formatting, validation)
+      '../utilities/core.js', // Core utilities (security, formatting, validation)
       'nightingale.dayjs.js',
       'nightingale.parsers.js',
     ],
@@ -122,7 +124,7 @@ const SERVICE_LOAD_ORDER = [
     services: [
       'nightingale.toast.js',
       'nightingale.clipboard.js', // New: Dedicated clipboard service
-      'nightingale.uiutilities.js', // New: UI interaction utilities
+      '../utilities/ui.js', // UI interaction utilities
     ],
   },
 
@@ -130,7 +132,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'business',
     services: [
-      'nightingale.cmsutilities.js', // CMS business logic only
+      '../utilities/cms.js', // CMS business logic
       'nightingale.placeholders.js',
       'nightingale.templates.js',
       'nightingale.documentgeneration.js',
@@ -144,7 +146,14 @@ const SERVICE_LOAD_ORDER = [
 async function loadService(servicePath) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = `js/services/${servicePath}`;
+    
+    // Handle both services and utilities directories
+    if (servicePath.startsWith('../utilities/')) {
+      script.src = `js/utilities/${servicePath.replace('../utilities/', '')}`;
+    } else {
+      script.src = `js/services/${servicePath}`;
+    }
+    
     script.async = true;
 
     script.onload = () => {
