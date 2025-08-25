@@ -49,11 +49,18 @@ const BUSINESS_COMPONENTS = [
     dependencies: ['FinancialItemCard'],
   },
 
-  {
+{
     name: 'DashboardTab',
     path: 'js/components/business/DashboardTab.js',
     category: 'dashboard',
     dependencies: [],
+  },
+
+{
+    name: 'OrganizationsTab',
+    path: 'js/components/business/OrganizationsTab.js',
+    category: 'organization-management',
+    dependencies: ['DataTable', 'Button', 'SearchBar', 'Modals'],
   },
 
   {
