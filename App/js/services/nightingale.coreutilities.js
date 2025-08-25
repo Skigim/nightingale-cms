@@ -369,7 +369,7 @@
   if (typeof window !== 'undefined') {
     window.NightingaleCoreUtilities = NightingaleCoreUtilities;
     window.NightingaleSearchService = NightingaleSearchService;
-    console.log('✅ Nightingale Core Utilities Service loaded');
+    console.info('✅ Nightingale Core Utilities Service loaded');
 
     // Register with service registry if available
     if (
@@ -381,7 +381,7 @@
         NightingaleCoreUtilities,
         'core'
       );
-      console.log(
+      console.info(
         '🛠️ Core Utilities Service registered with Nightingale Services'
       );
     }
