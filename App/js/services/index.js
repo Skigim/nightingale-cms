@@ -196,7 +196,7 @@ async function loadServicesInPhases() {
 
     console.info('🎯 All Nightingale Services Loaded Successfully!');
     console.debug(
-      `   ⚙️ Total Services: ${window.NightingaleServices.loaded.length}`
+      `   ⚙️ Total Services: ${window.NightingaleServices.loaded?.length || 0}`
     );
 
     // Log service summary by category
@@ -304,16 +304,26 @@ if (typeof window !== 'undefined') {
   window.autoLoadServices = autoLoadServices; // Backward compatibility
 
   // Auto-load when DOM is ready (only if not already loading)
-  if (!window.nightingaleServicesLoading) {
+  if (!window.nightingaleServicesLoading && !window.nightingaleServicesLoaded) {
     window.nightingaleServicesLoading = true;
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        loadNightingaleServices().catch(console.error);
+        loadNightingaleServices()
+          .then(() => {
+            window.nightingaleServicesLoaded = true;
+            window.nightingaleServicesLoading = false;
+          })
+          .catch(console.error);
       });
     } else {
       // DOM already loaded, start immediately
-      loadNightingaleServices().catch(console.error);
+      loadNightingaleServices()
+        .then(() => {
+          window.nightingaleServicesLoaded = true;
+          window.nightingaleServicesLoading = false;
+        })
+        .catch(console.error);
     }
   }
 }

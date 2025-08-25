@@ -423,7 +423,7 @@
       const e = React.createElement;
 
       // Component variables - will be assigned during initialization
-      let PrimaryButton, SecondaryButton, Modal, SearchBar;
+      let PrimaryButton, SecondaryButton, Modal, SearchBar, ButtonIcons;
       // Note: DataTable is loaded separately from the component library
 
       // --- SHARED COMPONENTS ---
@@ -2443,6 +2443,7 @@
               // DataTable is globally available from the component library
               Modal = window.NightingaleComponentLibrary.getComponent('Modal') || (() => e('div', {}, 'Modal'));
               SearchBar = window.NightingaleComponentLibrary.getComponent('SearchBar') || (() => e('input', {}, ''));
+              ButtonIcons = window.ButtonIcons || {};
               console.log('✅ Components extracted from library');
             } else {
               // Fallback components if library is not available
@@ -2452,6 +2453,7 @@
                 e('button', { ...props, className: 'bg-gray-600 text-white px-4 py-2 rounded' }, props.children);
               Modal = (props) => e('div', { ...props }, props.children);
               SearchBar = (props) => e('input', { ...props, type: 'text', placeholder: 'Search...' });
+              ButtonIcons = {};
               console.log('⚠️ Using fallback components');
             }
           } else {
