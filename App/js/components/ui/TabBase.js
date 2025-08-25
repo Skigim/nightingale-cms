@@ -55,6 +55,14 @@ function FallbackModal({ isOpen, onClose, title, children }) {
   );
 }
 
+// PropTypes for FallbackModal
+FallbackModal.propTypes = {
+  isOpen: window.PropTypes?.bool,
+  onClose: window.PropTypes?.func,
+  title: window.PropTypes?.string,
+  children: window.PropTypes?.node,
+};
+
 /**
  * Fallback Button component for when registry components are unavailable
  * Provides basic button functionality with Tailwind styling
@@ -100,6 +108,21 @@ function FallbackButton({
   );
 }
 
+// PropTypes for FallbackButton
+FallbackButton.propTypes = {
+  variant: window.PropTypes?.oneOf([
+    'primary',
+    'secondary',
+    'success',
+    'danger',
+  ]),
+  size: window.PropTypes?.oneOf(['sm', 'md', 'lg']),
+  onClick: window.PropTypes?.func,
+  children: window.PropTypes?.node,
+  disabled: window.PropTypes?.bool,
+  className: window.PropTypes?.string,
+};
+
 /**
  * Fallback SearchBar component for when registry components are unavailable
  * Provides basic search input functionality
@@ -121,6 +144,14 @@ function FallbackSearchBar({
       `w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`.trim(),
   });
 }
+
+// PropTypes for FallbackSearchBar
+FallbackSearchBar.propTypes = {
+  value: window.PropTypes?.string,
+  onChange: window.PropTypes?.func,
+  placeholder: window.PropTypes?.string,
+  className: window.PropTypes?.string,
+};
 
 /**
  * Multi-tier component registry access with comprehensive fallbacks

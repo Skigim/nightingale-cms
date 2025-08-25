@@ -191,7 +191,7 @@ function useOrganizationsData(props) {
 /**
  * Render action buttons for Organizations Tab
  */
-function renderOrganizationsActions({ components, data, props }) {
+function renderOrganizationsActions({ components, data }) {
   const e = window.React.createElement;
   const { Button } = components;
 
@@ -242,7 +242,7 @@ function renderOrganizationsActions({ components, data, props }) {
 /**
  * Render main content for Organizations Tab
  */
-function renderOrganizationsContent({ components, data, props }) {
+function renderOrganizationsContent({ components, data }) {
   const e = window.React.createElement;
   const { SearchBar, DataTable, Badge, Button } = components;
   const { state, handlers } = data;
