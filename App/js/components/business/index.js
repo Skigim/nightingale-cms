@@ -94,7 +94,6 @@ window.NightingaleBusiness = window.NightingaleBusiness || {
     this.components[name] = component;
     this.dependencies[name] = dependencies;
     this.loaded.push({ name, category, dependencies, timestamp: Date.now() });
-    console.log(`🏢 Business Component registered: ${name} (${category})`);
   },
 
   // Get a business component
@@ -139,24 +138,18 @@ function waitForUIComponents() {
  * Dynamically loads all business-specific components after UI components are ready
  */
 async function loadBusinessComponents() {
-  console.log('🏢 Loading Nightingale Business Component Library...');
-
   // Wait for UI components to be loaded first
   await waitForUIComponents();
-  console.log('✅ UI components ready, proceeding with business components...');
 
   const loadPromises = BUSINESS_COMPONENTS.map(
     async ({ name, path, category, dependencies }) => {
       try {
-        console.log(`🔄 Loading business component: ${name} (${category})`);
-
         // Create script element for component
         const script = document.createElement('script');
         script.src = path; // path already includes full js/components/business/ prefix
         script.async = true; // Return promise that resolves when script loads
         return new Promise((resolve, reject) => {
           script.onload = () => {
-            console.log(`✅ Business component loaded: ${name}`);
             resolve({ name, category, dependencies, status: 'loaded' });
           };
           script.onerror = () => {
@@ -174,9 +167,6 @@ async function loadBusinessComponents() {
 
   try {
     const results = await Promise.all(loadPromises);
-    console.log(
-      `🏢 Nightingale Business Library loaded successfully! (${results.length} components)`
-    );
 
     // Dispatch event for when business library is ready
     window.dispatchEvent(

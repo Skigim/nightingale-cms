@@ -19,13 +19,9 @@
         'use strict';
 
         if (window.location.protocol === 'file:') {
-          console.log('🔧 Initializing DevTools CORS override for file:// protocol');
-
           // Enhanced fetch override with better pattern matching
           const originalFetch = window.fetch;
           window.fetch = function (url, options) {
-            console.log('Fetch intercepted:', url); // Debug log
-
             if (typeof url === 'string') {
               if (
                 url.includes('%3Canonymous%3E') ||
@@ -70,7 +66,6 @@
                   url.includes('anonymous') ||
                   url.includes('fileFetcher.js'))
               ) {
-                console.log('🚫 Blocked XHR request:', url);
                 // Create a mock successful request
                 Object.defineProperty(xhr, 'status', {
                   writable: true,
@@ -159,6 +154,17 @@
     <script src="js/utilities/core.js"></script>
     <script src="js/utilities/ui.js"></script>
     <script src="js/utilities/cms.js"></script>
+
+    <!-- Unregister any existing service workers -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+    </script>
 
     <!-- Nightingale Service Initializer (loads services dynamically) -->
     <script src="js/services/index.js"></script>
@@ -2170,13 +2176,8 @@
             });
           }
 
-          console.log('handleUpdateData called with:', {
-            hasCases: !!newData?.cases,
-            caseCount: newData?.cases?.length || 0,
-          });
           setFullData(newData);
           setIsDirty(true);
-          console.log('Set isDirty to true');
         }, []);
 
         const handleSave = async () => {
@@ -2185,11 +2186,6 @@
             showToast('No data to save.', 'error');
             return;
           }
-
-          console.log('Attempting to save data...', {
-            isDirty,
-            fullDataExists: !!fullData,
-          });
 
           try {
             const success = await fileService.writeFile(fullData);
@@ -2221,19 +2217,12 @@
           setFullData(newData);
           setFileStatus('connected');
           setIsDirty(false);
-          console.log('Data loaded successfully:', {
-            cases: newData?.cases?.length || 0,
-            people: newData?.people?.length || 0,
-          });
         }, []);
 
         // Initialize file system and load data
         useEffect(() => {
           async function initializeApp() {
             try {
-              console.log('🚀 Nightingale CMS React App Starting...');
-              console.log('📱 React DevTools Available');
-
               setFileStatus('connecting');
 
               // Check for existing file system access
@@ -2245,7 +2234,6 @@
                   // Apply any necessary data migrations
                   const normalizedData = await window.NightingaleDataManagement.normalizeDataMigrations(data);
                   setFullData(normalizedData);
-                  console.log('Data loaded successfully');
                 }
               } else {
                 setFileStatus('disconnected');
@@ -2266,11 +2254,8 @@
           const channel = new BroadcastChannel('nightingale-app-communication');
 
           channel.addEventListener('message', (event) => {
-            console.log('Received broadcast message:', event.data);
-
             if (event.data.type === 'show_case' && event.data.mcn) {
               // Handle show case request from other apps
-              console.log(`Received request to show case: ${event.data.mcn}`);
               setActiveTab('cases');
               showToast(`Loading case ${event.data.mcn}...`, 'info');
             }
@@ -2282,14 +2267,7 @@
         // React DevTools setup
         useEffect(() => {
           if (window.NightingaleDevTools) {
-            console.log('🛠️ Nightingale DevTools Commands Available');
-            console.log('📝 Debug Data: window.NightingaleDevTools.inspectData(data)');
-            console.log('🎯 Debug Component: window.NightingaleDevTools.debugComponent(name, state)');
-            console.log('🔌 Check DevTools Connection: window.NightingaleDevTools.checkDevToolsConnection()');
-            console.log('📤 Test Broadcast: window.testDataIntegrityBroadcast()');
-            console.log('📊 App Status: window.checkAppStatus()');
-            console.log('💡 Open React DevTools to inspect component state and props!');
-
+            // DevTools available - use window.NightingaleDevTools.* commands for debugging
             window.NightingaleDevTools.checkDevToolsConnection();
           }
         }, []);
@@ -2298,35 +2276,47 @@
         const renderContent = () => {
           switch (activeTab) {
             case 'dashboard':
-              return window.DashboardTab && e(window.DashboardTab, { fullData });
+              return window.DashboardTab
+                ? e(window.DashboardTab, { fullData })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
             case 'cases':
-              return e(CasesTab, {
-                fullData,
-                onUpdateData: handleUpdateData,
-                fileService,
-                onViewModeChange: setCaseViewMode,
-                onBackToList: setCaseBackFunction,
-              });
+              return window.CasesTab
+                ? e(window.CasesTab, {
+                    fullData,
+                    onUpdateData: handleUpdateData,
+                    fileService,
+                    onViewModeChange: setCaseViewMode,
+                    onBackToList: setCaseBackFunction,
+                  })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Cases component not loaded');
             case 'people':
-              return e(PeopleTab, {
-                fullData,
-                onUpdateData: handleUpdateData,
-                fileService,
-                onViewModeChange: setPeopleViewMode,
-                onBackToList: setPeopleBackFunction,
-              });
+              return window.PeopleTab
+                ? e(window.PeopleTab, {
+                    fullData,
+                    onUpdateData: handleUpdateData,
+                    fileService,
+                    onViewModeChange: setPeopleViewMode,
+                    onBackToList: setPeopleBackFunction,
+                  })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'People component not loaded');
             case 'organizations':
-              return e(OrganizationsTab, {
-                fullData,
-                onUpdateData: handleUpdateData,
-                fileService,
-                onViewModeChange: setOrganizationsViewMode,
-                onBackToList: setOrganizationsBackFunction,
-              });
+              return window.OrganizationsTab
+                ? e(window.OrganizationsTab, {
+                    fullData,
+                    onUpdateData: handleUpdateData,
+                    fileService,
+                    onViewModeChange: setOrganizationsViewMode,
+                    onBackToList: setOrganizationsBackFunction,
+                  })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Organizations component not loaded');
             case 'eligibility':
-              return e(EligibilityTab, { fullData });
+              return window.EligibilityTab
+                ? e(window.EligibilityTab, { fullData })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Eligibility component not loaded');
             default:
-              return window.DashboardTab && e(window.DashboardTab, { fullData });
+              return window.DashboardTab
+                ? e(window.DashboardTab, { fullData })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
           }
         };
 
@@ -2364,8 +2354,6 @@
 
       // --- APP INITIALIZATION ---
 
-      console.log('🚀 Nightingale CMS React - Foundation Setup Complete');
-
       // Wait for components and services to load before rendering React app
       async function initializeApp() {
         try {
@@ -2383,10 +2371,8 @@
 
           // If not ready, wait for the services ready event
           if (!servicesReady) {
-            console.log('⏳ Waiting for services to load...');
             await new Promise((resolve) => {
               const handleServicesReady = () => {
-                console.log('✅ Services ready, proceeding with component check');
                 servicesReady = true;
                 window.removeEventListener('nightingale:services:ready', handleServicesReady);
                 resolve();
@@ -2411,7 +2397,6 @@
             while (attempts < 50) {
               // Max 5 seconds
               if (window.NightingaleComponentLibrary.getComponent('PrimaryButton')) {
-                console.log('✅ Components loaded, initializing React app');
                 break;
               }
               await new Promise((resolve) => setTimeout(resolve, 100));
@@ -2431,7 +2416,6 @@
               // DataTable is globally available from the component library
               Modal = window.NightingaleComponentLibrary.getComponent('Modal') || (() => e('div', {}, 'Modal'));
               SearchBar = window.NightingaleComponentLibrary.getComponent('SearchBar') || (() => e('input', {}, ''));
-              console.log('✅ Components extracted from library');
             } else {
               // Fallback components if library is not available
               PrimaryButton = (props) =>
@@ -2440,7 +2424,6 @@
                 e('button', { ...props, className: 'bg-gray-600 text-white px-4 py-2 rounded' }, props.children);
               Modal = (props) => e('div', { ...props }, props.children);
               SearchBar = (props) => e('input', { ...props, type: 'text', placeholder: 'Search...' });
-              console.log('⚠️ Using fallback components');
             }
           } else {
             console.warn('⚠️ Component library not found, proceeding with basic initialization');

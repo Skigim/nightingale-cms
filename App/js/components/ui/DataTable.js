@@ -570,7 +570,12 @@ const DataTable = ({
   );
 };
 
-// Make component available globally
+// Make component available globally and register with UI registry
 if (typeof window !== 'undefined') {
   window.DataTable = DataTable;
+
+  // Register with the UI component registry when available
+  if (window.NightingaleUI) {
+    window.NightingaleUI.registerComponent('DataTable', DataTable, 'data');
+  }
 }

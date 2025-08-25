@@ -19,8 +19,6 @@
         'use strict';
 
         if (window.location.protocol === 'file:') {
-          console.log('🔧 Initializing DevTools CORS override for file:// protocol');
-
           // Immediate fetch override before any libraries load
           const originalFetch = window.fetch;
           window.fetch = function (url, options) {
