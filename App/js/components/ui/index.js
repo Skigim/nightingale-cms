@@ -40,6 +40,13 @@ const UI_COMPONENTS = [
     path: 'js/components/ui/modals/StepperModal.js',
     category: 'modals',
   },
+
+  // Component Factories and Utilities
+  {
+    name: 'TabBase',
+    path: 'js/components/ui/TabBase.js',
+    category: 'factories',
+  },
 ]; // UI Component Registry
 window.NightingaleUI = window.NightingaleUI || {
   components: {},
