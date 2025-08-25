@@ -416,12 +416,6 @@ const DataTable = ({
           paginatedData.map((row, index) => {
             const rowId = row.id || row._id || JSON.stringify(row);
 
-            // Debug logging for isSelected issues
-            console.log('Row data:', row);
-            console.log('Generated rowId:', rowId);
-            console.log('selectedRows array:', selectedRows);
-            console.log('includes result:', selectedRows.includes(rowId));
-
             const isSelected = selectedRows.includes(rowId);
             const isEven = index % 2 === 0;
 
