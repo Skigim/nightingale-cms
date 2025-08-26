@@ -104,6 +104,12 @@ const BUSINESS_COMPONENTS = [
     category: 'settings',
     dependencies: ['Modal'],
   },
+  {
+    name: 'NightingaleCMSApp',
+    path: 'NightingaleCMSApp.js',
+    category: 'application',
+    dependencies: ['Sidebar', 'Header', 'SettingsModal'],
+  },
 
   // Future business components will be added here:
   // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },
