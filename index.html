@@ -170,7 +170,7 @@
     <script src="./src/services/index.js"></script>
 
     <!-- FileSystem Service for autosave -->
-    <script src="./src/services/nightingale.filesystem.js"></script>
+    <script src="./src/services/nightingale.fileservice.js"></script>
 
     <!-- Autosave Service -->
     <script src="./src/services/nightingale.autosave.js"></script>
@@ -1473,8 +1473,8 @@
         useEffect(() => {
           const handleServicesReady = () => {
             console.log('🎯 Services ready - initializing FileService');
-            if (typeof NightingaleFileSystemService !== 'undefined') {
-              const service = new NightingaleFileSystemService({
+            if (typeof FileSystemService !== 'undefined') {
+              const service = new FileSystemService({
                 tabId: `cms-react-tab-${Date.now()}`,
                 errorCallback: showToast,
                 sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
@@ -1482,12 +1482,12 @@
               setFileService(service);
               setServicesReady(true);
             } else {
-              console.warn('⚠️ NightingaleFileSystemService still not available after services ready event');
+              console.warn('⚠️ FileSystemService still not available after services ready event');
             }
           };
 
           // Check if services are already loaded
-          if (window.nightingaleServicesLoaded && typeof NightingaleFileSystemService !== 'undefined') {
+          if (window.nightingaleServicesLoaded && typeof FileSystemService !== 'undefined') {
             handleServicesReady();
           } else {
             // Listen for services ready event
@@ -1497,11 +1497,11 @@
             let attempts = 0;
             const checkInterval = setInterval(() => {
               attempts++;
-              if (typeof NightingaleFileSystemService !== 'undefined') {
+              if (typeof FileSystemService !== 'undefined') {
                 handleServicesReady();
                 clearInterval(checkInterval);
               } else if (attempts >= 10) {
-                console.error('❌ NightingaleFileSystemService failed to load after 10 seconds');
+                console.error('❌ FileSystemService failed to load after 10 seconds');
                 clearInterval(checkInterval);
               }
             }, 1000);

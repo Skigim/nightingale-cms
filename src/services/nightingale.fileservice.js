@@ -70,13 +70,20 @@ class FileSystemService {
   }
 
   async writeFile(data) {
-    if (!this.directoryHandle || (await this.checkPermission()) !== 'granted') {
-      this.errorCallback(
-        'Cannot write file: No directory selected or permission not granted.',
-        'error'
-      );
+    // Check if we have a directory handle and permissions
+    if (!this.directoryHandle) {
+      // For autosave compatibility: fail silently if no directory is selected
+      console.log('ℹ️ FileSystemService: No directory selected, save skipped gracefully');
       return false;
     }
+    
+    const permission = await this.checkPermission();
+    if (permission !== 'granted') {
+      // For autosave compatibility: fail silently if permissions not granted
+      console.log(`ℹ️ FileSystemService: Permission ${permission}, save skipped gracefully`);
+      return false;
+    }
+
     try {
       const fileHandleWrite = await this.directoryHandle.getFileHandle(
         this.fileName,
@@ -85,10 +92,12 @@ class FileSystemService {
       const writable = await fileHandleWrite.createWritable();
       await writable.write(JSON.stringify(data, null, 2));
       await writable.close();
+      
+      // Store last save timestamp
       localStorage.setItem(
         'nightingale-last-save',
         JSON.stringify({
-          timestamp: window.dateUtils.now(),
+          timestamp: window.dateUtils ? window.dateUtils.now() : Date.now(),
           tabId: this.tabId,
         })
       );
@@ -126,13 +135,18 @@ class FileSystemService {
   }
 
   async readFile() {
-    if (!this.directoryHandle || (await this.checkPermission()) !== 'granted') {
-      this.errorCallback(
-        'Cannot read file: No directory selected or permission not granted.',
-        'error'
-      );
+    // Check if we have a directory handle and permissions
+    if (!this.directoryHandle) {
+      console.log('ℹ️ FileSystemService: Cannot read file - no directory selected');
       return null;
     }
+    
+    const permission = await this.checkPermission();
+    if (permission !== 'granted') {
+      console.log('ℹ️ FileSystemService: Cannot read file - permission not granted');
+      return null;
+    }
+    
     try {
       const fileHandle = await this.directoryHandle.getFileHandle(
         this.fileName
