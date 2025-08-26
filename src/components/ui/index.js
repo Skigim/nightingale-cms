@@ -94,7 +94,7 @@ async function loadUIComponents() {
 
       // Create script element for component
       const script = document.createElement('script');
-      script.src = `/src/components/ui/${path}`; // Make path absolute from root
+      script.src = `src/components/ui/${path}`; // Make path relative to the root page
       script.async = true;
 
       // Return promise that resolves when script loads
