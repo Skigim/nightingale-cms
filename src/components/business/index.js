@@ -12,66 +12,66 @@ const BUSINESS_COMPONENTS = [
   // Case Management Modals
   {
     name: 'CaseCreationModal',
-    path: 'js/components/business/modals/CaseCreationModal.js',
+    path: 'CaseCreationModal.js',
     category: 'case-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },
   {
     name: 'PersonCreationModal',
-    path: 'js/components/business/modals/PersonCreationModal.js',
+    path: 'PersonCreationModal.js',
     category: 'people-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },
   {
     name: 'OrganizationModal',
-    path: 'js/components/business/modals/OrganizationModal.js',
+    path: 'OrganizationModal.js',
     category: 'organization-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },
   {
     name: 'AvsImportModal',
-    path: 'js/components/business/modals/AvsImportModal.js',
+    path: 'AvsImportModal.js',
     category: 'financial',
     dependencies: ['Modal', 'FormComponents', 'Button'],
   },
 
   {
     name: 'FinancialItemCard',
-    path: 'js/components/business/FinancialItemCard.js',
+    path: 'FinancialItemCard.js',
     category: 'financial',
     dependencies: ['Cards', 'Badge', 'Button'],
   },
 
   {
     name: 'FinancialManagementSection',
-    path: 'js/components/business/FinancialManagementSection.js',
+    path: 'FinancialManagementSection.js',
     category: 'financial',
     dependencies: ['FinancialItemCard'],
   },
 
   {
     name: 'DashboardTab',
-    path: 'js/components/business/DashboardTab.js',
+    path: 'DashboardTab.js',
     category: 'dashboard',
     dependencies: [],
   },
 
   {
     name: 'OrganizationsTab',
-    path: 'js/components/business/OrganizationsTab.js',
+    path: 'OrganizationsTab.js',
     category: 'organization-management',
     dependencies: ['TabBase', 'DataTable', 'Button', 'SearchBar'],
   },
 
   {
     name: 'NotesModal',
-    path: 'js/components/business/modals/NotesModal.js',
+    path: 'NotesModal.js',
     category: 'business',
     dependencies: [],
   },
   {
     name: 'FinancialItemModal',
-    path: 'js/components/business/modals/FinancialItemModal.js',
+    path: 'FinancialItemModal.js',
     category: 'financial',
     dependencies: ['Modal', 'FormComponents'],
   },
@@ -146,7 +146,7 @@ async function loadBusinessComponents() {
       try {
         // Create script element for component
         const script = document.createElement('script');
-        script.src = path; // path already includes full js/components/business/ prefix
+        script.src = path; // path is relative to business component directory
         script.async = true; // Return promise that resolves when script loads
         return new Promise((resolve, reject) => {
           script.onload = () => {

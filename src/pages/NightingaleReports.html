@@ -9,9 +9,9 @@
       content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;"
     />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="lib/dayjs.min.js"></script>
-    <script src="lib/dayjs-relativeTime.min.js"></script>
-    <script src="lib/dayjs-customParseFormat.min.js"></script>
+    <script src="../assets/dayjs.min.js"></script>
+    <script src="../assets/dayjs-relativeTime.min.js"></script>
+    <script src="../assets/dayjs-customParseFormat.min.js"></script>
     <script>
       // Initialize Day.js plugins
       if (typeof dayjs !== 'undefined') {
@@ -19,13 +19,13 @@
         dayjs.extend(window.dayjs_plugin_customParseFormat);
       }
     </script>
-    <script src="js/utilities/core.js"></script>
-    <script src="js/utilities/ui.js"></script>
-    <script src="js/utilities/cms.js"></script>
-    <script src="js/services/nightingale.dayjs.js"></script>
-    <script src="js/services/nightingale.fileservice.js"></script>
-    <script src="js/services/nightingale.toast.js"></script>
-    <script src="../Components/index.js"></script>
+    <script src="../services/core.js"></script>
+    <script src="../services/ui.js"></script>
+    <script src="../services/cms.js"></script>
+    <script src="../services/nightingale.dayjs.js"></script>
+    <script src="../services/nightingale.fileservice.js"></script>
+    <script src="../services/nightingale.toast.js"></script>
+    <script src="../components/index.js"></script>
 
     <!-- Lodash for reliable utility functions -->
     <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>

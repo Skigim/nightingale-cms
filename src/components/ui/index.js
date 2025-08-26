@@ -10,46 +10,46 @@
 // UI Component Loading Configuration
 const UI_COMPONENTS = [
   // Core UI Components
-  { name: 'Button', path: 'js/components/ui/Button.js', category: 'core' },
-  { name: 'Badge', path: 'js/components/ui/Badge.js', category: 'core' },
-  { name: 'Cards', path: 'js/components/ui/Cards.js', category: 'core' },
+  { name: 'Button', path: 'Button.js', category: 'core' },
+  { name: 'Badge', path: 'Badge.js', category: 'core' },
+  { name: 'Cards', path: 'Cards.js', category: 'core' },
   {
     name: 'SearchBar',
-    path: 'js/components/ui/SearchBar.js',
+    path: 'SearchBar.js',
     category: 'core',
   },
   {
     name: 'FormComponents',
-    path: 'js/components/ui/FormComponents.js',
+    path: 'FormComponents.js',
     category: 'forms',
   },
   {
     name: 'DataTable',
-    path: 'js/components/ui/DataTable.js',
+    path: 'DataTable.js',
     category: 'data',
   },
 
   // Modal Components
   {
     name: 'Modal',
-    path: 'js/components/ui/modals/Modal.js',
+    path: 'Modal.js',
     category: 'modals',
   },
   {
     name: 'StepperModal',
-    path: 'js/components/ui/modals/StepperModal.js',
+    path: 'StepperModal.js',
     category: 'modals',
   },
 
   // Component Factories and Utilities
   {
     name: 'TabBase',
-    path: 'js/components/ui/TabBase.js',
+    path: 'TabBase.js',
     category: 'factories',
   },
   {
     name: 'TabHeader',
-    path: 'js/components/ui/TabHeader.js',
+    path: 'TabHeader.js',
     category: 'layout',
   },
 ]; // UI Component Registry

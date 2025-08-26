@@ -102,7 +102,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'core',
     services: [
-      '../utilities/core.js', // Core utilities (security, formatting, validation)
+      'core.js', // Core utilities (security, formatting, validation)
       'nightingale.dayjs.js',
       'nightingale.parsers.js',
     ],
@@ -124,7 +124,7 @@ const SERVICE_LOAD_ORDER = [
     services: [
       'nightingale.toast.js',
       'nightingale.clipboard.js', // New: Dedicated clipboard service
-      '../utilities/ui.js', // UI interaction utilities
+      'ui.js', // UI interaction utilities
     ],
   },
 
@@ -132,7 +132,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'business',
     services: [
-      '../utilities/cms.js', // CMS business logic
+      'cms.js', // CMS business logic
       'nightingale.placeholders.js',
       'nightingale.templates.js',
       'nightingale.documentgeneration.js',
@@ -145,13 +145,8 @@ const SERVICE_LOAD_ORDER = [
  */
 async function loadService(servicePath) {
   return new Promise((resolve, reject) => {
-    // Determine the actual script src
-    let scriptSrc;
-    if (servicePath.startsWith('../utilities/')) {
-      scriptSrc = `js/utilities/${servicePath.replace('../utilities/', '')}`;
-    } else {
-      scriptSrc = `js/services/${servicePath}`;
-    }
+    // Determine the actual script src - all files are now in the same services directory
+    const scriptSrc = servicePath;
 
     // Check if script is already loaded
     const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
