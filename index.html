@@ -1473,7 +1473,8 @@
           const handleServicesReady = () => {
             console.log('🎯 Services ready - initializing AutosaveFileService');
             if (typeof AutosaveFileService !== 'undefined') {
-              const service = new AutosaveFileService({
+              // Use the clean factory method for React integration
+              const service = AutosaveFileService.createForReact({
                 tabId: `cms-react-tab-${Date.now()}`,
                 errorCallback: showToast,
                 sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
@@ -1484,7 +1485,8 @@
                 debounceDelay: 5000,  // 5 seconds
                 maxRetries: 3,
                 
-                // Status callback
+                // React integration - service handles data provider setup
+                getFullData: () => fullData,
                 statusCallback: (status) => {
                   setAutosaveStatus(status);
                   if (status.status === 'saved') {

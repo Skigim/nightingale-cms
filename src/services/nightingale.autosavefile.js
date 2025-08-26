@@ -312,10 +312,64 @@
     // =============================================================================
 
     /**
-     * Set the data provider function
+     * Set the data provider function (allows dynamic updates)
      */
     setDataProvider(dataProvider) {
       this.dataProvider = dataProvider;
+      console.log('📊 Data provider updated');
+    }
+
+    /**
+     * Update the data provider with current data reference
+     */
+    updateDataProvider(getCurrentData) {
+      this.dataProvider = () => {
+        const data = getCurrentData();
+        if (!data) {
+          console.warn('⚠️ Data provider returned null/undefined');
+          return null;
+        }
+        return data;
+      };
+      console.log('📊 Data provider function updated with current data reference');
+    }
+
+    /**
+     * Initialize with React state integration
+     * This method handles the common React pattern of passing a state getter
+     */
+    initializeWithReactState(getFullData, statusCallback = null) {
+      console.log('🔗 Initializing AutosaveFileService with React state integration');
+      
+      // Store the data getter for future updates
+      this.getFullData = getFullData;
+      
+      // Set up data provider that always gets current state
+      this.dataProvider = () => {
+        const data = this.getFullData();
+        if (!data) {
+          return null;
+        }
+        return data;
+      };
+      
+      // Set up status callback if provided
+      if (statusCallback) {
+        this.statusCallback = statusCallback;
+      }
+      
+      console.log('✅ React state integration configured');
+      return this;
+    }
+
+    /**
+     * Update the React data getter (for when state reference changes)
+     */
+    updateReactState(getFullData) {
+      if (this.getFullData) {
+        this.getFullData = getFullData;
+        console.log('🔄 React state getter updated');
+      }
     }
 
     /**
@@ -547,6 +601,46 @@
       this.dataProvider = null;
       this.statusCallback = null;
       console.log('🗑️ AutosaveFileService destroyed');
+    }
+
+    /**
+     * Static factory method for React integration
+     * Creates and configures service for typical React use case
+     */
+    static createForReact({
+      fileName = 'nightingale-data.json',
+      errorCallback = console.error,
+      sanitizeFn = (str) => str,
+      tabId = null,
+      
+      // Autosave configuration
+      enabled = true,
+      saveInterval = 120000, // 2 minutes
+      debounceDelay = 5000,   // 5 seconds
+      maxRetries = 3,
+      
+      // React integration
+      getFullData,
+      statusCallback = null,
+    } = {}) {
+      const service = new AutosaveFileService({
+        fileName,
+        errorCallback,
+        sanitizeFn,
+        tabId,
+        enabled,
+        saveInterval,
+        debounceDelay,
+        maxRetries,
+        statusCallback,
+      });
+      
+      // Set up React state integration
+      if (getFullData) {
+        service.initializeWithReactState(getFullData, statusCallback);
+      }
+      
+      return service;
     }
   }
 
