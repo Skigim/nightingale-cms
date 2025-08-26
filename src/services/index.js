@@ -145,8 +145,10 @@ const SERVICE_LOAD_ORDER = [
  */
 async function loadService(servicePath) {
   return new Promise((resolve, reject) => {
-    // Determine the actual script src - all files are now in the same services directory
-    const scriptSrc = servicePath;
+    // Determine the actual script src - need to resolve relative to the page, not this script
+    // Since this script is loaded from ../services/index.js relative to the page,
+    // we need to prepend ../services/ to make paths relative to the page location
+    const scriptSrc = `../services/${servicePath}`;
 
     // Check if script is already loaded
     const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
