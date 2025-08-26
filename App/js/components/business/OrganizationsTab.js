@@ -189,20 +189,6 @@ function useOrganizationsData(props) {
 }
 
 /**
- * Render action buttons for Organizations Tab
- */
-function renderOrganizationsActions({ components, data }) {
-  const e = window.React.createElement;
-  const { Button } = components;
-
-  return e(Button, {
-    variant: 'primary',
-    onClick: () => data.state.setIsCreateModalOpen(true),
-    children: 'Add New Organization',
-  });
-}
-
-/**
  * Render main content for Organizations Tab
  */
 function renderOrganizationsContent({ components, data }) {
@@ -465,7 +451,6 @@ const OrganizationsTab = window.createBusinessComponent
   ? window.createBusinessComponent({
       name: 'OrganizationsTab',
       useData: useOrganizationsData,
-      renderActions: renderOrganizationsActions,
       renderContent: renderOrganizationsContent,
       renderModals: renderOrganizationsModals,
       defaultProps: {
@@ -516,7 +501,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     OrganizationsTab,
     useOrganizationsData,
-    renderOrganizationsActions,
     renderOrganizationsContent,
     renderOrganizationsModals,
   };
