@@ -3,51 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nightingale CMS - Case Management Suite</title>
-
-    <!-- Tailwind CSS -->
+    <title>Nightingale CMS - Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=src/pages/NightingaleCMS-React.html" />
+    
+    <!-- Tailwind CSS for fallback styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- React and ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
-    <!-- External Libraries -->
-    <script src="src/assets/dayjs.min.js"></script>
-    <script src="src/assets/dayjs-relativeTime.min.js"></script>
-    <script src="src/assets/dayjs-customParseFormat.min.js"></script>
-    <script src="src/assets/fuse.min.js"></script>
-
-    <!-- Custom Tailwind Configuration -->
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              nightingale: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                200: '#bae6fd',
-                300: '#7dd3fc',
-                400: '#38bdf8',
-                500: '#0ea5e9',
-                600: '#0284c7',
-                700: '#0369a1',
-                800: '#075985',
-                900: '#0c4a6e',
-              },
-            },
-          },
-        },
-      };
-    </script>
-
-    <!-- Global Styles -->
+    
     <style>
-      /* Custom scrollbar styles */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+      .loading-spinner {
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
       }
 
       ::-webkit-scrollbar-track {
@@ -77,77 +46,48 @@
           transform: rotate(360deg);
         }
       }
-
-      /* Fade transitions */
-      .fade-in {
-        animation: fadeIn 0.3s ease-in;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
     </style>
+    
+    <script>
+      // JavaScript redirect as backup
+      window.onload = function() {
+        setTimeout(function() {
+          window.location.href = 'src/pages/NightingaleCMS-React.html';
+        }, 1000);
+      };
+    </script>
   </head>
-  <body class="bg-gray-50 min-h-screen">
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-      <div class="text-center">
-        <div
-          class="loading-spinner w-16 h-16 border-4 border-nightingale-200 border-t-nightingale-600 rounded-full mx-auto mb-4"
-        ></div>
-        <h2 class="text-xl font-semibold text-gray-800 mb-2">Loading Nightingale CMS</h2>
-        <p class="text-gray-600">Initializing case management suite...</p>
+  <body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <!-- Redirect Notice -->
+    <div class="text-center">
+      <div class="loading-spinner w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-6"></div>
+      <h1 class="text-3xl font-bold text-gray-800 mb-4">Nightingale CMS</h1>
+      <p class="text-lg text-gray-600 mb-2">Redirecting to Case Management System...</p>
+      <p class="text-sm text-gray-500 mb-6">If you are not redirected automatically, 
+        <a href="src/pages/NightingaleCMS-React.html" class="text-blue-600 hover:text-blue-700 underline">click here</a>.
+      </p>
+      
+      <!-- Quick Links -->
+      <div class="mt-8 space-y-2">
+        <p class="text-sm font-medium text-gray-700">Quick Access:</p>
+        <div class="flex flex-col sm:flex-row gap-2 justify-center">
+          <a href="src/pages/NightingaleCMS-React.html" 
+             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+            Main CMS Application
+          </a>
+          <a href="src/pages/NightingaleReports.html" 
+             class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+            Reports & Analytics
+          </a>
+          <a href="src/pages/NightingaleCorrespondence.html" 
+             class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+            Document Generation
+          </a>
+        </div>
       </div>
     </div>
-
-    <!-- Main Application Container -->
-    <div id="app-root" class="hidden min-h-screen">
-      <!-- Top Navigation Bar -->
-      <nav class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between h-16">
-            <!-- Logo and Title -->
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <h1 class="text-2xl font-bold text-nightingale-700">Nightingale CMS</h1>
-              </div>
-              <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <!-- Navigation will be populated dynamically -->
-              </div>
-            </div>
-
-            <!-- User Info and Actions -->
-            <div class="flex items-center space-x-4">
-              <!-- Search Bar -->
-              <div class="hidden md:block">
-                <div class="relative">
-                  <input
-                    type="text"
-                    placeholder="Search cases, people, organizations..."
-                    class="w-80 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-nightingale-500 focus:border-transparent"
-                  />
-                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <!-- User Menu -->
-              <div class="flex items-center space-x-2">
-                <button class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  </body>
+</html>
                     <path
                       stroke-linecap="round"
                       stroke-linejoin="round"
