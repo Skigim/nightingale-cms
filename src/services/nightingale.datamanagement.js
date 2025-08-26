@@ -19,6 +19,38 @@
   'use strict';
 
   // ========================================================================
+  // UTILITY FUNCTIONS
+  // ========================================================================
+
+  /**
+   * Generate secure unique IDs using crypto.randomUUID when available
+   * Falls back to timestamp + crypto random for older browsers
+   * 
+   * @param {string} prefix - Prefix for the ID (e.g., 'person', 'org', 'case')
+   * @returns {string} Secure unique ID
+   */
+  function generateSecureId(prefix = 'item') {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return `${prefix}-${crypto.randomUUID()}`;
+    }
+    
+    // Fallback for older browsers using crypto.getRandomValues
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      const array = new Uint32Array(3);
+      crypto.getRandomValues(array);
+      const timestamp = Date.now().toString(36);
+      const randomPart = Array.from(array, x => x.toString(36)).join('');
+      return `${prefix}-${timestamp}-${randomPart}`;
+    }
+    
+    // Final fallback (should rarely be used in modern browsers)
+    console.warn('🔒 Using non-cryptographic ID generation - consider updating browser');
+    const timestamp = Date.now().toString(36);
+    const randomPart = Math.random().toString(36).substr(2, 9);
+    return `${prefix}-${timestamp}-${randomPart}`;
+  }
+
+  // ========================================================================
   // DATA LOOKUP AND SEARCH FUNCTIONS
   // ========================================================================
 
@@ -62,9 +94,12 @@
 
     console.debug('🔄 Running data migrations for CMS React compatibility...');
 
+    // Create a deep clone to prevent race conditions during concurrent modifications
+    const normalizedData = JSON.parse(JSON.stringify(data));
+
     // Normalize case data structure
-    if (data.cases) {
-      data.cases = data.cases.map((caseItem) => {
+    if (normalizedData.cases) {
+      normalizedData.cases = normalizedData.cases.map((caseItem) => {
         const normalizedCase = { ...caseItem };
 
         // Ensure MCN field consistency - map both directions
@@ -149,13 +184,13 @@
     }
 
     // Normalize people data structure
-    if (data.people) {
-      data.people = data.people.map((person, index) => {
+    if (normalizedData.people) {
+      normalizedData.people = normalizedData.people.map((person, index) => {
         const normalizedPerson = { ...person };
 
-        // Ensure every person has an ID
+        // Ensure every person has an ID with secure generation
         if (!normalizedPerson.id) {
-          normalizedPerson.id = `person-${Date.now()}-${index}`;
+          normalizedPerson.id = generateSecureId('person');
         }
 
         // Ensure default values for required fields
@@ -176,13 +211,13 @@
     }
 
     // Normalize organizations data structure
-    if (data.organizations) {
-      data.organizations = data.organizations.map((org, index) => {
+    if (normalizedData.organizations) {
+      normalizedData.organizations = normalizedData.organizations.map((org, index) => {
         const normalizedOrg = { ...org };
 
-        // Ensure every organization has an ID
+        // Ensure every organization has an ID with secure generation
         if (!normalizedOrg.id) {
-          normalizedOrg.id = `org-${Date.now()}-${index}`;
+          normalizedOrg.id = generateSecureId('org');
         }
 
         // Ensure default values for required fields
@@ -203,7 +238,7 @@
     }
 
     console.debug('✅ Data migration completed successfully');
-    return data;
+    return normalizedData;
   }
 
   // ========================================================================
@@ -256,7 +291,7 @@
    */
   function transformFinancialItems(importedItems) {
     return importedItems.map((item) => ({
-      id: `financial-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: generateSecureId('financial'),
       description:
         item.description ||
         `${item.type} - ${item.location}` ||
@@ -338,6 +373,9 @@
 
   // Create service object
   const NightingaleDataManagement = {
+    // Utility functions
+    generateSecureId,
+    
     // Data lookup functions
     findPersonById,
 
