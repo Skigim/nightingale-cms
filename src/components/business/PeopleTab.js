@@ -2,7 +2,14 @@
  * Nightingale CMS - People Tab Component
  *
  * Extracted from NightingaleCMS-React.html using TabBase.js factory pattern
- * Manages people listing, search, CRUD operations, and details view navigation
+ * Manages people listing, search,    // Compact Header Bar
+    e(TabHeader, {
+      title: 'People',
+      count: `${dataResult.data.length} ${dataResult.data.length === 1 ? 'person' : 'people'}`,
+      icon: {
+        d: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
+      },
+      iconProps: { className: 'w-8 h-8 text-green-400' },d details view navigation
  *
  * Features:
  * - People search and filtering
@@ -23,14 +30,8 @@
  * Custom hook for PeopleTab data management
  * Implements the TabBase.js useData pattern for standardized data handling
  */
-function usePeopleData({
-  fullData,
-  onUpdateData,
-  fileService,
-  onViewModeChange,
-  onBackToList,
-}) {
-  const { useState, useEffect, useMemo } = window.React;
+function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
+  const { useState, useEffect, useMemo, useCallback } = window.React;
 
   // State management - all hooks must be called unconditionally
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,18 +42,18 @@ function usePeopleData({
   const [detailsPersonId, setDetailsPersonId] = useState(null);
 
   // Back to list function that can be called externally
-  const backToList = () => {
+  const backToList = useCallback(() => {
     setViewMode('list');
     setDetailsPersonId(null);
     onViewModeChange?.('list');
-  };
+  }, [onViewModeChange]);
 
   // Expose the back function to parent
   useEffect(() => {
     if (onBackToList) {
       onBackToList(() => backToList);
     }
-  }, [onBackToList]);
+  }, [onBackToList, backToList]);
 
   // Filter people (DataTable handles sorting)
   const filteredPeople = useMemo(() => {
@@ -271,7 +272,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
  * Render function for PeopleTab modals
  * Implements the TabBase.js renderModals pattern
  */
-function renderPeopleModals({ components, data: dataResult, props }) {
+function renderPeopleModals({ data: dataResult, props }) {
   const e = window.React.createElement;
 
   // Get PersonCreationModal with fallback

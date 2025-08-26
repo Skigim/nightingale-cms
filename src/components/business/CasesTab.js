@@ -23,7 +23,13 @@
  * Custom hook for CasesTab data management
  * Implements the TabBase.js useData pattern for standardized data handling
  */
-function useCasesData({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
+function useCasesData({
+  fullData,
+  onUpdateData,
+  fileService,
+  onViewModeChange,
+  onBackToList,
+}) {
   const { useState, useEffect, useMemo } = window.React;
 
   // State management - all hooks must be called unconditionally
@@ -58,7 +64,10 @@ function useCasesData({ fullData, onUpdateData, fileService, onViewModeChange, o
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((caseItem) => {
-        const person = window.NightingaleDataManagement?.findPersonById?.(fullData.people, caseItem.personId);
+        const person = window.NightingaleDataManagement?.findPersonById?.(
+          fullData.people,
+          caseItem.personId
+        );
         const personName = person?.name?.toLowerCase() || '';
 
         return (
@@ -121,19 +130,25 @@ function useCasesData({ fullData, onUpdateData, fileService, onViewModeChange, o
  */
 function renderCasesContent({ components, data: dataResult, props }) {
   const e = window.React.createElement;
-  const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } = components;
+  const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } =
+    components;
 
   // Conditional rendering for details view
   if (dataResult.viewMode === 'details' && dataResult.detailsCaseId) {
     // Use CaseDetailsView component with fallback
-    const CaseDetailsView = 
+    const CaseDetailsView =
       window.NightingaleBusiness?.components?.CaseDetailsView ||
       window.NightingaleBusiness?.CaseDetailsView ||
       window.CaseDetailsView ||
-      (({ caseId }) => e('div', 
-        { className: 'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700' },
-        `CaseDetailsView component not available. Case ID: ${caseId}`
-      ));
+      (({ caseId }) =>
+        e(
+          'div',
+          {
+            className:
+              'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700',
+          },
+          `CaseDetailsView component not available. Case ID: ${caseId}`
+        ));
 
     return e(CaseDetailsView, {
       caseId: dataResult.detailsCaseId,
@@ -148,31 +163,20 @@ function renderCasesContent({ components, data: dataResult, props }) {
   return e(
     'div',
     { className: 'w-full space-y-4' },
-    
+
     // Compact Header Bar
     e(TabHeader, {
       title: 'Cases',
       count: `${dataResult.data.length} case${dataResult.data.length !== 1 ? 's' : ''}`,
-      icon: e(
-        'svg',
-        {
-          xmlns: 'http://www.w3.org/2000/svg',
-          className: 'h-5 w-5 text-blue-400',
-          fill: 'none',
-          viewBox: '0 0 24 24',
-          stroke: 'currentColor',
-        },
-        e('path', {
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-          strokeWidth: 2,
-          d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-        })
-      ),
+      icon: {
+        d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+      },
+      iconProps: { className: 'w-8 h-8 text-blue-400' },
       actions: e(
         'button',
         {
-          className: 'bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
+          className:
+            'bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
           onClick: () => dataResult.setIsCreateModalOpen(true),
         },
         'New Case'
@@ -199,15 +203,27 @@ function renderCasesContent({ components, data: dataResult, props }) {
             field: 'mcn',
             label: 'MCN',
             sortable: true,
-            render: (value) => e('span', { className: 'font-mono text-blue-400' }, value || 'N/A'),
+            render: (value) =>
+              e(
+                'span',
+                { className: 'font-mono text-blue-400' },
+                value || 'N/A'
+              ),
           },
           {
             field: 'personId',
             label: 'Person',
             sortable: true,
             render: (value, caseItem) => {
-              const person = window.NightingaleDataManagement?.findPersonById?.(props.fullData?.people, value);
-              return e('span', { className: 'font-medium text-white' }, person?.name || 'Unknown');
+              const person = window.NightingaleDataManagement?.findPersonById?.(
+                props.fullData?.people,
+                value
+              );
+              return e(
+                'span',
+                { className: 'font-medium text-white' },
+                person?.name || 'Unknown'
+              );
             },
           },
           {
@@ -225,7 +241,9 @@ function renderCasesContent({ components, data: dataResult, props }) {
               const colorClass = statusColors[value] || 'bg-gray-500';
               return e(
                 'span',
-                { className: `px-2 py-1 rounded text-xs text-white ${colorClass}` },
+                {
+                  className: `px-2 py-1 rounded text-xs text-white ${colorClass}`,
+                },
                 value || 'Unknown'
               );
             },
@@ -234,7 +252,12 @@ function renderCasesContent({ components, data: dataResult, props }) {
             field: 'applicationDate',
             label: 'Application Date',
             sortable: true,
-            render: (value) => e('span', { className: 'text-gray-300' }, dataResult.formatDate(value)),
+            render: (value) =>
+              e(
+                'span',
+                { className: 'text-gray-300' },
+                dataResult.formatDate(value)
+              ),
           },
           {
             field: 'actions',
@@ -247,15 +270,18 @@ function renderCasesContent({ components, data: dataResult, props }) {
                 e(
                   'button',
                   {
-                    className: 'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                    onClick: (e) => dataResult.handleOpenCaseDetails(caseItem, e),
+                    className:
+                      'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
+                    onClick: (e) =>
+                      dataResult.handleOpenCaseDetails(caseItem, e),
                   },
                   'Details'
                 ),
                 e(
                   'button',
                   {
-                    className: 'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
+                    className:
+                      'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
                     onClick: (e) => {
                       e.stopPropagation();
                       dataResult.handleCaseClick(caseItem);
@@ -291,7 +317,8 @@ function renderCasesModals({ components, data: dataResult, props }) {
         ? e(
             'div',
             {
-              className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
+              className:
+                'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
               onClick: onClose,
             },
             e(
@@ -300,12 +327,21 @@ function renderCasesModals({ components, data: dataResult, props }) {
                 className: 'bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4',
                 onClick: (e) => e.stopPropagation(),
               },
-              e('h2', { className: 'text-lg font-semibold text-white mb-4' }, 'Create Case'),
-              e('p', { className: 'text-gray-400 mb-4' }, 'CaseCreationModal component not available'),
+              e(
+                'h2',
+                { className: 'text-lg font-semibold text-white mb-4' },
+                'Create Case'
+              ),
+              e(
+                'p',
+                { className: 'text-gray-400 mb-4' },
+                'CaseCreationModal component not available'
+              ),
               e(
                 'button',
                 {
-                  className: 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
+                  className:
+                    'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
                   onClick: onClose,
                 },
                 'Close'
