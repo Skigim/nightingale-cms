@@ -4,7 +4,13 @@ Last Updated: August 25, 2025
 Part 1: Core Principles of React
 This section covers the foundational rules and mental models for writing reliable and
 maintainable React code. These are rules, not just guidelines —breaking them often leads to
-bugs. Adhering to these principles enables React's performance optimizations and is essential
+bugs. Adhering to these principles enables React's perfo  const autosaveService = new AutosaveFileService();
+  autosaveService.initialize({ 
+    fileService, 
+    dataProvider: () => fullData 
+  });
+  setAutosaveService(autosaveService);
+}, [fileService, fullData, autosaveService]); // ❌ fullData changes frequently!timizations and is essential
 for the patterns we'll explore in Parts 2-4.
 1.1. Overview
 This document outlines React best practices specifically for the Nightingale CMS project,
@@ -340,7 +346,7 @@ One of the most subtle but devastating React bugs occurs when frequently changin
 ```javascript
 // This creates an infinite re-initialization loop
 useEffect(() => {
-  const autosaveService = new AutosaveService();
+  const autosaveService = new AutosaveFileService();
   autosaveService.initialize({ 
     fileService: fileService,
     dataProvider: () => fullData,  // Function closure captures current value
@@ -363,7 +369,7 @@ useEffect(() => {
 ```javascript
 // Service initializes once, accesses current data via closure
 useEffect(() => {
-  const autosaveService = new AutosaveService();
+  const autosaveService = new AutosaveFileService();
   autosaveService.initialize({ 
     fileService: fileService,
     dataProvider: () => fullData,  // ✅ Closure always gets current value

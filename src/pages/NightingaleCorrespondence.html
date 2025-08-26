@@ -78,7 +78,7 @@
     <script src="../services/cms.js"></script>
     <script src="../services/nightingale.dayjs.js"></script>
     <script src="../services/nightingale.parsers.js"></script>
-    <script src="../services/nightingale.fileservice.js"></script>
+    <script src="../services/nightingale.autosavefile.js"></script>
     <script src="../services/nightingale.toast.js"></script>
     <script src="../assets/fuse.min.js"></script>
     <script src="../services/nightingale.search.js"></script>
@@ -3175,7 +3175,7 @@
 
         const fileService = useMemo(
           () =>
-            new FileSystemService({
+            new AutosaveFileService({
               tabId: `corr-react-tab-${Date.now()}`,
               errorCallback: showToast,
               sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
@@ -3739,7 +3739,7 @@
 
       // Function to check if all required dependencies are loaded
       function checkDependencies() {
-        const requiredServices = ['FileSystemService', 'dateUtils', 'showToast', 'sanitize'];
+        const requiredServices = ['AutosaveFileService', 'dateUtils', 'showToast', 'sanitize'];
 
         const requiredGlobals = ['React', 'ReactDOM', 'dayjs'];
 

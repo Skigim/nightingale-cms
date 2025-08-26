@@ -23,7 +23,7 @@
     <script src="../services/ui.js"></script>
     <script src="../services/cms.js"></script>
     <script src="../services/nightingale.dayjs.js"></script>
-    <script src="../services/nightingale.fileservice.js"></script>
+    <script src="../services/nightingale.autosavefile.js"></script>
     <script src="../services/nightingale.toast.js"></script>
     <script src="../components/index.js"></script>
 
@@ -668,7 +668,7 @@
 
         const fileService = useMemo(
           () =>
-            new FileSystemService({
+            new AutosaveFileService({
               tabId: `reports-react-tab-${Date.now()}`,
               errorCallback: showToast,
               sanitizeFn: sanitize,

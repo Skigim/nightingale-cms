@@ -39,9 +39,9 @@ const autosaveServiceRef = useRef(null);
 const [autosaveStatus, setAutosaveStatus] = useState(null);
 
 useEffect(() => {
-  if (!window.FileSystemService || !fullData) return;
+  if (!window.AutosaveFileService || !fullData) return;
 
-  autosaveServiceRef.current = new window.NightingaleAutosaveService({
+  autosaveServiceRef.current = new window.AutosaveFileService({
     saveInterval: 30000, // Save every 30 seconds
     debounceDelay: 3000, // Wait 3 seconds after changes
     maxRetries: 3, // Retry failed saves 3 times
@@ -49,7 +49,7 @@ useEffect(() => {
   });
 
   autosaveServiceRef.current.initialize({
-    fileService: window.FileSystemService,
+    fileService: window.AutosaveFileService,
     dataProvider: () => fullData,
     statusCallback: setAutosaveStatus,
   });
@@ -197,7 +197,7 @@ const handleManualSave = async () => {
     if (!success) showToast('Save failed', 'error');
   } else {
     // Fallback to direct file service
-    await window.FileSystemService.writeFile(fullData);
+    await window.AutosaveFileService.writeFile(fullData);
   }
 };
 ```
@@ -253,7 +253,7 @@ const handleManualSave = async () => {
 
 The v2.0 service is backward compatible with v1.0 integrations. New features are opt-in:
 
-- **Permission monitoring**: Automatic when FileSystemService supports `checkPermission()`
+- **Permission monitoring**: Automatic when AutosaveFileService supports `checkPermission()`
 - **Multi-tab coordination**: Automatic via BroadcastChannel
 - **Enhanced statistics**: Available in status callback
 - **Error classification**: Provides more detailed error information
