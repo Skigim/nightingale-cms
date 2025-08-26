@@ -13,6 +13,7 @@ const UI_COMPONENTS = [
   { name: 'Button', path: 'Button.js', category: 'core' },
   { name: 'Badge', path: 'Badge.js', category: 'core' },
   { name: 'Cards', path: 'Cards.js', category: 'core' },
+  { name: 'ErrorBoundary', path: 'ErrorBoundary.js', category: 'core' },
   {
     name: 'SearchBar',
     path: 'SearchBar.js',
@@ -50,6 +51,21 @@ const UI_COMPONENTS = [
   {
     name: 'TabHeader',
     path: 'TabHeader.js',
+    category: 'layout',
+  },
+  {
+    name: 'Stepper',
+    path: 'Stepper.js',
+    category: 'layout',
+  },
+  {
+    name: 'Sidebar',
+    path: 'Sidebar.js',
+    category: 'layout',
+  },
+  {
+    name: 'Header',
+    path: 'Header.js',
     category: 'layout',
   },
 ]; // UI Component Registry
