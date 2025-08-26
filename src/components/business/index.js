@@ -74,6 +74,12 @@ const BUSINESS_COMPONENTS = [
     category: 'financial',
     dependencies: ['Modal', 'FormComponents'],
   },
+  {
+    name: 'CasesTab',
+    path: 'CasesTab.js',
+    category: 'case-management',
+    dependencies: ['TabBase', 'DataTable', 'SearchBar', 'TabHeader'],
+  },
 
   // Future business components will be added here:
   // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },
