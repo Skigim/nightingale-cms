@@ -19,7 +19,7 @@
  * │   └── nightingale.parsers.js      <- Data parsing
  * │
  * ├── 💾 Data Services (loaded second)
- * │   ├── nightingale.fileservice.js  <- File I/O operations
+ * │   ├── nightingale.autosavefile.js <- Combined file I/O and autosave
  * │   ├── nightingale.search.js       <- Search and filtering
  * │   └── nightingale.datamanagement.js <- Data management
  * │
@@ -112,7 +112,7 @@ const SERVICE_LOAD_ORDER = [
   {
     phase: 'data',
     services: [
-      'nightingale.fileservice.js',
+      'nightingale.autosavefile.js', // Combined file & autosave service
       'nightingale.search.js',
       'nightingale.datamanagement.js',
     ],
