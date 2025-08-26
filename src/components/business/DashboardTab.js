@@ -14,8 +14,14 @@
  * @returns {React.Element} Dashboard tab component
  */
 function DashboardTab({ fullData }) {
-  const e = window.React.createElement;
   const { useMemo } = window.React;
+
+  // Early return pattern for React safety
+  if (!window.React) {
+    return null;
+  }
+
+  const e = window.React.createElement;
 
   const stats = useMemo(() => {
     if (!fullData)
@@ -187,11 +193,31 @@ function DashboardTab({ fullData }) {
   );
 }
 
+// PropTypes validation
+DashboardTab.propTypes = {
+  fullData: window.PropTypes?.object,
+};
+
 // Register with business component system
 if (typeof window !== 'undefined') {
   window.DashboardTab = DashboardTab;
 
   if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent('DashboardTab', DashboardTab);
+    window.NightingaleBusiness.registerComponent(
+      'DashboardTab', 
+      DashboardTab,
+      'dashboard',
+      []
+    );
   }
+
+  // Legacy registration for backward compatibility
+  if (typeof window.Nightingale !== 'undefined') {
+    window.Nightingale.registerComponent('DashboardTab', DashboardTab);
+  }
+}
+
+// Export for ES6 module compatibility
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = DashboardTab;
 }
