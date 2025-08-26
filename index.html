@@ -169,8 +169,11 @@
     <!-- Nightingale Service Initializer (loads services dynamically) -->
     <script src="./src/services/index.js"></script>
 
-    <!-- Autosave Service (TEMPORARILY DISABLED - causing infinite loop) -->
-    <!-- <script src="./src/services/nightingale.autosave.js"></script> -->
+    <!-- FileSystem Service for autosave -->
+    <script src="./src/services/nightingale.filesystem.js"></script>
+
+    <!-- Autosave Service -->
+    <script src="./src/services/nightingale.autosave.js"></script>
 
     <!-- Nightingale Component Library - Layered Architecture -->
     <script src="./src/components/index.js"></script>
@@ -1470,8 +1473,8 @@
         useEffect(() => {
           const handleServicesReady = () => {
             console.log('🎯 Services ready - initializing FileService');
-            if (typeof FileSystemService !== 'undefined') {
-              const service = new FileSystemService({
+            if (typeof NightingaleFileSystemService !== 'undefined') {
+              const service = new NightingaleFileSystemService({
                 tabId: `cms-react-tab-${Date.now()}`,
                 errorCallback: showToast,
                 sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
@@ -1479,12 +1482,12 @@
               setFileService(service);
               setServicesReady(true);
             } else {
-              console.warn('⚠️ FileSystemService still not available after services ready event');
+              console.warn('⚠️ NightingaleFileSystemService still not available after services ready event');
             }
           };
 
           // Check if services are already loaded
-          if (window.nightingaleServicesLoaded && typeof FileSystemService !== 'undefined') {
+          if (window.nightingaleServicesLoaded && typeof NightingaleFileSystemService !== 'undefined') {
             handleServicesReady();
           } else {
             // Listen for services ready event
@@ -1494,11 +1497,11 @@
             let attempts = 0;
             const checkInterval = setInterval(() => {
               attempts++;
-              if (typeof FileSystemService !== 'undefined') {
+              if (typeof NightingaleFileSystemService !== 'undefined') {
                 handleServicesReady();
                 clearInterval(checkInterval);
               } else if (attempts >= 10) {
-                console.error('❌ FileSystemService failed to load after 10 seconds');
+                console.error('❌ NightingaleFileSystemService failed to load after 10 seconds');
                 clearInterval(checkInterval);
               }
             }, 1000);
