@@ -154,6 +154,59 @@ FallbackSearchBar.propTypes = {
 };
 
 /**
+ * Fallback TabHeader component for when registry components are unavailable
+ * Provides basic header functionality
+ */
+function FallbackTabHeader({ title, count, icon, actions, className = '' }) {
+  const e = window.React.createElement;
+
+  if (!title) {
+    console.warn('FallbackTabHeader: title prop is required');
+    return null;
+  }
+
+  return e(
+    'div',
+    {
+      className: `bg-gray-800 rounded-lg p-4 mb-6 flex items-center justify-between ${className}`,
+    },
+    // Left side: Icon and title section
+    e(
+      'div',
+      { className: 'flex items-center space-x-4' },
+      // Simple icon fallback
+      icon &&
+        e(
+          'div',
+          {
+            className:
+              'w-8 h-8 bg-blue-400 rounded text-white flex items-center justify-center text-xs font-bold',
+          },
+          title.charAt(0).toUpperCase()
+        ),
+      // Title and count section
+      e(
+        'div',
+        { className: 'flex flex-col' },
+        e('span', { className: 'font-bold text-white text-lg' }, title),
+        count && e('span', { className: 'text-sm text-gray-400' }, count)
+      )
+    ),
+    // Right side: Actions section
+    actions && e('div', { className: 'flex items-center space-x-2' }, actions)
+  );
+}
+
+// PropTypes for FallbackTabHeader
+FallbackTabHeader.propTypes = {
+  title: window.PropTypes?.string.isRequired,
+  count: window.PropTypes?.string,
+  icon: window.PropTypes?.object,
+  actions: window.PropTypes?.node,
+  className: window.PropTypes?.string,
+};
+
+/**
  * Multi-tier component registry access with comprehensive fallbacks
  * Implements the standardized lookup pattern used across all Tab components
  *
@@ -216,6 +269,7 @@ function resolveComponents() {
     Modal: getRegistryComponent('Modal', FallbackModal),
     Button: getRegistryComponent('Button', FallbackButton),
     SearchBar: getRegistryComponent('SearchBar', FallbackSearchBar),
+    TabHeader: getRegistryComponent('TabHeader', FallbackTabHeader),
     DataTable: getRegistryComponent('DataTable', null),
     Badge: getRegistryComponent('Badge', null),
     PersonCreationModal: getRegistryComponent('PersonCreationModal', null),
@@ -376,6 +430,7 @@ if (typeof window !== 'undefined') {
     window.NightingaleUI.components.FallbackModal = FallbackModal;
     window.NightingaleUI.components.FallbackButton = FallbackButton;
     window.NightingaleUI.components.FallbackSearchBar = FallbackSearchBar;
+    window.NightingaleUI.components.FallbackTabHeader = FallbackTabHeader;
   }
 }
 
