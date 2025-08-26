@@ -23,7 +23,13 @@
  * Custom hook for PeopleTab data management
  * Implements the TabBase.js useData pattern for standardized data handling
  */
-function usePeopleData({ fullData, onUpdateData, fileService, onViewModeChange, onBackToList }) {
+function usePeopleData({
+  fullData,
+  onUpdateData,
+  fileService,
+  onViewModeChange,
+  onBackToList,
+}) {
   const { useState, useEffect, useMemo } = window.React;
 
   // State management - all hooks must be called unconditionally
@@ -58,11 +64,26 @@ function usePeopleData({ fullData, onUpdateData, fileService, onViewModeChange, 
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter((person) => {
+        // Helper function to get searchable address text
+        const getAddressText = (address) => {
+          if (typeof address === 'string') return address.toLowerCase();
+          if (address && typeof address === 'object') {
+            const parts = [
+              address.street,
+              address.city,
+              address.state,
+              address.zip,
+            ].filter(Boolean);
+            return parts.join(' ').toLowerCase();
+          }
+          return '';
+        };
+
         return (
           person.name?.toLowerCase().includes(term) ||
           person.email?.toLowerCase().includes(term) ||
           person.phone?.includes(term) ||
-          person.address?.toLowerCase().includes(term) ||
+          getAddressText(person.address).includes(term) ||
           person.status?.toLowerCase().includes(term)
         );
       });
@@ -119,19 +140,25 @@ function usePeopleData({ fullData, onUpdateData, fileService, onViewModeChange, 
  */
 function renderPeopleContent({ components, data: dataResult, props }) {
   const e = window.React.createElement;
-  const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } = components;
+  const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } =
+    components;
 
   // Conditional rendering for details view
   if (dataResult.viewMode === 'details' && dataResult.detailsPersonId) {
     // Use PersonDetailsView component with fallback
-    const PersonDetailsView = 
+    const PersonDetailsView =
       window.NightingaleBusiness?.components?.PersonDetailsView ||
       window.NightingaleBusiness?.PersonDetailsView ||
       window.PersonDetailsView ||
-      (({ personId }) => e('div', 
-        { className: 'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700' },
-        `PersonDetailsView component not available. Person ID: ${personId}`
-      ));
+      (({ personId }) =>
+        e(
+          'div',
+          {
+            className:
+              'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700',
+          },
+          `PersonDetailsView component not available. Person ID: ${personId}`
+        ));
 
     return e(PersonDetailsView, {
       personId: dataResult.detailsPersonId,
@@ -145,7 +172,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
   return e(
     'div',
     { className: 'w-full space-y-4' },
-    
+
     // Compact Header Bar
     e(TabHeader, {
       title: 'People',
@@ -169,7 +196,8 @@ function renderPeopleContent({ components, data: dataResult, props }) {
       actions: e(
         'button',
         {
-          className: 'bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
+          className:
+            'bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
           onClick: () => dataResult.setIsCreateModalOpen(true),
         },
         'New Person'
@@ -196,25 +224,48 @@ function renderPeopleContent({ components, data: dataResult, props }) {
             field: 'name',
             label: 'Name',
             sortable: true,
-            render: (value) => e('span', { className: 'font-medium text-white' }, value || 'N/A'),
+            render: (value) =>
+              e(
+                'span',
+                { className: 'font-medium text-white' },
+                value || 'N/A'
+              ),
           },
           {
             field: 'email',
             label: 'Email',
             sortable: true,
-            render: (value) => e('span', { className: 'text-blue-400' }, value || 'N/A'),
+            render: (value) =>
+              e('span', { className: 'text-blue-400' }, value || 'N/A'),
           },
           {
             field: 'phone',
             label: 'Phone',
             sortable: true,
-            render: (value) => e('span', { className: 'text-gray-300' }, value || 'N/A'),
+            render: (value) =>
+              e('span', { className: 'text-gray-300' }, value || 'N/A'),
           },
           {
             field: 'address',
             label: 'Address',
             sortable: true,
-            render: (value) => e('span', { className: 'text-gray-300' }, value || 'N/A'),
+            render: (value) => {
+              // Handle both string and object address formats
+              let addressText = 'N/A';
+              if (typeof value === 'string') {
+                addressText = value;
+              } else if (value && typeof value === 'object') {
+                // Format address object as string
+                const parts = [
+                  value.street,
+                  value.city,
+                  value.state,
+                  value.zip,
+                ].filter(Boolean);
+                addressText = parts.length > 0 ? parts.join(', ') : 'N/A';
+              }
+              return e('span', { className: 'text-gray-300' }, addressText);
+            },
           },
           {
             field: 'status',
@@ -230,7 +281,9 @@ function renderPeopleContent({ components, data: dataResult, props }) {
               const colorClass = statusColors[value] || 'bg-gray-500';
               return e(
                 'span',
-                { className: `px-2 py-1 rounded text-xs text-white ${colorClass}` },
+                {
+                  className: `px-2 py-1 rounded text-xs text-white ${colorClass}`,
+                },
                 value || 'Unknown'
               );
             },
@@ -246,15 +299,18 @@ function renderPeopleContent({ components, data: dataResult, props }) {
                 e(
                   'button',
                   {
-                    className: 'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                    onClick: (e) => dataResult.handleOpenPersonDetails(person, e),
+                    className:
+                      'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
+                    onClick: (e) =>
+                      dataResult.handleOpenPersonDetails(person, e),
                   },
                   'Details'
                 ),
                 e(
                   'button',
                   {
-                    className: 'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
+                    className:
+                      'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
                     onClick: (e) => {
                       e.stopPropagation();
                       dataResult.handlePersonClick(person);
@@ -290,7 +346,8 @@ function renderPeopleModals({ components, data: dataResult, props }) {
         ? e(
             'div',
             {
-              className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
+              className:
+                'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
               onClick: onClose,
             },
             e(
@@ -299,12 +356,21 @@ function renderPeopleModals({ components, data: dataResult, props }) {
                 className: 'bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4',
                 onClick: (e) => e.stopPropagation(),
               },
-              e('h2', { className: 'text-lg font-semibold text-white mb-4' }, 'Create Person'),
-              e('p', { className: 'text-gray-400 mb-4' }, 'PersonCreationModal component not available'),
+              e(
+                'h2',
+                { className: 'text-lg font-semibold text-white mb-4' },
+                'Create Person'
+              ),
+              e(
+                'p',
+                { className: 'text-gray-400 mb-4' },
+                'PersonCreationModal component not available'
+              ),
               e(
                 'button',
                 {
-                  className: 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
+                  className:
+                    'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
                   onClick: onClose,
                 },
                 'Close'
