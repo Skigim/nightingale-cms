@@ -467,8 +467,10 @@
         this.state.pendingSave = true;
         this.updateStatus('saving', 'Saving...');
         
-        // Get current data
+        // Get current data with debugging
         const data = this.dataProvider();
+        console.log('🔍 Autosave debug - Data provider returned:', !!data, data ? `${Object.keys(data).length} keys` : 'null/undefined');
+        
         if (!data) {
           this.updateStatus('error', 'No data available to save');
           return;

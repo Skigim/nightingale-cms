@@ -415,7 +415,7 @@
 
     <script type="text/babel">
       // Main app React hooks
-      const { useState, useEffect, useMemo, useCallback } = React;
+      const { useState, useEffect, useMemo, useCallback, useRef } = React;
       const { createRoot } = ReactDOM;
       const e = React.createElement;
 
@@ -1463,6 +1463,14 @@
           message: 'Service not initialized',
         });
 
+        // Use ref for live data access to avoid stale closure issues
+        const fullDataRef = useRef(null);
+
+        // Keep ref synchronized with state
+        useEffect(() => {
+          fullDataRef.current = fullData;
+        }, [fullData]);
+
         // Backward compatibility aliases
         const fileService = autosaveFileService; // For components that expect fileService
         const autosaveService = autosaveFileService; // For components that expect autosaveService
@@ -1485,8 +1493,11 @@
                 debounceDelay: 5000,  // 5 seconds
                 maxRetries: 3,
                 
-                // React integration - service handles data provider setup
-                getFullData: () => fullData,
+                // React integration - use ref for live data access
+                getFullData: () => {
+                  console.log('📦 Data provider called, ref contains:', !!fullDataRef.current);
+                  return fullDataRef.current;
+                },
                 statusCallback: (status) => {
                   setAutosaveStatus(status);
                   if (status.status === 'saved') {
