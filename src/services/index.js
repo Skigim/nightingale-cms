@@ -10,7 +10,7 @@
  *
  * 📁 js/utilities/ (Core utility functions)
  * ├── 🔧 core.js                   <- Security, formatting, validation utilities
- * ├── 🎨 ui.js                     <- UI interaction utilities  
+ * ├── 🎨 ui.js                     <- UI interaction utilities
  * └── 🏢 cms.js                    <- CMS business logic
  *
  * 📁 js/services/ (Application services)
@@ -152,7 +152,7 @@ async function loadService(servicePath) {
     } else {
       scriptSrc = `js/services/${servicePath}`;
     }
-    
+
     // Check if script is already loaded
     const existingScript = document.querySelector(`script[src="${scriptSrc}"]`);
     if (existingScript) {
@@ -160,7 +160,7 @@ async function loadService(servicePath) {
       resolve(servicePath);
       return;
     }
-    
+
     const script = document.createElement('script');
     script.src = scriptSrc;
     script.async = true;

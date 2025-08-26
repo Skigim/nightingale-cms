@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Nightingale CMS",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/live-server",
+      "args": [
+        "App",
+        "--port=3000",
+        "--open=NightingaleCMS-React.html",
+        "--no-browser"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000/NightingaleCMS-React.html",
+      "webRoot": "${workspaceFolder}/App",
+      "sourceMaps": true
+    }
+  ]
+}
