@@ -169,6 +169,9 @@
     <!-- Nightingale Service Initializer (loads services dynamically) -->
     <script src="../services/index.js"></script>
 
+    <!-- Autosave Service -->
+    <script src="../services/nightingale.autosave.js"></script>
+
     <!-- Nightingale Component Library - Layered Architecture -->
     <script src="../components/index.js"></script>
 
@@ -724,7 +727,33 @@
         );
       }
 
-      function Header({ fileStatus, onSave, isDirty, onSettingsClick }) {
+      function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
+        // Determine autosave display status
+        const getAutosaveDisplay = () => {
+          if (!autosaveStatus) {
+            return { text: 'Manual', className: 'text-gray-400', icon: '⚙️' };
+          }
+
+          switch (autosaveStatus.status) {
+            case 'saved':
+            case 'no-changes':
+              return { text: 'Saved', className: 'text-green-400', icon: '✓' };
+            case 'saving':
+              return { text: 'Saving...', className: 'text-blue-400', icon: '⏳' };
+            case 'error':
+              return { text: 'Error', className: 'text-red-400', icon: '⚠️' };
+            case 'initialized':
+            case 'started':
+              return { text: 'Auto', className: 'text-green-400', icon: '🔄' };
+            default:
+              return { text: 'Manual', className: 'text-gray-400', icon: '⚙️' };
+          }
+        };
+
+        const autosaveDisplay = getAutosaveDisplay();
+        const showManualSave =
+          !autosaveStatus || autosaveStatus.status === 'error' || autosaveStatus.status === 'stopped';
+
         return e(
           'div',
           {
@@ -754,31 +783,6 @@
           e(
             'div',
             { className: 'flex items-center space-x-3' },
-            // Auto-refresh status indicator
-            e(
-              'div',
-              {
-                className: 'flex items-center space-x-1',
-                title: 'Auto-refresh active - data syncs when window becomes active',
-              },
-              e(
-                'svg',
-                {
-                  xmlns: 'http://www.w3.org/2000/svg',
-                  className: 'h-3 w-3 text-green-400',
-                  fill: 'none',
-                  viewBox: '0 0 24 24',
-                  stroke: 'currentColor',
-                },
-                e('path', {
-                  strokeLinecap: 'round',
-                  strokeLinejoin: 'round',
-                  strokeWidth: 2,
-                  d: 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
-                })
-              ),
-              e('span', { className: 'text-xs text-gray-400' }, 'Auto')
-            ),
             // File Status - Always clickable for settings access
             e(
               'div',
@@ -834,37 +838,25 @@
                 )
               )
             ),
-            // Save Status
+            // Autosave Status Display
             e(
               'div',
               {
-                className: `flex items-center space-x-1.5 ${isDirty ? '' : 'hidden'}`,
-                title: 'Save status',
+                className: 'flex items-center space-x-1.5',
+                title: autosaveStatus?.message || 'Autosave status',
               },
-              e(
-                'svg',
-                {
-                  xmlns: 'http://www.w3.org/2000/svg',
-                  className: `h-4 w-4 transition-colors duration-500 ${isDirty ? 'text-yellow-400' : 'text-gray-400'}`,
-                  viewBox: '0 0 20 20',
-                  fill: 'currentColor',
-                },
-                e('path', {
-                  fillRule: 'evenodd',
-                  d: 'M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z',
-                  clipRule: 'evenodd',
-                })
-              ),
-              e('span', { className: 'text-xs text-gray-400' }, isDirty ? 'Unsaved' : 'Saved')
+              e('span', { className: 'text-sm' }, autosaveDisplay.icon),
+              e('span', { className: `text-xs ${autosaveDisplay.className}` }, autosaveDisplay.text)
             ),
-            // Save Button
-            e(PrimaryButton, {
-              children: isDirty ? 'Save' : 'Saved',
-              onClick: onSave,
-              disabled: !isDirty,
-              icon: window.ButtonIcons?.save,
-              size: 'sm',
-            }),
+            // Manual Save Button (only shown when autosave is not working)
+            showManualSave &&
+              e(PrimaryButton, {
+                children: 'Save',
+                onClick: onManualSave,
+                icon: window.ButtonIcons?.save,
+                size: 'sm',
+                title: 'Manual save (autosave not available)',
+              }),
             // Status lights (matching original CMS)
             e(
               'div',
@@ -1102,7 +1094,6 @@
             })
         );
       }
-
 
       function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus, onFileStatusChange }) {
         const [isConnecting, setIsConnecting] = useState(false);
@@ -1464,6 +1455,13 @@
         const [organizationsViewMode, setOrganizationsViewMode] = useState('list'); // Track if we're in organization details view
         const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
 
+        // Autosave state
+        const [autosaveService, setAutosaveService] = useState(null);
+        const [autosaveStatus, setAutosaveStatus] = useState({
+          status: 'disconnected',
+          message: 'Autosave not initialized',
+        });
+
         // File service initialization
         const fileService = useMemo(() => {
           if (typeof FileSystemService !== 'undefined') {
@@ -1478,21 +1476,29 @@
           }
         }, []);
 
-        // Data update handler with immediate save + broadcast
-        const handleUpdateData = useCallback(async (newData) => {
-          // Use custom DevTools helper for better debugging
-          if (window.NightingaleDevTools) {
-            window.NightingaleDevTools.logDataFlow('Data Update', {
-              hasCases: !!newData?.cases,
-              caseCount: newData?.cases?.length || 0,
-              hasPeople: !!newData?.people,
-              peopleCount: newData?.people?.length || 0,
-            });
-          }
+        // Data update handler - now works with autosave
+        const handleUpdateData = useCallback(
+          async (newData) => {
+            // Use custom DevTools helper for better debugging
+            if (window.NightingaleDevTools) {
+              window.NightingaleDevTools.logDataFlow('Data Update', {
+                hasCases: !!newData?.cases,
+                caseCount: newData?.cases?.length || 0,
+                hasPeople: !!newData?.people,
+                peopleCount: newData?.people?.length || 0,
+              });
+            }
 
-          setFullData(newData);
-          setIsDirty(true);
-        }, []);
+            setFullData(newData);
+            setIsDirty(true);
+
+            // Notify autosave service of data change
+            if (autosaveService) {
+              autosaveService.notifyDataChange('user-edit');
+            }
+          },
+          [autosaveService]
+        );
 
         const handleSave = async () => {
           if (!fullData) {
@@ -1533,10 +1539,15 @@
           setIsDirty(false);
         }, []);
 
-        // Initialize file system and load data
+        // Initialize file system and load data - FIXED: Remove fileService dependency to prevent reinitialization
         useEffect(() => {
           async function initializeApp() {
             try {
+              if (!fileService) {
+                console.warn('FileService not available during initialization');
+                return;
+              }
+
               setFileStatus('connecting');
 
               // Check for existing file system access
@@ -1561,7 +1572,44 @@
           }
 
           initializeApp();
-        }, [fileService]);
+        }, []); // Empty dependency array prevents reinitialization
+
+        // Initialize autosave service when fileService and data are available
+        useEffect(() => {
+          if (!fileService || !window.AutosaveService || autosaveService) {
+            return; // Wait for dependencies or avoid double initialization
+          }
+
+          try {
+            const autosave = new window.AutosaveService({
+              enabled: true,
+              saveInterval: 30000, // 30 seconds
+              debounceDelay: 2000, // 2 seconds
+              maxRetries: 3,
+              persistConfig: true,
+              persistStats: true,
+            });
+
+            autosave.initialize({
+              fileService: fileService,
+              dataProvider: () => fullData,
+              statusCallback: (status) => {
+                setAutosaveStatus(status);
+                if (status.status === 'saved') {
+                  setIsDirty(false);
+                } else if (status.status === 'error') {
+                  console.warn('Autosave error:', status.message);
+                }
+              },
+            });
+
+            setAutosaveService(autosave);
+            console.log('✅ AutosaveService initialized successfully');
+          } catch (error) {
+            console.error('Failed to initialize AutosaveService:', error);
+            setAutosaveStatus({ status: 'error', message: 'Autosave initialization failed' });
+          }
+        }, [fileService, fullData, autosaveService]);
 
         // Cross-app communication listener
         useEffect(() => {
@@ -1651,7 +1699,12 @@
           e(
             'div',
             { className: 'flex-1 flex flex-col min-w-0 w-full' },
-            e(Header, { fileStatus, onSave: handleSave, isDirty, onSettingsClick: () => setIsSettingsOpen(true) }),
+            e(Header, {
+              fileStatus,
+              autosaveStatus,
+              onSettingsClick: () => setIsSettingsOpen(true),
+              onManualSave: handleSave,
+            }),
             e('main', { className: 'flex-1 p-4 overflow-auto bg-gray-900 w-full' }, renderContent())
           ),
           // Settings Modal
