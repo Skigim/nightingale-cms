@@ -267,11 +267,20 @@ function getRegistryComponent(componentName, fallbackComponent) {
 function resolveComponents() {
   return {
     Modal: getRegistryComponent('Modal', FallbackModal),
+    ConfirmationModal: getRegistryComponent('ConfirmationModal', null),
     Button: getRegistryComponent('Button', FallbackButton),
     SearchBar: getRegistryComponent('SearchBar', FallbackSearchBar),
     TabHeader: getRegistryComponent('TabHeader', FallbackTabHeader),
     DataTable: getRegistryComponent('DataTable', null),
     Badge: getRegistryComponent('Badge', null),
+    // Form Components
+    FormField: getRegistryComponent('FormField', null),
+    TextInput: getRegistryComponent('TextInput', null),
+    Select: getRegistryComponent('Select', null),
+    DateInput: getRegistryComponent('DateInput', null),
+    Textarea: getRegistryComponent('Textarea', null),
+    Checkbox: getRegistryComponent('Checkbox', null),
+    // Business Components
     PersonCreationModal: getRegistryComponent('PersonCreationModal', null),
     OrganizationModal: getRegistryComponent('OrganizationModal', null),
     NotesModal: getRegistryComponent('NotesModal', null),

@@ -193,7 +193,8 @@ function useOrganizationsData(props) {
  */
 function renderOrganizationsContent({ components, data }) {
   const e = window.React.createElement;
-  const { SearchBar, DataTable, TabHeader, Button } = components;
+  const { SearchBar, DataTable, TabHeader, Button, TextInput, Select } =
+    components;
   const { state, handlers } = data;
 
   // Define table columns
@@ -204,16 +205,14 @@ function renderOrganizationsContent({ components, data }) {
       sortable: true,
       render: (value, org) =>
         state.editingRowId === org?.id
-          ? e('input', {
-              type: 'text',
+          ? e(TextInput, {
               value: state.editValues.name,
-              onChange: (e) =>
+              onChange: (value) =>
                 state.setEditValues({
                   ...state.editValues,
-                  name: e.target.value,
+                  name: value,
                 }),
-              className:
-                'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+              className: 'w-full',
             })
           : e(
               'div',
@@ -227,26 +226,24 @@ function renderOrganizationsContent({ components, data }) {
       sortable: true,
       render: (value, org) =>
         state.editingRowId === org?.id
-          ? e(
-              'select',
-              {
-                value: state.editValues.type,
-                onChange: (e) =>
-                  state.setEditValues({
-                    ...state.editValues,
-                    type: e.target.value,
-                  }),
-                className:
-                  'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
-              },
-              e('option', { value: '' }, 'Select Type'),
-              e('option', { value: 'healthcare' }, 'Healthcare'),
-              e('option', { value: 'insurance' }, 'Insurance'),
-              e('option', { value: 'government' }, 'Government'),
-              e('option', { value: 'nonprofit' }, 'Nonprofit'),
-              e('option', { value: 'legal' }, 'Legal'),
-              e('option', { value: 'other' }, 'Other')
-            )
+          ? e(Select, {
+              value: state.editValues.type,
+              onChange: (value) =>
+                state.setEditValues({
+                  ...state.editValues,
+                  type: value,
+                }),
+              options: [
+                { value: '', label: 'Select Type' },
+                { value: 'healthcare', label: 'Healthcare' },
+                { value: 'insurance', label: 'Insurance' },
+                { value: 'government', label: 'Government' },
+                { value: 'nonprofit', label: 'Nonprofit' },
+                { value: 'legal', label: 'Legal' },
+                { value: 'other', label: 'Other' },
+              ],
+              className: 'w-full',
+            })
           : e(
               'div',
               { className: 'text-gray-300' },
@@ -261,16 +258,15 @@ function renderOrganizationsContent({ components, data }) {
       sortable: true,
       render: (value, org) =>
         state.editingRowId === org?.id
-          ? e('input', {
+          ? e(TextInput, {
               type: 'email',
               value: state.editValues.email,
-              onChange: (e) =>
+              onChange: (value) =>
                 state.setEditValues({
                   ...state.editValues,
-                  email: e.target.value,
+                  email: value,
                 }),
-              className:
-                'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+              className: 'w-full',
             })
           : e('div', { className: 'text-gray-300' }, org?.email || 'N/A'),
     },
@@ -280,16 +276,15 @@ function renderOrganizationsContent({ components, data }) {
       sortable: true,
       render: (value, org) =>
         state.editingRowId === org?.id
-          ? e('input', {
+          ? e(TextInput, {
               type: 'tel',
               value: state.editValues.phone,
-              onChange: (e) =>
+              onChange: (value) =>
                 state.setEditValues({
                   ...state.editValues,
-                  phone: e.target.value,
+                  phone: value,
                 }),
-              className:
-                'bg-gray-700 text-white px-2 py-1 rounded border border-gray-600',
+              className: 'w-full',
             })
           : e('div', { className: 'text-gray-300' }, org?.phone || 'N/A'),
     },
@@ -356,7 +351,7 @@ function renderOrganizationsContent({ components, data }) {
  */
 function renderOrganizationsModals({ components, data, props }) {
   const e = window.React.createElement;
-  const { Modal, OrganizationModal } = components;
+  const { ConfirmationModal, OrganizationModal } = components;
   const { state, handlers } = data;
   const { fullData, fileService, onUpdateData } = props;
 
@@ -369,34 +364,17 @@ function renderOrganizationsModals({ components, data, props }) {
     );
 
     modals.push(
-      e(Modal, {
+      e(ConfirmationModal, {
         key: 'delete-confirmation',
         isOpen: true,
         onClose: handlers.cancelOrganizationDelete,
+        onConfirm: () => handlers.confirmOrganizationDelete(org),
         title: 'Delete Organization',
-        children: e(
-          'div',
-          { className: 'space-y-4' },
-          e(
-            'p',
-            null,
-            'Are you sure you want to delete this organization? This action cannot be undone.'
-          ),
-          e(
-            'div',
-            { className: 'flex justify-end space-x-2' },
-            e(components.Button, {
-              variant: 'secondary',
-              onClick: handlers.cancelOrganizationDelete,
-              children: 'Cancel',
-            }),
-            e(components.Button, {
-              variant: 'danger',
-              onClick: () => handlers.confirmOrganizationDelete(org),
-              children: 'Delete',
-            })
-          )
-        ),
+        message:
+          'Are you sure you want to delete this organization? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger',
       })
     );
   }
