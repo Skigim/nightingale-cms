@@ -142,20 +142,6 @@
 
     <!-- Tailwind CSS CDN - TODO: Replace with build-time compilation for production -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      // Suppress the production warning - we know this needs to be compiled
-      if (window.Tailwind) {
-        console.warn = (() => {
-          const originalWarn = console.warn;
-          return (...args) => {
-            if (typeof args[0] === 'string' && args[0].includes('should not be used in production')) {
-              return; // Suppress this specific warning
-            }
-            originalWarn.apply(console, args);
-          };
-        })();
-      }
-    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -1783,7 +1769,7 @@
           let servicesReady = false;
           const checkServicesReady = () => {
             servicesReady =
-              typeof FileSystemService !== 'undefined' &&
+              typeof AutosaveFileService !== 'undefined' &&
               typeof window.NightingaleServices !== 'undefined' &&
               (window.NightingaleServices.loaded?.length || 0) > 0;
           };
