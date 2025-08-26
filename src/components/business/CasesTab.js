@@ -389,6 +389,15 @@ function renderCasesModals({ components, data: dataResult, props }) {
         },
         editCaseId: dataResult.editCaseId,
         fullData: props.fullData,
+        onViewCaseDetails: (caseId) => {
+          // Close the edit modal first
+          dataResult.setIsEditModalOpen(false);
+          dataResult.setEditCaseId(null);
+          // Open case details view
+          dataResult.setDetailsCaseId(caseId);
+          dataResult.setViewMode('details');
+          props.onViewModeChange?.('details');
+        },
       })
   );
 }
