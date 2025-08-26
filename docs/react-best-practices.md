@@ -321,3 +321,93 @@ same props.
 4.7. References
 ●  [The Rules of React](https://react.dev/reference/rules)
 ●  [Thinking in React](https://react.dev/learn/thinking-in-react)
+
+---
+
+## Part 5: Nightingale CMS Learning & Discoveries
+
+*This section documents React patterns and pitfalls discovered during actual development of the Nightingale CMS project. These are practical lessons learned from real bugs and issues encountered in our codebase.*
+
+### 5.1. useEffect Dependency Array Pitfalls
+
+*Discovered during autosave service infinite loop debugging (August 26, 2025)*
+
+#### The Problem: Infinite Re-initialization Loops
+
+One of the most subtle but devastating React bugs occurs when frequently changing state is included in useEffect dependency arrays that initialize services or expensive operations.
+
+#### ❌ ANTI-PATTERN: Frequently Changing Dependencies
+```javascript
+// This creates an infinite re-initialization loop
+useEffect(() => {
+  const autosaveService = new AutosaveService();
+  autosaveService.initialize({ 
+    fileService: fileService,
+    dataProvider: () => fullData,  // Function closure captures current value
+    statusCallback: setAutosaveStatus 
+  });
+  setAutosaveService(autosaveService);
+}, [fileService, fullData, autosaveService]); // ❌ fullData changes frequently!
+```
+
+**What happens:**
+1. Effect runs, creates autosave service
+2. Autosave saves data successfully 
+3. `setFullData()` is called with updated data
+4. `fullData` changes, triggering the useEffect again
+5. **New autosave service instance is created** (old one not cleaned up)
+6. Multiple autosave services now running simultaneously
+7. Each completion triggers more data changes → infinite loop
+
+#### ✅ CORRECT PATTERN: Closure for Current Values
+```javascript
+// Service initializes once, accesses current data via closure
+useEffect(() => {
+  const autosaveService = new AutosaveService();
+  autosaveService.initialize({ 
+    fileService: fileService,
+    dataProvider: () => fullData,  // ✅ Closure always gets current value
+    statusCallback: setAutosaveStatus 
+  });
+  setAutosaveService(autosaveService);
+}, [fileService, autosaveService]); // ✅ Only re-run when service dependencies change
+```
+
+**Why this works:**
+- The `dataProvider: () => fullData` closure **always** returns the current value of `fullData`
+- No need to re-initialize the service when data changes
+- Effect only runs when the actual service dependencies change
+
+#### 🧠 Mental Model: Dependencies vs. Current Values
+
+**Ask yourself:** *"Do I need to re-run this effect when this value changes, or do I just need the current value?"*
+
+- **Need to re-run**: Include in dependency array
+- **Just need current value**: Use closure pattern, exclude from dependencies
+
+#### 🔍 How to Debug This Pattern
+
+**Symptoms:**
+- Services being created multiple times
+- "Infinite loop" or "too many re-renders" errors  
+- Performance degradation over time
+- Multiple instances of the same operation running
+
+**Debugging steps:**
+1. Add `console.log('Effect running')` to suspect useEffects
+2. Look for effects that run every time data changes
+3. Check if services/subscriptions are being recreated unnecessarily
+4. Use React DevTools Profiler to identify excessive re-renders
+
+#### 🎯 Rule of Thumb
+
+**For service initialization useEffects:**
+- Include: Service constructors, configuration objects, external dependencies
+- Exclude: Frequently changing application data that the service will access via closures
+
+This pattern is especially critical for:
+- Autosave services
+- WebSocket connections  
+- Event listeners
+- Timers and intervals
+- External library initializations

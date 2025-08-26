@@ -1646,7 +1646,7 @@
             console.error('Failed to initialize AutosaveService:', error);
             setAutosaveStatus({ status: 'error', message: 'Autosave initialization failed' });
           }
-        }, [fileService, fullData, autosaveService]);
+        }, [fileService, autosaveService]);
 
         // Cross-app communication listener
         useEffect(() => {
