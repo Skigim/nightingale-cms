@@ -169,11 +169,8 @@
     <!-- Nightingale Service Initializer (loads services dynamically) -->
     <script src="./src/services/index.js"></script>
 
-    <!-- FileSystem Service for autosave -->
-    <script src="./src/services/nightingale.fileservice.js"></script>
-
-    <!-- Autosave Service -->
-    <script src="./src/services/nightingale.autosave.js"></script>
+    <!-- Combined Autosave & File Service -->
+    <script src="./src/services/nightingale.autosavefile.js"></script>
 
     <!-- Nightingale Component Library - Layered Architecture -->
     <script src="./src/components/index.js"></script>
@@ -1458,36 +1455,57 @@
         const [organizationsViewMode, setOrganizationsViewMode] = useState('list'); // Track if we're in organization details view
         const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
 
-        // Autosave state
-        const [autosaveService, setAutosaveService] = useState(null);
+        // Autosave & File service state (combined)
+        const [autosaveFileService, setAutosaveFileService] = useState(null);
         const [autosaveStatus, setAutosaveStatus] = useState({
           status: 'disconnected',
-          message: 'Autosave not initialized',
+          message: 'Service not initialized',
         });
 
-        // File service initialization with proper service loading awareness
-        const [fileService, setFileService] = useState(null);
+        // Backward compatibility aliases
+        const fileService = autosaveFileService; // For components that expect fileService
+        const autosaveService = autosaveFileService; // For components that expect autosaveService
         const [servicesReady, setServicesReady] = useState(false);
 
-        // Initialize file service when services are ready
+        // Initialize combined autosave & file service when services are ready
         useEffect(() => {
           const handleServicesReady = () => {
-            console.log('🎯 Services ready - initializing FileService');
-            if (typeof FileSystemService !== 'undefined') {
-              const service = new FileSystemService({
+            console.log('🎯 Services ready - initializing AutosaveFileService');
+            if (typeof AutosaveFileService !== 'undefined') {
+              const service = new AutosaveFileService({
                 tabId: `cms-react-tab-${Date.now()}`,
                 errorCallback: showToast,
                 sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
+                
+                // Autosave configuration
+                enabled: true,
+                saveInterval: 120000, // 2 minutes
+                debounceDelay: 5000,  // 5 seconds
+                maxRetries: 3,
+                
+                // Status callback
+                statusCallback: (status) => {
+                  setAutosaveStatus(status);
+                  if (status.status === 'saved') {
+                    setIsDirty(false);
+                  } else if (status.status === 'error') {
+                    console.warn('Autosave error:', status.message);
+                  }
+                },
               });
-              setFileService(service);
+              
+              // Set data provider for autosave
+              service.setDataProvider(() => fullData);
+              
+              setAutosaveFileService(service);
               setServicesReady(true);
             } else {
-              console.warn('⚠️ FileSystemService still not available after services ready event');
+              console.warn('⚠️ AutosaveFileService still not available after services ready event');
             }
           };
 
           // Check if services are already loaded
-          if (window.nightingaleServicesLoaded && typeof FileSystemService !== 'undefined') {
+          if (window.nightingaleServicesLoaded && typeof AutosaveFileService !== 'undefined') {
             handleServicesReady();
           } else {
             // Listen for services ready event
@@ -1497,11 +1515,11 @@
             let attempts = 0;
             const checkInterval = setInterval(() => {
               attempts++;
-              if (typeof FileSystemService !== 'undefined') {
+              if (typeof AutosaveFileService !== 'undefined') {
                 handleServicesReady();
                 clearInterval(checkInterval);
               } else if (attempts >= 10) {
-                console.error('❌ FileSystemService failed to load after 10 seconds');
+                console.error('❌ AutosaveFileService failed to load after 10 seconds');
                 clearInterval(checkInterval);
               }
             }, 1000);
@@ -1513,7 +1531,7 @@
           }
         }, []);
 
-        // Data update handler - now works with autosave
+        // Data update handler - now works with combined autosave service
         const handleUpdateData = useCallback(
           async (newData) => {
             // Use custom DevTools helper for better debugging
@@ -1530,11 +1548,11 @@
             setIsDirty(true);
 
             // Notify autosave service of data change
-            if (autosaveService) {
-              autosaveService.notifyDataChange('user-edit');
+            if (autosaveFileService) {
+              autosaveFileService.notifyDataChange('user-edit');
             }
           },
-          [autosaveService]
+          [autosaveFileService]
         );
 
         const handleSave = async () => {
@@ -1545,7 +1563,7 @@
           }
 
           try {
-            const success = await fileService.writeFile(fullData);
+            const success = await autosaveFileService.writeFile(fullData);
             if (success) {
               setIsDirty(false);
               showToast('Data saved successfully.', 'success');
@@ -1560,7 +1578,7 @@
               integrityChannel.close();
               console.log('Sent data integrity broadcast: data updated');
             } else {
-              console.error('FileService.writeFile returned false');
+              console.error('AutosaveFileService.writeFile returned false');
               showToast('Failed to save data.', 'error');
             }
           } catch (error) {
@@ -1576,22 +1594,22 @@
           setIsDirty(false);
         }, []);
 
-        // Initialize file system and load data - FIXED: Remove fileService dependency to prevent reinitialization
+        // Initialize app and load data
         useEffect(() => {
           async function initializeApp() {
             try {
-              if (!fileService) {
-                console.warn('FileService not available during initialization');
+              if (!autosaveFileService) {
+                console.warn('AutosaveFileService not available during initialization');
                 return;
               }
 
               setFileStatus('connecting');
 
               // Check for existing file system access
-              const { handle, permission } = await fileService.restoreLastDirectoryAccess();
+              const { handle, permission } = await autosaveFileService.restoreLastDirectoryAccess();
               if (handle && permission === 'granted') {
                 setFileStatus('connected');
-                const data = await fileService.readFile();
+                const data = await autosaveFileService.readFile();
                 if (data) {
                   // Apply any necessary data migrations
                   const normalizedData = await window.NightingaleDataManagement.normalizeDataMigrations(data);
@@ -1608,45 +1626,10 @@
             }
           }
 
-          initializeApp();
-        }, []); // Empty dependency array prevents reinitialization
-
-        // Initialize autosave service when fileService and data are available
-        useEffect(() => {
-          if (!fileService || !window.AutosaveService || autosaveService) {
-            return; // Wait for dependencies or avoid double initialization
+          if (autosaveFileService) {
+            initializeApp();
           }
-
-          try {
-            const autosave = new window.AutosaveService({
-              enabled: true,
-              saveInterval: 120000, // 2 minutes (reduced from 30 seconds to minimize hiccups)
-              debounceDelay: 5000, // 5 seconds (increased from 2 seconds for better batching)
-              maxRetries: 3,
-              persistConfig: true,
-              persistStats: true,
-            });
-
-            autosave.initialize({
-              fileService: fileService,
-              dataProvider: () => fullData,
-              statusCallback: (status) => {
-                setAutosaveStatus(status);
-                if (status.status === 'saved') {
-                  setIsDirty(false);
-                } else if (status.status === 'error') {
-                  console.warn('Autosave error:', status.message);
-                }
-              },
-            });
-
-            setAutosaveService(autosave);
-            console.log('✅ AutosaveService initialized successfully');
-          } catch (error) {
-            console.error('Failed to initialize AutosaveService:', error);
-            setAutosaveStatus({ status: 'error', message: 'Autosave initialization failed' });
-          }
-        }, [fileService, autosaveService]);
+        }, [autosaveFileService]); // Only run when service becomes available
 
         // Cross-app communication listener
         useEffect(() => {
