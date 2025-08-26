@@ -259,6 +259,14 @@ function NightingaleCMSApp() {
   );
 }
 
+// PropTypes for validation
+if (typeof window !== 'undefined' && window.PropTypes) {
+  NightingaleCMSApp.propTypes = {
+    // NightingaleCMSApp is the root component and doesn't receive external props
+    // All props are managed internally through state
+  };
+}
+
 // Self-registration for both module and script loading
 if (typeof window !== 'undefined') {
   // Register globally for backward compatibility
