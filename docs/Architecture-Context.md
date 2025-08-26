@@ -356,4 +356,4 @@ vrRequests: [
 
 ---
 
-_This document reflects the state as of August 16, 2025, after the livingArrangement migration and PersonDetailsModal enhancements._
+_This document reflects the state as of August 25, 2025, after the directory reorganization to src/ structure and new unified index.html shell._

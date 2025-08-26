@@ -26,8 +26,12 @@ Nightingale CMS helps social workers track applications, manage client relations
 ### Running the Application
 
 1. **Clone/Download** the project to your local machine
-2. **Open** `App/NightingaleCMS-React.html` in your web browser
-3. **Create Sample Data** using the "Create Sample Data" button
+2. **Open** `index.html` in your web browser for the main suite, or use individual pages:
+   - Main CMS Suite: `index.html`
+   - Legacy React App: `src/pages/NightingaleCMS-React.html`
+   - Reports: `src/pages/NightingaleReports.html`
+   - Correspondence: `src/pages/NightingaleCorrespondence.html`
+3. **Create Sample Data** using the "Create Sample Data" button (in legacy app)
 4. **Start Managing Cases** with the intuitive interface
 
 ### Development Setup
@@ -39,7 +43,10 @@ cd CMSWorkspace
 # Open in VS Code (recommended)
 code .
 
-# Or open App/NightingaleCMS-React.html directly in browser
+# Serve files with Python (recommended for local development)
+python -m http.server 8080
+
+# Or open index.html directly in browser
 ```
 
 ## 🏗️ Architecture
@@ -47,24 +54,41 @@ code .
 ### Component-Based Design
 
 ```
-App/
-├── Components/           # Reusable UI Component Library
-│   ├── Button.js        # Multi-variant button with icons
-│   ├── DataTable.js     # Sortable, filterable tables
-│   ├── Modal.js         # Overlay dialogs and forms
-│   ├── SearchBar.js     # Search with real-time filtering
-│   ├── Badge.js         # Status and category indicators
-│   ├── FormComponents.js # Form inputs with validation
-│   └── modals/          # Specialized modal components
-├── js/                  # Core Services & Utilities
-│   ├── nightingale.utils.js      # General utilities
-│   ├── nightingale.parsers.js    # Data parsing/validation
-│   ├── nightingale.fileservice.js # File I/O operations
-│   ├── nightingale.search.js     # Search/filtering logic
-│   └── nightingale.dayjs.js      # Date/time utilities
-├── lib/                 # Third-party libraries
-├── build/               # Build artifacts and distributions
-└── Docs/                # Component documentation
+src/
+├── components/           # Reusable Component Library
+│   ├── ui/              # Generic UI components (framework-agnostic)
+│   │   ├── Button.js    # Multi-variant button with icons
+│   │   ├── DataTable.js # Sortable, filterable tables
+│   │   ├── Modal.js     # Overlay dialogs and forms
+│   │   ├── SearchBar.js # Search with real-time filtering
+│   │   ├── Badge.js     # Status and category indicators
+│   │   ├── FormComponents.js # Form inputs with validation
+│   │   └── TabBase.js   # Tab component factory
+│   └── business/        # Domain-specific CMS components
+│       ├── CaseCreationModal.js   # Case creation workflows
+│       ├── PersonCreationModal.js # Person management forms
+│       ├── OrganizationModal.js   # Organization management
+│       └── FinancialItemModal.js  # Financial item management
+├── services/            # Core Services & Utilities
+│   ├── core.js          # Core application services
+│   ├── cms.js           # CMS-specific business logic
+│   ├── ui.js            # UI interaction utilities
+│   ├── nightingale.fileservice.js    # File I/O operations
+│   ├── nightingale.search.js         # Search/filtering logic
+│   ├── nightingale.dayjs.js          # Date/time utilities
+│   ├── nightingale.autosave.js       # Auto-save functionality
+│   └── nightingale.toast.js          # Toast notifications
+├── pages/               # Application Pages
+│   ├── NightingaleCMS-React.html     # Main CMS application
+│   ├── NightingaleReports.html       # Reports and analytics
+│   └── NightingaleCorrespondence.html # Document generation
+├── assets/              # Third-party libraries
+│   ├── dayjs.min.js     # Date manipulation
+│   ├── fuse.min.js      # Fuzzy search
+│   └── lodash.min.js    # Utility functions
+Data/                    # JSON data files and backups
+Docs/                    # Project documentation
+index.html              # Main application shell
 ```
 
 ### Technology Stack
@@ -151,8 +175,9 @@ App/
 ### Adding New Components
 
 ```javascript
-// Create component in Components/
+// Create component in src/components/ui/ (generic) or src/components/business/ (domain-specific)
 function NewComponent({ prop1, prop2, ...props }) {
+  const e = window.React.createElement; // Component-scoped React.createElement
   const [state, setState] = useState(initialValue);
 
   return e(
@@ -162,20 +187,34 @@ function NewComponent({ prop1, prop2, ...props }) {
   );
 }
 
-// Export for use
-window.NewComponent = NewComponent;
+// Register component
+if (typeof window !== 'undefined') {
+  window.NewComponent = NewComponent;
+
+  if (window.NightingaleUI) {
+    window.NightingaleUI.registerComponent('NewComponent', NewComponent);
+  }
+}
 ```
 
 ### Data Operations
 
 ```javascript
-// Save data
-await window.NightingaleFileService.saveData(data);
+// Save data (using modern service pattern)
+await window.NightingaleServices.getService('fileService').saveData(data);
 
 // Load data
-const data = await window.NightingaleFileService.loadData();
+const data =
+  await window.NightingaleServices.getService('fileService').loadData();
 
 // Search data
+const results = window.NightingaleServices.getService('search').searchCases(
+  data.cases,
+  query
+);
+
+// Legacy compatibility (still works)
+await window.NightingaleFileService.saveData(data);
 const results = window.NightingaleSearch.searchCases(data.cases, query);
 ```
 
@@ -214,30 +253,34 @@ const variants = {
 
 ## 📖 Documentation
 
-### Component Documentation
+### Project Documentation
 
-- [Button Integration Guide](App/Components/Docs/Button-Integration.md)
-- [DataTable Integration Guide](App/Components/Docs/DataTable-Integration.md)
-- [Modal Usage Examples](App/Components/Docs/Modal-Examples.md)
+- [Architecture Context](Docs/Architecture-Context.md) - Current implementation vs future model
+- [Service Organization](Docs/Service-Reorganization-Migration-Guide.md) - Service layer architecture
+- [Data Migration Guide](Docs/Data-Migration-Guide.md) - Legacy data migration procedures
+- [Component Analysis](Docs/Tab-Component-Analysis.md) - Component architecture patterns
+- [React Best Practices](Docs/react-best-practices.md) - Development guidelines
 
 ### API Documentation
 
-- [File Service API](App/js/README.md)
-- [Search Service API](App/js/nightingale.search.js)
-- [Utility Functions](App/js/nightingale.utils.js)
+- [File Service API](src/services/nightingale.fileservice.js) - File I/O operations
+- [Search Service API](src/services/nightingale.search.js) - Search and filtering
+- [Autosave Service](src/services/README-autosave.md) - Automatic data saving
 
 ## 🚀 Deployment
 
 ### Development
 
-- Open `App/NightingaleCMS-React.html` directly in browser
+- Open `index.html` directly in browser for the main suite
 - Uses in-browser Babel compilation for rapid development
+- Individual pages can be accessed directly in `src/pages/`
 
 ### Production
 
 - Pre-compile with build tools for performance
 - Host static files on web server
 - Configure proper MIME types for .js files
+- Consider using a local server (Python, Node.js, etc.) for development
 
 ## 🔄 Migration & Updates
 

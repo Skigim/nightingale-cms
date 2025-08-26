@@ -28,12 +28,6 @@ const BUSINESS_COMPONENTS = [
     category: 'organization-management',
     dependencies: ['StepperModal', 'FormComponents'],
   },
-  {
-    name: 'AvsImportModal',
-    path: 'AvsImportModal.js',
-    category: 'financial',
-    dependencies: ['Modal', 'FormComponents', 'Button'],
-  },
 
   {
     name: 'FinancialItemCard',
@@ -43,31 +37,36 @@ const BUSINESS_COMPONENTS = [
   },
 
   {
+    name: 'NotesModal',
+    path: 'NotesModal.js',
+    category: 'business',
+    dependencies: [],
+  },
+
+  // Additional business components:
+  {
+    name: 'AvsImportModal',
+    path: 'AvsImportModal.js',
+    category: 'financial',
+    dependencies: ['Modal', 'FormComponents', 'Button'],
+  },
+  {
     name: 'FinancialManagementSection',
     path: 'FinancialManagementSection.js',
     category: 'financial',
     dependencies: ['FinancialItemCard'],
   },
-
   {
     name: 'DashboardTab',
     path: 'DashboardTab.js',
     category: 'dashboard',
     dependencies: [],
   },
-
   {
     name: 'OrganizationsTab',
     path: 'OrganizationsTab.js',
     category: 'organization-management',
     dependencies: ['TabBase', 'DataTable', 'Button', 'SearchBar'],
-  },
-
-  {
-    name: 'NotesModal',
-    path: 'NotesModal.js',
-    category: 'business',
-    dependencies: [],
   },
   {
     name: 'FinancialItemModal',
