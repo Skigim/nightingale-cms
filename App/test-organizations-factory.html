@@ -26,8 +26,8 @@
     <!-- Load TabBase factory -->
     <script src="../js/components/ui/TabBase.js"></script>
 
-    <!-- Load the refactored component -->
-    <script src="../js/components/business/OrganizationsTab.refactored.js"></script>
+    <!-- Load the factory-based component -->
+    <script src="../js/components/business/OrganizationsTab.js"></script>
 
     <script>
       const { createElement: e, useState } = React;
@@ -82,23 +82,23 @@
           e(
             'div',
             { className: 'mb-4 p-4 bg-blue-900 rounded text-sm' },
-            'This demonstrates the refactored OrganizationsTab using the createBusinessComponent factory.'
+            'This demonstrates the OrganizationsTab using the createBusinessComponent factory.'
           ),
 
-          // Original for comparison
+          // Factory-based component
           e(
             'div',
             { className: 'mb-8' },
-            e('h2', { className: 'text-xl font-semibold mb-4' }, 'Refactored Component (Using Factory)'),
-            window.OrganizationsTabRefactored
-              ? e(window.OrganizationsTabRefactored, {
+            e('h2', { className: 'text-xl font-semibold mb-4' }, 'OrganizationsTab (Factory Pattern)'),
+            window.OrganizationsTab
+              ? e(window.OrganizationsTab, {
                   fullData: data,
                   onUpdateData: handleUpdateData,
                   fileService: mockFileService,
                   onViewModeChange: (mode) => console.log('View mode:', mode),
                   onBackToList: (fn) => console.log('Back function set:', fn),
                 })
-              : e('div', { className: 'p-4 bg-red-900 rounded' }, 'OrganizationsTabRefactored not available')
+              : e('div', { className: 'p-4 bg-red-900 rounded' }, 'OrganizationsTab not available')
           ),
 
           // Debug info
@@ -110,7 +110,7 @@
               'ul',
               { className: 'space-y-1' },
               e('li', {}, `createBusinessComponent available: ${!!window.createBusinessComponent}`),
-              e('li', {}, `OrganizationsTabRefactored available: ${!!window.OrganizationsTabRefactored}`),
+              e('li', {}, `OrganizationsTab available: ${!!window.OrganizationsTab}`),
               e('li', {}, `Data organizations count: ${data.organizations.length}`),
               e(
                 'li',

@@ -435,6 +435,31 @@ docs: update component integration guide
 refactor(services): simplify file service error handling
 ```
 
+### **Commit Message Philosophy**
+
+Write commits that are **purely useful, totally concise, with zero fluff**:
+
+**Focus on WHAT changed, not outcomes:**
+
+- ✅ `Remove unused props parameters`
+- ❌ `All linting issues resolved, code ready for production`
+
+**Be technically specific:**
+
+- ✅ `Add PropTypes to fallback components`
+- ❌ `Add comprehensive PropTypes to all fallback components`
+
+**Avoid meta-commentary:**
+
+- ✅ `Update component registry`
+- ❌ `Successfully implemented registry updates`
+
+**No status updates or obvious statements:**
+
+- ❌ `Fix no-unused-vars warnings` (obvious from the fix)
+- ❌ `All issues resolved` (wouldn't commit if not)
+- ❌ `Benefits: XYZ...` (fluff)
+
 ### **Breaking Changes**
 
 When introducing breaking changes, include `BREAKING CHANGE:` in the footer with a description of what changed and migration instructions.

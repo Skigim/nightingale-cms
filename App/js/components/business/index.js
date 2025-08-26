@@ -60,14 +60,6 @@ const BUSINESS_COMPONENTS = [
     name: 'OrganizationsTab',
     path: 'js/components/business/OrganizationsTab.js',
     category: 'organization-management',
-    dependencies: ['DataTable', 'Button', 'SearchBar', 'Modals'],
-  },
-
-  // Refactored Components (Factory Pattern)
-  {
-    name: 'OrganizationsTabRefactored',
-    path: 'js/components/business/OrganizationsTab.refactored.js',
-    category: 'organization-management',
     dependencies: ['TabBase', 'DataTable', 'Button', 'SearchBar'],
   },
 
