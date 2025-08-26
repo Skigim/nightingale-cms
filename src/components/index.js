@@ -103,7 +103,7 @@ async function loadComponentLayers() {
     // Load UI layer first (generic components)
     console.log('🎨 Phase 1: Loading UI Component Layer...');
     const uiScript = document.createElement('script');
-    uiScript.src = '../components/ui/index.js';
+    uiScript.src = 'src/components/ui/index.js';
     uiScript.async = true;
 
     await new Promise((resolve, reject) => {
@@ -126,7 +126,7 @@ async function loadComponentLayers() {
     // Load business layer (domain-specific components)
     console.log('🏢 Phase 2: Loading Business Component Layer...');
     const businessScript = document.createElement('script');
-    businessScript.src = '../components/business/index.js';
+    businessScript.src = 'src/components/business/index.js';
     businessScript.async = true;
 
     await new Promise((resolve, reject) => {
