@@ -23,14 +23,8 @@
  * Custom hook for CasesTab data management
  * Implements the TabBase.js useData pattern for standardized data handling
  */
-function useCasesData({
-  fullData,
-  onUpdateData,
-  fileService,
-  onViewModeChange,
-  onBackToList,
-}) {
-  const { useState, useEffect, useMemo } = window.React;
+function useCasesData({ fullData, onViewModeChange, onBackToList }) {
+  const { useState, useEffect, useMemo, useCallback } = window.React;
 
   // State management - all hooks must be called unconditionally
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,18 +35,18 @@ function useCasesData({
   const [detailsCaseId, setDetailsCaseId] = useState(null);
 
   // Back to list function that can be called externally
-  const backToList = () => {
+  const backToList = useCallback(() => {
     setViewMode('list');
     setDetailsCaseId(null);
     onViewModeChange?.('list');
-  };
+  }, [onViewModeChange]);
 
   // Expose the back function to parent
   useEffect(() => {
     if (onBackToList) {
       onBackToList(() => backToList);
     }
-  }, [onBackToList]);
+  }, [onBackToList, backToList]);
 
   // Filter cases (DataTable handles sorting)
   const filteredCases = useMemo(() => {
@@ -214,7 +208,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
             field: 'personId',
             label: 'Person',
             sortable: true,
-            render: (value, caseItem) => {
+            render: (value) => {
               const person = window.NightingaleDataManagement?.findPersonById?.(
                 props.fullData?.people,
                 value
@@ -304,7 +298,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
  * Render function for CasesTab modals
  * Implements the TabBase.js renderModals pattern
  */
-function renderCasesModals({ components, data: dataResult, props }) {
+function renderCasesModals({ data: dataResult, props }) {
   const e = window.React.createElement;
 
   // Get CaseCreationModal with fallback
