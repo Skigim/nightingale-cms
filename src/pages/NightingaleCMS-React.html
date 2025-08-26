@@ -1103,18 +1103,6 @@
         );
       }
 
-      function EligibilityTab({ fullData }) {
-        return e(
-          'div',
-          { className: 'space-y-6' },
-          e('h2', { className: 'text-2xl font-bold text-white' }, 'Eligibility Management'),
-          e(
-            'div',
-            { className: 'bg-gray-800 rounded-lg p-6 border border-gray-700' },
-            e('p', { className: 'text-gray-400' }, 'Eligibility functionality will be implemented here...')
-          )
-        );
-      }
 
       function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus, onFileStatusChange }) {
         const [isConnecting, setIsConnecting] = useState(false);

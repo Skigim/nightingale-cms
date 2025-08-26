@@ -86,6 +86,12 @@ const BUSINESS_COMPONENTS = [
     category: 'people-management',
     dependencies: ['TabBase', 'DataTable', 'SearchBar', 'TabHeader'],
   },
+  {
+    name: 'EligibilityTab',
+    path: 'EligibilityTab.js',
+    category: 'eligibility',
+    dependencies: [],
+  },
 
   // Future business components will be added here:
   // { name: 'PersonDetailsModal', path: 'business/modals/PersonDetailsModal.js', category: 'people' },
