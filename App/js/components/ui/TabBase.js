@@ -259,6 +259,80 @@ function getRegistryComponent(componentName, fallbackComponent) {
 }
 
 /**
+ * Standardized Search Section Component
+ * Provides consistent Card-wrapped search bar for all tabs
+ */
+function SearchSection({ searchBar, className = '' }) {
+  const e = window.React.createElement;
+  const Card = getRegistryComponent('Card', null);
+
+  if (Card) {
+    return e(Card, {
+      variant: 'elevated',
+      className: `bg-gray-800 border-gray-700 ${className}`,
+      children: searchBar,
+    });
+  }
+
+  // Fallback to div wrapper
+  return e(
+    'div',
+    {
+      className: `bg-gray-800 rounded-lg p-4 border border-gray-700 ${className}`,
+    },
+    searchBar
+  );
+}
+
+/**
+ * Standardized Content Section Component
+ * Provides consistent Card-wrapped content areas for all tabs
+ */
+function ContentSection({ children, variant = 'table', className = '' }) {
+  const e = window.React.createElement;
+  const Card = getRegistryComponent('Card', null);
+
+  const variantClasses = {
+    table: 'bg-gray-900 border-gray-700', // Dark theme for data tables
+    form: 'bg-white border-gray-200', // Light theme for forms
+    info: 'bg-gray-50 border-gray-300', // Light gray for info sections
+  };
+
+  const variantClass = variantClasses[variant] || variantClasses.table;
+
+  if (Card) {
+    return e(Card, {
+      variant: 'default',
+      className: `${variantClass} ${className}`,
+      children,
+    });
+  }
+
+  // Fallback to div wrapper
+  return e(
+    'div',
+    {
+      className: `rounded-lg shadow ${variantClass} ${className}`,
+    },
+    children
+  );
+}
+
+// PropTypes for layout components
+if (typeof window !== 'undefined' && window.PropTypes) {
+  SearchSection.propTypes = {
+    searchBar: window.PropTypes.node.isRequired,
+    className: window.PropTypes.string,
+  };
+
+  ContentSection.propTypes = {
+    children: window.PropTypes.node.isRequired,
+    variant: window.PropTypes.oneOf(['table', 'form', 'info']),
+    className: window.PropTypes.string,
+  };
+}
+
+/**
  * Standardized component registry resolver
  * Provides all commonly used components with multi-tier fallbacks
  *
@@ -273,6 +347,11 @@ function resolveComponents() {
     TabHeader: getRegistryComponent('TabHeader', FallbackTabHeader),
     DataTable: getRegistryComponent('DataTable', null),
     Badge: getRegistryComponent('Badge', null),
+    // Card Components
+    Card: getRegistryComponent('Card', null),
+    // Layout Helpers
+    SearchSection,
+    ContentSection,
     // Form Components
     FormField: getRegistryComponent('FormField', null),
     TextInput: getRegistryComponent('TextInput', null),
@@ -421,6 +500,10 @@ if (typeof window !== 'undefined') {
   window.getRegistryComponent = getRegistryComponent;
   window.resolveComponents = resolveComponents;
 
+  // Register layout helpers
+  window.SearchSection = SearchSection;
+  window.ContentSection = ContentSection;
+
   // Register fallback components
   window.FallbackModal = FallbackModal;
   window.FallbackButton = FallbackButton;
@@ -436,6 +519,8 @@ if (typeof window !== 'undefined') {
       createBusinessComponent;
     window.NightingaleUI.components.getRegistryComponent = getRegistryComponent;
     window.NightingaleUI.components.resolveComponents = resolveComponents;
+    window.NightingaleUI.components.SearchSection = SearchSection;
+    window.NightingaleUI.components.ContentSection = ContentSection;
     window.NightingaleUI.components.FallbackModal = FallbackModal;
     window.NightingaleUI.components.FallbackButton = FallbackButton;
     window.NightingaleUI.components.FallbackSearchBar = FallbackSearchBar;

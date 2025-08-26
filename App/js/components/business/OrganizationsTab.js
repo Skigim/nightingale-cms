@@ -193,8 +193,16 @@ function useOrganizationsData(props) {
  */
 function renderOrganizationsContent({ components, data }) {
   const e = window.React.createElement;
-  const { SearchBar, DataTable, TabHeader, Button, TextInput, Select } =
-    components;
+  const {
+    SearchBar,
+    DataTable,
+    TabHeader,
+    Button,
+    TextInput,
+    Select,
+    SearchSection,
+    ContentSection,
+  } = components;
   const { state, handlers } = data;
 
   // Define table columns
@@ -309,12 +317,8 @@ function renderOrganizationsContent({ components, data }) {
     }),
 
     // Search Bar
-    e(
-      'div',
-      {
-        className: 'bg-gray-800 rounded-lg p-4 border border-gray-700',
-      },
-      e(
+    e(SearchSection, {
+      searchBar: e(
         'div',
         { className: 'flex items-center space-x-4' },
         e(
@@ -328,21 +332,20 @@ function renderOrganizationsContent({ components, data }) {
             className: 'w-full',
           })
         )
-      )
-    ),
+      ),
+    }),
 
     // Organizations Table
-    e(
-      'div',
-      { className: 'bg-white rounded-lg shadow' },
-      e(DataTable, {
+    e(ContentSection, {
+      variant: 'table',
+      children: e(DataTable, {
         data: data.data,
         columns,
         onRowClick: handlers.handleOrganizationClick,
         className: 'w-full',
         emptyMessage: 'No organizations found',
-      })
-    )
+      }),
+    })
   );
 }
 
