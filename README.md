@@ -28,7 +28,7 @@ Nightingale CMS helps social workers track applications, manage client relations
 1. **Clone/Download** the project to your local machine
 2. **Open** `index.html` in your web browser for the main suite, or use individual pages:
    - Main CMS Suite: `index.html`
-   - Legacy React App: `src/pages/NightingaleCMS-React.html`
+   - Main React App: `index.html` (Unified CMS application)
    - Reports: `src/pages/NightingaleReports.html`
    - Correspondence: `src/pages/NightingaleCorrespondence.html`
 3. **Create Sample Data** using the "Create Sample Data" button (in legacy app)
@@ -79,7 +79,6 @@ src/
 │   ├── nightingale.autosave.js       # Auto-save functionality
 │   └── nightingale.toast.js          # Toast notifications
 ├── pages/               # Application Pages
-│   ├── NightingaleCMS-React.html     # Main CMS application
 │   ├── NightingaleReports.html       # Reports and analytics
 │   └── NightingaleCorrespondence.html # Document generation
 ├── assets/              # Third-party libraries

@@ -2,7 +2,7 @@
 
 ## 📋 Executive Summary
 
-This analysis examines embedded React components in `src/pages/NightingaleCMS-React.html` to create a comprehensive extraction plan following the TabBase.js factory pattern. The goal is to migrate embedded components to separate files using the standardized business component architecture.
+This analysis examines embedded React components that were previously in `src/pages/NightingaleCMS-React.html` (now consolidated into `index.html`) to create a comprehensive extraction plan following the TabBase.js factory pattern. The goal is to migrate embedded components to separate files using the standardized business component architecture.
 
 ## 🔍 Embedded Component Inventory
 

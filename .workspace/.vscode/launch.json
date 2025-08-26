@@ -9,7 +9,7 @@
       "args": [
         "App",
         "--port=3000",
-        "--open=NightingaleCMS-React.html",
+        "--open=index.html",
         "--no-browser"
       ],
       "console": "integratedTerminal",
@@ -19,7 +19,7 @@
       "name": "Debug in Chrome",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000/NightingaleCMS-React.html",
+      "url": "http://localhost:3000/index.html",
       "webRoot": "${workspaceFolder}/App",
       "sourceMaps": true
     }

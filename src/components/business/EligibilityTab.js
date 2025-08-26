@@ -1,7 +1,7 @@
 /**
  * Nightingale CMS - Eligibility Tab Component
  *
- * Extracted from NightingaleCMS-React.html 
+ * Extracted from main CMS application (now in index.html) 
  * Simple placeholder tab for eligibility management functionality
  *
  * Features:

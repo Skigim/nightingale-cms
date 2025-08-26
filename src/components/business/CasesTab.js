@@ -1,7 +1,7 @@
 /**
  * Nightingale CMS - Cases Tab Component
  *
- * Extracted from NightingaleCMS-React.html using TabBase.js factory pattern
+ * Extracted from main CMS application (now in index.html) using TabBase.js factory pattern
  * Manages case listing, search, CRUD operations, and details view navigation
  *
  * Features:

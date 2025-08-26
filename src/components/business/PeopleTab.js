@@ -1,7 +1,7 @@
 /**
  * Nightingale CMS - People Tab Component
  *
- * Extracted from NightingaleCMS-React.html using TabBase.js factory pattern
+ * Extracted from main CMS application (now in index.html) using TabBase.js factory pattern
  * Manages people listing, search, and details view navigation
  *
  * Features:
