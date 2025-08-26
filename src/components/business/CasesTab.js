@@ -366,6 +366,7 @@ function renderCasesModals({ components, data: dataResult, props }) {
         dataResult.setIsCreateModalOpen(false);
       },
       fullData: props.fullData,
+      fileService: props.fileService,
     }),
 
     // Case Edit Modal (using same component with edit mode)
@@ -389,6 +390,7 @@ function renderCasesModals({ components, data: dataResult, props }) {
         },
         editCaseId: dataResult.editCaseId,
         fullData: props.fullData,
+        fileService: props.fileService,
         onViewCaseDetails: (caseId) => {
           // Close the edit modal first
           dataResult.setIsEditModalOpen(false);

@@ -315,6 +315,7 @@ function renderPeopleModals({ data: dataResult, props }) {
         dataResult.setIsCreateModalOpen(false);
       },
       fullData: props.fullData,
+      fileService: props.fileService,
     }),
 
     // Person Edit Modal (using same component with edit mode)
@@ -338,6 +339,7 @@ function renderPeopleModals({ data: dataResult, props }) {
         },
         editPersonId: dataResult.editPersonId,
         fullData: props.fullData,
+        fileService: props.fileService,
       })
   );
 }

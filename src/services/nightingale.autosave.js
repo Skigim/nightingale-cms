@@ -395,10 +395,11 @@
      * Handle permission status changes
      */
     async handlePermissionChange(previousStatus, newStatus) {
-      this.log(
-        `Permission changed from ${previousStatus} to ${newStatus}`,
-        'info'
-      );
+      // Handle initial state properly
+      const prev = previousStatus || 'unknown';
+      const current = newStatus || 'unknown';
+
+      this.log(`Permission changed from ${prev} to ${current}`, 'info');
 
       switch (newStatus) {
         case 'granted':
@@ -1118,16 +1119,34 @@
 
       switch (level) {
         case 'error':
-          console.error(logMessage, data);
+          if (data !== null) {
+            console.error(logMessage, data);
+          } else {
+            console.error(logMessage);
+          }
           break;
         case 'warn':
-          console.warn(logMessage, data);
+          if (data !== null) {
+            console.warn(logMessage, data);
+          } else {
+            console.warn(logMessage);
+          }
           break;
         case 'debug':
-          console.debug && console.debug(logMessage, data);
+          if (console.debug) {
+            if (data !== null) {
+              console.debug(logMessage, data);
+            } else {
+              console.debug(logMessage);
+            }
+          }
           break;
         default:
-          console.log(logMessage, data);
+          if (data !== null) {
+            console.log(logMessage, data);
+          } else {
+            console.log(logMessage);
+          }
       }
     }
   }

@@ -1462,17 +1462,51 @@
           message: 'Autosave not initialized',
         });
 
-        // File service initialization
-        const fileService = useMemo(() => {
-          if (typeof FileSystemService !== 'undefined') {
-            return new FileSystemService({
-              tabId: `cms-react-tab-${Date.now()}`,
-              errorCallback: showToast,
-              sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
-            });
+        // File service initialization with proper service loading awareness
+        const [fileService, setFileService] = useState(null);
+        const [servicesReady, setServicesReady] = useState(false);
+
+        // Initialize file service when services are ready
+        useEffect(() => {
+          const handleServicesReady = () => {
+            console.log('🎯 Services ready - initializing FileService');
+            if (typeof FileSystemService !== 'undefined') {
+              const service = new FileSystemService({
+                tabId: `cms-react-tab-${Date.now()}`,
+                errorCallback: showToast,
+                sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
+              });
+              setFileService(service);
+              setServicesReady(true);
+            } else {
+              console.warn('⚠️ FileSystemService still not available after services ready event');
+            }
+          };
+
+          // Check if services are already loaded
+          if (window.nightingaleServicesLoaded && typeof FileSystemService !== 'undefined') {
+            handleServicesReady();
           } else {
-            console.warn('⚠️ FileSystemService not yet loaded, using fallback');
-            return null;
+            // Listen for services ready event
+            window.addEventListener('nightingale:services:ready', handleServicesReady);
+
+            // Fallback: check every second for 10 seconds
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+              attempts++;
+              if (typeof FileSystemService !== 'undefined') {
+                handleServicesReady();
+                clearInterval(checkInterval);
+              } else if (attempts >= 10) {
+                console.error('❌ FileSystemService failed to load after 10 seconds');
+                clearInterval(checkInterval);
+              }
+            }, 1000);
+
+            return () => {
+              window.removeEventListener('nightingale:services:ready', handleServicesReady);
+              clearInterval(checkInterval);
+            };
           }
         }, []);
 
@@ -1583,8 +1617,8 @@
           try {
             const autosave = new window.AutosaveService({
               enabled: true,
-              saveInterval: 30000, // 30 seconds
-              debounceDelay: 2000, // 2 seconds
+              saveInterval: 120000, // 2 minutes (reduced from 30 seconds to minimize hiccups)
+              debounceDelay: 5000, // 5 seconds (increased from 2 seconds for better batching)
               maxRetries: 3,
               persistConfig: true,
               persistStats: true,
@@ -1681,6 +1715,26 @@
                 : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
           }
         };
+
+        // Show loading screen while services are initializing
+        if (!servicesReady || !fileService) {
+          return e(
+            'div',
+            {
+              className: 'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
+              style: { fontFamily: 'Inter, system-ui, sans-serif' },
+            },
+            e(
+              'div',
+              { className: 'text-center space-y-4' },
+              e('div', {
+                className: 'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
+              }),
+              e('h2', { className: 'text-xl font-semibold' }, 'Initializing Nightingale CMS'),
+              e('p', { className: 'text-gray-400' }, 'Loading services and file system...')
+            )
+          );
+        }
 
         return e(
           'div',
