@@ -319,18 +319,10 @@ function createBusinessComponent(config) {
 
         // Render action buttons if provided
         renderActions &&
-          e(
-            'div',
-            { className: 'flex justify-between items-center' },
-            renderActions({ components, data: dataResult, props: finalProps })
-          ),
+          renderActions({ components, data: dataResult, props: finalProps }),
 
         // Render main content
-        e(
-          'div',
-          { className: 'bg-white rounded-lg shadow' },
-          renderContent({ components, data: dataResult, props: finalProps })
-        ),
+        renderContent({ components, data: dataResult, props: finalProps }),
 
         // Render modals if provided
         renderModals &&

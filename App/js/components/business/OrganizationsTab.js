@@ -199,7 +199,7 @@ function renderOrganizationsActions({ components, data }) {
     'div',
     {
       className:
-        'flex items-center justify-between bg-gray-800 p-3 rounded-lg shadow-md',
+        'flex items-center justify-between bg-gray-800 p-4 rounded-lg shadow-md mb-6',
     },
     e(
       'div',
@@ -208,7 +208,7 @@ function renderOrganizationsActions({ components, data }) {
         'svg',
         {
           xmlns: 'http://www.w3.org/2000/svg',
-          className: 'h-5 w-5 mr-2 text-purple-400',
+          className: 'h-5 w-5 mr-3 text-purple-400',
           fill: 'none',
           viewBox: '0 0 24 24',
           stroke: 'currentColor',
@@ -221,14 +221,18 @@ function renderOrganizationsActions({ components, data }) {
         })
       ),
       e(
-        'span',
-        { className: 'font-bold text-white' },
-        'Organizations Management'
-      ),
-      e(
-        'span',
-        { className: 'ml-3 text-sm text-gray-400' },
-        `${data.meta.filteredCount} organizations`
+        'div',
+        { className: 'flex flex-col' },
+        e(
+          'span',
+          { className: 'font-bold text-white text-lg' },
+          'Organizations Management'
+        ),
+        e(
+          'span',
+          { className: 'text-sm text-gray-400' },
+          `${data.meta.filteredCount} organizations`
+        )
       )
     ),
     e(Button, {
@@ -413,13 +417,13 @@ function renderOrganizationsContent({ components, data }) {
 
   return e(
     'div',
-    { className: 'space-y-4' },
+    { className: 'space-y-6' },
 
     // Search Bar
     e(
       'div',
       {
-        className: 'bg-gray-800 rounded-lg p-4 border border-gray-700 w-full',
+        className: 'bg-gray-800 rounded-lg p-4 border border-gray-700',
       },
       e(
         'div',
@@ -439,13 +443,17 @@ function renderOrganizationsContent({ components, data }) {
     ),
 
     // Organizations Table
-    e(DataTable, {
-      data: data.data,
-      columns,
-      onRowClick: handlers.handleOrganizationClick,
-      className: 'w-full',
-      emptyMessage: 'No organizations found',
-    })
+    e(
+      'div',
+      { className: 'bg-white rounded-lg shadow' },
+      e(DataTable, {
+        data: data.data,
+        columns,
+        onRowClick: handlers.handleOrganizationClick,
+        className: 'w-full',
+        emptyMessage: 'No organizations found',
+      })
+    )
   );
 }
 
