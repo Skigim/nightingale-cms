@@ -195,52 +195,11 @@ function renderOrganizationsActions({ components, data }) {
   const e = window.React.createElement;
   const { Button } = components;
 
-  return e(
-    'div',
-    {
-      className:
-        'flex items-center justify-between bg-gray-800 p-4 rounded-lg shadow-md mb-6',
-    },
-    e(
-      'div',
-      { className: 'flex items-center' },
-      e(
-        'svg',
-        {
-          xmlns: 'http://www.w3.org/2000/svg',
-          className: 'h-5 w-5 mr-3 text-purple-400',
-          fill: 'none',
-          viewBox: '0 0 24 24',
-          stroke: 'currentColor',
-        },
-        e('path', {
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-          strokeWidth: 2,
-          d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-        })
-      ),
-      e(
-        'div',
-        { className: 'flex flex-col' },
-        e(
-          'span',
-          { className: 'font-bold text-white text-lg' },
-          'Organizations Management'
-        ),
-        e(
-          'span',
-          { className: 'text-sm text-gray-400' },
-          `${data.meta.filteredCount} organizations`
-        )
-      )
-    ),
-    e(Button, {
-      variant: 'primary',
-      onClick: () => data.state.setIsCreateModalOpen(true),
-      children: 'Add New Organization',
-    })
-  );
+  return e(Button, {
+    variant: 'primary',
+    onClick: () => data.state.setIsCreateModalOpen(true),
+    children: 'Add New Organization',
+  });
 }
 
 /**
@@ -248,7 +207,7 @@ function renderOrganizationsActions({ components, data }) {
  */
 function renderOrganizationsContent({ components, data }) {
   const e = window.React.createElement;
-  const { SearchBar, DataTable, Badge, Button } = components;
+  const { SearchBar, DataTable, TabHeader, Button } = components;
   const { state, handlers } = data;
 
   // Define table columns
@@ -348,76 +307,25 @@ function renderOrganizationsContent({ components, data }) {
             })
           : e('div', { className: 'text-gray-300' }, org?.phone || 'N/A'),
     },
-    {
-      field: 'status',
-      label: 'Status',
-      sortable: true,
-      render: (value, org) => {
-        const status = org.status || 'active';
-        return e(Badge, {
-          variant:
-            status === 'active'
-              ? 'success'
-              : status === 'pending'
-                ? 'warning'
-                : 'secondary',
-          children: status.charAt(0).toUpperCase() + status.slice(1),
-        });
-      },
-    },
-    {
-      field: 'actions',
-      label: 'Actions',
-      sortable: false,
-      render: (value, org) =>
-        state.editingRowId === org.id
-          ? e(
-              'div',
-              { className: 'flex space-x-2' },
-              e(Button, {
-                variant: 'success',
-                size: 'sm',
-                onClick: () => handlers.handleSaveEdit(org),
-                children: 'Save',
-              }),
-              e(Button, {
-                variant: 'secondary',
-                size: 'sm',
-                onClick: handlers.handleCancelEdit,
-                children: 'Cancel',
-              })
-            )
-          : e(
-              'div',
-              { className: 'flex space-x-2' },
-              e(Button, {
-                variant: 'secondary',
-                size: 'sm',
-                onClick: (e) => handlers.handleViewSummary(org, e),
-                children: 'View',
-              }),
-              e(Button, {
-                variant: 'secondary',
-                size: 'sm',
-                onClick: (e) => {
-                  e.stopPropagation();
-                  handlers.handleStartEdit(org);
-                },
-                children: 'Edit',
-              }),
-              e(Button, {
-                variant: 'danger',
-                size: 'sm',
-                onClick: (e) => handlers.handleDeleteOrganization(org, e),
-                children: 'Delete',
-              })
-            ),
-    },
   ];
 
   return e(
     'div',
     { className: 'space-y-6' },
+
+    // Tab Header
+    e(TabHeader, {
+      title: 'Organizations Management',
+      count: `${data.meta.filteredCount} organizations`,
+      icon: {
+        d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+      },
+      actions: e(Button, {
+        variant: 'primary',
+        onClick: () => data.state.setIsCreateModalOpen(true),
+        children: 'Add New Organization',
+      }),
+    }),
 
     // Search Bar
     e(

@@ -47,6 +47,11 @@ const UI_COMPONENTS = [
     path: 'js/components/ui/TabBase.js',
     category: 'factories',
   },
+  {
+    name: 'TabHeader',
+    path: 'js/components/ui/TabHeader.js',
+    category: 'layout',
+  },
 ]; // UI Component Registry
 window.NightingaleUI = window.NightingaleUI || {
   components: {},
