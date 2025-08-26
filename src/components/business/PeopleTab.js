@@ -83,8 +83,7 @@ function usePeopleData({
           person.name?.toLowerCase().includes(term) ||
           person.email?.toLowerCase().includes(term) ||
           person.phone?.includes(term) ||
-          getAddressText(person.address).includes(term) ||
-          person.status?.toLowerCase().includes(term)
+          getAddressText(person.address).includes(term)
         );
       });
     }
@@ -96,13 +95,6 @@ function usePeopleData({
   const handlePersonClick = (person) => {
     setEditPersonId(person.id);
     setIsEditModalOpen(true);
-  };
-
-  const handleOpenPersonDetails = (person, e) => {
-    e.stopPropagation();
-    setDetailsPersonId(person.id || person.name);
-    setViewMode('details');
-    onViewModeChange?.('details');
   };
 
   const formatDate = (dateString) => {
@@ -129,7 +121,6 @@ function usePeopleData({
     // Functions
     backToList,
     handlePersonClick,
-    handleOpenPersonDetails,
     formatDate,
   };
 }
@@ -266,59 +257,6 @@ function renderPeopleContent({ components, data: dataResult, props }) {
               }
               return e('span', { className: 'text-gray-300' }, addressText);
             },
-          },
-          {
-            field: 'status',
-            label: 'Status',
-            sortable: true,
-            render: (value) => {
-              const statusColors = {
-                Active: 'bg-green-500',
-                Inactive: 'bg-gray-500',
-                Pending: 'bg-yellow-500',
-                Suspended: 'bg-red-500',
-              };
-              const colorClass = statusColors[value] || 'bg-gray-500';
-              return e(
-                'span',
-                {
-                  className: `px-2 py-1 rounded text-xs text-white ${colorClass}`,
-                },
-                value || 'Unknown'
-              );
-            },
-          },
-          {
-            field: 'actions',
-            label: 'Actions',
-            sortable: false,
-            render: (value, person) =>
-              e(
-                'div',
-                { className: 'flex space-x-2' },
-                e(
-                  'button',
-                  {
-                    className:
-                      'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                    onClick: (e) =>
-                      dataResult.handleOpenPersonDetails(person, e),
-                  },
-                  'Details'
-                ),
-                e(
-                  'button',
-                  {
-                    className:
-                      'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                    onClick: (e) => {
-                      e.stopPropagation();
-                      dataResult.handlePersonClick(person);
-                    },
-                  },
-                  'Edit'
-                )
-              ),
           },
         ],
         onRowClick: dataResult.handlePersonClick,
