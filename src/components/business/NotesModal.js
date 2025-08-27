@@ -18,6 +18,14 @@ function NotesModal({
   const e = window.React.createElement;
   const { useState, useEffect, useMemo } = window.React;
 
+  // Get toast function with fallback
+  const showToast =
+    window.showToast ||
+    window.NightingaleToast?.show ||
+    function (message, type) {
+      console.log(`Toast ${type}: ${message}`);
+    };
+
   // Look up person name using the helper function
   const person = window.NightingaleDataManagement.findPersonById(
     fullData?.people,
@@ -159,19 +167,15 @@ function NotesModal({
       }
 
       // Show success message
-      if (window.showToast) {
-        window.showToast(
-          currentNote ? 'Note updated successfully' : 'Note added successfully',
-          'success'
-        );
-      }
+      showToast(
+        currentNote ? 'Note updated successfully' : 'Note added successfully',
+        'success'
+      );
 
       resetForm();
     } catch (error) {
       console.error('Error saving note:', error);
-      if (window.showToast) {
-        window.showToast('Error saving note. Please try again.', 'error');
-      }
+      showToast('Error saving note. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -258,14 +262,10 @@ function NotesModal({
         onNotesUpdate(caseId, updatedNotes);
       }
 
-      if (window.showToast) {
-        window.showToast('Note deleted successfully', 'success');
-      }
+      showToast('Note deleted successfully', 'success');
     } catch (error) {
       console.error('Error deleting note:', error);
-      if (window.showToast) {
-        window.showToast('Error deleting note. Please try again.', 'error');
-      }
+      showToast('Error deleting note. Please try again.', 'error');
     }
   };
 

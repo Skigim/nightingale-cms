@@ -743,6 +743,14 @@ function CaseCreationModal({
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Get toast function with fallback
+  const showToast =
+    window.showToast ||
+    window.NightingaleToast?.show ||
+    function (message, type) {
+      console.log(`Toast ${type}: ${message}`);
+    };
+
   // Create filtered steps config for edit mode (removes Review step)
   const filteredStepsConfig = editCaseId
     ? stepsConfig.filter((step) => step.title !== 'Review')
@@ -832,7 +840,7 @@ function CaseCreationModal({
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
-          window.showToast?.(
+          showToast(
             'Please fix validation errors before continuing',
             'error'
           );
@@ -859,7 +867,7 @@ function CaseCreationModal({
         setValidationErrors(stepErrors);
         setCurrentStep(i);
         const stepTitle = configToUse[i]?.title || `Step ${i + 1}`;
-        window.showToast(
+        showToast(
           `Please fix the errors on the '${stepTitle}' step.`,
           'error'
         );
@@ -938,11 +946,11 @@ function CaseCreationModal({
       }
 
       onCaseCreated(resultCase);
-      window.showToast(successMessage, 'success');
+      showToast(successMessage, 'success');
       onClose();
     } catch (error) {
       console.error('Error saving case:', error);
-      window.showToast('Error saving case: ' + error.message, 'error');
+      showToast('Error saving case: ' + error.message, 'error');
     } finally {
       setIsLoading(false);
     }

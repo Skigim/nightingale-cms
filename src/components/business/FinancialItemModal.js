@@ -19,6 +19,14 @@ function FinancialItemModal({
   const e = window.React.createElement;
   const { useState, useEffect } = window.React;
 
+  // Get toast function with fallback
+  const showToast =
+    window.showToast ||
+    window.NightingaleToast?.show ||
+    function (message, type) {
+      console.log(`Toast ${type}: ${message}`);
+    };
+
   const [formData, setFormData] = useState({
     id: editingItem?.id || null,
     description: editingItem?.description || editingItem?.type || '', // Migrate type → description
@@ -165,9 +173,9 @@ function FinancialItemModal({
         dateAdded: new Date().toISOString(),
       });
       setErrors({});
-      window.showToast(`${itemType} item saved. Add another.`, 'success');
+      showToast(`${itemType} item saved. Add another.`, 'success');
     } else {
-      window.showToast(
+      showToast(
         `${itemType} item ${isEditing ? 'updated' : 'saved'} successfully.`,
         'success'
       );

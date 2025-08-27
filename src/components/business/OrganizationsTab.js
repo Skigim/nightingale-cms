@@ -16,6 +16,14 @@ function useOrganizationsData(props) {
   } = props;
   const { useState, useMemo, useEffect, useCallback } = window.React || {};
 
+  // Get toast function with fallback
+  const showToast =
+    window.showToast ||
+    window.NightingaleToast?.show ||
+    function (message, type) {
+      console.log(`Toast ${type}: ${message}`);
+    };
+
   // All state hooks (called unconditionally per React rules)
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrganization, setSelectedOrganization] = useState(null);
@@ -85,7 +93,7 @@ function useOrganizationsData(props) {
         (o) => o.id !== organization.id
       );
       onUpdateData(updatedData);
-      window.showToast(
+      showToast(
         `Organization ${organization.name} deleted successfully`,
         'success'
       );
@@ -132,11 +140,11 @@ function useOrganizationsData(props) {
           onUpdateData(updatedData);
           setEditingRowId(null);
           setEditValues({});
-          window.showToast('Organization updated successfully!', 'success');
+          showToast('Organization updated successfully!', 'success');
         }
       } catch (error) {
         console.error('Error saving organization:', error);
-        window.showToast('Error saving organization', 'error');
+        showToast('Error saving organization', 'error');
       }
     },
     [fullData, fileService, onUpdateData, editValues]
