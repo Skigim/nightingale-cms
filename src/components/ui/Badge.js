@@ -299,3 +299,7 @@ if (typeof window !== 'undefined') {
     );
   }
 }
+
+// ES6 Module Export
+export default Badge;
+export { Badge, ProgressBadge, CountBadge, MultiBadge };

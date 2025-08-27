@@ -486,3 +486,12 @@ if (typeof module !== 'undefined' && module.exports) {
     renderOrganizationsModals,
   };
 }
+
+// ES6 Module Export
+export default OrganizationsTab;
+export {
+  OrganizationsTab,
+  useOrganizationsData,
+  renderOrganizationsContent,
+  renderOrganizationsModals,
+};

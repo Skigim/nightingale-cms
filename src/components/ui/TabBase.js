@@ -539,3 +539,16 @@ if (typeof module !== 'undefined' && module.exports) {
     FallbackSearchBar,
   };
 }
+
+// ES6 export for modern module systems
+export default createBusinessComponent;
+export {
+  createBusinessComponent,
+  getRegistryComponent,
+  resolveComponents,
+  FallbackModal,
+  FallbackButton,
+  FallbackSearchBar,
+  SearchSection,
+  ContentSection,
+};

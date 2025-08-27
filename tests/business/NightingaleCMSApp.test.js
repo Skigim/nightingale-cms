@@ -256,16 +256,17 @@ describe('NightingaleCMSApp Component', () => {
     });
   });
 
-  test('tracks dirty state correctly', async () => {
-    // Mock autosave service that calls dirty state callback
-    let dirtyCallback;
+  test('provides data to autosave service', async () => {
+    // Mock autosave service that captures the getFullData callback
+    let getFullDataCallback;
     window.AutosaveFileService.createForReact.mockImplementation((config) => {
-      dirtyCallback = config.onDirtyChange;
+      getFullDataCallback = config.getFullData;
       return {
         on: jest.fn(),
         off: jest.fn(),
         save: jest.fn(),
         load: jest.fn(),
+        saveData: jest.fn(),
       };
     });
 
@@ -278,14 +279,12 @@ describe('NightingaleCMSApp Component', () => {
       expect(window.AutosaveFileService.createForReact).toHaveBeenCalled();
     });
 
-    // Simulate dirty state change from autosave service
-    if (dirtyCallback) {
-      dirtyCallback(true);
-    }
+    // Verify the data provider callback is properly set
+    expect(getFullDataCallback).toBeInstanceOf(Function);
 
-    // Component should track dirty state but doesn't pass it to Header in current implementation
-    // This test verifies the callback is set up correctly
-    expect(dirtyCallback).toBeDefined();
+    // Test that the callback returns data (initially null)
+    const result = getFullDataCallback();
+    expect(result).toBeNull(); // Initial state should be null
   });
 
   test('handles component unmounting gracefully', () => {

@@ -264,3 +264,7 @@ if (typeof module !== 'undefined' && module.exports) {
     Cards,
   };
 }
+
+// ES6 export for modern module systems
+export default Cards;
+export { Card, CardGrid, CardList, CardField, CardActions };

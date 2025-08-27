@@ -1,11 +1,11 @@
 /**
  * ErrorBoundary.js - Error boundary UI component
- * 
+ *
  * Class component for graceful error handling in React applications.
  * Catches JavaScript errors anywhere in the child component tree and displays a fallback UI.
- * 
+ *
  * Note: This is a class component as Error Boundaries require class components in React.
- * 
+ *
  * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
@@ -14,7 +14,7 @@
 /**
  * ErrorBoundary Component
  * Wraps components to catch and handle errors gracefully
- * 
+ *
  * @class ErrorBoundary
  * @extends React.Component
  */
@@ -24,6 +24,7 @@ class ErrorBoundary extends window.React.Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
+  // eslint-disable-next-line no-unused-vars
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI
     return { hasError: true };
@@ -36,7 +37,7 @@ class ErrorBoundary extends window.React.Component {
       errorInfo: errorInfo,
     });
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // You can also log the error to an error reporting service here
     if (window.console && window.console.error) {
       console.error('Component stack trace:', errorInfo.componentStack);
@@ -56,12 +57,17 @@ class ErrorBoundary extends window.React.Component {
       return e(
         'div',
         {
-          className: 'h-full w-full flex items-center justify-center bg-gray-900 text-white p-8',
+          className:
+            'h-full w-full flex items-center justify-center bg-gray-900 text-white p-8',
         },
         e(
           'div',
           { className: 'max-w-2xl text-center' },
-          e('h1', { className: 'text-3xl font-bold mb-4' }, 'Something went wrong'),
+          e(
+            'h1',
+            { className: 'text-3xl font-bold mb-4' },
+            'Something went wrong'
+          ),
           e(
             'p',
             { className: 'text-gray-300 mb-6' },
@@ -70,7 +76,8 @@ class ErrorBoundary extends window.React.Component {
           e(
             'button',
             {
-              className: 'bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-medium',
+              className:
+                'bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-medium',
               onClick: () => window.location.reload(),
             },
             'Reload Application'
@@ -79,11 +86,20 @@ class ErrorBoundary extends window.React.Component {
             e(
               'details',
               { className: 'mt-6 text-left' },
-              e('summary', { className: 'cursor-pointer text-gray-400' }, 'Technical Details'),
+              e(
+                'summary',
+                { className: 'cursor-pointer text-gray-400' },
+                'Technical Details'
+              ),
               e(
                 'pre',
-                { className: 'mt-2 text-sm bg-gray-800 p-4 rounded overflow-auto' },
-                this.state.error.toString() + '\n' + (this.state.errorInfo?.componentStack || '')
+                {
+                  className:
+                    'mt-2 text-sm bg-gray-800 p-4 rounded overflow-auto',
+                },
+                this.state.error.toString() +
+                  '\n' +
+                  (this.state.errorInfo?.componentStack || '')
               )
             )
         )
@@ -109,7 +125,11 @@ if (typeof window !== 'undefined') {
 
   // Register with NightingaleUI registry if available
   if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('ErrorBoundary', ErrorBoundary, 'core');
+    window.NightingaleUI.registerComponent(
+      'ErrorBoundary',
+      ErrorBoundary,
+      'core'
+    );
   }
 }
 
@@ -117,3 +137,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = ErrorBoundary;
 }
+
+// ES6 Module Export
+export default ErrorBoundary;

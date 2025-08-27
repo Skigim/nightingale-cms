@@ -381,3 +381,8 @@
   // Return service for module systems
   return NightingaleUIUtilities;
 })(typeof window !== 'undefined' ? window : this);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' &&
+  window.NightingaleUIUtilities) ||
+  null;

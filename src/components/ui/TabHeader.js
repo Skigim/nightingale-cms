@@ -91,6 +91,9 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = TabHeader;
 }
 
+// ES6 export for modern module systems
+export default TabHeader;
+
 // Global registration for script loading
 if (typeof window !== 'undefined') {
   window.TabHeader = TabHeader;

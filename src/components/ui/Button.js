@@ -396,3 +396,17 @@ if (typeof module !== 'undefined' && module.exports) {
     ButtonIcons,
   };
 }
+
+// ES6 Module Export
+export default Button;
+export {
+  Button,
+  PrimaryButton,
+  SecondaryButton,
+  DangerButton,
+  SuccessButton,
+  OutlineButton,
+  GhostButton,
+  LinkButton,
+  ButtonIcons,
+};

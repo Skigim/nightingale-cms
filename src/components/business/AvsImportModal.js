@@ -553,3 +553,6 @@ if (typeof window !== 'undefined') {
     );
   }
 }
+
+// ES6 Module Export
+export default AvsImportModal;

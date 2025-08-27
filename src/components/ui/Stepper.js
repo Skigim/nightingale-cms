@@ -1,9 +1,9 @@
 /**
  * Stepper.js - Step indicator UI component
- * 
+ *
  * Generic UI component for displaying step-by-step progress with interactive navigation.
  * Provides visual progress indication and clickable step navigation.
- * 
+ *
  * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
@@ -12,7 +12,7 @@
 /**
  * Stepper Component
  * Displays a horizontal step progress indicator with optional progress bar
- * 
+ *
  * @param {Object} props - Component props
  * @param {Array} props.steps - Array of step objects with title and optional description
  * @param {number} props.currentStep - Index of the currently active step
@@ -98,7 +98,8 @@ function Stepper({
           'div',
           { className: 'w-full bg-gray-700 rounded-full h-2' },
           e('div', {
-            className: 'bg-blue-600 h-2 rounded-full transition-all duration-300',
+            className:
+              'bg-blue-600 h-2 rounded-full transition-all duration-300',
             style: {
               width: `${((currentStep + 1) / steps.length) * 100}%`,
             },
@@ -169,7 +170,12 @@ function Stepper({
                 },
                 step.title
               ),
-              step.description && e('div', { className: 'text-xs text-gray-500 mt-1' }, step.description)
+              step.description &&
+                e(
+                  'div',
+                  { className: 'text-xs text-gray-500 mt-1' },
+                  step.description
+                )
             )
           )
         );
@@ -216,3 +222,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Stepper;
 }
+
+// ES6 export for modern module systems
+export default Stepper;

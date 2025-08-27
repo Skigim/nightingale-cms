@@ -126,8 +126,8 @@
     }
 
     const appUrls = {
-      correspondence: 'NightingaleCorrespondence.html',
-      reports: 'NightingaleReports.html',
+      correspondence: 'src/pages/NightingaleCorrespondence.html',
+      reports: 'src/pages/NightingaleReports.html',
     };
 
     const baseUrl = appUrls[targetApp] || appUrls.correspondence;
@@ -247,3 +247,8 @@
   // Return service for module systems
   return NightingaleCMSUtilities;
 })(typeof window !== 'undefined' ? window : this);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' &&
+  window.NightingaleCMSUtilities) ||
+  null;

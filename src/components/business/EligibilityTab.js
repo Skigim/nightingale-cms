@@ -1,7 +1,7 @@
 /**
  * Nightingale CMS - Eligibility Tab Component
  *
- * Extracted from main CMS application (now in index.html) 
+ * Extracted from main CMS application (now in index.html)
  * Simple placeholder tab for eligibility management functionality
  *
  * Features:
@@ -9,10 +9,9 @@
  * - Consistent styling with other tabs
  * - Ready for future enhancement
  *
- * @param {Object} props.fullData - Complete application data (currently unused)
  * @returns {React.Element} Eligibility tab component
  */
-function EligibilityTab({ fullData }) {
+function EligibilityTab() {
   // Early return pattern for React safety
   if (!window.React) {
     return null;
@@ -23,11 +22,19 @@ function EligibilityTab({ fullData }) {
   return e(
     'div',
     { className: 'space-y-6' },
-    e('h2', { className: 'text-2xl font-bold text-white' }, 'Eligibility Management'),
+    e(
+      'h2',
+      { className: 'text-2xl font-bold text-white' },
+      'Eligibility Management'
+    ),
     e(
       'div',
       { className: 'bg-gray-800 rounded-lg p-6 border border-gray-700' },
-      e('p', { className: 'text-gray-400' }, 'Eligibility functionality will be implemented here...')
+      e(
+        'p',
+        { className: 'text-gray-400' },
+        'Eligibility functionality will be implemented here...'
+      )
     )
   );
 }
@@ -60,3 +67,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = EligibilityTab;
 }
+
+// ES6 Module Export
+export default EligibilityTab;

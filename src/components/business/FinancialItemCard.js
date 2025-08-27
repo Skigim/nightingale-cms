@@ -393,3 +393,7 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { FinancialItemCard, FinancialItemList, FinancialItemGrid };
 }
+
+// ES6 Module Export
+export default FinancialItemCard;
+export { FinancialItemCard, FinancialItemList, FinancialItemGrid };

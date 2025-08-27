@@ -100,3 +100,15 @@ function parseAvsData(rawInput, knownAccountTypes) {
 // Make parser functions available globally
 window.parseAvsAccountBlock = parseAvsAccountBlock;
 window.parseAvsData = parseAvsData;
+
+// Export for ES6 module compatibility
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    parseAvsAccountBlock,
+    parseAvsData,
+  };
+}
+
+// ES6 Module Export
+export default { parseAvsAccountBlock, parseAvsData };
+export { parseAvsAccountBlock, parseAvsData };

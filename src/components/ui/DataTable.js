@@ -579,3 +579,6 @@ if (typeof window !== 'undefined') {
     window.NightingaleUI.registerComponent('DataTable', DataTable, 'data');
   }
 }
+
+// ES6 Module Export
+export default DataTable;

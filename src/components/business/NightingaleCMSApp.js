@@ -335,3 +335,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = NightingaleCMSApp;
 }
+
+// ES6 Module Export
+export default NightingaleCMSApp;

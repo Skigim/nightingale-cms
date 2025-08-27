@@ -15,56 +15,56 @@ describe('SettingsModal Component', () => {
     fileService: {
       save: jest.fn().mockResolvedValue(),
       load: jest.fn().mockResolvedValue(),
-      getFileInfo: jest.fn().mockReturnValue({ name: 'test.json', size: 1024 })
+      getFileInfo: jest.fn().mockReturnValue({ name: 'test.json', size: 1024 }),
     },
     data: {
       cases: [],
       people: [],
-      organizations: []
+      organizations: [],
     },
-    onDataUpdate: jest.fn()
+    onDataUpdate: jest.fn(),
   };
 
   beforeEach(() => {
     // Ensure React is available globally
     global.window = window;
     window.React = React;
-    
+
     // Mock required services
     window.NightingaleServices = {
       createSampleData: jest.fn().mockReturnValue({
         cases: [{ id: '1', clientName: 'Sample Case' }],
         people: [{ id: '1', name: 'Sample Person' }],
-        organizations: [{ id: '1', name: 'Sample Org' }]
+        organizations: [{ id: '1', name: 'Sample Org' }],
       }),
       exportData: jest.fn(),
-      importData: jest.fn()
+      importData: jest.fn(),
     };
-    
+
     // Mock file operations
     global.URL = {
       createObjectURL: jest.fn().mockReturnValue('blob:mock-url'),
-      revokeObjectURL: jest.fn()
+      revokeObjectURL: jest.fn(),
     };
-    
+
     global.Blob = jest.fn().mockImplementation((content, options) => ({
       content,
-      options
+      options,
     }));
-    
+
     jest.clearAllMocks();
   });
 
   test('renders without crashing', () => {
     const Component = window.SettingsModal;
     expect(Component).toBeDefined();
-    
+
     render(React.createElement(Component, defaultProps));
   });
 
   test('displays modal title', () => {
     const Component = window.SettingsModal;
-    
+
     render(React.createElement(Component, defaultProps));
 
     expect(screen.getByText(/settings/i)).toBeInTheDocument();
@@ -72,11 +72,13 @@ describe('SettingsModal Component', () => {
 
   test('does not render when isOpen is false', () => {
     const Component = window.SettingsModal;
-    
-    const { container } = render(React.createElement(Component, {
-      ...defaultProps,
-      isOpen: false
-    }));
+
+    const { container } = render(
+      React.createElement(Component, {
+        ...defaultProps,
+        isOpen: false,
+      })
+    );
 
     expect(container.firstChild).toBeNull();
   });
@@ -84,21 +86,23 @@ describe('SettingsModal Component', () => {
   test('calls onClose when close button is clicked', () => {
     const mockOnClose = jest.fn();
     const Component = window.SettingsModal;
-    
-    render(React.createElement(Component, {
-      ...defaultProps,
-      onClose: mockOnClose
-    }));
+
+    render(
+      React.createElement(Component, {
+        ...defaultProps,
+        onClose: mockOnClose,
+      })
+    );
 
     const closeButton = screen.getByLabelText(/close/i);
     fireEvent.click(closeButton);
-    
+
     expect(mockOnClose).toHaveBeenCalled();
   });
 
   test('shows file information section', () => {
     const Component = window.SettingsModal;
-    
+
     render(React.createElement(Component, defaultProps));
 
     expect(screen.getByText(/file info/i)).toBeInTheDocument();
@@ -108,57 +112,67 @@ describe('SettingsModal Component', () => {
   test('creates sample data when button is clicked', async () => {
     const mockOnDataUpdate = jest.fn();
     const Component = window.SettingsModal;
-    
-    render(React.createElement(Component, {
-      ...defaultProps,
-      onDataUpdate: mockOnDataUpdate
-    }));
+
+    render(
+      React.createElement(Component, {
+        ...defaultProps,
+        onDataUpdate: mockOnDataUpdate,
+      })
+    );
 
     const createSampleButton = screen.getByText(/create sample/i);
     fireEvent.click(createSampleButton);
-    
+
     await waitFor(() => {
       expect(window.NightingaleServices.createSampleData).toHaveBeenCalled();
-      expect(mockOnDataUpdate).toHaveBeenCalledWith(expect.objectContaining({
-        cases: expect.any(Array),
-        people: expect.any(Array),
-        organizations: expect.any(Array)
-      }));
+      expect(mockOnDataUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: expect.any(Array),
+          people: expect.any(Array),
+          organizations: expect.any(Array),
+        })
+      );
     });
   });
 
   test('exports data when export button is clicked', async () => {
     const Component = window.SettingsModal;
-    
+
     render(React.createElement(Component, defaultProps));
 
     const exportButton = screen.getByText(/export/i);
     fireEvent.click(exportButton);
-    
+
     await waitFor(() => {
-      expect(window.NightingaleServices.exportData).toHaveBeenCalledWith(defaultProps.data);
+      expect(window.NightingaleServices.exportData).toHaveBeenCalledWith(
+        defaultProps.data
+      );
     });
   });
 
   test('handles file import', async () => {
     const mockOnDataUpdate = jest.fn();
     const Component = window.SettingsModal;
-    
-    render(React.createElement(Component, {
-      ...defaultProps,
-      onDataUpdate: mockOnDataUpdate
-    }));
+
+    render(
+      React.createElement(Component, {
+        ...defaultProps,
+        onDataUpdate: mockOnDataUpdate,
+      })
+    );
 
     const fileInput = screen.getByRole('button', { name: /import/i });
-    
+
     // Simulate file selection
-    const file = new File(['{"cases": []}'], 'import.json', { type: 'application/json' });
+    const file = new File(['{"cases": []}'], 'import.json', {
+      type: 'application/json',
+    });
     const changeEvent = {
-      target: { files: [file] }
+      target: { files: [file] },
     };
-    
+
     fireEvent.change(fileInput, changeEvent);
-    
+
     // Note: File import testing is complex due to FileReader API
     // This test validates the UI interaction
     expect(fileInput).toBeInTheDocument();
@@ -169,13 +183,15 @@ describe('SettingsModal Component', () => {
     const dataWithStats = {
       cases: [{ id: '1' }, { id: '2' }],
       people: [{ id: '1' }],
-      organizations: [{ id: '1' }, { id: '2' }, { id: '3' }]
+      organizations: [{ id: '1' }, { id: '2' }, { id: '3' }],
     };
-    
-    render(React.createElement(Component, {
-      ...defaultProps,
-      data: dataWithStats
-    }));
+
+    render(
+      React.createElement(Component, {
+        ...defaultProps,
+        data: dataWithStats,
+      })
+    );
 
     expect(screen.getByText(/2.*cases/i)).toBeInTheDocument();
     expect(screen.getByText(/1.*people/i)).toBeInTheDocument();
@@ -185,18 +201,20 @@ describe('SettingsModal Component', () => {
   test('handles save operation', async () => {
     const mockFileService = {
       ...defaultProps.fileService,
-      save: jest.fn().mockResolvedValue()
+      save: jest.fn().mockResolvedValue(),
     };
     const Component = window.SettingsModal;
-    
-    render(React.createElement(Component, {
-      ...defaultProps,
-      fileService: mockFileService
-    }));
+
+    render(
+      React.createElement(Component, {
+        ...defaultProps,
+        fileService: mockFileService,
+      })
+    );
 
     const saveButton = screen.getByText(/save.*now/i);
     fireEvent.click(saveButton);
-    
+
     await waitFor(() => {
       expect(mockFileService.save).toHaveBeenCalledWith(defaultProps.data);
     });
@@ -205,18 +223,20 @@ describe('SettingsModal Component', () => {
   test('handles save operation errors', async () => {
     const mockFileService = {
       ...defaultProps.fileService,
-      save: jest.fn().mockRejectedValue(new Error('Save failed'))
+      save: jest.fn().mockRejectedValue(new Error('Save failed')),
     };
     const Component = window.SettingsModal;
-    
-    render(React.createElement(Component, {
-      ...defaultProps,
-      fileService: mockFileService
-    }));
+
+    render(
+      React.createElement(Component, {
+        ...defaultProps,
+        fileService: mockFileService,
+      })
+    );
 
     const saveButton = screen.getByText(/save.*now/i);
     fireEvent.click(saveButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument();
     });
@@ -224,17 +244,19 @@ describe('SettingsModal Component', () => {
 
   test('handles missing required props gracefully', () => {
     const Component = window.SettingsModal;
-    
-    const { container } = render(React.createElement(Component, {
-      isOpen: true
-    }));
+
+    const { container } = render(
+      React.createElement(Component, {
+        isOpen: true,
+      })
+    );
 
     expect(container.firstChild).toBeNull();
   });
 
   test('matches snapshot', () => {
     const Component = window.SettingsModal;
-    
+
     const { container } = render(React.createElement(Component, defaultProps));
 
     expect(container.firstChild).toMatchSnapshot();

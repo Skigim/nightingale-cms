@@ -563,3 +563,6 @@ if (typeof window !== 'undefined') {
     window.NightingaleBusiness.registerComponent('NotesModal', NotesModal);
   }
 }
+
+// ES6 Module Export
+export default NotesModal;

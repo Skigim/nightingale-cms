@@ -25,7 +25,7 @@
   /**
    * Generate secure unique IDs using crypto.randomUUID when available
    * Falls back to timestamp + crypto random for older browsers
-   * 
+   *
    * @param {string} prefix - Prefix for the ID (e.g., 'person', 'org', 'case')
    * @returns {string} Secure unique ID
    */
@@ -33,18 +33,20 @@
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return `${prefix}-${crypto.randomUUID()}`;
     }
-    
+
     // Fallback for older browsers using crypto.getRandomValues
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint32Array(3);
       crypto.getRandomValues(array);
       const timestamp = Date.now().toString(36);
-      const randomPart = Array.from(array, x => x.toString(36)).join('');
+      const randomPart = Array.from(array, (x) => x.toString(36)).join('');
       return `${prefix}-${timestamp}-${randomPart}`;
     }
-    
+
     // Final fallback (should rarely be used in modern browsers)
-    console.warn('🔒 Using non-cryptographic ID generation - consider updating browser');
+    console.warn(
+      '🔒 Using non-cryptographic ID generation - consider updating browser'
+    );
     const timestamp = Date.now().toString(36);
     const randomPart = Math.random().toString(36).substr(2, 9);
     return `${prefix}-${timestamp}-${randomPart}`;
@@ -185,7 +187,7 @@
 
     // Normalize people data structure
     if (normalizedData.people) {
-      normalizedData.people = normalizedData.people.map((person, index) => {
+      normalizedData.people = normalizedData.people.map((person) => {
         const normalizedPerson = { ...person };
 
         // Ensure every person has an ID with secure generation
@@ -212,7 +214,7 @@
 
     // Normalize organizations data structure
     if (normalizedData.organizations) {
-      normalizedData.organizations = normalizedData.organizations.map((org, index) => {
+      normalizedData.organizations = normalizedData.organizations.map((org) => {
         const normalizedOrg = { ...org };
 
         // Ensure every organization has an ID with secure generation
@@ -375,7 +377,7 @@
   const NightingaleDataManagement = {
     // Utility functions
     generateSecureId,
-    
+
     // Data lookup functions
     findPersonById,
 
@@ -423,3 +425,8 @@
   // Return service for module systems
   return NightingaleDataManagement;
 })(typeof window !== 'undefined' ? window : this);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' &&
+  window.NightingaleDataManagement) ||
+  null;

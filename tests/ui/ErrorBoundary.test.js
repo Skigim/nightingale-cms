@@ -15,7 +15,7 @@ describe('ErrorBoundary Component', () => {
     // Ensure React is available globally
     global.window = window;
     window.React = React;
-    
+
     // Mock console.error to avoid cluttering test output
     consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -26,10 +26,14 @@ describe('ErrorBoundary Component', () => {
 
   test('renders children when there is no error', () => {
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement('div', null, 'Test child component')
-    ));
+
+    render(
+      React.createElement(
+        Component,
+        null,
+        React.createElement('div', null, 'Test child component')
+      )
+    );
 
     expect(screen.getByText('Test child component')).toBeInTheDocument();
   });
@@ -40,10 +44,10 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement(ThrowError)
-    ));
+
+    render(
+      React.createElement(Component, null, React.createElement(ThrowError))
+    );
 
     expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
     expect(screen.getByText(/Test error/)).toBeInTheDocument();
@@ -55,10 +59,10 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement(ThrowError)
-    ));
+
+    render(
+      React.createElement(Component, null, React.createElement(ThrowError))
+    );
 
     expect(screen.getByText(/Technical Details/)).toBeInTheDocument();
     expect(screen.getByText(/Detailed test error/)).toBeInTheDocument();
@@ -70,10 +74,10 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement(ThrowError)
-    ));
+
+    render(
+      React.createElement(Component, null, React.createElement(ThrowError))
+    );
 
     // ErrorBoundary always shows technical details, so check that error UI is shown
     expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
@@ -86,10 +90,10 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement(ThrowError)
-    ));
+
+    render(
+      React.createElement(Component, null, React.createElement(ThrowError))
+    );
 
     expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
     expect(screen.getByText(/Test error/)).toBeInTheDocument();
@@ -101,10 +105,10 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement(ThrowError)
-    ));
+
+    render(
+      React.createElement(Component, null, React.createElement(ThrowError))
+    );
 
     expect(consoleSpy).toHaveBeenCalledWith(
       'ErrorBoundary caught an error:',
@@ -115,7 +119,7 @@ describe('ErrorBoundary Component', () => {
 
   test('handles null children gracefully', () => {
     const Component = window.ErrorBoundary;
-    
+
     const { container } = render(React.createElement(Component, null, null));
 
     // ErrorBoundary should render nothing when given null children
@@ -124,11 +128,15 @@ describe('ErrorBoundary Component', () => {
 
   test('handles multiple children', () => {
     const Component = window.ErrorBoundary;
-    
-    render(React.createElement(Component, null,
-      React.createElement('div', null, 'Child 1'),
-      React.createElement('div', null, 'Child 2')
-    ));
+
+    render(
+      React.createElement(
+        Component,
+        null,
+        React.createElement('div', null, 'Child 1'),
+        React.createElement('div', null, 'Child 2')
+      )
+    );
 
     expect(screen.getByText('Child 1')).toBeInTheDocument();
     expect(screen.getByText('Child 2')).toBeInTheDocument();
@@ -143,17 +151,25 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    const { rerender } = render(React.createElement(Component, null,
-      React.createElement(ThrowError, { shouldThrow: true })
-    ));
+
+    const { rerender } = render(
+      React.createElement(
+        Component,
+        null,
+        React.createElement(ThrowError, { shouldThrow: true })
+      )
+    );
 
     expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
 
     // Simulate a reset by rerendering with different props
-    rerender(React.createElement(Component, null,
-      React.createElement(ThrowError, { shouldThrow: false })
-    ));
+    rerender(
+      React.createElement(
+        Component,
+        null,
+        React.createElement(ThrowError, { shouldThrow: false })
+      )
+    );
 
     // Note: In a real ErrorBoundary, you'd need a reset mechanism
     // This test verifies the basic error state behavior
@@ -165,20 +181,32 @@ describe('ErrorBoundary Component', () => {
     };
 
     const Component = window.ErrorBoundary;
-    
-    const { container } = render(React.createElement(Component, { showDetails: true },
-      React.createElement(ThrowError)
-    ));
+
+    const { container } = render(
+      React.createElement(
+        Component,
+        { showDetails: true },
+        React.createElement(ThrowError)
+      )
+    );
 
     expect(container.firstChild).toMatchSnapshot();
   });
 
   test('matches snapshot for normal state', () => {
     const Component = window.ErrorBoundary;
-    
-    const { container } = render(React.createElement(Component, null,
-      React.createElement('div', { className: 'test-child' }, 'Normal content')
-    ));
+
+    const { container } = render(
+      React.createElement(
+        Component,
+        null,
+        React.createElement(
+          'div',
+          { className: 'test-child' },
+          'Normal content'
+        )
+      )
+    );
 
     expect(container.firstChild).toMatchSnapshot();
   });

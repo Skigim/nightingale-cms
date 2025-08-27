@@ -427,3 +427,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = SettingsModal;
 }
+
+// ES6 Module Export
+export default SettingsModal;

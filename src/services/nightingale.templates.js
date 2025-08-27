@@ -718,3 +718,8 @@
     }
   }
 })(typeof self !== 'undefined' ? self : this);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' &&
+  window.NightingaleTemplateService) ||
+  null;

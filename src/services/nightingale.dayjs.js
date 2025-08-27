@@ -100,3 +100,11 @@ if (typeof window !== 'undefined' && window.dateUtils) {
   // Make dateUtils available globally
   window.dateUtils = dateUtils;
 }
+
+// Export for ES6 module compatibility
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = window.dateUtils;
+}
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' && window.dateUtils) || null;

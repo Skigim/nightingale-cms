@@ -1,9 +1,9 @@
 /**
  * Header.js - Application header UI component
- * 
+ *
  * Generic UI component for application header with status indicators, save controls, and settings access.
  * Provides file connection status, autosave status, and manual save functionality.
- * 
+ *
  * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
@@ -12,7 +12,7 @@
 /**
  * Header Component
  * Displays application header with branding, status indicators, and controls
- * 
+ *
  * @param {Object} props - Component props
  * @param {string} [props.fileStatus] - File connection status ('connected', 'disconnected', 'connecting')
  * @param {Object} [props.autosaveStatus] - Autosave status object with status and message
@@ -30,17 +30,21 @@ function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
   const e = window.React.createElement;
 
   // Get button components with fallback
-  const PrimaryButton = window.PrimaryButton || window.Button || function FallbackButton({ children, onClick, title, size }) {
-    return e(
-      'button',
-      {
-        className: 'px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors',
-        onClick,
-        title,
-      },
-      children
-    );
-  };
+  const PrimaryButton =
+    window.PrimaryButton ||
+    window.Button ||
+    function FallbackButton({ children, onClick, title }) {
+      return e(
+        'button',
+        {
+          className:
+            'px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors',
+          onClick,
+          title,
+        },
+        children
+      );
+    };
 
   // Determine autosave display status
   const getAutosaveDisplay = () => {
@@ -66,12 +70,15 @@ function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
 
   const autosaveDisplay = getAutosaveDisplay();
   const showManualSave =
-    !autosaveStatus || autosaveStatus.status === 'error' || autosaveStatus.status === 'stopped';
+    !autosaveStatus ||
+    autosaveStatus.status === 'error' ||
+    autosaveStatus.status === 'stopped';
 
   return e(
     'div',
     {
-      className: 'flex items-center justify-between bg-gray-800 p-2 shadow-md flex-shrink-0',
+      className:
+        'flex items-center justify-between bg-gray-800 p-2 shadow-md flex-shrink-0',
     },
     e(
       'div',
@@ -92,7 +99,11 @@ function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
           d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
         })
       ),
-      e('span', { className: 'font-bold text-white' }, 'Nightingale CMS - React')
+      e(
+        'span',
+        { className: 'font-bold text-white' },
+        'Nightingale CMS - React'
+      )
     ),
     e(
       'div',
@@ -160,7 +171,11 @@ function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
           title: autosaveStatus?.message || 'Autosave status',
         },
         e('span', { className: 'text-sm' }, autosaveDisplay.icon),
-        e('span', { className: `text-xs ${autosaveDisplay.className}` }, autosaveDisplay.text)
+        e(
+          'span',
+          { className: `text-xs ${autosaveDisplay.className}` },
+          autosaveDisplay.text
+        )
       ),
       // Manual Save Button (only shown when autosave is not working)
       showManualSave &&
@@ -187,7 +202,11 @@ function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
 // PropTypes for validation
 if (typeof window !== 'undefined' && window.PropTypes) {
   Header.propTypes = {
-    fileStatus: window.PropTypes.oneOf(['connected', 'disconnected', 'connecting']),
+    fileStatus: window.PropTypes.oneOf([
+      'connected',
+      'disconnected',
+      'connecting',
+    ]),
     autosaveStatus: window.PropTypes.shape({
       status: window.PropTypes.string,
       message: window.PropTypes.string,
@@ -212,3 +231,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Header;
 }
+
+// ES6 Module Export
+export default Header;

@@ -100,11 +100,6 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Nightingale Core Utilities -->
-    <script src="./src/services/core.js"></script>
-    <script src="./src/services/ui.js"></script>
-    <script src="./src/services/cms.js"></script>
-
     <!-- Unregister any existing service workers -->
     <script>
       if ('serviceWorker' in navigator) {
@@ -116,19 +111,9 @@
       }
     </script>
 
-    <!-- Nightingale Service Initializer (loads services dynamically) -->
-    <script src="./src/services/index.js"></script>
-
-    <!-- Combined Autosave & File Service -->
-    <script src="./src/services/nightingale.autosavefile.js"></script>
-
-    <!-- Nightingale Component Library - Layered Architecture -->
-    <script src="./src/components/index.js"></script>
-
-    <!-- Components will be loaded automatically by the layered architecture:
-         🎨 UI Layer: Button, Badge, DataTable, FormComponents, SearchBar, Modal, StepperModal, Stepper, Sidebar, Header, ErrorBoundary
-         🏢 Business Layer: CaseCreationModal (with integrated steps), PersonCreationModal, OrganizationModal, CaseDetailsView, SettingsModal, NightingaleCMSApp
-    -->
+    <!-- 🚀 NIGHTINGALE CMS - ES6 MODULE SYSTEM -->
+    <!-- All services and components are loaded via main.js ES6 imports -->
+    <script type="module" src="./src/main.js"></script>
 
     <!-- Day.js for date management -->
     <script src="./src/assets/dayjs.min.js"></script>
@@ -183,32 +168,11 @@
         debugActiveView: () => console.log('Active View:', window.nightingaleActiveView),
       };
     </script>
-
-    <!-- Application Initialization Service -->
-    <script src="./src/services/app-init.js"></script>
   </head>
 
   <body>
+    <!-- 🎯 REACT APP ROOT -->
+    <!-- Application is initialized automatically by main.js ES6 module system -->
     <div id="root"></div>
-
-    <script type="text/babel">
-      // Main app React hooks
-      const { useState, useEffect, useMemo, useCallback, useRef } = React;
-      const { createRoot } = ReactDOM;
-      const e = React.createElement;
-
-      // Component variables - will be assigned during initialization
-      let PrimaryButton, SecondaryButton, Modal, SearchBar;
-      // Note: DataTable is loaded separately from the component library
-
-      // Global toast function for services (loaded from toast service)
-      const showToast = window.showToast || function (message, type = 'info') {
-        console.log(`Toast ${type}: ${message}`);
-      };
-
-      // The application will be initialized by the app-init.js service
-      // All component functions have been extracted to separate files
-      // and are loaded automatically by the component library system
-    </script>
   </body>
 </html>

@@ -1,15 +1,15 @@
 # Nightingale CMS Todo
 
-## ✅ Recently Completed (by Autonomous Agent)
+## [x] Recently Completed
 
 ### Tab Components (COMPLETED)
 
-- ✅ Complete extraction of DashboardTab - Enhanced with registry patterns and React safety
-- ✅ Extract CasesTab - Complete TabBase.js factory implementation with useCasesData hook
-- ✅ Extract PeopleTab - Full CRUD interface using TabBase.js factory with usePeopleData hook
-- ✅ Extract EligibilityTab - Simple placeholder component with proper registration patterns
-- ✅ Update component registry - All new components added to business/index.js
-- ✅ Create analysis document - Comprehensive analysis-embedded-components.md created
+- [x] Complete extraction of DashboardTab - Enhanced with registry patterns and React safety
+- [x] Extract CasesTab - Complete TabBase.js factory implementation with useCasesData hook
+- [x] Extract PeopleTab - Full CRUD interface using TabBase.js factory with usePeopleData hook
+- [x] Extract EligibilityTab - Simple placeholder component with proper registration patterns
+- [x] Update component registry - All new components added to business/index.js
+- [x] Create analysis document - Comprehensive analysis-embedded-components.md created
 
 **File Impact**: Main HTML reduced from 2,454 lines to 1,646 lines (33% reduction!)
 
@@ -17,21 +17,21 @@
 
 ### Test Recent Component Extractions
 
-- [ ] Test extracted components in browser - Verify CasesTab, PeopleTab, EligibilityTab work correctly
-- [ ] Check browser console for errors - Verify no JavaScript errors from component extraction
-- [ ] Test tab switching functionality - Ensure navigation between extracted tabs works
-- [ ] Validate component registry loading - Confirm all components load via registry system
-- [ ] Test modal functionality - Verify case creation, person creation modals work
-- [ ] Validate data persistence - Ensure CRUD operations still work correctly
+- [x] Test extracted components in browser - Verify CasesTab, PeopleTab, EligibilityTab work correctly
+- [x] Check browser console for errors - Verify no JavaScript errors from component extraction
+- [x] Test tab switching functionality - Ensure navigation between extracted tabs works
+- [x] Validate component registry loading - Confirm all components load via registry system
+- [x] Test modal functionality - Verify case creation, person creation modals work
+- [x] Validate data persistence - Ensure CRUD operations still work correctly
 
 ## 🏗️ Remaining Component Extraction
 
 ### Additional Components to Extract
 
-- [ ] Extract CaseDetailsView (224 lines) - Complex component with multiple dependencies
-- [ ] Extract SettingsModal (167 lines) - File operations and data loading interface
-- [ ] Extract Sidebar component (317 lines) - Navigation and state management
-- [ ] Review for additional embedded components - Check for remaining extraction opportunities
+- [x] Extract CaseDetailsView (224 lines) - Complex component with multiple dependencies
+- [x] Extract SettingsModal (167 lines) - File operations and data loading interface
+- [x] Extract Sidebar component (317 lines) - Navigation and state management
+- [x] Review for additional embedded components - Check for remaining extraction opportunities
 
 ### Service Layer Refinement
 

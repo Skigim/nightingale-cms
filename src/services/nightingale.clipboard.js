@@ -341,3 +341,7 @@
   // Return service for module systems
   return NightingaleClipboard;
 })(typeof window !== 'undefined' ? window : this);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' && window.NightingaleClipboard) ||
+  null;

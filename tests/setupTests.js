@@ -7,12 +7,12 @@ global.ReactDOM = require('react-dom');
 // Setup window object for browser-like environment
 Object.defineProperty(window, 'React', {
   writable: true,
-  value: global.React
+  value: global.React,
 });
 
 Object.defineProperty(window, 'ReactDOM', {
   writable: true,
-  value: global.ReactDOM
+  value: global.ReactDOM,
 });
 
 // Mock console.warn to not clutter test output
@@ -29,9 +29,9 @@ afterAll(() => {
 global.testUtils = {
   // Helper to create mock props for components
   createMockProps: (overrides = {}) => ({
-    ...overrides
+    ...overrides,
   }),
-  
+
   // Helper to wait for async operations
   waitFor: (callback, timeout = 1000) => {
     return new Promise((resolve, reject) => {
@@ -56,5 +56,5 @@ global.testUtils = {
       };
       check();
     });
-  }
+  },
 };

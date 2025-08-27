@@ -403,3 +403,8 @@
   // Return service for module systems
   return NightingaleCoreUtilities;
 })(typeof window !== 'undefined' ? window : this);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' &&
+  window.NightingaleCoreUtilities) ||
+  (typeof global !== 'undefined' ? global.NightingaleCoreUtilities : null);

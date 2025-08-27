@@ -436,3 +436,15 @@ if (typeof window !== 'undefined') {
     window.NightingaleComponentLibrary.registerComponent('Checkbox', Checkbox);
   }
 }
+
+// ES6 Module Export
+export default FormField;
+export {
+  FormField,
+  TextInput,
+  Select,
+  DateInput,
+  Textarea,
+  Checkbox,
+  createValidator,
+};

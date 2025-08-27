@@ -539,3 +539,6 @@ if (typeof window !== 'undefined') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = FinancialItemModal;
 }
+
+// ES6 Module Export
+export default FinancialItemModal;

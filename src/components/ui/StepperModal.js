@@ -199,3 +199,6 @@ function StepperModal({
 if (typeof window !== 'undefined') {
   window.StepperModal = StepperModal;
 }
+
+// ES6 Module Export
+export default StepperModal;

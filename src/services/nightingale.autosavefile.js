@@ -15,7 +15,7 @@
  * @author Nightingale CMS Team
  */
 
-(function (global) {
+(function () {
   'use strict';
 
   /**
@@ -28,17 +28,16 @@
       errorCallback = console.error,
       sanitizeFn = (str) => str,
       tabId = null,
-      
+
       // Autosave configuration
       enabled = true,
       saveInterval = 120000, // 2 minutes
-      debounceDelay = 5000,   // 5 seconds
+      debounceDelay = 5000, // 5 seconds
       maxRetries = 3,
-      
+
       // Service callbacks
       statusCallback = null,
     } = {}) {
-      
       // File service properties
       this.directoryHandle = null;
       this.fileName = fileName;
@@ -48,7 +47,7 @@
       this.dbName = 'NightingaleFileAccess';
       this.storeName = 'directoryHandles';
       this.dbKey = 'nightingaleDirectory';
-      
+
       // Autosave properties
       this.config = {
         enabled,
@@ -56,7 +55,7 @@
         debounceDelay,
         maxRetries,
       };
-      
+
       this.state = {
         isRunning: false,
         permissionStatus: 'unknown',
@@ -65,7 +64,7 @@
         consecutiveFailures: 0,
         pendingSave: false,
       };
-      
+
       this.statusCallback = statusCallback;
       this.dataProvider = null;
       this.timers = {
@@ -73,7 +72,7 @@
         debounceTimeout: null,
         permissionCheck: null,
       };
-      
+
       // Auto-initialize
       this.initialize();
     }
@@ -84,18 +83,17 @@
     async initialize() {
       try {
         console.log('🎯 Initializing AutosaveFileService');
-        
+
         // Try to restore previous directory access
         await this.restoreLastDirectoryAccess();
-        
+
         // Start autosave if enabled
         if (this.config.enabled) {
           this.startAutosave();
         }
-        
+
         console.log('✅ AutosaveFileService initialized successfully');
         this.updateStatus('initialized', 'Service ready');
-        
       } catch (error) {
         console.error('❌ Failed to initialize AutosaveFileService:', error);
         this.updateStatus('error', 'Initialization failed: ' + error.message);
@@ -112,25 +110,28 @@
 
     async connect() {
       if (!this.isSupported()) {
-        this.errorCallback('File System Access API is not supported in this browser.', 'error');
+        this.errorCallback(
+          'File System Access API is not supported in this browser.',
+          'error'
+        );
         return false;
       }
-      
+
       try {
         this.directoryHandle = await window.showDirectoryPicker();
         const permissionGranted = await this.requestPermission();
-        
+
         if (permissionGranted) {
           await this.storeDirectoryHandle();
           this.state.permissionStatus = 'granted';
           this.updateStatus('connected', 'Connected to data folder');
-          
+
           // Start autosave if not already running
           if (this.config.enabled && !this.state.isRunning) {
             this.startAutosave();
           }
         }
-        
+
         return permissionGranted;
       } catch (err) {
         if (err.name !== 'AbortError') {
@@ -148,12 +149,14 @@
 
     async requestPermission() {
       if (!this.directoryHandle) return false;
-      
-      const permission = await this.directoryHandle.requestPermission({ mode: 'readwrite' });
+
+      const permission = await this.directoryHandle.requestPermission({
+        mode: 'readwrite',
+      });
       if (permission === 'granted') {
         return true;
       }
-      
+
       this.errorCallback('Permission denied for the directory.', 'error');
       return false;
     }
@@ -161,13 +164,17 @@
     async writeFile(data) {
       // Check if we have a directory handle and permissions
       if (!this.directoryHandle) {
-        console.log('ℹ️ AutosaveFileService: No directory selected, save skipped gracefully');
+        console.log(
+          'ℹ️ AutosaveFileService: No directory selected, save skipped gracefully'
+        );
         return false;
       }
-      
+
       const permission = await this.checkPermission();
       if (permission !== 'granted') {
-        console.log(`ℹ️ AutosaveFileService: Permission ${permission}, save skipped gracefully`);
+        console.log(
+          `ℹ️ AutosaveFileService: Permission ${permission}, save skipped gracefully`
+        );
         return false;
       }
 
@@ -179,7 +186,7 @@
         const writable = await fileHandleWrite.createWritable();
         await writable.write(JSON.stringify(data, null, 2));
         await writable.close();
-        
+
         // Store last save timestamp
         localStorage.setItem(
           'nightingale-last-save',
@@ -188,37 +195,51 @@
             tabId: this.tabId,
           })
         );
-        
+
         return true;
       } catch (err) {
-        this.errorCallback(`Error writing file "${this.fileName}": ${err.message}`, 'error');
+        this.errorCallback(
+          `Error writing file "${this.fileName}": ${err.message}`,
+          'error'
+        );
         return false;
       }
     }
 
     async readFile() {
       if (!this.directoryHandle) {
-        console.log('ℹ️ AutosaveFileService: Cannot read file - no directory selected');
+        console.log(
+          'ℹ️ AutosaveFileService: Cannot read file - no directory selected'
+        );
         return null;
       }
-      
+
       const permission = await this.checkPermission();
       if (permission !== 'granted') {
-        console.log('ℹ️ AutosaveFileService: Cannot read file - permission not granted');
+        console.log(
+          'ℹ️ AutosaveFileService: Cannot read file - permission not granted'
+        );
         return null;
       }
-      
+
       try {
-        const fileHandle = await this.directoryHandle.getFileHandle(this.fileName);
+        const fileHandle = await this.directoryHandle.getFileHandle(
+          this.fileName
+        );
         const file = await fileHandle.getFile();
         const contents = await file.text();
         return JSON.parse(contents);
       } catch (err) {
         if (err.name === 'NotFoundError') {
-          console.log(`File "${this.fileName}" not found. A new one will be created on the first save.`);
+          console.log(
+            `File "${this.fileName}" not found. A new one will be created on the first save.`
+          );
           return null;
         } else {
-          this.errorCallback(`Error reading file "${this.fileName}": ${err.message}`, 'error');
+          this.errorCallback(
+            `Error reading file "${this.fileName}": ${err.message}`,
+            'error'
+          );
           throw err;
         }
       }
@@ -229,27 +250,33 @@
         this.state.permissionStatus = 'unsupported';
         return { handle: null, permission: 'unsupported' };
       }
-      
+
       try {
         const handle = await this.getStoredDirectoryHandle();
         if (handle) {
           this.directoryHandle = handle;
           const permission = await this.checkPermission();
           this.state.permissionStatus = permission;
-          
+
           if (permission === 'granted') {
-            this.updateStatus('connected', 'Restored connection to data folder');
+            this.updateStatus(
+              'connected',
+              'Restored connection to data folder'
+            );
           } else {
-            this.updateStatus('disconnected', 'Please reconnect to your data folder');
+            this.updateStatus(
+              'disconnected',
+              'Please reconnect to your data folder'
+            );
           }
-          
+
           return { handle, permission };
         }
       } catch (error) {
         console.error('Error restoring directory access:', error);
         await this.clearStoredDirectoryHandle();
       }
-      
+
       this.state.permissionStatus = 'prompt';
       this.updateStatus('disconnected', 'No data folder connected');
       return { handle: null, permission: 'prompt' };
@@ -266,8 +293,12 @@
             resolve(null);
             return;
           }
-          const getRequest = db.transaction(this.storeName).objectStore(this.storeName).get(this.dbKey);
-          getRequest.onsuccess = () => resolve(getRequest.result?.handle || null);
+          const getRequest = db
+            .transaction(this.storeName)
+            .objectStore(this.storeName)
+            .get(this.dbKey);
+          getRequest.onsuccess = () =>
+            resolve(getRequest.result?.handle || null);
           getRequest.onerror = () => resolve(null);
         };
         request.onupgradeneeded = (e) => {
@@ -283,7 +314,10 @@
         request.onerror = (e) => reject(e);
         request.onsuccess = () => {
           const db = request.result;
-          const putRequest = db.transaction(this.storeName, 'readwrite').objectStore(this.storeName).put({ handle: this.directoryHandle }, this.dbKey);
+          const putRequest = db
+            .transaction(this.storeName, 'readwrite')
+            .objectStore(this.storeName)
+            .put({ handle: this.directoryHandle }, this.dbKey);
           putRequest.onsuccess = () => resolve();
           putRequest.onerror = (e) => reject(e);
         };
@@ -299,7 +333,10 @@
             resolve();
             return;
           }
-          const deleteRequest = db.transaction(this.storeName, 'readwrite').objectStore(this.storeName).delete(this.dbKey);
+          const deleteRequest = db
+            .transaction(this.storeName, 'readwrite')
+            .objectStore(this.storeName)
+            .delete(this.dbKey);
           deleteRequest.onsuccess = () => resolve();
           deleteRequest.onerror = () => resolve();
         };
@@ -331,7 +368,9 @@
         }
         return data;
       };
-      console.log('📊 Data provider function updated with current data reference');
+      console.log(
+        '📊 Data provider function updated with current data reference'
+      );
     }
 
     /**
@@ -339,11 +378,13 @@
      * This method handles the common React pattern of passing a state getter
      */
     initializeWithReactState(getFullData, statusCallback = null) {
-      console.log('🔗 Initializing AutosaveFileService with React state integration');
-      
+      console.log(
+        '🔗 Initializing AutosaveFileService with React state integration'
+      );
+
       // Store the data getter for future updates
       this.getFullData = getFullData;
-      
+
       // Set up data provider that always gets current state
       this.dataProvider = () => {
         const data = this.getFullData();
@@ -352,12 +393,12 @@
         }
         return data;
       };
-      
+
       // Set up status callback if provided
       if (statusCallback) {
         this.statusCallback = statusCallback;
       }
-      
+
       console.log('✅ React state integration configured');
       return this;
     }
@@ -383,17 +424,17 @@
 
       console.log('🎯 Starting autosave service');
       this.state.isRunning = true;
-      
+
       // Start periodic save interval
       this.timers.saveInterval = setInterval(() => {
         this.performAutosave('interval');
       }, this.config.saveInterval);
-      
+
       // Start permission checking
       this.timers.permissionCheck = setInterval(() => {
         this.checkPermissions();
       }, 30000); // Check every 30 seconds
-      
+
       this.updateStatus('running', 'Autosave active');
     }
 
@@ -403,39 +444,39 @@
     stopAutosave() {
       console.log('🛑 Stopping autosave service');
       this.state.isRunning = false;
-      
+
       // Clear all timers
       if (this.timers.saveInterval) {
         clearInterval(this.timers.saveInterval);
         this.timers.saveInterval = null;
       }
-      
+
       if (this.timers.debounceTimeout) {
         clearTimeout(this.timers.debounceTimeout);
         this.timers.debounceTimeout = null;
       }
-      
+
       if (this.timers.permissionCheck) {
         clearInterval(this.timers.permissionCheck);
         this.timers.permissionCheck = null;
       }
-      
+
       this.updateStatus('stopped', 'Autosave stopped');
     }
 
     /**
      * Notify that data has changed (for debounced saves)
      */
-    notifyDataChange(source = 'user-edit') {
+    notifyDataChange() {
       if (!this.state.isRunning) return;
 
       this.state.lastDataChange = Date.now();
-      
+
       // Clear existing debounce timeout
       if (this.timers.debounceTimeout) {
         clearTimeout(this.timers.debounceTimeout);
       }
-      
+
       // Set new debounced save
       this.timers.debounceTimeout = setTimeout(() => {
         this.performAutosave('change');
@@ -445,7 +486,7 @@
     /**
      * Perform an autosave operation
      */
-    async performAutosave(trigger = 'manual') {
+    async performAutosave() {
       if (!this.state.isRunning || this.state.pendingSave) {
         return;
       }
@@ -466,11 +507,15 @@
       try {
         this.state.pendingSave = true;
         this.updateStatus('saving', 'Saving...');
-        
+
         // Get current data with debugging
         const data = this.dataProvider();
-        console.log('🔍 Autosave debug - Data provider returned:', !!data, data ? `${Object.keys(data).length} keys` : 'null/undefined');
-        
+        console.log(
+          '🔍 Autosave debug - Data provider returned:',
+          !!data,
+          data ? `${Object.keys(data).length} keys` : 'null/undefined'
+        );
+
         if (!data) {
           this.updateStatus('error', 'No data available to save');
           return;
@@ -478,15 +523,17 @@
 
         // Perform the save
         const success = await this.writeFile(data);
-        
+
         if (success) {
           this.state.lastSaveTime = Date.now();
           this.state.consecutiveFailures = 0;
-          this.updateStatus('saved', `Last saved: ${new Date().toLocaleTimeString()}`);
+          this.updateStatus(
+            'saved',
+            `Last saved: ${new Date().toLocaleTimeString()}`
+          );
         } else {
           this.handleSaveFailure('Write operation failed');
         }
-        
       } catch (error) {
         this.handleSaveFailure(error.message);
       } finally {
@@ -499,7 +546,7 @@
      */
     handleSaveFailure(errorMessage) {
       this.state.consecutiveFailures++;
-      
+
       if (this.state.consecutiveFailures >= this.config.maxRetries) {
         this.updateStatus('error', `Save failed: ${errorMessage}`);
         // Stop trying for a while
@@ -507,8 +554,11 @@
           this.state.consecutiveFailures = 0;
         }, 60000); // Reset after 1 minute
       } else {
-        this.updateStatus('retrying', `Retrying save (${this.state.consecutiveFailures}/${this.config.maxRetries})`);
-        
+        this.updateStatus(
+          'retrying',
+          `Retrying save (${this.state.consecutiveFailures}/${this.config.maxRetries})`
+        );
+
         // Retry after a delay
         setTimeout(() => {
           this.performAutosave('retry');
@@ -524,11 +574,17 @@
         const permission = await this.checkPermission();
         const previousStatus = this.state.permissionStatus;
         this.state.permissionStatus = permission;
-        
+
         if (previousStatus !== permission) {
-          console.log(`🔐 Permission changed from ${previousStatus} to ${permission}`);
-          
-          if (permission === 'granted' && this.config.enabled && !this.state.isRunning) {
+          console.log(
+            `🔐 Permission changed from ${previousStatus} to ${permission}`
+          );
+
+          if (
+            permission === 'granted' &&
+            this.config.enabled &&
+            !this.state.isRunning
+          ) {
             this.startAutosave();
           } else if (permission !== 'granted' && this.state.isRunning) {
             this.updateStatus('waiting', 'Waiting for folder permissions');
@@ -552,7 +608,7 @@
         lastSaveTime: this.state.lastSaveTime,
         consecutiveFailures: this.state.consecutiveFailures,
       };
-      
+
       if (this.statusCallback) {
         this.statusCallback(statusObj);
       }
@@ -587,7 +643,7 @@
      */
     updateConfig(newConfig) {
       this.config = { ...this.config, ...newConfig };
-      
+
       // Restart autosave if interval changed
       if (this.state.isRunning && newConfig.saveInterval) {
         this.stopAutosave();
@@ -614,13 +670,13 @@
       errorCallback = console.error,
       sanitizeFn = (str) => str,
       tabId = null,
-      
+
       // Autosave configuration
       enabled = true,
       saveInterval = 120000, // 2 minutes
-      debounceDelay = 5000,   // 5 seconds
+      debounceDelay = 5000, // 5 seconds
       maxRetries = 3,
-      
+
       // React integration
       getFullData,
       statusCallback = null,
@@ -636,12 +692,12 @@
         maxRetries,
         statusCallback,
       });
-      
+
       // Set up React state integration
       if (getFullData) {
         service.initializeWithReactState(getFullData, statusCallback);
       }
-      
+
       return service;
     }
   }
@@ -656,5 +712,8 @@
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = AutosaveFileService;
   }
-
 })(typeof window !== 'undefined' ? window : global);
+
+// ES6 Module Export
+export default (typeof window !== 'undefined' && window.AutosaveFileService) ||
+  null;
