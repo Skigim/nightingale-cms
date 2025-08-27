@@ -14,14 +14,10 @@
  * @returns {React.Element} Dashboard tab component
  */
 function DashboardTab({ fullData }) {
-  const { useMemo } = window.React;
-
-  // Early return pattern for React safety
-  if (!window.React) {
-    return null;
-  }
-
-  const e = window.React.createElement;
+  // Hooks and React-related variables must be declared at the top level.
+  // All hooks must be called at the top level of the component.
+  const { useMemo } = window.React || {};
+  const e = window.React ? window.React.createElement : () => null;
 
   const stats = useMemo(() => {
     if (!fullData)
@@ -46,6 +42,11 @@ function DashboardTab({ fullData }) {
       pendingVr,
     };
   }, [fullData]);
+
+  if (!window.React) {
+    // If React is not available, the component cannot render.
+    return null;
+  }
 
   return e(
     'div',
@@ -204,7 +205,7 @@ if (typeof window !== 'undefined') {
 
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
-      'DashboardTab', 
+      'DashboardTab',
       DashboardTab,
       'dashboard',
       []
