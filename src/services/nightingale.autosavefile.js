@@ -264,7 +264,17 @@
         );
         const file = await fileHandle.getFile();
         const contents = await file.text();
-        return JSON.parse(contents);
+        const rawData = JSON.parse(contents);
+        
+        // Apply data migrations if available
+        if (window.NightingaleDataManagement?.normalizeDataMigrations) {
+          console.log('🔄 Applying data migrations...');
+          const migratedData = await window.NightingaleDataManagement.normalizeDataMigrations(rawData);
+          return migratedData;
+        } else {
+          console.warn('⚠️ Data migration service not available, returning raw data');
+          return rawData;
+        }
       } catch (err) {
         if (err.name === 'NotFoundError') {
           console.log(

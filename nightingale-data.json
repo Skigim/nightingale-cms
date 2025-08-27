@@ -1,0 +1,290 @@
+{
+  "cases": [
+    {
+      "id": "case-1756152724620",
+      "mcn": "58368",
+      "personId": "2",
+      "spouseId": "4",
+      "status": "Pending",
+      "applicationDate": "2023-03-01T06:00:00.000Z",
+      "description": "",
+      "caseType": "SIMP",
+      "priority": false,
+      "livingArrangement": "Other",
+      "withWaiver": false,
+      "admissionDate": "",
+      "organizationId": "",
+      "authorizedReps": [],
+      "retroRequested": "No",
+      "createdDate": "2025-08-25T20:12:04.620Z",
+      "updatedDate": "2025-08-27T19:57:52.530Z",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": [
+          {
+            "id": 1756152782453,
+            "description": "Mortgage",
+            "location": "Bank",
+            "accountNumber": "",
+            "amount": 500,
+            "frequency": "monthly",
+            "owner": "applicant",
+            "verificationStatus": "Verified",
+            "verificationSource": "Training",
+            "notes": "",
+            "dateAdded": "2025-08-25T20:12:39.053Z",
+            "type": "Mortgage",
+            "value": 500,
+            "source": "Training"
+          }
+        ]
+      },
+      "organizationAddress": "Not specified",
+      "lastOpened": "2025-08-27T14:31:11.520Z"
+    },
+    {
+      "id": null,
+      "masterCaseNumber": "4267",
+      "personId": 3,
+      "appDetails": {
+        "appDate": "",
+        "caseType": "LTC",
+        "applicationType": "Application",
+        "avsConsentDate": "",
+        "admissionDate": "",
+        "medicareAExpDate": ""
+      },
+      "createdAt": "2025-08-27T14:31:22.272Z",
+      "lastOpened": "2025-08-27T14:31:22.272Z",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      },
+      "notes": [],
+      "authorizedRepIds": [],
+      "retroStatus": false,
+      "mcn": "4267",
+      "caseType": "LTC",
+      "livingArrangement": "Not specified",
+      "organizationAddress": "Not specified"
+    },
+    {
+      "id": "case-1756318202495",
+      "mcn": "4267",
+      "personId": "4",
+      "spouseId": "5",
+      "status": "Pending",
+      "applicationDate": "2025-08-27",
+      "description": "",
+      "caseType": "SIMP",
+      "priority": false,
+      "livingArrangement": "Nursing Home",
+      "withWaiver": false,
+      "admissionDate": "",
+      "organizationId": "1",
+      "authorizedReps": [],
+      "retroRequested": "No",
+      "createdDate": "2025-08-27T18:10:02.495Z",
+      "updatedDate": "2025-08-27T19:50:07.448Z",
+      "organizationAddress": "Not specified",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
+    },
+    {
+      "id": "case-1756324787809",
+      "mcn": "46576",
+      "personId": "3",
+      "spouseId": "",
+      "status": "Pending",
+      "applicationDate": "2025-08-01T05:00:00.000Z",
+      "description": "",
+      "caseType": "LTC",
+      "priority": false,
+      "livingArrangement": "Apartment/House",
+      "withWaiver": false,
+      "admissionDate": "",
+      "organizationId": "",
+      "authorizedReps": [],
+      "retroRequested": "No",
+      "createdDate": "2025-08-27T19:59:47.809Z",
+      "updatedDate": "2025-08-27T19:59:47.809Z",
+      "organizationAddress": "Not specified",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
+    }
+  ],
+  "people": [
+    {
+      "name": "Blondie Bumstead",
+      "dateOfBirth": "1957-06-25T05:00:00.000Z",
+      "ssn": "",
+      "phone": "(308)558-7447",
+      "email": "",
+      "address": {
+        "street": "3998 Terrace Park",
+        "city": "Lincoln",
+        "state": "NE",
+        "zip": "68501"
+      },
+      "mailingAddress": {
+        "street": "3998 Terrace Park",
+        "city": "Lincoln",
+        "state": "NE",
+        "zip": "68501",
+        "sameAsPhysical": true
+      },
+      "organizationId": null,
+      "livingArrangement": "Apartment/House",
+      "authorizedRepIds": [],
+      "familyMembers": [],
+      "id": "2",
+      "createdAt": "2025-08-25T20:11:09.838Z",
+      "status": "active",
+      "dateAdded": "2025-08-26T15:45:33.643Z"
+    },
+    {
+      "name": "Aileen Harris",
+      "dateOfBirth": "1945-04-19T05:00:00.000Z",
+      "ssn": "",
+      "phone": "",
+      "email": "",
+      "address": {
+        "street": "1322 Elmwood Cir",
+        "city": "Holbrook",
+        "state": "NE",
+        "zip": "68948"
+      },
+      "mailingAddress": {
+        "street": "1322 Elmwood Cir",
+        "city": "Holbrook",
+        "state": "NE",
+        "zip": "68948",
+        "sameAsPhysical": true
+      },
+      "organizationId": null,
+      "livingArrangement": "Apartment/House",
+      "authorizedRepIds": [],
+      "familyMembers": [],
+      "id": "3",
+      "createdAt": "2025-08-27T14:27:18.853Z",
+      "status": "active",
+      "dateAdded": "2025-08-27T14:27:56.174Z"
+    },
+    {
+      "name": "Alan Blair",
+      "dateOfBirth": "1948-08-17T05:00:00.000Z",
+      "ssn": "",
+      "phone": "",
+      "email": "",
+      "address": {
+        "street": "5262 Zesty Rd",
+        "city": "Gothenburg",
+        "state": "NE",
+        "zip": "69138"
+      },
+      "mailingAddress": {
+        "street": "5262 Zesty Rd",
+        "city": "Gothenburg",
+        "state": "NE",
+        "zip": "69138",
+        "sameAsPhysical": true
+      },
+      "organizationId": "1",
+      "livingArrangement": "Nursing Home",
+      "authorizedRepIds": [],
+      "familyMembers": [],
+      "id": "4",
+      "createdAt": "2025-08-27T18:51:47.555Z",
+      "status": "active",
+      "dateAdded": "2025-08-27T19:48:34.074Z"
+    },
+    {
+      "name": "Kay Blair",
+      "dateOfBirth": "1948-09-21T05:00:00.000Z",
+      "ssn": "",
+      "phone": "",
+      "email": "",
+      "address": {
+        "street": "5262 Zesty Rd",
+        "city": "Gothenburg",
+        "state": "NE",
+        "zip": "69138"
+      },
+      "mailingAddress": {
+        "street": "5262 Zesty Rd",
+        "city": "Gothenburg",
+        "state": "NE",
+        "zip": "69138",
+        "sameAsPhysical": true
+      },
+      "organizationId": null,
+      "livingArrangement": "Apartment/House",
+      "authorizedRepIds": [],
+      "familyMembers": [],
+      "id": "4",
+      "createdAt": "2025-08-27T18:54:56.687Z",
+      "status": "active",
+      "dateAdded": "2025-08-27T19:48:34.074Z"
+    }
+  ],
+  "organizations": [
+    {
+      "name": "Holbrook Care Home",
+      "type": "Nursing Home",
+      "email": "",
+      "phone": "",
+      "address": {
+        "street": "",
+        "city": "Holbrook",
+        "state": "NE",
+        "zip": "68948"
+      },
+      "notes": "",
+      "personnel": [],
+      "status": "active",
+      "id": "1",
+      "createdAt": "2025-08-27T14:27:47.487Z",
+      "dateAdded": "2025-08-27T14:27:56.174Z"
+    }
+  ],
+  "nextPersonId": 6,
+  "nextCaseId": null,
+  "nextOrganizationId": 2,
+  "nextFinancialItemId": 1756152782454,
+  "nextNoteId": 1,
+  "showAllCases": false,
+  "showAllContacts": false,
+  "showAllPeople": true,
+  "caseSortReversed": false,
+  "priorityFilterActive": false,
+  "contacts": [],
+  "vrTemplates": [],
+  "nextVrTemplateId": 1,
+  "vrCategories": [],
+  "vrRequests": [],
+  "nextVrRequestId": 1,
+  "vrDraftItems": [],
+  "activeCase": null,
+  "isDataLoaded": true,
+  "showAllOrganizations": false,
+  "accordionState": {
+    "simp_applicant": true,
+    "simp_joint": false,
+    "simp_spouse": true
+  },
+  "viewState": {
+    "currentTab": "case-management",
+    "currentTitle": "Cases",
+    "currentCaseId": null,
+    "lastRefreshTimestamp": null,
+    "expandedFinancialCards": {}
+  }
+}

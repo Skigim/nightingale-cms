@@ -104,6 +104,12 @@
       normalizedData.cases = normalizedData.cases.map((caseItem) => {
         const normalizedCase = { ...caseItem };
 
+        // Ensure every case has a proper ID with secure generation
+        if (!normalizedCase.id || normalizedCase.id === null) {
+          normalizedCase.id = generateSecureId('case');
+          console.log(`🆔 Generated new case ID: ${normalizedCase.id} for MCN: ${normalizedCase.mcn || normalizedCase.masterCaseNumber}`);
+        }
+
         // Ensure MCN field consistency - map both directions
         // Legacy field migration: masterCaseNumber -> mcn
         if (caseItem.masterCaseNumber && !caseItem.mcn) {
@@ -120,6 +126,41 @@
           normalizedCase.caseType = caseItem.appDetails.caseType;
         }
 
+        // Convert legacy createdAt to createdDate
+        if (caseItem.createdAt && !caseItem.createdDate) {
+          normalizedCase.createdDate = caseItem.createdAt;
+        }
+
+        // Ensure personId is a string (legacy uses numbers)
+        if (normalizedCase.personId && typeof normalizedCase.personId === 'number') {
+          normalizedCase.personId = normalizedCase.personId.toString();
+        }
+
+        // Add required fields with defaults for legacy cases
+        if (!normalizedCase.status) {
+          normalizedCase.status = 'Pending';
+        }
+
+        if (!normalizedCase.description) {
+          normalizedCase.description = '';
+        }
+
+        if (!normalizedCase.priority) {
+          normalizedCase.priority = false;
+        }
+
+        if (!normalizedCase.withWaiver) {
+          normalizedCase.withWaiver = false;
+        }
+
+        if (!normalizedCase.authorizedReps) {
+          normalizedCase.authorizedReps = [];
+        }
+
+        if (!normalizedCase.retroRequested) {
+          normalizedCase.retroRequested = 'No';
+        }
+
         // Add default values for new fields if they don't exist
         if (!normalizedCase.livingArrangement) {
           normalizedCase.livingArrangement = 'Not specified';
@@ -127,6 +168,15 @@
 
         if (!normalizedCase.organizationAddress) {
           normalizedCase.organizationAddress = 'Not specified';
+        }
+
+        // Ensure financials structure exists
+        if (!normalizedCase.financials) {
+          normalizedCase.financials = {
+            resources: [],
+            income: [],
+            expenses: []
+          };
         }
 
         // FINANCIAL ITEMS MIGRATION: type → description, value → amount
@@ -209,6 +259,18 @@
         }
 
         return normalizedPerson;
+      });
+
+      // Resolve duplicate person IDs
+      const seenPersonIds = new Set();
+      normalizedData.people = normalizedData.people.map((person) => {
+        if (seenPersonIds.has(person.id)) {
+          const oldId = person.id;
+          person.id = generateSecureId('person');
+          console.log(`🔄 Resolved duplicate person ID: ${oldId} → ${person.id} for ${person.name}`);
+        }
+        seenPersonIds.add(person.id);
+        return person;
       });
     }
 
