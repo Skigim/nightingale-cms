@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CaseDetailsView Component matches snapshot in edit mode 1`] = `null`;
+
+exports[`CaseDetailsView Component matches snapshot in view mode 1`] = `null`;

@@ -1,0 +1,1872 @@
+﻿<!doctype html>
+<html lang="en" class="h-full bg-gray-900 text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nightingale CMS (React)</title>
+    <!-- React DevTools Detection -->
+    <meta name="react-devtools" content="enabled" />
+    <meta name="application-name" content="Nightingale CMS" />
+    <meta name="framework" content="React" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: file:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com chrome-extension: moz-extension: edge-extension: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com chrome-extension: moz-extension: edge-extension:; font-src https://fonts.gstatic.com data:; connect-src 'self' https: chrome-extension: moz-extension: edge-extension: data: blob: file:; img-src 'self' data: blob: chrome-extension: moz-extension: edge-extension:; frame-src 'self' chrome-extension: moz-extension: edge-extension:;"
+    />
+
+    <!-- DevTools CORS Override - Must run before any other scripts -->
+    <script>
+      (function () {
+        'use strict';
+
+        if (window.location.protocol === 'file:') {
+          // Enhanced fetch override with better pattern matching
+          const originalFetch = window.fetch;
+          window.fetch = function (url, options) {
+            if (typeof url === 'string') {
+              if (
+                url.includes('%3Canonymous%3E') ||
+                url.includes('<anonymous>') ||
+                url.includes('anonymous') ||
+                url.includes('chrome-extension://') ||
+                url.includes('moz-extension://') ||
+                url.includes('edge-extension://') ||
+                url.includes('fileFetcher.js') ||
+                url.includes('transformScriptTags') ||
+                url.includes('hook.js') ||
+                url.startsWith('file:///C:/Projects/Nightingale/App/%3C') ||
+                url.match(/file:\/\/.*\/(undefined|null|%3C|%3E)/)
+              ) {
+                // Return empty response instead of logging to reduce console noise
+                return Promise.resolve(
+                  new Response('// Blocked', {
+                    status: 200,
+                    statusText: 'OK',
+                    headers: { 'Content-Type': 'application/javascript' },
+                  })
+                );
+              }
+            }
+
+            return originalFetch
+              ? originalFetch.apply(this, arguments)
+              : Promise.reject(new Error('Fetch not available'));
+          };
+
+          // Also override XMLHttpRequest as a fallback
+          const originalXHR = window.XMLHttpRequest;
+          window.XMLHttpRequest = function () {
+            const xhr = new originalXHR();
+            const originalOpen = xhr.open;
+
+            xhr.open = function (method, url, async, user, password) {
+              if (
+                typeof url === 'string' &&
+                (url.includes('%3Canonymous%3E') ||
+                  url.includes('<anonymous>') ||
+                  url.includes('anonymous') ||
+                  url.includes('fileFetcher.js'))
+              ) {
+                // Create a mock successful request
+                Object.defineProperty(xhr, 'status', {
+                  writable: true,
+                  value: 200,
+                });
+                Object.defineProperty(xhr, 'responseText', {
+                  writable: true,
+                  value: '// DevTools source placeholder',
+                });
+                Object.defineProperty(xhr, 'readyState', {
+                  writable: true,
+                  value: 4,
+                });
+
+                setTimeout(() => {
+                  if (xhr.onload) xhr.onload();
+                  if (xhr.onreadystatechange) xhr.onreadystatechange();
+                }, 0);
+
+                return;
+              }
+
+              return originalOpen.apply(this, arguments);
+            };
+
+            return xhr;
+          };
+
+          // Enhanced error suppression for DevTools CORS errors
+          const originalConsoleError = console.error;
+          console.error = function (...args) {
+            const message = args.join(' ');
+            if (
+              message.includes('Access to fetch') &&
+              (message.includes('%3Canonymous%3E') || message.includes('fileFetcher.js')) &&
+              message.includes('CORS policy')
+            ) {
+              console.warn('🔇 Suppressed DevTools CORS error (handled by override)');
+              return;
+            }
+            return originalConsoleError.apply(this, args);
+          };
+
+          // Global error handler for unhandled CORS errors
+          window.addEventListener('error', function (e) {
+            if (
+              e.message &&
+              e.message.includes('Access to fetch') &&
+              (e.message.includes('%3Canonymous%3E') || e.message.includes('fileFetcher.js'))
+            ) {
+              console.warn('🔇 Suppressed DevTools CORS error via global handler');
+              e.preventDefault();
+              return false;
+            }
+          });
+
+          // Catch unhandled promise rejections from fetch
+          window.addEventListener('unhandledrejection', function (e) {
+            if (
+              e.reason &&
+              e.reason.message &&
+              e.reason.message.includes('net::ERR_FAILED') &&
+              e.reason.stack &&
+              e.reason.stack.includes('fileFetcher.js')
+            ) {
+              console.warn('🔇 Suppressed DevTools fetch rejection');
+              e.preventDefault();
+              return false;
+            }
+          });
+        }
+      })();
+    </script>
+
+    <!-- Tailwind CSS CDN - TODO: Replace with build-time compilation for production -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- React and Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Nightingale Core Utilities -->
+    <script src="./src/services/core.js"></script>
+    <script src="./src/services/ui.js"></script>
+    <script src="./src/services/cms.js"></script>
+
+    <!-- Unregister any existing service workers -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+    </script>
+
+    <!-- Nightingale Service Initializer (loads services dynamically) -->
+    <script src="./src/services/index.js"></script>
+
+    <!-- Combined Autosave & File Service -->
+    <script src="./src/services/nightingale.autosavefile.js"></script>
+
+    <!-- Nightingale Component Library - Layered Architecture -->
+    <script src="./src/components/index.js"></script>
+
+    <!-- Components will be loaded automatically by the layered architecture:
+         ?? UI Layer: Button, Badge, DataTable, FormComponents, SearchBar, Modal, StepperModal
+         ?? Business Layer: CaseCreationModal (with integrated steps), PersonCreationModal, OrganizationModal
+    -->
+
+    <!-- Day.js for date management -->
+    <script src="./src/assets/dayjs.min.js"></script>
+    <script src="./src/assets/dayjs-relativeTime.min.js"></script>
+    <script src="./src/assets/dayjs-customParseFormat.min.js"></script>
+    <script src="./src/services/nightingale.dayjs.js"></script>
+
+    <!-- Optional: AVS Import Modal Integration Test -->
+    <!-- <script src="./src/components/business/AvsImportModal.test.js"></script> -->
+
+    <!-- Lodash for reliable utility functions -->
+    <script src="https://unpkg.com/lodash@4.17.21/lodash.min.js"></script>
+
+    <script>
+      // Initialize Day.js plugins
+      if (typeof dayjs !== 'undefined') {
+        dayjs.extend(window.dayjs_plugin_relativeTime);
+        dayjs.extend(window.dayjs_plugin_customParseFormat);
+      }
+    </script>
+
+    <!-- Fuse.js for search -->
+    <script src="./src/assets/fuse.min.js"></script>
+
+    <style>
+      html {
+        font-family: 'Inter', sans-serif;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1f2937;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+
+      /* Sidebar transitions */
+      .sidebar {
+        transition: width 0.3s ease-in-out;
+      }
+
+      /* List item hover effects */
+      .list-item {
+        transition:
+          transform 0.2s ease-in-out,
+          box-shadow 0.2s ease-in-out,
+          background-color 0.2s ease-in-out;
+        cursor: pointer;
+      }
+      .list-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        background-color: #374151;
+      }
+
+      /* Input focus styles */
+      input:focus,
+      select:focus,
+      textarea:focus {
+        --tw-ring-color: rgba(96, 165, 250, 0.5);
+      }
+
+      /* Toast container */
+      #toast-container {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .toast {
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        color: white;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        opacity: 0;
+        transform: translateX(100%);
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.success {
+        background-color: #16a34a;
+      }
+      .toast.warning {
+        background-color: #ea580c;
+      }
+      .toast.error {
+        background-color: #dc2626;
+      }
+
+      /* Error styles */
+      .input-error {
+        border-color: #ef4444 !important;
+        --tw-ring-color: rgba(239, 68, 68, 0.5);
+      }
+      .error-message {
+        color: #f87171;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+      }
+
+      /* Modal styles */
+      .modal-backdrop {
+        backdrop-filter: blur(2px);
+      }
+
+      /* Search dropdown z-index layering */
+      .search-dropdown-container {
+        position: relative;
+        z-index: 1100;
+      }
+
+      .search-dropdown-client {
+        z-index: 1110 !important;
+      }
+
+      .search-dropdown-spouse {
+        z-index: 1100 !important;
+      }
+
+      .search-dropdown-rep {
+        z-index: 1090 !important;
+      }
+
+      /* Ensure dropdowns appear above other form elements */
+      .case-creation-step {
+        position: relative;
+      }
+
+      .case-creation-step:nth-child(1) {
+        z-index: 1020;
+      }
+
+      .case-creation-step:nth-child(2) {
+        z-index: 1010;
+      }
+
+      .case-creation-step:nth-child(3) {
+        z-index: 1000;
+      }
+
+      /* Full viewport reset */
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      #root {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body class="h-full w-full m-0 p-0">
+    <div id="root" class="h-full w-full flex m-0 p-0"></div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- React DevTools Integration & Enhanced Debugging -->
+    <script>
+      // DevTools Integration Helper
+      window.NightingaleDevTools = {
+        // Data inspection utilities
+        inspectData: (data) => {
+          console.group('🔍 Nightingale Data Inspector');
+          console.log('Full Data:', data);
+          console.log('Cases:', data?.cases?.length || 0);
+          console.log('People:', data?.people?.length || 0);
+          console.log('Organizations:', data?.organizations?.length || 0);
+          console.log('VR Requests:', data?.vrRequests?.length || 0);
+          console.groupEnd();
+        },
+
+        // Component state debugger
+        debugComponent: (componentName, state) => {
+          console.group(`🎯 Component Debug: ${componentName}`);
+          console.log('State:', state);
+          console.groupEnd();
+        },
+
+        // Data flow logger
+        logDataFlow: (action, details) => {
+          console.log(`📊 Data Flow: ${action}`);
+          console.log('Timestamp:', new Date().toISOString());
+          console.log('Data:', details);
+        },
+
+        // Connection checker
+        checkDevToolsConnection: () => {
+          console.group('🔌 React DevTools Connection Status');
+          console.log('DevTools Hook Available:', !!window.__REACT_DEVTOOLS_GLOBAL_HOOK__);
+          console.log('React Available:', !!window.React);
+          console.log('ReactDOM Available:', !!window.ReactDOM);
+          console.log('React Version:', window.React?.version || 'Unknown');
+          console.log('File Protocol:', window.location.protocol === 'file:');
+          console.log('DevTools Renderers:', window.__REACT_DEVTOOLS_GLOBAL_HOOK__?.renderers?.size || 0);
+          console.log('DevTools Operations:', typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__?.onCommitFiberRoot);
+          console.groupEnd();
+        },
+
+        // Quick debugging shortcuts
+        debugCases: () => window.NightingaleDevTools.inspectData(window.nightingaleData?.cases),
+        debugActiveView: () => console.log('Active View:', window.nightingaleActiveView),
+      };
+    </script>
+
+    <script type="text/babel">
+      // Main app React hooks
+      const { useState, useEffect, useMemo, useCallback, useRef } = React;
+      const { createRoot } = ReactDOM;
+      const e = React.createElement;
+
+      // Component variables - will be assigned during initialization
+      let PrimaryButton, SecondaryButton, Modal, SearchBar;
+      // Note: DataTable is loaded separately from the component library
+      // Note: ButtonIcons is loaded from Button.js component
+
+      // --- SHARED COMPONENTS ---
+
+      function Stepper({
+        steps,
+        currentStep,
+        onStepClick,
+        allowBackward = true,
+        showProgress = true,
+        isClickable: customIsClickable,
+      }) {
+        const getStepStatus = (stepIndex) => {
+          if (stepIndex < currentStep) return 'completed';
+          if (stepIndex === currentStep) return 'active';
+          return 'pending';
+        };
+
+        const getStepColor = (status) => {
+          switch (status) {
+            case 'completed':
+              return 'bg-green-600 text-green-100 border-green-600';
+            case 'active':
+              return 'bg-blue-600 text-blue-100 border-blue-600';
+            case 'pending':
+              return 'bg-gray-600 text-gray-400 border-gray-600';
+            default:
+              return 'bg-gray-600 text-gray-400 border-gray-600';
+          }
+        };
+
+        const isClickable = (stepIndex) => {
+          if (customIsClickable) {
+            return onStepClick && customIsClickable(stepIndex);
+          }
+          return onStepClick && (allowBackward || stepIndex <= currentStep);
+        };
+
+        return e(
+          'div',
+          { className: 'w-full' },
+
+          // Progress bar (optional)
+          showProgress &&
+            e(
+              'div',
+              { className: 'mb-8' },
+              e(
+                'div',
+                { className: 'flex items-center justify-between mb-2' },
+                e('span', { className: 'text-sm text-gray-400' }, 'Progress'),
+                e(
+                  'span',
+                  { className: 'text-sm text-gray-400' },
+                  `${Math.round(((currentStep + 1) / steps.length) * 100)}%`
+                )
+              ),
+              e(
+                'div',
+                { className: 'w-full bg-gray-700 rounded-full h-2' },
+                e('div', {
+                  className: 'bg-blue-600 h-2 rounded-full transition-all duration-300',
+                  style: {
+                    width: `${((currentStep + 1) / steps.length) * 100}%`,
+                  },
+                })
+              )
+            ),
+
+          // Steps
+          e(
+            'div',
+            { className: 'flex items-center justify-between' },
+            steps.map((step, index) => {
+              const status = getStepStatus(index);
+              const clickable = isClickable(index);
+
+              return e(
+                React.Fragment,
+                { key: index },
+
+                // Step container
+                e(
+                  'div',
+                  { className: 'flex flex-col items-center relative' },
+
+                  // Step circle
+                  e(
+                    clickable ? 'button' : 'div',
+                    {
+                      className: `relative z-10 w-10 h-10 rounded-full border-2 flex items-center justify-center font-medium text-sm transition-all duration-200 ${getStepColor(
+                        status
+                      )} ${clickable ? 'hover:scale-105 cursor-pointer' : ''}`,
+                      onClick: clickable ? () => onStepClick(index) : undefined,
+                      disabled: !clickable,
+                    },
+                    status === 'completed'
+                      ? e(
+                          'svg',
+                          {
+                            className: 'w-5 h-5',
+                            fill: 'none',
+                            viewBox: '0 0 24 24',
+                            stroke: 'currentColor',
+                          },
+                          e('path', {
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                            strokeWidth: 2,
+                            d: 'M5 13l4 4L19 7',
+                          })
+                        )
+                      : e('span', null, index + 1)
+                  ),
+
+                  // Step label
+                  e(
+                    'div',
+                    { className: 'mt-3 text-center' },
+                    e(
+                      'div',
+                      {
+                        className: `text-sm font-medium ${
+                          status === 'active'
+                            ? 'text-blue-400'
+                            : status === 'completed'
+                              ? 'text-green-400'
+                              : 'text-gray-400'
+                        }`,
+                      },
+                      step.title
+                    ),
+                    step.description && e('div', { className: 'text-xs text-gray-500 mt-1' }, step.description)
+                  )
+                )
+              );
+            })
+          )
+        );
+      }
+
+      function Sidebar({ activeTab, onTabChange, onSettingsClick, caseViewMode, onCaseBackToList }) {
+        const tabs = [
+          {
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z',
+          },
+          {
+            id: 'cases',
+            label: 'Cases',
+            icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+          },
+          {
+            id: 'people',
+            label: 'People',
+            icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
+          },
+          {
+            id: 'organizations',
+            label: 'Organizations',
+            icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+          },
+          {
+            id: 'eligibility',
+            label: 'Eligibility',
+            icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+          },
+        ];
+
+        return e(
+          'div',
+          {
+            className: 'w-16 bg-gray-800 border-r border-gray-700 flex flex-col',
+          },
+          e(
+            'div',
+            { className: 'p-4 border-b border-gray-700' },
+            e('h1', { className: 'text-blue-400 font-bold text-sm text-center' }, 'CMS')
+          ),
+          e(
+            'nav',
+            { className: 'flex-1 p-2 space-y-2' },
+            tabs.map((tab) => {
+              // Special handling for Cases tab when in details view
+              if (tab.id === 'cases' && activeTab === 'cases' && caseViewMode === 'details') {
+                return e(
+                  'button',
+                  {
+                    key: tab.id,
+                    onClick: () => onCaseBackToList(),
+                    className:
+                      'w-full p-3 rounded-md transition-all duration-200 group relative bg-blue-600 text-white',
+                    title: 'Back to Cases List',
+                  },
+                  e(
+                    'svg',
+                    {
+                      className: 'w-5 h-5 mx-auto',
+                      fill: 'none',
+                      viewBox: '0 0 24 24',
+                      stroke: 'currentColor',
+                      strokeWidth: 2,
+                    },
+                    e('path', {
+                      strokeLinecap: 'round',
+                      strokeLinejoin: 'round',
+                      d: 'M10 19l-7-7m0 0l7-7m-7 7h18',
+                    })
+                  ),
+                  // Tooltip
+                  e(
+                    'div',
+                    {
+                      className:
+                        'absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50',
+                    },
+                    'Back to Cases List'
+                  )
+                );
+              }
+
+              // Regular tab rendering
+              return e(
+                'button',
+                {
+                  key: tab.id,
+                  onClick: () => onTabChange(tab.id),
+                  className: `w-full p-3 rounded-md transition-all duration-200 group relative ${
+                    activeTab === tab.id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                  }`,
+                  title: tab.label,
+                },
+                e(
+                  'svg',
+                  {
+                    className: 'w-5 h-5 mx-auto',
+                    fill: 'none',
+                    viewBox: '0 0 24 24',
+                    stroke: 'currentColor',
+                    strokeWidth: 2,
+                  },
+                  e('path', {
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    d: tab.icon,
+                  })
+                ),
+                // Tooltip
+                e(
+                  'div',
+                  {
+                    className:
+                      'absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50',
+                  },
+                  tab.label
+                )
+              );
+            })
+          ),
+          // Settings button
+          e(
+            'div',
+            { className: 'p-2 border-t border-gray-700' },
+            e(
+              'button',
+              {
+                onClick: onSettingsClick,
+                className:
+                  'w-full p-3 rounded-md text-gray-400 hover:bg-gray-700 hover:text-white transition-all duration-200 group relative',
+                title: 'Settings',
+              },
+              e(
+                'svg',
+                {
+                  className: 'w-5 h-5 mx-auto',
+                  fill: 'none',
+                  viewBox: '0 0 24 24',
+                  stroke: 'currentColor',
+                  strokeWidth: 2,
+                },
+                e('path', {
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round',
+                  d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94 1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z',
+                }),
+                e('path', {
+                  strokeLinecap: 'round',
+                  strokeLinejoin: 'round',
+                  d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+                })
+              ),
+              // Tooltip
+              e(
+                'div',
+                {
+                  className:
+                    'absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50',
+                },
+                'Settings'
+              )
+            )
+          )
+        );
+      }
+
+      function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
+        // Determine autosave display status
+        const getAutosaveDisplay = () => {
+          if (!autosaveStatus) {
+            return { text: 'Manual', className: 'text-gray-400', icon: '⚙️' };
+          }
+
+          switch (autosaveStatus.status) {
+            case 'saved':
+            case 'no-changes':
+              return { text: 'Saved', className: 'text-green-400', icon: '✓' };
+            case 'saving':
+              return { text: 'Saving...', className: 'text-blue-400', icon: '⏳' };
+            case 'error':
+              return { text: 'Error', className: 'text-red-400', icon: '⚠️' };
+            case 'initialized':
+            case 'started':
+              return { text: 'Auto', className: 'text-green-400', icon: '🔄' };
+            default:
+              return { text: 'Manual', className: 'text-gray-400', icon: '⚙️' };
+          }
+        };
+
+        const autosaveDisplay = getAutosaveDisplay();
+        const showManualSave =
+          !autosaveStatus || autosaveStatus.status === 'error' || autosaveStatus.status === 'stopped';
+
+        return e(
+          'div',
+          {
+            className: 'flex items-center justify-between bg-gray-800 p-2 shadow-md flex-shrink-0',
+          },
+          e(
+            'div',
+            { className: 'flex items-center' },
+            e(
+              'svg',
+              {
+                xmlns: 'http://www.w3.org/2000/svg',
+                className: 'h-6 w-6 mr-2 text-blue-400',
+                fill: 'none',
+                viewBox: '0 0 24 24',
+                stroke: 'currentColor',
+              },
+              e('path', {
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                strokeWidth: 2,
+                d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+              })
+            ),
+            e('span', { className: 'font-bold text-white' }, 'Nightingale CMS - React')
+          ),
+          e(
+            'div',
+            { className: 'flex items-center space-x-3' },
+            // File Status - Always clickable for settings access
+            e(
+              'div',
+              { className: 'text-sm' },
+              e(
+                'button',
+                {
+                  className: `px-2 py-1 rounded text-xs font-medium transition-colors flex items-center space-x-1 ${
+                    fileStatus === 'connected'
+                      ? 'bg-green-600 text-green-100 hover:bg-green-500 cursor-pointer'
+                      : fileStatus === 'disconnected'
+                        ? 'bg-red-600 text-red-100 hover:bg-red-500 cursor-pointer'
+                        : 'bg-yellow-600 text-yellow-100 hover:bg-yellow-500 cursor-pointer'
+                  }`,
+                  onClick: onSettingsClick,
+                  title:
+                    fileStatus === 'connected'
+                      ? 'Click to open settings and change save folder'
+                      : fileStatus === 'disconnected'
+                        ? 'Click to open settings and connect to save folder'
+                        : 'Click to open settings',
+                },
+                e(
+                  'span',
+                  null,
+                  fileStatus === 'connected'
+                    ? 'Connected'
+                    : fileStatus === 'disconnected'
+                      ? 'Disconnected'
+                      : 'Connecting...'
+                ),
+                // Add settings icon to indicate it's always clickable
+                e(
+                  'svg',
+                  {
+                    className: 'w-3 h-3',
+                    fill: 'none',
+                    viewBox: '0 0 24 24',
+                    stroke: 'currentColor',
+                  },
+                  e('path', {
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: 2,
+                    d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94 1.543.826-3.31 2.37-2.37.996.608 2.296.096 2.572-1.065z',
+                  }),
+                  e('path', {
+                    strokeLinecap: 'round',
+                    strokeLinejoin: 'round',
+                    strokeWidth: 2,
+                    d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+                  })
+                )
+              )
+            ),
+            // Autosave Status Display
+            e(
+              'div',
+              {
+                className: 'flex items-center space-x-1.5',
+                title: autosaveStatus?.message || 'Autosave status',
+              },
+              e('span', { className: 'text-sm' }, autosaveDisplay.icon),
+              e('span', { className: `text-xs ${autosaveDisplay.className}` }, autosaveDisplay.text)
+            ),
+            // Manual Save Button (only shown when autosave is not working)
+            showManualSave &&
+              e(PrimaryButton, {
+                children: 'Save',
+                onClick: onManualSave,
+                icon: window.ButtonIcons?.save,
+                size: 'sm',
+                title: 'Manual save (autosave not available)',
+              }),
+            // Status lights (matching original CMS)
+            e(
+              'div',
+              { className: 'flex space-x-2' },
+              e('div', { className: 'w-3 h-3 bg-yellow-400 rounded-full' }),
+              e('div', { className: 'w-3 h-3 bg-green-400 rounded-full' }),
+              e('div', { className: 'w-3 h-3 bg-red-400 rounded-full' })
+            )
+          )
+        );
+      }
+
+      // Case Details View Component
+      function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileService }) {
+        const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+        const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+        const caseData = fullData?.cases?.find((c) => c.id === caseId);
+        const person = window.NightingaleDataManagement.findPersonById(fullData?.people, caseData?.personId);
+        const spouse = caseData?.spouseId
+          ? window.NightingaleDataManagement.findPersonById(fullData?.people, caseData.spouseId)
+          : null;
+        const organization = caseData?.organizationId
+          ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0'))
+          : null;
+
+        // Update case field helper
+        const updateCaseField = (field, value) => {
+          const updatedCase = { ...caseData, [field]: value };
+          const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+          onUpdateData({ ...fullData, cases: updatedCases });
+        };
+
+        // Update notes handler
+        const handleNotesUpdate = (caseId, updatedNotes) => {
+          const updatedCase = { ...caseData, notes: updatedNotes };
+          const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+          onUpdateData({ ...fullData, cases: updatedCases });
+        };
+
+        if (!caseData) {
+          return e(
+            'div',
+            { className: 'w-full p-8 text-center' },
+            e('p', { className: 'text-gray-400 text-lg' }, 'Case not found'),
+            e(
+              'button',
+              {
+                onClick: onBackToList,
+                className: 'mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700',
+              },
+              'Back to Cases'
+            )
+          );
+        }
+
+        return e(
+          'div',
+          { className: 'w-full space-y-6' },
+
+          // Header with Back Button and Case Info (CMSOld styling with background container)
+          e(
+            'div',
+            {
+              className: 'bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg',
+            },
+            e(
+              'div',
+              { className: 'flex justify-between items-start' },
+              e(
+                'div',
+                {},
+                e(
+                  'h1',
+                  {
+                    className:
+                      'text-3xl font-bold text-blue-300 clickable-header flex items-center gap-x-2 cursor-pointer hover:text-blue-200 transition-colors',
+                    title: 'Click to edit case details',
+                    onClick: () => setIsEditModalOpen(true),
+                  },
+                  person?.name || 'Unknown',
+                  ' ',
+                  e(
+                    'svg',
+                    {
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      className: 'h-5 w-5 text-gray-500 group-hover:text-blue-300 transition-colors',
+                      viewBox: '0 0 20 20',
+                      fill: 'currentColor',
+                    },
+                    e('path', {
+                      d: 'M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z',
+                    }),
+                    e('path', {
+                      fillRule: 'evenodd',
+                      d: 'M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z',
+                      clipRule: 'evenodd',
+                    })
+                  )
+                ),
+                e(
+                  'p',
+                  {
+                    className: 'text-gray-400 copy-mcn-header cursor-pointer hover:text-blue-400 transition-colors',
+                    onClick: () => window.NightingaleCMSUtilities.copyMCN(caseData.mcn),
+                    title: 'Click to copy MCN',
+                  },
+                  `MCN: ${caseData.mcn || 'Not set'}`
+                ),
+                e(
+                  'div',
+                  { className: 'flex items-center gap-4 mt-3' },
+                  e(
+                    'div',
+                    { className: 'flex items-center gap-2' },
+                    e(
+                      'select',
+                      {
+                        value: caseData.status || '',
+                        onChange: (e) => updateCaseField('status', e.target.value),
+                        className: 'bg-gray-700 border border-gray-600 rounded-md py-1 px-2 text-sm',
+                      },
+                      e('option', { value: '' }, '-- No Status --'),
+                      e('option', { value: 'Pending' }, 'Pending'),
+                      e('option', { value: 'In Progress' }, 'In Progress'),
+                      e('option', { value: 'Approved' }, 'Approved'),
+                      e('option', { value: 'Denied' }, 'Denied'),
+                      e('option', { value: 'Closed' }, 'Closed')
+                    )
+                  ),
+                  e(
+                    'div',
+                    { className: 'flex items-center gap-2' },
+                    e('label', { className: 'text-sm text-gray-400' }, 'Priority:'),
+                    e('input', {
+                      type: 'checkbox',
+                      checked: caseData.priority || false,
+                      onChange: (e) => updateCaseField('priority', e.target.checked),
+                      className: 'h-4 w-4 rounded',
+                    })
+                  ),
+                  e(
+                    'div',
+                    { className: 'flex items-center gap-2' },
+                    e('label', { className: 'text-sm text-gray-400' }, 'Retro:'),
+                    e('input', {
+                      type: 'checkbox',
+                      checked: caseData.retroStatus || false,
+                      onChange: (e) => updateCaseField('retroStatus', e.target.checked),
+                      className: 'h-4 w-4 rounded',
+                    })
+                  )
+                )
+              ),
+              e(
+                'div',
+                { className: 'flex items-center gap-3 self-start pt-8' },
+                e(
+                  'button',
+                  {
+                    onClick: () => setIsNotesModalOpen(true),
+                    className: 'bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center gap-2',
+                  },
+                  e(
+                    'svg',
+                    {
+                      xmlns: 'http://www.w3.org/2000/svg',
+                      className: 'h-4 w-4',
+                      fill: 'none',
+                      viewBox: '0 0 24 24',
+                      stroke: 'currentColor',
+                    },
+                    e('path', {
+                      strokeLinecap: 'round',
+                      strokeLinejoin: 'round',
+                      strokeWidth: 2,
+                      d: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+                    })
+                  ),
+                  `Notes (${caseData.notes?.length || 0})`
+                ),
+                e(
+                  'button',
+                  {
+                    onClick: () => window.NightingaleCMSUtilities.generateCaseSummary(caseData),
+                    className: 'bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md',
+                  },
+                  'Generate Summary'
+                ),
+                e(
+                  'button',
+                  {
+                    onClick: () => window.NightingaleCMSUtilities.openVRApp(caseData),
+                    className: 'bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md',
+                  },
+                  'Open VR App'
+                )
+              )
+            )
+          ),
+
+          // Financial Management Section
+          window.FinancialManagementSection &&
+            e(window.FinancialManagementSection, { caseData, fullData, onUpdateData }),
+
+          // Notes Modal
+          e(window.NotesModal, {
+            isOpen: isNotesModalOpen,
+            onClose: () => setIsNotesModalOpen(false),
+            caseId: caseData.id,
+            notes: caseData.notes || [],
+            onNotesUpdate: handleNotesUpdate,
+            caseData: caseData,
+            fullData: fullData,
+          }),
+
+          // Edit Case Modal
+          isEditModalOpen &&
+            e(CaseCreationModal, {
+              isOpen: isEditModalOpen,
+              onClose: () => setIsEditModalOpen(false),
+              editCaseId: caseData.id,
+              fullData,
+              fileService,
+              onViewCaseDetails: (caseId) => {
+                setIsEditModalOpen(false);
+                setDetailsCaseId(caseId);
+                setViewMode('details');
+                onViewModeChange?.('details');
+              },
+              onCaseCreated: (updatedCaseData) => {
+                onUpdateData(updatedCaseData);
+                setIsEditModalOpen(false);
+              },
+            })
+        );
+      }
+
+      function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus, onFileStatusChange }) {
+        const [isConnecting, setIsConnecting] = useState(false);
+        const [loadingData, setLoadingData] = useState(false);
+
+        const handleConnect = async () => {
+          setIsConnecting(true);
+          try {
+            const connected = await fileService.connect();
+            if (connected) {
+              onFileStatusChange('connected');
+              showToast('Directory connected successfully!', 'success');
+            } else {
+              onFileStatusChange('disconnected');
+              showToast('Failed to connect to directory', 'error');
+            }
+          } catch (error) {
+            console.error('Connection error:', error);
+            onFileStatusChange('disconnected');
+            showToast('Error connecting to directory', 'error');
+          } finally {
+            setIsConnecting(false);
+          }
+        };
+
+        const handleLoadData = async () => {
+          setLoadingData(true);
+          try {
+            const data = await fileService.readFile();
+            if (data) {
+              const normalizedData = await window.NightingaleDataManagement.normalizeDataMigrations(data);
+              onDataLoaded(normalizedData);
+              showToast(`Data loaded successfully! Found ${normalizedData.cases?.length || 0} cases`, 'success');
+              onClose();
+            } else {
+              showToast('No data file found', 'warning');
+            }
+          } catch (error) {
+            console.error('Load data error:', error);
+            showToast('Error loading data file', 'error');
+          } finally {
+            setLoadingData(false);
+          }
+        };
+
+        const handleCreateSample = async () => {
+          try {
+            const sampleData = {
+              cases: [
+                {
+                  id: 'case-001',
+                  mcn: 'MCN-2025-001',
+                  personId: 'person-001',
+                  status: 'Pending',
+                  applicationDate: '2025-08-01',
+                  description: 'Sample case for testing',
+                  caseType: 'VR',
+                  priority: 'Normal',
+                  address: '123 Main St',
+                  city: 'Springfield',
+                  state: 'IL',
+                  zipCode: '62701',
+                  organizationId: 'org-001',
+                  authorizedReps: [],
+                },
+                {
+                  id: 'case-002',
+                  mcn: 'MCN-2025-002',
+                  personId: 'person-002',
+                  status: 'Approved',
+                  applicationDate: '2025-08-05',
+                  description: 'Another sample case',
+                  caseType: 'LTC',
+                  priority: 'High',
+                  address: '456 Oak Ave',
+                  city: 'Springfield',
+                  state: 'IL',
+                  zipCode: '62702',
+                  organizationId: 'org-002',
+                  authorizedReps: [],
+                },
+              ],
+              people: [
+                {
+                  id: 'person-001',
+                  name: 'John Doe',
+                  email: 'john.doe@example.com',
+                  phone: '(555) 123-4567',
+                  address: '123 Main St, Springfield, IL 62701',
+                  status: 'active',
+                  dateAdded: new Date().toISOString(),
+                },
+                {
+                  id: 'person-002',
+                  name: 'Jane Smith',
+                  email: 'jane.smith@example.com',
+                  phone: '(555) 234-5678',
+                  address: '789 Pine St, Springfield, IL 62703',
+                  status: 'active',
+                  dateAdded: new Date().toISOString(),
+                },
+              ],
+              organizations: [
+                {
+                  id: 'org-001',
+                  name: 'Springfield Community Services',
+                  type: 'Non-Profit',
+                  contactPerson: 'Mary Wilson',
+                  email: 'info@springfieldcs.org',
+                  phone: '(555) 987-6543',
+                  address: '100 Community Drive, Springfield, IL 62701',
+                  status: 'active',
+                  dateAdded: new Date().toISOString(),
+                },
+                {
+                  id: 'org-002',
+                  name: 'Regional Health Center',
+                  type: 'Healthcare',
+                  contactPerson: 'Dr. Sarah Davis',
+                  email: 'contact@regionalhc.org',
+                  phone: '(555) 876-5432',
+                  address: '200 Medical Plaza, Springfield, IL 62702',
+                  status: 'active',
+                  dateAdded: new Date().toISOString(),
+                },
+              ],
+              financials: [
+                {
+                  id: 'fin-001',
+                  caseId: 'case-001',
+                  amount: 1250.0,
+                  description: 'VR Services',
+                  category: 'Training',
+                },
+              ],
+              notes: [
+                {
+                  id: 'note-001',
+                  caseId: 'case-001',
+                  content: 'Initial assessment completed',
+                  date: '2025-08-02',
+                  type: 'Assessment',
+                },
+              ],
+              vrRequests: [
+                {
+                  id: 'vr-001',
+                  caseId: 'case-001',
+                  status: 'Pending',
+                  requestDate: '2025-08-01',
+                },
+              ],
+            };
+
+            await fileService.writeFile(sampleData);
+            onDataLoaded(sampleData);
+            showToast('Sample data created and loaded!', 'success');
+            onClose();
+          } catch (error) {
+            console.error('Create sample error:', error);
+            showToast('Error creating sample data', 'error');
+          }
+        };
+
+        if (!isOpen) return null;
+
+        return e(
+          Modal,
+          {
+            isOpen,
+            onClose,
+            title: 'Settings & Data Management',
+            footerContent: e(
+              'div',
+              { className: 'flex space-x-3' },
+              e(
+                'button',
+                {
+                  onClick: onClose,
+                  className: 'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
+                },
+                'Close'
+              )
+            ),
+          },
+          e(
+            'div',
+            { className: 'space-y-6' },
+
+            // File System Connection
+            e(
+              'div',
+              { className: 'space-y-4' },
+              e('h3', { className: 'text-lg font-semibold text-white' }, 'File System Connection'),
+              e(
+                'p',
+                { className: 'text-gray-400 text-sm' },
+                'Connect to your project directory to load and save case data.'
+              ),
+              e(
+                'div',
+                { className: 'flex items-center space-x-4' },
+                e(
+                  'button',
+                  {
+                    onClick: handleConnect,
+                    disabled: isConnecting,
+                    className: `px-4 py-2 rounded-lg font-medium transition-colors ${
+                      isConnecting
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`,
+                  },
+                  isConnecting ? 'Connecting...' : 'Connect to Directory'
+                ),
+                e(
+                  'div',
+                  {
+                    className: `px-3 py-1 rounded-full text-xs font-medium ${
+                      fileStatus === 'connected' ? 'bg-green-600 text-green-100' : 'bg-red-600 text-red-100'
+                    }`,
+                  },
+                  fileStatus === 'connected' ? 'Connected' : 'Disconnected'
+                )
+              )
+            ),
+
+            // Data Management
+            e(
+              'div',
+              { className: 'space-y-4' },
+              e('h3', { className: 'text-lg font-semibold text-white' }, 'Data Management'),
+              e('p', { className: 'text-gray-400 text-sm' }, 'Load existing data or create sample data for testing.'),
+              e(
+                'div',
+                { className: 'grid grid-cols-1 md:grid-cols-2 gap-3' },
+                e(
+                  'button',
+                  {
+                    onClick: handleLoadData,
+                    disabled: loadingData || fileStatus !== 'connected',
+                    className: `px-4 py-3 rounded-lg font-medium transition-colors ${
+                      loadingData || fileStatus !== 'connected'
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : 'bg-green-600 hover:bg-green-700 text-white'
+                    }`,
+                  },
+                  loadingData ? 'Loading...' : 'Load Data File'
+                ),
+                e(
+                  'button',
+                  {
+                    onClick: handleCreateSample,
+                    disabled: fileStatus !== 'connected',
+                    className: `px-4 py-3 rounded-lg font-medium transition-colors ${
+                      fileStatus !== 'connected'
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : 'bg-orange-600 hover:bg-orange-700 text-white'
+                    }`,
+                  },
+                  'Create Sample Data'
+                )
+              )
+            ),
+
+            // Instructions
+            e(
+              'div',
+              { className: 'space-y-2 p-4 bg-gray-700 rounded-lg' },
+              e('h4', { className: 'font-medium text-white' }, 'Instructions:'),
+              e(
+                'ol',
+                {
+                  className: 'text-sm text-gray-300 space-y-1 list-decimal list-inside',
+                },
+                e('li', null, "Click 'Connect to Directory' and select your Nightingale project folder"),
+                e('li', null, "Use 'Load Data File' to load existing nightingale-data.json"),
+                e('li', null, "Or use 'Create Sample Data' to generate test cases for development")
+              )
+            )
+          )
+        );
+      }
+
+      // ErrorBoundary Component for graceful error handling
+      class ErrorBoundary extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = { hasError: false, error: null, errorInfo: null };
+        }
+
+        static getDerivedStateFromError(error) {
+          return { hasError: true };
+        }
+
+        componentDidCatch(error, errorInfo) {
+          this.setState({
+            error: error,
+            errorInfo: errorInfo,
+          });
+          console.error('ErrorBoundary caught an error:', error, errorInfo);
+        }
+
+        render() {
+          if (this.state.hasError) {
+            return e(
+              'div',
+              {
+                className: 'h-full w-full flex items-center justify-center bg-gray-900 text-white p-8',
+              },
+              e(
+                'div',
+                { className: 'max-w-2xl text-center' },
+                e('h1', { className: 'text-3xl font-bold mb-4' }, 'Something went wrong'),
+                e(
+                  'p',
+                  { className: 'text-gray-300 mb-6' },
+                  "The application encountered an error and couldn't recover."
+                ),
+                e(
+                  'button',
+                  {
+                    className: 'bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-medium',
+                    onClick: () => window.location.reload(),
+                  },
+                  'Reload Application'
+                ),
+                this.state.error &&
+                  e(
+                    'details',
+                    { className: 'mt-6 text-left' },
+                    e('summary', { className: 'cursor-pointer text-gray-400' }, 'Technical Details'),
+                    e(
+                      'pre',
+                      { className: 'mt-2 text-sm bg-gray-800 p-4 rounded overflow-auto' },
+                      this.state.error.toString() + '\n' + this.state.errorInfo.componentStack
+                    )
+                  )
+              )
+            );
+          }
+
+          return this.props.children;
+        }
+      }
+
+      // Main App Component
+
+      function NightingaleCMSApp() {
+        const [fullData, setFullData] = useState(null);
+        const [activeTab, setActiveTab] = useState('dashboard');
+        const [fileStatus, setFileStatus] = useState('disconnected');
+        const [isDirty, setIsDirty] = useState(false);
+        const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+        const [caseViewMode, setCaseViewMode] = useState('list'); // Track if we're in case details view
+        const [caseBackFunction, setCaseBackFunction] = useState(null); // Function to go back from case details
+        const [peopleViewMode, setPeopleViewMode] = useState('list'); // Track if we're in person details view
+        const [peopleBackFunction, setPeopleBackFunction] = useState(null); // Function to go back from person details
+        const [organizationsViewMode, setOrganizationsViewMode] = useState('list'); // Track if we're in organization details view
+        const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
+
+        // Autosave & File service state (combined)
+        const [autosaveFileService, setAutosaveFileService] = useState(null);
+        const [autosaveStatus, setAutosaveStatus] = useState({
+          status: 'disconnected',
+          message: 'Service not initialized',
+        });
+
+        // Use ref for live data access to avoid stale closure issues
+        const fullDataRef = useRef(null);
+
+        // Keep ref synchronized with state
+        useEffect(() => {
+          fullDataRef.current = fullData;
+        }, [fullData]);
+
+        // Backward compatibility aliases
+        const fileService = autosaveFileService; // For components that expect fileService
+        const autosaveService = autosaveFileService; // For components that expect autosaveService
+        const [servicesReady, setServicesReady] = useState(false);
+
+        // Initialize combined autosave & file service when services are ready
+        useEffect(() => {
+          const handleServicesReady = () => {
+            console.log('🎯 Services ready - initializing AutosaveFileService');
+            if (typeof AutosaveFileService !== 'undefined') {
+              // Use the clean factory method for React integration
+              const service = AutosaveFileService.createForReact({
+                tabId: `cms-react-tab-${Date.now()}`,
+                errorCallback: showToast,
+                sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
+                
+                // Autosave configuration
+                enabled: true,
+                saveInterval: 120000, // 2 minutes
+                debounceDelay: 5000,  // 5 seconds
+                maxRetries: 3,
+                
+                // React integration - use ref for live data access
+                getFullData: () => {
+                  console.log('📦 Data provider called, ref contains:', !!fullDataRef.current);
+                  return fullDataRef.current;
+                },
+                statusCallback: (status) => {
+                  setAutosaveStatus(status);
+                  if (status.status === 'saved') {
+                    setIsDirty(false);
+                  } else if (status.status === 'error') {
+                    console.warn('Autosave error:', status.message);
+                  }
+                },
+              });
+              
+              setAutosaveFileService(service);
+              setServicesReady(true);
+            } else {
+              console.warn('⚠️ AutosaveFileService still not available after services ready event');
+            }
+          };
+
+          // Check if services are already loaded
+          if (window.nightingaleServicesLoaded && typeof AutosaveFileService !== 'undefined') {
+            handleServicesReady();
+          } else {
+            // Listen for services ready event
+            window.addEventListener('nightingale:services:ready', handleServicesReady);
+
+            // Fallback: check every second for 10 seconds
+            let attempts = 0;
+            const checkInterval = setInterval(() => {
+              attempts++;
+              if (typeof AutosaveFileService !== 'undefined') {
+                handleServicesReady();
+                clearInterval(checkInterval);
+              } else if (attempts >= 10) {
+                console.error('❌ AutosaveFileService failed to load after 10 seconds');
+                clearInterval(checkInterval);
+              }
+            }, 1000);
+
+            return () => {
+              window.removeEventListener('nightingale:services:ready', handleServicesReady);
+              clearInterval(checkInterval);
+            };
+          }
+        }, []);
+
+        // Data update handler - now works with combined autosave service
+        const handleUpdateData = useCallback(
+          async (newData) => {
+            // Use custom DevTools helper for better debugging
+            if (window.NightingaleDevTools) {
+              window.NightingaleDevTools.logDataFlow('Data Update', {
+                hasCases: !!newData?.cases,
+                caseCount: newData?.cases?.length || 0,
+                hasPeople: !!newData?.people,
+                peopleCount: newData?.people?.length || 0,
+              });
+            }
+
+            setFullData(newData);
+            setIsDirty(true);
+
+            // Notify autosave service of data change
+            if (autosaveFileService) {
+              autosaveFileService.notifyDataChange('user-edit');
+            }
+          },
+          [autosaveFileService]
+        );
+
+        const handleSave = async () => {
+          if (!fullData) {
+            console.error('No fullData available for saving');
+            showToast('No data to save.', 'error');
+            return;
+          }
+
+          try {
+            const success = await autosaveFileService.writeFile(fullData);
+            if (success) {
+              setIsDirty(false);
+              showToast('Data saved successfully.', 'success');
+
+              // Send data integrity broadcast to notify other apps
+              const integrityChannel = new BroadcastChannel('nightingale_suite');
+              integrityChannel.postMessage({
+                type: 'data_updated',
+                source: 'cms-react',
+                timestamp: new Date().toISOString(),
+              });
+              integrityChannel.close();
+              console.log('Sent data integrity broadcast: data updated');
+            } else {
+              console.error('AutosaveFileService.writeFile returned false');
+              showToast('Failed to save data.', 'error');
+            }
+          } catch (error) {
+            console.error('Error during save:', error);
+            showToast(`Save failed: ${error.message}`, 'error');
+          }
+        };
+
+        // Data loading handler for settings modal
+        const handleDataLoaded = useCallback((newData) => {
+          setFullData(newData);
+          setFileStatus('connected');
+          setIsDirty(false);
+        }, []);
+
+        // Initialize app and load data
+        useEffect(() => {
+          async function initializeApp() {
+            try {
+              if (!autosaveFileService) {
+                console.warn('AutosaveFileService not available during initialization');
+                return;
+              }
+
+              setFileStatus('connecting');
+
+              // Check for existing file system access
+              const { handle, permission } = await autosaveFileService.restoreLastDirectoryAccess();
+              if (handle && permission === 'granted') {
+                setFileStatus('connected');
+                const data = await autosaveFileService.readFile();
+                if (data) {
+                  // Apply any necessary data migrations
+                  const normalizedData = await window.NightingaleDataManagement.normalizeDataMigrations(data);
+                  setFullData(normalizedData);
+                }
+              } else {
+                setFileStatus('disconnected');
+                showToast('Please connect to your data file to continue.', 'warning');
+              }
+            } catch (error) {
+              console.error('App initialization error:', error);
+              setFileStatus('disconnected');
+              showToast(`Initialization failed: ${error.message}`, 'error');
+            }
+          }
+
+          if (autosaveFileService) {
+            initializeApp();
+          }
+        }, [autosaveFileService]); // Only run when service becomes available
+
+        // Cross-app communication listener
+        useEffect(() => {
+          const channel = new BroadcastChannel('nightingale-app-communication');
+
+          channel.addEventListener('message', (event) => {
+            if (event.data.type === 'show_case' && event.data.mcn) {
+              // Handle show case request from other apps
+              setActiveTab('cases');
+              showToast(`Loading case ${event.data.mcn}...`, 'info');
+            }
+          });
+
+          return () => channel.close();
+        }, []);
+
+        // React DevTools setup
+        useEffect(() => {
+          if (window.NightingaleDevTools) {
+            // DevTools available - use window.NightingaleDevTools.* commands for debugging
+            window.NightingaleDevTools.checkDevToolsConnection();
+          }
+        }, []);
+
+        // Render content based on active tab
+        const renderContent = () => {
+          switch (activeTab) {
+            case 'dashboard':
+              return window.DashboardTab
+                ? e(window.DashboardTab, { fullData })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
+            case 'cases':
+              return window.CasesTab
+                ? e(window.CasesTab, {
+                    fullData,
+                    onUpdateData: handleUpdateData,
+                    fileService,
+                    onViewModeChange: setCaseViewMode,
+                    onBackToList: setCaseBackFunction,
+                  })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Cases component not loaded');
+            case 'people':
+              return window.PeopleTab
+                ? e(window.PeopleTab, {
+                    fullData,
+                    onUpdateData: handleUpdateData,
+                    fileService,
+                    onViewModeChange: setPeopleViewMode,
+                    onBackToList: setPeopleBackFunction,
+                  })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'People component not loaded');
+            case 'organizations':
+              return window.OrganizationsTab
+                ? e(window.OrganizationsTab, {
+                    fullData,
+                    onUpdateData: handleUpdateData,
+                    fileService,
+                    onViewModeChange: setOrganizationsViewMode,
+                    onBackToList: setOrganizationsBackFunction,
+                  })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Organizations component not loaded');
+            case 'eligibility':
+              return window.EligibilityTab
+                ? e(window.EligibilityTab, { fullData })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Eligibility component not loaded');
+            default:
+              return window.DashboardTab
+                ? e(window.DashboardTab, { fullData })
+                : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
+          }
+        };
+
+        // Show loading screen while services are initializing
+        if (!servicesReady || !fileService) {
+          return e(
+            'div',
+            {
+              className: 'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
+              style: { fontFamily: 'Inter, system-ui, sans-serif' },
+            },
+            e(
+              'div',
+              { className: 'text-center space-y-4' },
+              e('div', {
+                className: 'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
+              }),
+              e('h2', { className: 'text-xl font-semibold' }, 'Initializing Nightingale CMS'),
+              e('p', { className: 'text-gray-400' }, 'Loading services and file system...')
+            )
+          );
+        }
+
+        return e(
+          'div',
+          { className: 'h-screen w-screen flex' },
+          e(Sidebar, {
+            activeTab,
+            onTabChange: setActiveTab,
+            onSettingsClick: () => setIsSettingsOpen(true),
+            caseViewMode,
+            onCaseBackToList: () => {
+              if (caseBackFunction) {
+                caseBackFunction();
+              }
+            },
+          }),
+          e(
+            'div',
+            { className: 'flex-1 flex flex-col min-w-0 w-full' },
+            e(Header, {
+              fileStatus,
+              autosaveStatus,
+              onSettingsClick: () => setIsSettingsOpen(true),
+              onManualSave: handleSave,
+            }),
+            e('main', { className: 'flex-1 p-4 overflow-auto bg-gray-900 w-full' }, renderContent())
+          ),
+          // Settings Modal
+          e(SettingsModal, {
+            isOpen: isSettingsOpen,
+            onClose: () => setIsSettingsOpen(false),
+            fileService,
+            onDataLoaded: handleDataLoaded,
+            fileStatus,
+            onFileStatusChange: setFileStatus,
+          })
+        );
+      }
+
+      // --- APP INITIALIZATION ---
+
+      // Wait for components and services to load before rendering React app
+      async function initializeApp() {
+        try {
+          // Wait for services to be ready first
+          let servicesReady = false;
+          const checkServicesReady = () => {
+            servicesReady =
+              typeof AutosaveFileService !== 'undefined' &&
+              typeof window.NightingaleServices !== 'undefined' &&
+              (window.NightingaleServices.loaded?.length || 0) > 0;
+          };
+
+          // Check if services are already ready
+          checkServicesReady();
+
+          // If not ready, wait for the services ready event
+          if (!servicesReady) {
+            await new Promise((resolve) => {
+              const handleServicesReady = () => {
+                servicesReady = true;
+                window.removeEventListener('nightingale:services:ready', handleServicesReady);
+                resolve();
+              };
+              window.addEventListener('nightingale:services:ready', handleServicesReady);
+
+              // Fallback timeout after 10 seconds
+              setTimeout(() => {
+                if (!servicesReady) {
+                  console.warn('⚠️ Services loading timeout, proceeding anyway');
+                  window.removeEventListener('nightingale:services:ready', handleServicesReady);
+                  resolve();
+                }
+              }, 10000);
+            });
+          }
+
+          // Wait for components to be available (index.js auto-loads them)
+          if (window.NightingaleComponentLibrary) {
+            // Wait for auto-loading to complete by checking if components are registered
+            let attempts = 0;
+            while (attempts < 50) {
+              // Max 5 seconds
+              if (window.NightingaleComponentLibrary.getComponent('PrimaryButton')) {
+                break;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              attempts++;
+            }
+
+            if (attempts >= 50) {
+              console.warn('⚠️ Components took too long to load, proceeding anyway');
+            }
+
+            // Extract components from the library for use in the app
+            if (window.NightingaleComponentLibrary) {
+              PrimaryButton =
+                window.NightingaleComponentLibrary.getComponent('PrimaryButton') || (() => e('button', {}, 'Button'));
+              SecondaryButton =
+                window.NightingaleComponentLibrary.getComponent('SecondaryButton') || (() => e('button', {}, 'Button'));
+              // DataTable is globally available from the component library
+              Modal = window.NightingaleComponentLibrary.getComponent('Modal') || (() => e('div', {}, 'Modal'));
+              SearchBar = window.NightingaleComponentLibrary.getComponent('SearchBar') || (() => e('input', {}, ''));
+            } else {
+              // Fallback components if library is not available
+              PrimaryButton = (props) =>
+                e('button', { ...props, className: 'bg-blue-600 text-white px-4 py-2 rounded' }, props.children);
+              SecondaryButton = (props) =>
+                e('button', { ...props, className: 'bg-gray-600 text-white px-4 py-2 rounded' }, props.children);
+              Modal = (props) => e('div', { ...props }, props.children);
+              SearchBar = (props) => e('input', { ...props, type: 'text', placeholder: 'Search...' });
+            }
+          } else {
+            console.warn('⚠️ Component library not found, proceeding with basic initialization');
+          }
+
+          const root = createRoot(document.getElementById('root'));
+          root.render(e(NightingaleCMSApp));
+
+          // Store app instance globally for debugging
+          window.nightingaleCMSApp = root;
+        } catch (error) {
+          console.error('❌ Failed to initialize app:', error);
+          // Fallback - render anyway
+          const root = createRoot(document.getElementById('root'));
+          root.render(e(NightingaleCMSApp));
+          window.nightingaleCMSApp = root;
+        }
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+      } else {
+        initializeApp();
+      }
+    </script>
+  </body>
+</html>
