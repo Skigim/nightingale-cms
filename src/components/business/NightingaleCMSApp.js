@@ -1,9 +1,9 @@
 /**
  * NightingaleCMSApp.js - Main application component
- * 
+ *
  * Root business component for the Nightingale CMS application.
  * Manages global state, services, and orchestrates all other components.
- * 
+ *
  * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
@@ -12,31 +12,25 @@
 /**
  * NightingaleCMSApp Component
  * Main application component with global state management
- * 
+ *
  * @returns {React.Element} NightingaleCMSApp component
  */
 function NightingaleCMSApp() {
-  // React safety check
-  if (!window.React) {
-    console.warn('React not available for NightingaleCMSApp component');
-    return null;
-  }
+  const e = window.React?.createElement;
+  const { useState, useEffect, useRef, useMemo } = window.React || {};
 
-  const e = window.React.createElement;
-  const { useState, useEffect, useRef } = window.React;
-
-  // Main application state
+  // Main application state - hooks must be called unconditionally
   const [fullData, setFullData] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [fileStatus, setFileStatus] = useState('disconnected');
-  const [isDirty, setIsDirty] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [caseViewMode, setCaseViewMode] = useState('list'); // Track if we're in case details view
   const [caseBackFunction, setCaseBackFunction] = useState(null); // Function to go back from case details
-  const [peopleViewMode, setPeopleViewMode] = useState('list'); // Track if we're in person details view
-  const [peopleBackFunction, setPeopleBackFunction] = useState(null); // Function to go back from person details
-  const [organizationsViewMode, setOrganizationsViewMode] = useState('list'); // Track if we're in organization details view
-  const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
+  // TODO: Implement people and organizations navigation in sidebar
+  // const [peopleViewMode, setPeopleViewMode] = useState('list'); // Track if we're in person details view
+  // const [peopleBackFunction, setPeopleBackFunction] = useState(null); // Function to go back from person details
+  // const [organizationsViewMode, setOrganizationsViewMode] = useState('list'); // Track if we're in organization details view
+  // const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
 
   // Autosave & File service state (combined)
   const [autosaveFileService, setAutosaveFileService] = useState(null);
@@ -55,16 +49,25 @@ function NightingaleCMSApp() {
 
   // Backward compatibility aliases
   const fileService = autosaveFileService; // For components that expect fileService
-  const autosaveService = autosaveFileService; // For components that expect autosaveService
   const [servicesReady, setServicesReady] = useState(false);
 
   // Get component dependencies
-  const Sidebar = window.Sidebar || window.NightingaleUI?.getComponent?.('Sidebar');
-  const Header = window.Header || window.NightingaleUI?.getComponent?.('Header');
-  const SettingsModal = window.SettingsModal || window.NightingaleBusiness?.getComponent?.('SettingsModal');
-  const showToast = window.showToast || window.NightingaleToast?.show || function(message, type) {
-    console.log(`Toast ${type}: ${message}`);
-  };
+  const Sidebar =
+    window.Sidebar || window.NightingaleUI?.getComponent?.('Sidebar');
+  const Header =
+    window.Header || window.NightingaleUI?.getComponent?.('Header');
+  const SettingsModal =
+    window.SettingsModal ||
+    window.NightingaleBusiness?.getComponent?.('SettingsModal');
+  const showToast = useMemo(() => {
+    return (
+      window.showToast ||
+      window.NightingaleToast?.show ||
+      function (message, type) {
+        console.log(`Toast ${type}: ${message}`);
+      }
+    );
+  }, []);
 
   // Initialize combined autosave & file service when services are ready
   useEffect(() => {
@@ -75,30 +78,30 @@ function NightingaleCMSApp() {
         const service = window.AutosaveFileService.createForReact({
           tabId: `cms-react-tab-${Date.now()}`,
           errorCallback: showToast,
-          sanitizeFn: typeof window.sanitize !== 'undefined' ? window.sanitize : (str) => str,
-          
+          sanitizeFn:
+            typeof window.sanitize !== 'undefined'
+              ? window.sanitize
+              : (str) => str,
+
           // Autosave configuration
           enabled: true,
           saveInterval: 120000, // 2 minutes
-          debounceDelay: 5000,  // 5 seconds
+          debounceDelay: 5000, // 5 seconds
           maxRetries: 3,
-          
+
           // React integration - use ref for live data access
           getFullData: () => {
-            console.log('📦 Data provider called, ref contains:', !!fullDataRef.current);
+            console.log(
+              '📦 Data provider called, ref contains:',
+              !!fullDataRef.current
+            );
             return fullDataRef.current;
           },
-          
+
           // Status updates
           onStatusChange: (status) => {
             console.log('🔄 Autosave status change:', status);
             setAutosaveStatus(status);
-          },
-          
-          // Track dirty state
-          onDirtyChange: (dirty) => {
-            console.log('📝 Data dirty state changed:', dirty);
-            setIsDirty(dirty);
           },
         });
 
@@ -113,16 +116,19 @@ function NightingaleCMSApp() {
 
     // Listen for services ready event
     window.addEventListener('nightingale:services:ready', handleServicesReady);
-    
+
     // Also check if already ready
     if (typeof window.AutosaveFileService !== 'undefined') {
       handleServicesReady();
     }
 
     return () => {
-      window.removeEventListener('nightingale:services:ready', handleServicesReady);
+      window.removeEventListener(
+        'nightingale:services:ready',
+        handleServicesReady
+      );
     };
-  }, []);
+  }, [showToast]);
 
   // Handle manual save
   const handleManualSave = async () => {
@@ -141,13 +147,11 @@ function NightingaleCMSApp() {
   const handleDataLoaded = (data) => {
     console.log('📊 Data loaded from child component');
     setFullData(data);
-    setIsDirty(false);
   };
 
   const handleDataUpdate = (newData) => {
     console.log('📊 Data updated from child component');
     setFullData(newData);
-    setIsDirty(true);
   };
 
   // Render tab content based on active tab
@@ -156,7 +160,11 @@ function NightingaleCMSApp() {
       case 'dashboard':
         return window.DashboardTab
           ? e(window.DashboardTab, { fullData })
-          : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
+          : e(
+              'div',
+              { className: 'p-4 text-center text-gray-400' },
+              'Dashboard component not loaded'
+            );
       case 'cases':
         return window.CasesTab
           ? e(window.CasesTab, {
@@ -166,54 +174,92 @@ function NightingaleCMSApp() {
               onViewModeChange: setCaseViewMode,
               onBackToList: setCaseBackFunction,
             })
-          : e('div', { className: 'p-4 text-center text-gray-400' }, 'Cases component not loaded');
+          : e(
+              'div',
+              { className: 'p-4 text-center text-gray-400' },
+              'Cases component not loaded'
+            );
       case 'people':
         return window.PeopleTab
           ? e(window.PeopleTab, {
               fullData,
               onUpdateData: handleDataUpdate,
               fileService,
-              onViewModeChange: setPeopleViewMode,
-              onBackToList: setPeopleBackFunction,
+              // TODO: Implement navigation when sidebar supports people back button
+              // onViewModeChange: setPeopleViewMode,
+              // onBackToList: setPeopleBackFunction,
             })
-          : e('div', { className: 'p-4 text-center text-gray-400' }, 'People component not loaded');
+          : e(
+              'div',
+              { className: 'p-4 text-center text-gray-400' },
+              'People component not loaded'
+            );
       case 'organizations':
         return window.OrganizationsTab
           ? e(window.OrganizationsTab, {
               fullData,
               onUpdateData: handleDataUpdate,
               fileService,
-              onViewModeChange: setOrganizationsViewMode,
-              onBackToList: setOrganizationsBackFunction,
+              // TODO: Implement navigation when sidebar supports organizations back button
+              // onViewModeChange: setOrganizationsViewMode,
+              // onBackToList: setOrganizationsBackFunction,
             })
-          : e('div', { className: 'p-4 text-center text-gray-400' }, 'Organizations component not loaded');
+          : e(
+              'div',
+              { className: 'p-4 text-center text-gray-400' },
+              'Organizations component not loaded'
+            );
       case 'eligibility':
         return window.EligibilityTab
           ? e(window.EligibilityTab, { fullData })
-          : e('div', { className: 'p-4 text-center text-gray-400' }, 'Eligibility component not loaded');
+          : e(
+              'div',
+              { className: 'p-4 text-center text-gray-400' },
+              'Eligibility component not loaded'
+            );
       default:
         return window.DashboardTab
           ? e(window.DashboardTab, { fullData })
-          : e('div', { className: 'p-4 text-center text-gray-400' }, 'Dashboard component not loaded');
+          : e(
+              'div',
+              { className: 'p-4 text-center text-gray-400' },
+              'Dashboard component not loaded'
+            );
     }
   };
+
+  // React safety check for render
+  if (!window.React) {
+    console.warn('React not available for NightingaleCMSApp component');
+    return null;
+  }
 
   // Show loading screen while services are initializing
   if (!servicesReady || !fileService) {
     return e(
       'div',
       {
-        className: 'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
+        className:
+          'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
         style: { fontFamily: 'Inter, system-ui, sans-serif' },
       },
       e(
         'div',
         { className: 'text-center space-y-4' },
         e('div', {
-          className: 'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
+          className:
+            'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
         }),
-        e('h2', { className: 'text-xl font-semibold' }, 'Initializing Nightingale CMS'),
-        e('p', { className: 'text-gray-400' }, 'Loading services and file system...')
+        e(
+          'h2',
+          { className: 'text-xl font-semibold' },
+          'Initializing Nightingale CMS'
+        ),
+        e(
+          'p',
+          { className: 'text-gray-400' },
+          'Loading services and file system...'
+        )
       )
     );
   }
@@ -221,26 +267,28 @@ function NightingaleCMSApp() {
   return e(
     'div',
     { className: 'h-screen w-screen flex' },
-    Sidebar && e(Sidebar, {
-      activeTab,
-      onTabChange: setActiveTab,
-      onSettingsClick: () => setIsSettingsOpen(true),
-      caseViewMode,
-      onCaseBackToList: () => {
-        if (caseBackFunction) {
-          caseBackFunction();
-        }
-      },
-    }),
+    Sidebar &&
+      e(Sidebar, {
+        activeTab,
+        onTabChange: setActiveTab,
+        onSettingsClick: () => setIsSettingsOpen(true),
+        caseViewMode,
+        onCaseBackToList: () => {
+          if (caseBackFunction) {
+            caseBackFunction();
+          }
+        },
+      }),
     e(
       'div',
       { className: 'flex-1 flex flex-col overflow-hidden' },
-      Header && e(Header, {
-        fileStatus,
-        autosaveStatus,
-        onSettingsClick: () => setIsSettingsOpen(true),
-        onManualSave: handleManualSave,
-      }),
+      Header &&
+        e(Header, {
+          fileStatus,
+          autosaveStatus,
+          onSettingsClick: () => setIsSettingsOpen(true),
+          onManualSave: handleManualSave,
+        }),
       e(
         'main',
         { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
@@ -248,14 +296,15 @@ function NightingaleCMSApp() {
       )
     ),
     // Settings Modal
-    SettingsModal && e(SettingsModal, {
-      isOpen: isSettingsOpen,
-      onClose: () => setIsSettingsOpen(false),
-      fileService,
-      onDataLoaded: handleDataLoaded,
-      fileStatus,
-      onFileStatusChange: setFileStatus,
-    })
+    SettingsModal &&
+      e(SettingsModal, {
+        isOpen: isSettingsOpen,
+        onClose: () => setIsSettingsOpen(false),
+        fileService,
+        onDataLoaded: handleDataLoaded,
+        fileStatus,
+        onFileStatusChange: setFileStatus,
+      })
   );
 }
 
@@ -274,7 +323,11 @@ if (typeof window !== 'undefined') {
 
   // Register with NightingaleBusiness registry if available
   if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent('NightingaleCMSApp', NightingaleCMSApp, 'application');
+    window.NightingaleBusiness.registerComponent(
+      'NightingaleCMSApp',
+      NightingaleCMSApp,
+      'application'
+    );
   }
 }
 

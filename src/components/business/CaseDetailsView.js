@@ -1,9 +1,9 @@
 /**
  * CaseDetailsView.js - Case details view business component
- * 
+ *
  * Business component for displaying and managing detailed case information.
  * Provides case editing, notes management, financial tracking, and status updates.
- * 
+ *
  * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
@@ -12,7 +12,7 @@
 /**
  * CaseDetailsView Component
  * Displays comprehensive case details with editing capabilities
- * 
+ *
  * @param {Object} props - Component props
  * @param {string} props.caseId - ID of the case to display
  * @param {Object} props.fullData - Complete dataset including cases, people, organizations
@@ -21,56 +21,74 @@
  * @param {Object} [props.fileService] - File service for data operations
  * @returns {React.Element} CaseDetailsView component
  */
-function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileService }) {
+function CaseDetailsView({
+  caseId,
+  fullData,
+  onUpdateData,
+  onBackToList,
+  fileService,
+}) {
+  const e = window.React?.createElement;
+  const { useState } = window.React || {};
+
+  // Component state - must be called unconditionally
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   // React safety check
   if (!window.React) {
     console.warn('React not available for CaseDetailsView component');
     return null;
   }
 
-  const e = window.React.createElement;
-  const { useState } = window.React;
-
-  // Component state
-  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
   // Validate required props
   if (!caseId || !fullData || typeof onUpdateData !== 'function') {
-    console.warn('CaseDetailsView: caseId, fullData, and onUpdateData are required');
+    console.warn(
+      'CaseDetailsView: caseId, fullData, and onUpdateData are required'
+    );
     return null;
   }
 
   // Data lookups
   const caseData = fullData?.cases?.find((c) => c.id === caseId);
-  const person = window.NightingaleDataManagement?.findPersonById?.(fullData?.people, caseData?.personId);
-  const spouse = caseData?.spouseId
-    ? window.NightingaleDataManagement?.findPersonById?.(fullData?.people, caseData.spouseId)
-    : null;
-  const organization = caseData?.organizationId
-    ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0'))
-    : null;
+  const person = window.NightingaleDataManagement?.findPersonById?.(
+    fullData?.people,
+    caseData?.personId
+  );
+  // TODO: Add spouse and organization display when needed
+  // const spouse = caseData?.spouseId ? window.NightingaleDataManagement?.findPersonById?.(fullData?.people, caseData.spouseId) : null;
+  // const organization = caseData?.organizationId ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0')) : null;
 
   // Get component dependencies
-  const CaseCreationModal = window.CaseCreationModal || window.NightingaleBusiness?.getComponent?.('CaseCreationModal');
-  const FinancialManagementSection = window.FinancialManagementSection || window.NightingaleBusiness?.getComponent?.('FinancialManagementSection');
-  const NotesModal = window.NotesModal || window.NightingaleBusiness?.getComponent?.('NotesModal');
+  const CaseCreationModal =
+    window.CaseCreationModal ||
+    window.NightingaleBusiness?.getComponent?.('CaseCreationModal');
+  const FinancialManagementSection =
+    window.FinancialManagementSection ||
+    window.NightingaleBusiness?.getComponent?.('FinancialManagementSection');
+  const NotesModal =
+    window.NotesModal ||
+    window.NightingaleBusiness?.getComponent?.('NotesModal');
 
   // Update case field helper
   const updateCaseField = (field, value) => {
     if (!caseData) return;
-    
+
     const updatedCase = { ...caseData, [field]: value };
-    const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+    const updatedCases = fullData.cases.map((c) =>
+      c.id === caseData.id ? updatedCase : c
+    );
     onUpdateData({ ...fullData, cases: updatedCases });
   };
 
   // Update notes handler
   const handleNotesUpdate = (caseId, updatedNotes) => {
     if (!caseData) return;
-    
+
     const updatedCase = { ...caseData, notes: updatedNotes };
-    const updatedCases = fullData.cases.map((c) => (c.id === caseData.id ? updatedCase : c));
+    const updatedCases = fullData.cases.map((c) =>
+      c.id === caseData.id ? updatedCase : c
+    );
     onUpdateData({ ...fullData, cases: updatedCases });
   };
 
@@ -80,14 +98,16 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
       'div',
       { className: 'w-full p-8 text-center' },
       e('p', { className: 'text-gray-400 text-lg' }, 'Case not found'),
-      onBackToList && e(
-        'button',
-        {
-          onClick: onBackToList,
-          className: 'mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700',
-        },
-        'Back to Cases'
-      )
+      onBackToList &&
+        e(
+          'button',
+          {
+            onClick: onBackToList,
+            className:
+              'mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700',
+          },
+          'Back to Cases'
+        )
     );
   }
 
@@ -99,7 +119,8 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
     e(
       'div',
       {
-        className: 'bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg',
+        className:
+          'bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg',
       },
       e(
         'div',
@@ -121,7 +142,8 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
               'svg',
               {
                 xmlns: 'http://www.w3.org/2000/svg',
-                className: 'h-5 w-5 text-gray-500 group-hover:text-blue-300 transition-colors',
+                className:
+                  'h-5 w-5 text-gray-500 group-hover:text-blue-300 transition-colors',
                 viewBox: '0 0 20 20',
                 fill: 'currentColor',
               },
@@ -138,8 +160,10 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
           e(
             'p',
             {
-              className: 'text-gray-400 copy-mcn-header cursor-pointer hover:text-blue-400 transition-colors',
-              onClick: () => window.NightingaleCMSUtilities?.copyMCN?.(caseData.mcn),
+              className:
+                'text-gray-400 copy-mcn-header cursor-pointer hover:text-blue-400 transition-colors',
+              onClick: () =>
+                window.NightingaleCMSUtilities?.copyMCN?.(caseData.mcn),
               title: 'Click to copy MCN',
             },
             `MCN: ${caseData.mcn || 'Not set'}`
@@ -155,7 +179,8 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
                 {
                   value: caseData.status || '',
                   onChange: (e) => updateCaseField('status', e.target.value),
-                  className: 'bg-gray-700 border border-gray-600 rounded-md py-1 px-2 text-sm',
+                  className:
+                    'bg-gray-700 border border-gray-600 rounded-md py-1 px-2 text-sm',
                 },
                 e('option', { value: '' }, '-- No Status --'),
                 e('option', { value: 'Pending' }, 'Pending'),
@@ -183,7 +208,8 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
               e('input', {
                 type: 'checkbox',
                 checked: caseData.retroStatus || false,
-                onChange: (e) => updateCaseField('retroStatus', e.target.checked),
+                onChange: (e) =>
+                  updateCaseField('retroStatus', e.target.checked),
                 className: 'h-4 w-4 rounded',
               })
             )
@@ -196,7 +222,8 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
             'button',
             {
               onClick: () => setIsNotesModalOpen(true),
-              className: 'bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center gap-2',
+              className:
+                'bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md flex items-center gap-2',
             },
             e(
               'svg',
@@ -219,16 +246,20 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
           e(
             'button',
             {
-              onClick: () => window.NightingaleCMSUtilities?.generateCaseSummary?.(caseData),
-              className: 'bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md',
+              onClick: () =>
+                window.NightingaleCMSUtilities?.generateCaseSummary?.(caseData),
+              className:
+                'bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md',
             },
             'Generate Summary'
           ),
           e(
             'button',
             {
-              onClick: () => window.NightingaleCMSUtilities?.openVRApp?.(caseData),
-              className: 'bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md',
+              onClick: () =>
+                window.NightingaleCMSUtilities?.openVRApp?.(caseData),
+              className:
+                'bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md',
             },
             'Open VR App'
           )
@@ -241,15 +272,16 @@ function CaseDetailsView({ caseId, fullData, onUpdateData, onBackToList, fileSer
       e(FinancialManagementSection, { caseData, fullData, onUpdateData }),
 
     // Notes Modal
-    NotesModal && e(NotesModal, {
-      isOpen: isNotesModalOpen,
-      onClose: () => setIsNotesModalOpen(false),
-      caseId: caseData.id,
-      notes: caseData.notes || [],
-      onNotesUpdate: handleNotesUpdate,
-      caseData: caseData,
-      fullData: fullData,
-    }),
+    NotesModal &&
+      e(NotesModal, {
+        isOpen: isNotesModalOpen,
+        onClose: () => setIsNotesModalOpen(false),
+        caseId: caseData.id,
+        notes: caseData.notes || [],
+        onNotesUpdate: handleNotesUpdate,
+        caseData: caseData,
+        fullData: fullData,
+      }),
 
     // Edit Case Modal
     isEditModalOpen &&
@@ -298,7 +330,11 @@ if (typeof window !== 'undefined') {
 
   // Register with NightingaleBusiness registry if available
   if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent('CaseDetailsView', CaseDetailsView, 'case-management');
+    window.NightingaleBusiness.registerComponent(
+      'CaseDetailsView',
+      CaseDetailsView,
+      'case-management'
+    );
   }
 }
 

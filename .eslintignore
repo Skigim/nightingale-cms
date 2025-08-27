@@ -1,2 +1,4 @@
 App/lib/
 src/assets/
+**/__tests__/
+**/setupTests.js

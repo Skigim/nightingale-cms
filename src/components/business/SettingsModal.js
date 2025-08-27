@@ -1,9 +1,9 @@
 /**
  * SettingsModal.js - Settings and data management modal
- * 
+ *
  * Business component for application settings, file system connection, and data management.
  * Provides functionality to connect to directories, load/save data, and create sample datasets.
- * 
+ *
  * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
@@ -12,7 +12,7 @@
 /**
  * SettingsModal Component
  * Modal for managing application settings and data operations
- * 
+ *
  * @param {Object} props - Component props
  * @param {boolean} props.isOpen - Whether the modal is open
  * @param {Function} props.onClose - Callback to close the modal
@@ -22,25 +22,35 @@
  * @param {Function} props.onFileStatusChange - Callback when file status changes
  * @returns {React.Element} SettingsModal component
  */
-function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus, onFileStatusChange }) {
+function SettingsModal({
+  isOpen,
+  onClose,
+  fileService,
+  onDataLoaded,
+  fileStatus,
+  onFileStatusChange,
+}) {
+  const e = window.React?.createElement;
+  const { useState } = window.React || {};
+
+  // Component state - must be called unconditionally
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+
   // React safety check
   if (!window.React) {
     console.warn('React not available for SettingsModal component');
     return null;
   }
 
-  const e = window.React.createElement;
-  const { useState } = window.React;
-
-  // Component state
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [loadingData, setLoadingData] = useState(false);
-
   // Get dependencies
   const Modal = window.Modal || window.NightingaleUI?.getComponent?.('Modal');
-  const showToast = window.showToast || window.NightingaleToast?.show || function(message, type) {
-    console.log(`Toast ${type}: ${message}`);
-  };
+  const showToast =
+    window.showToast ||
+    window.NightingaleToast?.show ||
+    function (message, type) {
+      console.log(`Toast ${type}: ${message}`);
+    };
 
   // Validate required props
   if (!Modal) {
@@ -88,12 +98,16 @@ function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus,
     try {
       const data = await fileService.readFile();
       if (data) {
-        const normalizedData = window.NightingaleDataManagement?.normalizeDataMigrations
+        const normalizedData = window.NightingaleDataManagement
+          ?.normalizeDataMigrations
           ? await window.NightingaleDataManagement.normalizeDataMigrations(data)
           : data;
-        
+
         if (onDataLoaded) onDataLoaded(normalizedData);
-        showToast(`Data loaded successfully! Found ${normalizedData.cases?.length || 0} cases`, 'success');
+        showToast(
+          `Data loaded successfully! Found ${normalizedData.cases?.length || 0} cases`,
+          'success'
+        );
         onClose();
       } else {
         showToast('No data file found', 'warning');
@@ -245,7 +259,8 @@ function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus,
           'button',
           {
             onClick: onClose,
-            className: 'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
+            className:
+              'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
           },
           'Close'
         )
@@ -259,7 +274,11 @@ function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus,
       e(
         'div',
         { className: 'space-y-4' },
-        e('h3', { className: 'text-lg font-semibold text-white' }, 'File System Connection'),
+        e(
+          'h3',
+          { className: 'text-lg font-semibold text-white' },
+          'File System Connection'
+        ),
         e(
           'p',
           { className: 'text-gray-400 text-sm' },
@@ -285,7 +304,9 @@ function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus,
             'div',
             {
               className: `px-3 py-1 rounded-full text-xs font-medium ${
-                fileStatus === 'connected' ? 'bg-green-600 text-green-100' : 'bg-red-600 text-red-100'
+                fileStatus === 'connected'
+                  ? 'bg-green-600 text-green-100'
+                  : 'bg-red-600 text-red-100'
               }`,
             },
             fileStatus === 'connected' ? 'Connected' : 'Disconnected'
@@ -297,8 +318,16 @@ function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus,
       e(
         'div',
         { className: 'space-y-4' },
-        e('h3', { className: 'text-lg font-semibold text-white' }, 'Data Management'),
-        e('p', { className: 'text-gray-400 text-sm' }, 'Load existing data or create sample data for testing.'),
+        e(
+          'h3',
+          { className: 'text-lg font-semibold text-white' },
+          'Data Management'
+        ),
+        e(
+          'p',
+          { className: 'text-gray-400 text-sm' },
+          'Load existing data or create sample data for testing.'
+        ),
         e(
           'div',
           { className: 'grid grid-cols-1 md:grid-cols-2 gap-3' },
@@ -339,11 +368,24 @@ function SettingsModal({ isOpen, onClose, fileService, onDataLoaded, fileStatus,
         e(
           'ol',
           {
-            className: 'text-sm text-gray-300 space-y-1 list-decimal list-inside',
+            className:
+              'text-sm text-gray-300 space-y-1 list-decimal list-inside',
           },
-          e('li', null, "Click 'Connect to Directory' and select your Nightingale project folder"),
-          e('li', null, "Use 'Load Data File' to load existing nightingale-data.json"),
-          e('li', null, "Or use 'Create Sample Data' to generate test cases for development")
+          e(
+            'li',
+            null,
+            "Click 'Connect to Directory' and select your Nightingale project folder"
+          ),
+          e(
+            'li',
+            null,
+            "Use 'Load Data File' to load existing nightingale-data.json"
+          ),
+          e(
+            'li',
+            null,
+            "Or use 'Create Sample Data' to generate test cases for development"
+          )
         )
       )
     )
@@ -357,7 +399,11 @@ if (typeof window !== 'undefined' && window.PropTypes) {
     onClose: window.PropTypes.func.isRequired,
     fileService: window.PropTypes.object,
     onDataLoaded: window.PropTypes.func,
-    fileStatus: window.PropTypes.oneOf(['connected', 'disconnected', 'connecting']),
+    fileStatus: window.PropTypes.oneOf([
+      'connected',
+      'disconnected',
+      'connecting',
+    ]),
     onFileStatusChange: window.PropTypes.func,
   };
 }
@@ -369,7 +415,11 @@ if (typeof window !== 'undefined') {
 
   // Register with NightingaleBusiness registry if available
   if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent('SettingsModal', SettingsModal, 'settings');
+    window.NightingaleBusiness.registerComponent(
+      'SettingsModal',
+      SettingsModal,
+      'settings'
+    );
   }
 }
 
