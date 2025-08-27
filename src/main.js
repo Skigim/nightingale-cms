@@ -14,7 +14,12 @@
 
 // React and ReactDOM are loaded via CDN in index.html
 // Tailwind CSS is loaded via CDN in index.html
-// Day.js is loaded via asset in index.html
+
+// Import Day.js for date management (async loading)
+import dayjsPromise from './assets/dayjs.js';
+
+// Import Fuse.js for search functionality (async loading)
+import fusePromise from './assets/fuse.js';
 
 // ========================================================================
 // NIGHTINGALE SERVICES - Dependency Order Matters!
@@ -167,37 +172,62 @@ function registerComponents() {
 /**
  * Initialize the Nightingale CMS Application
  */
-function initializeNightingaleCMS() {
+async function initializeNightingaleCMS() {
   console.log('🚀 Nightingale CMS - Initializing ES6 Module System...');
 
-  // Register services and components
-  registerServices();
-  registerComponents();
+  try {
+    // Wait for external libraries to load before initializing services
+    console.log('📦 Loading external libraries...');
+    
+    const [dayjs, Fuse] = await Promise.all([
+      dayjsPromise,
+      fusePromise
+    ]);
+    
+    console.log('✅ Day.js loaded successfully');
+    console.log('✅ Fuse.js loaded successfully');
 
-  // Initialize the main React app
-  const root = window.ReactDOM.createRoot(document.getElementById('root'));
-  root.render(window.React.createElement(NightingaleCMSApp));
+    // Register services and components
+    registerServices();
+    registerComponents();
 
-  // Dispatch ready events for compatibility
-  window.dispatchEvent(
-    new CustomEvent('nightingale:services:ready', {
-      detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
-    })
-  );
+    // Initialize the main React app
+    const root = window.ReactDOM.createRoot(document.getElementById('root'));
+    root.render(window.React.createElement(NightingaleCMSApp));
 
-  window.dispatchEvent(
-    new CustomEvent('nightingale:components:ready', {
-      detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
-    })
-  );
+    // Dispatch ready events for compatibility
+    window.dispatchEvent(
+      new CustomEvent('nightingale:services:ready', {
+        detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
+      })
+    );
 
-  window.dispatchEvent(
-    new CustomEvent('nightingale:ready', {
-      detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
-    })
-  );
+    window.dispatchEvent(
+      new CustomEvent('nightingale:components:ready', {
+        detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
+      })
+    );
 
-  console.log('🎉 Nightingale CMS - Fully Initialized with ES6 Modules!');
+    window.dispatchEvent(
+      new CustomEvent('nightingale:ready', {
+        detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
+      })
+    );
+
+    console.log('🎉 Nightingale CMS - Fully Initialized with ES6 Modules!');
+  } catch (error) {
+    console.error('❌ Failed to initialize Nightingale CMS:', error);
+    
+    // Fallback: try to initialize without external libraries
+    console.log('🔄 Attempting fallback initialization without external libraries...');
+    registerServices();
+    registerComponents();
+    
+    const root = window.ReactDOM.createRoot(document.getElementById('root'));
+    root.render(window.React.createElement(NightingaleCMSApp));
+    
+    console.log('⚠️ Nightingale CMS initialized with limited functionality');
+  }
 }
 
 // ========================================================================
@@ -206,10 +236,16 @@ function initializeNightingaleCMS() {
 
 // Wait for DOM to be ready, then initialize
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeNightingaleCMS);
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeNightingaleCMS().catch(error => {
+      console.error('❌ Critical error during initialization:', error);
+    });
+  });
 } else {
   // DOM already loaded
-  initializeNightingaleCMS();
+  initializeNightingaleCMS().catch(error => {
+    console.error('❌ Critical error during initialization:', error);
+  });
 }
 
 // Export the main app for potential use by other modules

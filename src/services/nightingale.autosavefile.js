@@ -48,6 +48,10 @@
       this.storeName = 'directoryHandles';
       this.dbKey = 'nightingaleDirectory';
 
+      // Write operation queue to prevent race conditions
+      this.writeQueue = [];
+      this.isWriting = false;
+
       // Autosave properties
       this.config = {
         enabled,
@@ -162,6 +166,38 @@
     }
 
     async writeFile(data) {
+      // Add to write queue to prevent race conditions
+      return new Promise((resolve, reject) => {
+        this.writeQueue.push({ data, resolve, reject });
+        this.processWriteQueue();
+      });
+    }
+
+    async processWriteQueue() {
+      // If already processing or queue is empty, return
+      if (this.isWriting || this.writeQueue.length === 0) {
+        return;
+      }
+
+      this.isWriting = true;
+
+      try {
+        while (this.writeQueue.length > 0) {
+          const { data, resolve, reject } = this.writeQueue.shift();
+          
+          try {
+            const success = await this._performWrite(data);
+            resolve(success);
+          } catch (error) {
+            reject(error);
+          }
+        }
+      } finally {
+        this.isWriting = false;
+      }
+    }
+
+    async _performWrite(data) {
       // Check if we have a directory handle and permissions
       if (!this.directoryHandle) {
         console.log(
