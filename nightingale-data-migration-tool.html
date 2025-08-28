@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nightingale CMS Data Migration Tool</title>
-    <style>
+    <title>Nightingale CMS Data Migra        
+        <div style="text-align: center;">
+            <button class="btn" id="migrateBtn" onclick="migrateData()" disabled>
+                🔄 Migrate Data
+            </button>
+        </div>    <style>
         * {
             margin: 0;
             padding: 0;
@@ -164,7 +168,7 @@
 <body>
     <div class="container">
         <h1>🩺 Nightingale CMS Data Migration Tool</h1>
-        <p class="subtitle">Migrate legacy case data to the current format</p>
+        <p class="subtitle">Migrate legacy case data to the current normalized format</p>
         
         <div class="upload-area" id="uploadArea">
             <div class="upload-text">📁 Drop your nightingale-data.json file here</div>
@@ -182,19 +186,11 @@
             <h3 style="color: #2d3748; margin-bottom: 16px;">Migration Options</h3>
             
             <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" id="anonymizeData" style="margin-right: 8px; transform: scale(1.2);">
-                <span style="color: #4a5568; font-weight: 600;">🔒 Anonymize Personal Data</span>
+                <input type="checkbox" id="generateEmptySchema" style="margin-right: 8px; transform: scale(1.2);">
+                <span style="color: #4a5568; font-weight: 600;">� Generate Empty Schema</span>
             </label>
             <p style="color: #718096; font-size: 14px; margin-left: 28px; margin-bottom: 16px;">
-                Replace names, addresses, phone numbers, emails, and SSNs with realistic fake data
-            </p>
-            
-            <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" id="preserveRelationships" checked style="margin-right: 8px; transform: scale(1.2);">
-                <span style="color: #4a5568; font-weight: 600;">🔗 Preserve Data Relationships</span>
-            </label>
-            <p style="color: #718096; font-size: 14px; margin-left: 28px;">
-                Keep case-to-person and other ID relationships intact during anonymization
+                Generate a clean, empty data structure for development and testing
             </p>
         </div>
         
@@ -219,223 +215,6 @@
         let rawData = null;
         let migratedData = null;
         let migrationLog = [];
-
-        // Anonymization data sets
-        const FAKE_DATA = {
-            firstNames: [
-                'James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda',
-                'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica',
-                'Thomas', 'Sarah', 'Christopher', 'Karen', 'Charles', 'Nancy', 'Daniel', 'Lisa',
-                'Matthew', 'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra', 'Donald', 'Donna',
-                'Steven', 'Carol', 'Paul', 'Ruth', 'Andrew', 'Sharon', 'Joshua', 'Michelle'
-            ],
-            lastNames: [
-                'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
-                'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas',
-                'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson', 'White',
-                'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker', 'Young',
-                'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores'
-            ],
-            streets: [
-                'Main St', 'Oak Ave', 'Pine St', 'Maple Dr', 'Cedar Ln', 'Elm St', 'Park Ave',
-                'Washington St', 'First St', 'Second St', 'Third St', 'Lincoln Ave', 'Church St',
-                'Mill St', 'School St', 'Spring St', 'High St', 'Court St', 'Franklin St', 'Jefferson Ave'
-            ],
-            cities: [
-                'Springfield', 'Franklin', 'Georgetown', 'Madison', 'Washington', 'Arlington', 'Fairview',
-                'Salem', 'Bristol', 'Clinton', 'Greenville', 'Manchester', 'Oxford', 'Plymouth',
-                'Richmond', 'Riverside', 'Kingston', 'Newport', 'Auburn', 'Centerville'
-            ],
-            organizations: [
-                'Sunset Care Center', 'Meadowbrook Manor', 'Golden Years Facility', 'Harmony House',
-                'Peaceful Gardens', 'Riverside Care', 'Oak Hill Center', 'Pine Valley Manor',
-                'Maplewood Care', 'Serenity Springs', 'Garden View Center', 'Willow Creek Manor'
-            ]
-        };
-
-        // Anonymization helper functions
-        function getRandomItem(array) {
-            return array[Math.floor(Math.random() * array.length)];
-        }
-
-        function generateFakeSSN() {
-            // Generate fake SSN in XXX-XX-XXXX format (avoiding real ranges)
-            const area = Math.floor(Math.random() * 99) + 900; // 900-999 (invalid range)
-            const group = Math.floor(Math.random() * 99) + 1;
-            const serial = Math.floor(Math.random() * 9999) + 1;
-            return `${area}-${group.toString().padStart(2, '0')}-${serial.toString().padStart(4, '0')}`;
-        }
-
-        function generateFakePhone() {
-            // Generate fake phone in (XXX)XXX-XXXX format
-            const area = Math.floor(Math.random() * 800) + 200; // 200-999
-            const exchange = Math.floor(Math.random() * 800) + 200;
-            const number = Math.floor(Math.random() * 10000);
-            return `(${area})${exchange}-${number.toString().padStart(4, '0')}`;
-        }
-
-        function generateFakeEmail(firstName, lastName) {
-            const domains = ['example.com', 'test.org', 'sample.net', 'demo.com'];
-            const domain = getRandomItem(domains);
-            return `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}`;
-        }
-
-        function generateFakeAddress() {
-            const number = Math.floor(Math.random() * 9999) + 1;
-            const street = getRandomItem(FAKE_DATA.streets);
-            const city = getRandomItem(FAKE_DATA.cities);
-            const states = ['NE', 'IA', 'KS', 'CO', 'WY', 'SD', 'ND', 'MO', 'OK'];
-            const state = getRandomItem(states);
-            const zip = Math.floor(Math.random() * 90000) + 10000;
-            
-            return {
-                street: `${number} ${street}`,
-                city: city,
-                state: state,
-                zip: zip.toString()
-            };
-        }
-
-        // Main anonymization function
-        function anonymizeData(data, preserveRelationships = true) {
-            if (!data) return data;
-            
-            log('🔒 Starting data anonymization...', 'info');
-            const anonymizedData = JSON.parse(JSON.stringify(data));
-            
-            // Create mapping for consistent anonymization
-            const personNameMap = new Map();
-            const organizationNameMap = new Map();
-            
-            // Anonymize people
-            if (anonymizedData.people) {
-                log(`👥 Anonymizing ${anonymizedData.people.length} people...`, 'info');
-                
-                anonymizedData.people = anonymizedData.people.map((person, index) => {
-                    const anonymizedPerson = { ...person };
-                    
-                    // Generate consistent fake name
-                    const firstName = getRandomItem(FAKE_DATA.firstNames);
-                    const lastName = getRandomItem(FAKE_DATA.lastNames);
-                    const fullName = `${firstName} ${lastName}`;
-                    
-                    if (preserveRelationships && person.name) {
-                        personNameMap.set(person.name, fullName);
-                    }
-                    
-                    anonymizedPerson.name = fullName;
-                    
-                    // Anonymize sensitive fields
-                    if (person.ssn) {
-                        anonymizedPerson.ssn = generateFakeSSN();
-                    }
-                    
-                    if (person.phone) {
-                        anonymizedPerson.phone = generateFakePhone();
-                    }
-                    
-                    if (person.email) {
-                        anonymizedPerson.email = generateFakeEmail(firstName, lastName);
-                    }
-                    
-                    // Anonymize addresses
-                    if (person.address) {
-                        anonymizedPerson.address = generateFakeAddress();
-                    }
-                    
-                    if (person.mailingAddress && !person.mailingAddress.sameAsPhysical) {
-                        anonymizedPerson.mailingAddress = generateFakeAddress();
-                    } else if (person.mailingAddress && person.mailingAddress.sameAsPhysical) {
-                        anonymizedPerson.mailingAddress = {
-                            ...anonymizedPerson.address,
-                            sameAsPhysical: true
-                        };
-                    }
-                    
-                    return anonymizedPerson;
-                });
-                
-                log(`✅ Anonymized ${anonymizedData.people.length} people`, 'success');
-            }
-            
-            // Anonymize organizations
-            if (anonymizedData.organizations) {
-                log(`🏢 Anonymizing ${anonymizedData.organizations.length} organizations...`, 'info');
-                
-                anonymizedData.organizations = anonymizedData.organizations.map((org) => {
-                    const anonymizedOrg = { ...org };
-                    
-                    const fakeName = getRandomItem(FAKE_DATA.organizations);
-                    
-                    if (preserveRelationships && org.name) {
-                        organizationNameMap.set(org.name, fakeName);
-                    }
-                    
-                    anonymizedOrg.name = fakeName;
-                    
-                    if (org.email) {
-                        anonymizedOrg.email = `info@${fakeName.toLowerCase().replace(/\s+/g, '')}.example.com`;
-                    }
-                    
-                    if (org.phone) {
-                        anonymizedOrg.phone = generateFakePhone();
-                    }
-                    
-                    if (org.address) {
-                        anonymizedOrg.address = generateFakeAddress();
-                    }
-                    
-                    return anonymizedOrg;
-                });
-                
-                log(`✅ Anonymized ${anonymizedData.organizations.length} organizations`, 'success');
-            }
-            
-            // Anonymize case notes and descriptions (remove potentially identifying info)
-            if (anonymizedData.cases) {
-                log(`📋 Anonymizing case data...`, 'info');
-                
-                anonymizedData.cases = anonymizedData.cases.map((caseItem) => {
-                    const anonymizedCase = { ...caseItem };
-                    
-                    // Clear description and notes that might contain personal info
-                    if (anonymizedCase.description) {
-                        anonymizedCase.description = '';
-                    }
-                    
-                    if (anonymizedCase.notes && Array.isArray(anonymizedCase.notes)) {
-                        anonymizedCase.notes = anonymizedCase.notes.map(note => ({
-                            ...note,
-                            content: '[ANONYMIZED NOTE CONTENT]',
-                            title: note.title ? '[ANONYMIZED NOTE TITLE]' : ''
-                        }));
-                    }
-                    
-                    // Anonymize financial item descriptions that might be identifying
-                    if (anonymizedCase.financials) {
-                        ['resources', 'income', 'expenses'].forEach(type => {
-                            if (anonymizedCase.financials[type]) {
-                                anonymizedCase.financials[type] = anonymizedCase.financials[type].map(item => ({
-                                    ...item,
-                                    notes: item.notes ? '[ANONYMIZED]' : '',
-                                    location: item.location ? 'Anonymous Bank' : '',
-                                    accountNumber: item.accountNumber ? '****' : ''
-                                }));
-                            }
-                        });
-                    }
-                    
-                    return anonymizedCase;
-                });
-                
-                log(`✅ Anonymized case data`, 'success');
-            }
-            
-            log(`🎉 Data anonymization completed!`, 'success');
-            log(`📊 Anonymized: ${anonymizedData.people?.length || 0} people, ${anonymizedData.organizations?.length || 0} organizations`, 'info');
-            
-            return anonymizedData;
-        }
 
         // Utility function to generate secure IDs
         function generateSecureId(prefix = 'item') {
@@ -484,13 +263,13 @@
                     }
 
                     // Map appDetails.appDate to applicationDate
-                    if (caseItem.appDetails?.appDate && !caseItem.applicationDate) {
+                    if (caseItem.appDetails && caseItem.appDetails.appDate && !caseItem.applicationDate) {
                         normalizedCase.applicationDate = caseItem.appDetails.appDate;
                         log(`📅 Migrated appDetails.appDate → applicationDate`, 'success');
                     }
 
                     // Map appDetails.caseType to caseType if missing
-                    if (caseItem.appDetails?.caseType && !caseItem.caseType) {
+                    if (caseItem.appDetails && caseItem.appDetails.caseType && !caseItem.caseType) {
                         normalizedCase.caseType = caseItem.appDetails.caseType;
                         log(`📋 Migrated appDetails.caseType "${caseItem.appDetails.caseType}" → caseType`, 'success');
                     }
@@ -723,12 +502,11 @@
                 try {
                     rawData = JSON.parse(e.target.result);
                     log(`📁 Loaded file: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`, 'success');
-                    log(`📊 Found: ${rawData.cases?.length || 0} cases, ${rawData.people?.length || 0} people, ${rawData.organizations?.length || 0} organizations`);
+                    
+                    // Show normal counts during initial file load (before anonymization)
+                    log(`📊 Found: ${(rawData.cases ? rawData.cases.length : 0)} cases, ${(rawData.people ? rawData.people.length : 0)} people, ${(rawData.organizations ? rawData.organizations.length : 0)} organizations`);
                     migrateBtn.disabled = false;
                     uploadArea.innerHTML = `<div class="upload-text success">✅ ${file.name} loaded successfully</div>`;
-                    
-                    // Show options panel
-                    document.getElementById('optionsPanel').style.display = 'block';
                     
                 } catch (error) {
                     log(`❌ Error parsing JSON: ${error.message}`, 'error');
@@ -747,26 +525,25 @@
             migrationLog = [];
             document.getElementById('results').style.display = 'block';
             migrateBtn.disabled = true;
-            migrateBtn.textContent = '🔄 Migrating...';
+            migrateBtn.textContent = '🔄 Processing...';
 
             try {
-                // First, apply data migrations
-                log('🔄 Starting data migration process...', 'info');
-                migratedData = await normalizeDataMigrations(rawData);
+                const shouldGenerateEmpty = document.getElementById('generateEmptySchema').checked;
                 
-                // Then, apply anonymization if requested
-                const shouldAnonymize = document.getElementById('anonymizeData').checked;
-                const preserveRelationships = document.getElementById('preserveRelationships').checked;
-                
-                if (shouldAnonymize) {
-                    log('🔒 Applying anonymization...', 'info');
-                    migratedData = anonymizeData(migratedData, preserveRelationships);
+                if (shouldGenerateEmpty) {
+                    // Generate empty schema instead of migrating
+                    log('📋 Generating empty schema...', 'info');
+                    migratedData = generateEmptySchema();
+                } else {
+                    // Apply data migrations only
+                    log('� Starting data migration process...', 'info');
+                    migratedData = await normalizeDataMigrations(rawData);
                 }
                 
                 // Create download link with appropriate filename
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = shouldAnonymize 
-                    ? `nightingale-data-migrated-anonymized-${timestamp}.json`
+                const filename = shouldGenerateEmpty 
+                    ? `nightingale-empty-schema-${timestamp}.json`
                     : `nightingale-data-migrated-${timestamp}.json`;
                 
                 const dataStr = JSON.stringify(migratedData, null, 2);
@@ -779,7 +556,15 @@
                 downloadLink.style.display = 'inline-block';
                 document.getElementById('downloadSection').style.display = 'block';
                 
-                const processType = shouldAnonymize ? 'Migration and anonymization' : 'Migration';
+                const processType = shouldGenerateEmpty ? 'Empty schema generation' : 'Migration';
+                
+                // Final summary
+                if (shouldGenerateEmpty) {
+                    log(`📊 Generated empty schema with metadata`, 'info');
+                } else {
+                    log(`📊 Final: ${migratedData.cases ? migratedData.cases.length : 0} cases, ${migratedData.people ? migratedData.people.length : 0} people, ${migratedData.organizations ? migratedData.organizations.length : 0} organizations`, 'info');
+                }
+                
                 log(`🎉 ${processType} completed! File is ready for download.`, 'success');
                 
             } catch (error) {
