@@ -93,7 +93,6 @@
               return element;
             }
           } catch (error) {
-            // When one falls, we continue - focus attempt failed but expedition proceeds
             const logger = window.NightingaleLogger?.get('ui:focus');
             logger?.debug('Focus attempt failed, we continue.', {
               selector,
@@ -249,6 +248,8 @@
 
       return true;
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('ui:broadcast');
+      logger?.debug('Broadcast failed', { error: error.message });
       return false;
     }
   }

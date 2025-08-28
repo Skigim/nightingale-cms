@@ -10,9 +10,21 @@
  * - Template validation
  * - Duplicate name checking
  * - File persistence with immediate sync
- * - BroadcastChannel integration for CMS synchronization
- *
- * Data Structure:
+ * - BroadcastChannel integration for CMS synchronizat        if (showToast && this.toastService) {
+          this._showToast('Category added successfully.', 'success');
+        }
+
+        return {
+          success: true,
+          data: newData,
+        };
+      } catch (error) {
+        const logger = window.NightingaleLogger?.get('templates:addCategory');
+        logger?.error('Category addition failed', { error: error.message });
+        return {
+          success: false,
+          error: error.message,
+        };ata Structure:
  * - Templates: { id, name, category, content }
  * - Categories: Array of strings
  * - Auto-increment ID management
@@ -229,6 +241,8 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('templates:render');
+        logger?.error('Template render failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -326,6 +340,8 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('templates:process');
+        logger?.error('Template processing failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -392,6 +408,8 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('templates:delete');
+        logger?.error('Template deletion failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -562,6 +580,10 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get(
+          'templates:removeCategory'
+        );
+        logger?.error('Category removal failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -600,6 +622,8 @@
           return false;
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('templates:integrity');
+        logger?.warn('Integrity signal failed', { error: error.message });
         return false;
       }
     }

@@ -803,6 +803,11 @@ function CaseCreationModal({
         const newErrors = validator(caseData, safeFullData);
         return newErrors;
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('caseCreation:validate');
+        logger?.warn('Step validation failed', {
+          error: error.message,
+          step: stepConfig.key,
+        });
         // Step validation error suppressed (no-op)
         // In case of validation error, return empty errors (allow the step)
         return {};
@@ -945,6 +950,8 @@ function CaseCreationModal({
       showToast(successMessage, 'success');
       onClose();
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('caseCreation:save');
+      logger?.error('Case save failed', { error: error.message });
       // Error saving case suppressed (no-op)
       showToast('Error saving case: ' + error.message, 'error');
     } finally {

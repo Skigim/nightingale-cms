@@ -282,6 +282,12 @@ function showToast(message, type = 'info', duration = null) {
 
     return toastQueue.add(message, type, duration);
   } catch (error) {
+    const logger = window.NightingaleLogger?.get('toast:system');
+    logger?.error('Toast system failed', {
+      error: error.message,
+      message,
+      type,
+    });
     return null;
   }
 }

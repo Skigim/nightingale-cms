@@ -137,6 +137,8 @@ function useOrganizationsData(props) {
           showToast('Organization updated successfully!', 'success');
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('organizationsTab:save');
+        logger?.error('Organization save failed', { error: error.message });
         showToast('Error saving organization', 'error');
       }
     },

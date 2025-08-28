@@ -219,6 +219,10 @@ function OrganizationModal({
 
         return errors;
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('organization:validate');
+        logger?.warn('Organization validation failed', {
+          error: error.message,
+        });
         return {};
       }
     },
@@ -459,6 +463,8 @@ function OrganizationModal({
       onOrganizationCreated(resultOrganization);
       onClose();
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('organization:save');
+      logger?.error('Organization save failed', { error: error.message });
       window.showToast?.(
         'Error saving organization: ' + error.message,
         'error'

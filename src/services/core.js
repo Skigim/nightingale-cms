@@ -286,6 +286,8 @@
         this.data = data;
         this.options = defaultOptions;
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('core:search');
+        logger?.warn('Search service init failed', { error: error.message });
         this.fuse = null;
       }
     }
@@ -299,6 +301,8 @@
         const results = this.fuse.search(query.trim());
         return results.map((result) => result.item || result);
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('core:search');
+        logger?.debug('Search query failed', { error: error.message, query });
         return [];
       }
     }
@@ -314,7 +318,8 @@
           this.fuse.setCollection(newData);
         }
       } catch (error) {
-        // Silently handle search update errors
+        const logger = window.NightingaleLogger?.get('core:search');
+        logger?.debug('Search data update failed', { error: error.message });
       }
     }
 

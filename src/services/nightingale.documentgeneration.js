@@ -159,6 +159,8 @@
           content: processedContent,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('documents:generate');
+        logger?.error('Document generation failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -209,6 +211,8 @@
           itemCount: selectedFinancialItems.length,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('documents:compile');
+        logger?.error('Document compilation failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -354,6 +358,10 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get(
+          'documents:createVrRequest'
+        );
+        logger?.error('VR request creation failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -448,6 +456,10 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get(
+          'documents:updateVrStatus'
+        );
+        logger?.error('VR status update failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -519,6 +531,10 @@
           data: newData,
         };
       } catch (error) {
+        const logger = window.NightingaleLogger?.get(
+          'documents:deleteVrRequest'
+        );
+        logger?.error('VR request deletion failed', { error: error.message });
         return {
           success: false,
           error: error.message,
@@ -606,6 +622,10 @@
           return false;
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('documents:integrity');
+        logger?.warn('Document integrity signal failed', {
+          error: error.message,
+        });
         return false;
       }
     }

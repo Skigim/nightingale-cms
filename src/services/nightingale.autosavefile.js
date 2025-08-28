@@ -96,6 +96,8 @@
 
         this.updateStatus('initialized', 'Service ready');
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('autosave:init');
+        logger?.error('Autosave init failed', { error: error.message });
         this.updateStatus('error', 'Initialization failed: ' + error.message);
       }
     }
@@ -184,6 +186,8 @@
             const success = await this._performWrite(data);
             resolve(success);
           } catch (error) {
+            const logger = window.NightingaleLogger?.get('autosave:write');
+            logger?.error('Write operation failed', { error: error.message });
             reject(error);
           }
         }
@@ -300,6 +304,10 @@
           return { handle, permission };
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('autosave:directory');
+        logger?.warn('Directory handle verification failed', {
+          error: error.message,
+        });
         await this.clearStoredDirectoryHandle();
       }
 
@@ -541,6 +549,8 @@
           this.handleSaveFailure('Write operation failed');
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('autosave:save');
+        logger?.error('Save operation failed', { error: error.message });
         this.handleSaveFailure(error.message);
       } finally {
         this.state.pendingSave = false;
@@ -593,6 +603,8 @@
           }
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('autosave:permissions');
+        logger?.debug('Permission check failed', { error: error.message });
         this.state.permissionStatus = 'unknown';
       }
     }

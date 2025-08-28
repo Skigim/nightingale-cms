@@ -132,6 +132,11 @@
     try {
       window.open(vrUrl, '_blank');
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('cms:navigation');
+      logger?.warn('Failed to open VR app', {
+        error: error.message,
+        url: vrUrl,
+      });
       if (window.showToast) {
         window.showToast('Failed to open VR application', 'error');
       }

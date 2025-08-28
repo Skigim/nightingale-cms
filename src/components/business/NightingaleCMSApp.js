@@ -180,6 +180,8 @@ function NightingaleCMSApp() {
         await fileService.saveData();
         showToast('Data saved successfully', 'success');
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('cms:manualSave');
+        logger?.error('Manual save failed', { error: error.message });
         showToast('Failed to save data', 'error');
       }
     } else {

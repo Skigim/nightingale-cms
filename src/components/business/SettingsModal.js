@@ -73,6 +73,8 @@ function SettingsModal({
         showToast('Failed to connect to directory', 'error');
       }
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('settings:connect');
+      logger?.error('Directory connection failed', { error: error.message });
       if (onFileStatusChange) onFileStatusChange('disconnected');
       showToast('Error connecting to directory', 'error');
     } finally {
@@ -105,6 +107,8 @@ function SettingsModal({
         showToast('No data file found', 'warning');
       }
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('settings:loadData');
+      logger?.error('Data loading failed', { error: error.message });
       showToast('Error loading data file', 'error');
     } finally {
       setLoadingData(false);
@@ -230,6 +234,8 @@ function SettingsModal({
       showToast('Sample data created and loaded!', 'success');
       onClose();
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('settings:createSample');
+      logger?.error('Sample data creation failed', { error: error.message });
       showToast('Error creating sample data', 'error');
     }
   };

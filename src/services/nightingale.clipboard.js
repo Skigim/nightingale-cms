@@ -67,6 +67,10 @@
         // Fallback to execCommand for older browsers
         return this._fallbackCopy(sanitizedText, config);
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('clipboard:copy');
+        logger?.debug('Modern clipboard API failed, trying fallback', {
+          error: error.message,
+        });
         return this._fallbackCopy(sanitizedText, config);
       }
     }
@@ -103,6 +107,8 @@
           throw new Error('execCommand failed');
         }
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('clipboard:fallback');
+        logger?.warn('Fallback copy failed', { error: error.message });
         if (config.showToast && window.showToast) {
           window.showToast(config.errorMessage, 'error');
         }

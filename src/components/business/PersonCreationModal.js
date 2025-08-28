@@ -255,6 +255,8 @@ function PersonCreationModal({
 
         return errors;
       } catch (error) {
+        const logger = window.NightingaleLogger?.get('personCreation:validate');
+        logger?.warn('Person validation failed', { error: error.message });
         // Person validation error suppressed (no-op)
         // In case of validation error, return empty errors (allow the step)
         return {};
@@ -459,6 +461,8 @@ function PersonCreationModal({
       onPersonCreated(resultPerson);
       onClose();
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('personCreation:save');
+      logger?.error('Person save failed', { error: error.message });
       window.showToast?.('Error saving person: ' + error.message, 'error');
     } finally {
       setIsLoading(false);

@@ -166,6 +166,8 @@ function NotesModal({
 
       resetForm();
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('notes:save');
+      logger?.error('Note save failed', { error: error.message });
       showToast('Error saving note. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
@@ -227,6 +229,8 @@ function NotesModal({
 
       showToast('Note deleted successfully', 'success');
     } catch (error) {
+      const logger = window.NightingaleLogger?.get('notes:delete');
+      logger?.error('Note deletion failed', { error: error.message });
       showToast('Error deleting note. Please try again.', 'error');
     } finally {
       // Reset confirmation state
