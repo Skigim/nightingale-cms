@@ -43,6 +43,11 @@ function NightingaleCMSApp() {
   // Use ref for live data access to avoid stale closure issues
   const fullDataRef = useRef(null);
 
+  // Data update handler - must be defined before useMemo that uses it
+  const handleDataUpdate = useCallback((newData) => {
+    setFullData(newData);
+  }, []);
+
   // Keep ref synchronized with state
   useEffect(() => {
     fullDataRef.current = fullData;
@@ -192,10 +197,6 @@ function NightingaleCMSApp() {
   // Handle data updates from children
   const handleDataLoaded = useCallback((data) => {
     setFullData(data);
-  }, []);
-
-  const handleDataUpdate = useCallback((newData) => {
-    setFullData(newData);
   }, []);
 
   // Render tab content based on active tab - optimized with memoized props
