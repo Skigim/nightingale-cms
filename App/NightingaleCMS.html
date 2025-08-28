@@ -8397,7 +8397,15 @@
 
         // Save view state to localStorage to preserve context across reloads or when focus is lost
         function saveViewStateToLocalStorage() {
-          console.time("ViewState Save");
+          // Don't save if state isn't initialized yet
+          if (!state || !state.viewState) {
+            console.warn("State not initialized, skipping viewState save");
+            return;
+          }
+          
+          // Use unique timer name to avoid conflicts
+          const timerName = `ViewState Save ${Date.now()}`;
+          console.time(timerName);
           const viewStateToSave = {
             currentTab: state.viewState.currentTab,
             currentCaseId: state.viewState.currentCaseId,
@@ -8406,7 +8414,7 @@
             "nightingaleViewState",
             JSON.stringify(viewStateToSave)
           );
-          console.timeEnd("ViewState Save");
+          console.timeEnd(timerName);
         }
 
         // Save on blur (visibilitychange) and also on unload as a fallback
@@ -8551,6 +8559,45 @@
             showToast(`Case repair complete: ${repaired} repaired, ${removed} removed`, 'success');
             
             return { repaired, removed };
+          },
+          // Debug functions for save triggers
+          debugSaveTriggers: () => {
+            console.log("🔍 Adding save trigger debugging...");
+            
+            // Intercept the state proxy setter to see what's changing
+            const originalSetter = window.stateHandler.set;
+            let lastChange = null;
+            let changeCount = 0;
+            
+            window.stateHandler.set = function(target, property, value, receiver) {
+              const now = Date.now();
+              changeCount++;
+              
+              // Log rapid changes
+              if (lastChange && (now - lastChange) < 100) {
+                console.warn(`⚡ RAPID CHANGE #${changeCount}: ${property} changed within 100ms of last change`);
+              }
+              
+              console.log(`🔄 State change #${changeCount}: ${property} =`, value);
+              lastChange = now;
+              
+              return originalSetter.call(this, target, property, value, receiver);
+            };
+            
+            console.log("✅ Save trigger debugging enabled");
+          },
+          checkSaveLocks: () => {
+            console.log("🔒 Save Lock Status:");
+            console.log(`Global lock: ${window._nightingaleGlobalSaveLock}`);
+            console.log(`Instance lock: ${window.fileService?.isSaving}`);
+            console.log(`Tab ID: ${window.fileService?.tabId}`);
+            console.log(`Directory: ${window.fileService?.directoryHandle?.name}`);
+          },
+          checkSaveQueue: () => {
+            console.log("⏱️ Save Queue Status:");
+            console.log(`Debounced save pending: ${window.stateHandler?.debouncedSave ? 'Yes' : 'No'}`);
+            console.log(`Last save timestamp: ${window.stateHandler?.lastSaveTimestamp}`);
+            console.log(`Batch loading: ${window.stateHandler?.isBatchLoading}`);
           },
           // Testing utilities
           runDataIntegrityCheck: () => {
