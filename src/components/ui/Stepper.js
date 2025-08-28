@@ -32,7 +32,6 @@ function Stepper({
 }) {
   // React safety check
   if (!window.React) {
-    console.warn('React not available for Stepper component');
     return null;
   }
 
@@ -40,12 +39,10 @@ function Stepper({
 
   // Validate required props
   if (!steps || !Array.isArray(steps)) {
-    console.warn('Stepper: steps prop is required and must be an array');
     return null;
   }
 
   if (typeof currentStep !== 'number') {
-    console.warn('Stepper: currentStep prop is required and must be a number');
     return null;
   }
 

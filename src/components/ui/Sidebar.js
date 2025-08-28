@@ -30,7 +30,6 @@ function Sidebar({
 }) {
   // React safety check
   if (!window.React) {
-    console.warn('React not available for Sidebar component');
     return null;
   }
 
@@ -38,7 +37,6 @@ function Sidebar({
 
   // Validate required props
   if (!activeTab || typeof onTabChange !== 'function') {
-    console.warn('Sidebar: activeTab and onTabChange props are required');
     return null;
   }
 

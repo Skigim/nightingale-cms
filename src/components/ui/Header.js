@@ -23,7 +23,6 @@
 function Header({ fileStatus, autosaveStatus, onSettingsClick, onManualSave }) {
   // React safety check
   if (!window.React) {
-    console.warn('React not available for Header component');
     return null;
   }
 

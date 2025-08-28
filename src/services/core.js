@@ -268,7 +268,6 @@
   class NightingaleSearchService {
     constructor(data, options = {}) {
       if (typeof Fuse === 'undefined') {
-        console.error('NightingaleSearchService: Fuse.js is not available');
         this.fuse = null;
         return;
       }
@@ -287,10 +286,6 @@
         this.data = data;
         this.options = defaultOptions;
       } catch (error) {
-        console.error(
-          'NightingaleSearchService: Error initializing Fuse.js:',
-          error
-        );
         this.fuse = null;
       }
     }
@@ -304,14 +299,12 @@
         const results = this.fuse.search(query.trim());
         return results.map((result) => result.item || result);
       } catch (error) {
-        console.error('NightingaleSearchService: Search error:', error);
         return [];
       }
     }
 
     setData(newData) {
       if (!Array.isArray(newData)) {
-        console.warn('NightingaleSearchService: setData expects an array');
         return;
       }
 
@@ -321,7 +314,7 @@
           this.fuse.setCollection(newData);
         }
       } catch (error) {
-        console.error('NightingaleSearchService: Error updating data:', error);
+        // Silently handle search update errors
       }
     }
 
@@ -369,7 +362,6 @@
   if (typeof window !== 'undefined') {
     window.NightingaleCoreUtilities = NightingaleCoreUtilities;
     window.NightingaleSearchService = NightingaleSearchService;
-    console.log('✅ Nightingale Core Utilities Service loaded');
 
     // Register with service registry if available
     if (
@@ -380,9 +372,6 @@
         'coreUtilities',
         NightingaleCoreUtilities,
         'core'
-      );
-      console.log(
-        '🛠️ Core Utilities Service registered with Nightingale Services'
       );
     }
 

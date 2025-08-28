@@ -27,7 +27,6 @@ function TabHeader({
 
   // Validate required props
   if (!title) {
-    console.warn('TabHeader: title prop is required');
     return null;
   }
 

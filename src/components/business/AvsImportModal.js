@@ -21,7 +21,6 @@ function AvsImportModal({
   onClose,
   onImport,
   masterCaseId,
-  ownerFilter = 'applicant', // Reserved for future filtering logic
   existingResources = [],
 }) {
   const e = window.React.createElement;
@@ -35,10 +34,7 @@ function AvsImportModal({
   const [error, setError] = useState(null);
 
   // Note: ownerFilter reserved for future filtering functionality
-  console.debug('AvsImportModal initialized for:', {
-    masterCaseId,
-    ownerFilter,
-  });
+  // AVS Import Modal initialized
 
   // Known account types - memoized for performance
   const knownAccountTypes = useMemo(
@@ -131,7 +127,6 @@ function AvsImportModal({
       setError(
         'Failed to parse AVS data. Please check the format and try again.'
       );
-      console.error('AVS parsing error:', err);
       setPreviewItems([]);
     } finally {
       setIsLoading(false);

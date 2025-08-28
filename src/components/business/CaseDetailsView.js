@@ -37,15 +37,11 @@ function CaseDetailsView({
 
   // React safety check
   if (!window.React) {
-    console.warn('React not available for CaseDetailsView component');
     return null;
   }
 
   // Validate required props
   if (!caseId || !fullData || typeof onUpdateData !== 'function') {
-    console.warn(
-      'CaseDetailsView: caseId, fullData, and onUpdateData are required'
-    );
     return null;
   }
 

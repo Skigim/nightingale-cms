@@ -178,12 +178,13 @@ async function initializeNightingaleCMS() {
   try {
     // Wait for external libraries to load before initializing services
     console.log('📦 Loading external libraries...');
-    
-    const [dayjs, Fuse] = await Promise.all([
-      dayjsPromise,
-      fusePromise
-    ]);
-    
+
+    const [dayjs, Fuse] = await Promise.all([dayjsPromise, fusePromise]);
+
+    // Make libraries globally available
+    window.dayjs = dayjs;
+    window.Fuse = Fuse;
+
     console.log('✅ Day.js loaded successfully');
     console.log('✅ Fuse.js loaded successfully');
 
@@ -217,15 +218,17 @@ async function initializeNightingaleCMS() {
     console.log('🎉 Nightingale CMS - Fully Initialized with ES6 Modules!');
   } catch (error) {
     console.error('❌ Failed to initialize Nightingale CMS:', error);
-    
+
     // Fallback: try to initialize without external libraries
-    console.log('🔄 Attempting fallback initialization without external libraries...');
+    console.log(
+      '🔄 Attempting fallback initialization without external libraries...'
+    );
     registerServices();
     registerComponents();
-    
+
     const root = window.ReactDOM.createRoot(document.getElementById('root'));
     root.render(window.React.createElement(NightingaleCMSApp));
-    
+
     console.log('⚠️ Nightingale CMS initialized with limited functionality');
   }
 }
@@ -237,13 +240,13 @@ async function initializeNightingaleCMS() {
 // Wait for DOM to be ready, then initialize
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    initializeNightingaleCMS().catch(error => {
+    initializeNightingaleCMS().catch((error) => {
       console.error('❌ Critical error during initialization:', error);
     });
   });
 } else {
   // DOM already loaded
-  initializeNightingaleCMS().catch(error => {
+  initializeNightingaleCMS().catch((error) => {
     console.error('❌ Critical error during initialization:', error);
   });
 }

@@ -44,9 +44,7 @@
     }
 
     // Final fallback (should rarely be used in modern browsers)
-    console.warn(
-      '🔒 Using non-cryptographic ID generation - consider updating browser'
-    );
+    // This fallback is for environments where crypto is not available.
     const timestamp = Date.now().toString(36);
     const randomPart = Math.random().toString(36).substr(2, 9);
     return `${prefix}-${timestamp}-${randomPart}`;
@@ -93,9 +91,6 @@
    */
   async function normalizeDataMigrations(data) {
     if (!data) return data;
-
-    console.debug('🔄 Running data migrations for CMS React compatibility...');
-
     // Create a deep clone to prevent race conditions during concurrent modifications
     const normalizedData = JSON.parse(JSON.stringify(data));
 
@@ -107,7 +102,6 @@
         // Ensure every case has a proper ID with secure generation
         if (!normalizedCase.id || normalizedCase.id === null) {
           normalizedCase.id = generateSecureId('case');
-          console.log(`🆔 Generated new case ID: ${normalizedCase.id} for MCN: ${normalizedCase.mcn || normalizedCase.masterCaseNumber}`);
         }
 
         // Ensure MCN field consistency - map both directions
@@ -132,7 +126,10 @@
         }
 
         // Ensure personId is a string (legacy uses numbers)
-        if (normalizedCase.personId && typeof normalizedCase.personId === 'number') {
+        if (
+          normalizedCase.personId &&
+          typeof normalizedCase.personId === 'number'
+        ) {
           normalizedCase.personId = normalizedCase.personId.toString();
         }
 
@@ -175,7 +172,7 @@
           normalizedCase.financials = {
             resources: [],
             income: [],
-            expenses: []
+            expenses: [],
           };
         }
 
@@ -190,17 +187,11 @@
                   // Migrate type → description (CMSOld uses "type", React uses "description")
                   if (item.type && !item.description) {
                     migratedItem.description = item.type;
-                    console.log(
-                      `🏷️ Migrated financial item type "${item.type}" → description`
-                    );
                   }
 
                   // Migrate value → amount (CMSOld uses "value", React uses "amount")
                   if (item.value !== undefined && item.amount === undefined) {
                     migratedItem.amount = item.value;
-                    console.log(
-                      `💰 Migrated financial item value ${item.value} → amount`
-                    );
                   }
 
                   // Ensure backward compatibility: keep both fields
@@ -265,9 +256,7 @@
       const seenPersonIds = new Set();
       normalizedData.people = normalizedData.people.map((person) => {
         if (seenPersonIds.has(person.id)) {
-          const oldId = person.id;
           person.id = generateSecureId('person');
-          console.log(`🔄 Resolved duplicate person ID: ${oldId} → ${person.id} for ${person.name}`);
         }
         seenPersonIds.add(person.id);
         return person;
@@ -301,7 +290,6 @@
       });
     }
 
-    console.debug('✅ Data migration completed successfully');
     return normalizedData;
   }
 
@@ -467,7 +455,6 @@
   // Export to global scope
   if (typeof window !== 'undefined') {
     window.NightingaleDataManagement = NightingaleDataManagement;
-    console.info('✅ Nightingale Data Management Service loaded');
 
     // Register with service registry if available
     if (
@@ -477,9 +464,6 @@
       window.NightingaleServices.registerService(
         'dataManagement',
         NightingaleDataManagement
-      );
-      console.log(
-        '📋 Data Management Service registered with Nightingale Services'
       );
     }
   }

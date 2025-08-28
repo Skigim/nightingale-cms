@@ -20,11 +20,7 @@ function NotesModal({
 
   // Get toast function with fallback
   const showToast =
-    window.showToast ||
-    window.NightingaleToast?.show ||
-    function (message, type) {
-      console.log(`Toast ${type}: ${message}`);
-    };
+    window.showToast || window.NightingaleToast?.show || function () {};
 
   // Look up person name using the helper function
   const person = window.NightingaleDataManagement.findPersonById(
@@ -44,6 +40,8 @@ function NotesModal({
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState(null);
 
   // Note categories for dropdown
   const noteCategories = useMemo(
@@ -91,13 +89,7 @@ function NotesModal({
           '.modal-container', // Target the modal container
           'view',
           {
-            onFocused: (element) => {
-              console.debug(
-                'Notes modal view mode focused:',
-                element.tagName,
-                element.type || ''
-              );
-            },
+            onFocused: () => {},
           }
         );
       }, 100);
@@ -174,7 +166,6 @@ function NotesModal({
 
       resetForm();
     } catch (error) {
-      console.error('Error saving note:', error);
       showToast('Error saving note. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
@@ -208,36 +199,8 @@ function NotesModal({
               'button:not([disabled])',
             ],
             delay: 200, // Longer delay for SearchBar initialization
-            onFocused: (element) => {
-              console.debug(
-                'Notes modal edit mode focused:',
-                element.tagName,
-                element.type || '',
-                element.placeholder || '',
-                element.className || ''
-              );
-            },
-            onFailed: (attemptedSelectors) => {
-              console.warn(
-                'Notes modal edit mode focus failed. Attempted selectors:',
-                attemptedSelectors
-              );
-              // Debug: show what elements are actually available
-              const availableInputs = document.querySelectorAll(
-                '.modal-container input'
-              );
-              console.debug(
-                'Available inputs:',
-                Array.from(availableInputs).map((el) => ({
-                  tag: el.tagName,
-                  type: el.type,
-                  placeholder: el.placeholder,
-                  className: el.className,
-                  disabled: el.disabled,
-                  readonly: el.readOnly,
-                }))
-              );
-            },
+            onFocused: () => {},
+            onFailed: () => {},
           }
         );
       }, 50); // Quick timeout for DOM update
@@ -245,16 +208,16 @@ function NotesModal({
   };
 
   const handleDelete = async (noteId) => {
-    if (
-      !window.confirm(
-        'Are you sure you want to delete this note? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
+    // Set up React-based confirmation instead of blocking window.confirm()
+    setNoteToDelete(noteId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!noteToDelete) return;
 
     try {
-      const updatedNotes = notesList.filter((note) => note.id !== noteId);
+      const updatedNotes = notesList.filter((note) => note.id !== noteToDelete);
       setNotesList(updatedNotes);
 
       // Notify parent component
@@ -264,9 +227,17 @@ function NotesModal({
 
       showToast('Note deleted successfully', 'success');
     } catch (error) {
-      console.error('Error deleting note:', error);
       showToast('Error deleting note. Please try again.', 'error');
+    } finally {
+      // Reset confirmation state
+      setShowDeleteConfirm(false);
+      setNoteToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setNoteToDelete(null);
   };
 
   const renderNoteForm = () => {
@@ -455,36 +426,8 @@ function NotesModal({
                   'button:not([disabled])',
                 ],
                 delay: 200, // Longer delay for SearchBar initialization
-                onFocused: (element) => {
-                  console.debug(
-                    'Notes modal add mode focused:',
-                    element.tagName,
-                    element.type || '',
-                    element.placeholder || '',
-                    element.className || ''
-                  );
-                },
-                onFailed: (attemptedSelectors) => {
-                  console.warn(
-                    'Notes modal add mode focus failed. Attempted selectors:',
-                    attemptedSelectors
-                  );
-                  // Debug: show what elements are actually available
-                  const availableInputs = document.querySelectorAll(
-                    '.modal-container input'
-                  );
-                  console.debug(
-                    'Available inputs:',
-                    Array.from(availableInputs).map((el) => ({
-                      tag: el.tagName,
-                      type: el.type,
-                      placeholder: el.placeholder,
-                      className: el.className,
-                      disabled: el.disabled,
-                      readonly: el.readOnly,
-                    }))
-                  );
-                },
+                onFocused: () => {},
+                onFailed: () => {},
               }
             );
           }, 50); // Quick timeout for DOM update
@@ -509,48 +452,89 @@ function NotesModal({
   );
 
   return e(
-    window.Modal,
-    {
-      isOpen,
-      onClose: () => {
-        resetForm();
-        onClose();
-      },
-      title: `Notes - ${clientName} (MCN: ${mcn})`,
-      size: 'default',
-      footerContent: footerContent,
-    },
+    window.React.Fragment,
+    {},
 
-    // Modal content
+    // Main Notes Modal
     e(
-      'div',
-      { className: 'space-y-6' },
+      window.Modal,
+      {
+        isOpen,
+        onClose: () => {
+          resetForm();
+          onClose();
+        },
+        title: `Notes - ${clientName} (MCN: ${mcn})`,
+        size: 'default',
+        footerContent: footerContent,
+      },
 
-      // Form section (shown when adding/editing)
-      isEditMode &&
-        e(
-          'div',
-          { className: 'border-b border-gray-600 pb-6' },
+      // Modal content
+      e(
+        'div',
+        { className: 'space-y-6' },
+
+        // Form section (shown when adding/editing)
+        isEditMode &&
           e(
-            'h3',
-            { className: 'text-lg font-medium text-white mb-4' },
-            currentNote ? 'Edit Note' : 'Add New Note'
+            'div',
+            { className: 'border-b border-gray-600 pb-6' },
+            e(
+              'h3',
+              { className: 'text-lg font-medium text-white mb-4' },
+              currentNote ? 'Edit Note' : 'Add New Note'
+            ),
+            renderNoteForm()
           ),
-          renderNoteForm()
+
+        // Notes list section (only show when not in edit mode)
+        !isEditMode &&
+          e(
+            'div',
+            null,
+            e(
+              'h3',
+              { className: 'text-lg font-medium text-white mb-4' },
+              `Existing Notes (${notesList.length})`
+            ),
+            renderNotesList()
+          )
+      )
+    ),
+
+    // Delete Confirmation Modal
+    e(
+      window.Modal,
+      {
+        isOpen: showDeleteConfirm,
+        onClose: cancelDelete,
+        title: 'Confirm Delete',
+        size: 'sm',
+        footerContent: e(
+          window.React.Fragment,
+          {},
+          e(window.Button, {
+            variant: 'secondary',
+            onClick: cancelDelete,
+            children: 'Cancel',
+          }),
+          e(window.Button, {
+            variant: 'danger',
+            onClick: confirmDelete,
+            children: 'Delete Note',
+          })
         ),
-
-      // Notes list section (only show when not in edit mode)
-      !isEditMode &&
+      },
+      e(
+        'div',
+        { className: 'text-gray-300' },
+        e('p', null, 'Are you sure you want to delete this note?'),
         e(
-          'div',
-          null,
-          e(
-            'h3',
-            { className: 'text-lg font-medium text-white mb-4' },
-            `Existing Notes (${notesList.length})`
-          ),
-          renderNotesList()
+          'p',
+          { className: 'text-sm text-gray-400 mt-2' },
+          'This action cannot be undone.'
         )
+      )
     )
   );
 }

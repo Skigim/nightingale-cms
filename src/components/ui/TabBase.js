@@ -161,7 +161,6 @@ function FallbackTabHeader({ title, count, icon, actions, className = '' }) {
   const e = window.React.createElement;
 
   if (!title) {
-    console.warn('FallbackTabHeader: title prop is required');
     return null;
   }
 
@@ -449,7 +448,7 @@ function createBusinessComponent(config) {
     // Ensure data is in expected format
     const data = dataResult.data || [];
     if (!Array.isArray(data)) {
-      console.warn(`${name}: Expected data to be an array, got:`, typeof data);
+      // data validation failed; continuing with empty array semantics
     }
 
     // PHASE 5: Render Phase
@@ -471,7 +470,6 @@ function createBusinessComponent(config) {
           renderModals({ components, data: dataResult, props: finalProps })
       );
     } catch (renderError) {
-      console.error(`${name} render error:`, renderError);
       return e(
         'div',
         {

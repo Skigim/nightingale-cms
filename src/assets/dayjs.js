@@ -1,6 +1,6 @@
 /**
  * Day.js ES6 Module Wrapper
- * 
+ *
  * This module provides ES6 import/export compatibility for Day.js
  * and its plugins while maintaining backward compatibility.
  */
@@ -47,46 +47,21 @@ async function loadDayJS() {
         return loadScript('./src/assets/dayjs-relativeTime.min.js');
       })
       .then(() => {
-        // Debug: Check what plugins are available on window
-        console.log('🔍 Debug - Available plugins:', {
-          customParseFormat: !!window.dayjs_plugin_customParseFormat,
-          relativeTime: !!window.dayjs_plugin_relativeTime,
-          windowKeys: Object.keys(window).filter(key => key.includes('dayjs'))
-        });
-        
+        // (debug removed) plugin availability can be inspected via getDayjs() if needed
+
         // Explicitly extend Day.js with the loaded plugins
         // The plugins are available as global variables after loading
         if (window.dayjs_plugin_customParseFormat) {
           dayjs.extend(window.dayjs_plugin_customParseFormat);
-          console.log('✅ Day.js customParseFormat plugin extended');
-        } else {
-          console.warn('⚠️ customParseFormat plugin not found on window');
         }
-        
+
         if (window.dayjs_plugin_relativeTime) {
           dayjs.extend(window.dayjs_plugin_relativeTime);
-          console.log('✅ Day.js relativeTime plugin extended');
-        } else {
-          console.warn('⚠️ relativeTime plugin not found on window');
         }
-        
+
         // Verify the plugins are working by testing them
-        try {
-          // Test custom parse format
-          const testDate = dayjs('2023-01-01', 'YYYY-MM-DD');
-          
-          // Test relative time
-          const now = dayjs();
-          const relative = now.fromNow();
-          
-          console.log('✅ Day.js plugins loaded and working:', { 
-            testDate: testDate.format(), 
-            relative 
-          });
-        } catch (pluginError) {
-          console.warn('⚠️ Day.js plugins may not be fully functional:', pluginError);
-        }
-        
+        // Removed runtime console verification; consumers may perform their own checks.
+
         resolve(dayjs);
       })
       .catch(reject);

@@ -159,10 +159,6 @@
           content: processedContent,
         };
       } catch (error) {
-        console.error(
-          'DocumentGenerationService.generateDocumentContent error:',
-          error
-        );
         return {
           success: false,
           error: error.message,
@@ -213,10 +209,6 @@
           itemCount: selectedFinancialItems.length,
         };
       } catch (error) {
-        console.error(
-          'DocumentGenerationService.appendDocumentContent error:',
-          error
-        );
         return {
           success: false,
           error: error.message,
@@ -362,10 +354,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error(
-          'DocumentGenerationService.createVrRequest error:',
-          error
-        );
         return {
           success: false,
           error: error.message,
@@ -460,10 +448,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error(
-          'DocumentGenerationService.updateVrRequestStatus error:',
-          error
-        );
         return {
           success: false,
           error: error.message,
@@ -535,10 +519,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error(
-          'DocumentGenerationService.deleteVrRequest error:',
-          error
-        );
         return {
           success: false,
           error: error.message,
@@ -605,16 +585,9 @@
      */
     async _saveWithSync(data, action, metadata = {}) {
       try {
-        console.log(
-          `Document generation service: Attempting immediate file write for ${action}...`
-        );
         const success = await this.fileService.writeFile(data);
 
         if (success) {
-          console.log(
-            `Document generation service: File write successful, sending broadcast for ${action}...`
-          );
-
           // Send data integrity broadcast to notify CMS to refresh
           const integrityChannel = new BroadcastChannel('nightingale_suite');
           integrityChannel.postMessage({
@@ -628,21 +601,11 @@
           });
           integrityChannel.close();
 
-          console.log(
-            `Document generation service: Broadcast sent successfully for ${action}`
-          );
           return true;
         } else {
-          console.error(
-            `Document generation service: FileService.writeFile returned false for ${action}`
-          );
           return false;
         }
       } catch (error) {
-        console.error(
-          `Document generation service: Error during immediate save for ${action}:`,
-          error
-        );
         return false;
       }
     }
@@ -662,7 +625,7 @@
       ) {
         this.toastService.show(message, type);
       } else {
-        console.log(`[${type.toUpperCase()}] ${message}`);
+        // Fallback when no toast service is available
       }
     }
 

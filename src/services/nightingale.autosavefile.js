@@ -25,7 +25,7 @@
   class AutosaveFileService {
     constructor({
       fileName = 'nightingale-data.json',
-      errorCallback = console.error,
+      errorCallback = () => {},
       sanitizeFn = (str) => str,
       tabId = null,
 
@@ -86,8 +86,6 @@
      */
     async initialize() {
       try {
-        console.log('🎯 Initializing AutosaveFileService');
-
         // Try to restore previous directory access
         await this.restoreLastDirectoryAccess();
 
@@ -96,10 +94,8 @@
           this.startAutosave();
         }
 
-        console.log('✅ AutosaveFileService initialized successfully');
         this.updateStatus('initialized', 'Service ready');
       } catch (error) {
-        console.error('❌ Failed to initialize AutosaveFileService:', error);
         this.updateStatus('error', 'Initialization failed: ' + error.message);
       }
     }
@@ -139,7 +135,6 @@
         return permissionGranted;
       } catch (err) {
         if (err.name !== 'AbortError') {
-          console.error('Error selecting directory:', err);
           this.updateStatus('error', 'Failed to connect to folder');
         }
         return false;
@@ -184,7 +179,7 @@
       try {
         while (this.writeQueue.length > 0) {
           const { data, resolve, reject } = this.writeQueue.shift();
-          
+
           try {
             const success = await this._performWrite(data);
             resolve(success);
@@ -200,17 +195,11 @@
     async _performWrite(data) {
       // Check if we have a directory handle and permissions
       if (!this.directoryHandle) {
-        console.log(
-          'ℹ️ AutosaveFileService: No directory selected, save skipped gracefully'
-        );
         return false;
       }
 
       const permission = await this.checkPermission();
       if (permission !== 'granted') {
-        console.log(
-          `ℹ️ AutosaveFileService: Permission ${permission}, save skipped gracefully`
-        );
         return false;
       }
 
@@ -244,17 +233,11 @@
 
     async readFile() {
       if (!this.directoryHandle) {
-        console.log(
-          'ℹ️ AutosaveFileService: Cannot read file - no directory selected'
-        );
         return null;
       }
 
       const permission = await this.checkPermission();
       if (permission !== 'granted') {
-        console.log(
-          'ℹ️ AutosaveFileService: Cannot read file - permission not granted'
-        );
         return null;
       }
 
@@ -265,21 +248,19 @@
         const file = await fileHandle.getFile();
         const contents = await file.text();
         const rawData = JSON.parse(contents);
-        
+
         // Apply data migrations if available
         if (window.NightingaleDataManagement?.normalizeDataMigrations) {
-          console.log('🔄 Applying data migrations...');
-          const migratedData = await window.NightingaleDataManagement.normalizeDataMigrations(rawData);
+          const migratedData =
+            await window.NightingaleDataManagement.normalizeDataMigrations(
+              rawData
+            );
           return migratedData;
         } else {
-          console.warn('⚠️ Data migration service not available, returning raw data');
           return rawData;
         }
       } catch (err) {
         if (err.name === 'NotFoundError') {
-          console.log(
-            `File "${this.fileName}" not found. A new one will be created on the first save.`
-          );
           return null;
         } else {
           this.errorCallback(
@@ -319,7 +300,6 @@
           return { handle, permission };
         }
       } catch (error) {
-        console.error('Error restoring directory access:', error);
         await this.clearStoredDirectoryHandle();
       }
 
@@ -399,7 +379,6 @@
      */
     setDataProvider(dataProvider) {
       this.dataProvider = dataProvider;
-      console.log('📊 Data provider updated');
     }
 
     /**
@@ -409,14 +388,10 @@
       this.dataProvider = () => {
         const data = getCurrentData();
         if (!data) {
-          console.warn('⚠️ Data provider returned null/undefined');
           return null;
         }
         return data;
       };
-      console.log(
-        '📊 Data provider function updated with current data reference'
-      );
     }
 
     /**
@@ -424,10 +399,6 @@
      * This method handles the common React pattern of passing a state getter
      */
     initializeWithReactState(getFullData, statusCallback = null) {
-      console.log(
-        '🔗 Initializing AutosaveFileService with React state integration'
-      );
-
       // Store the data getter for future updates
       this.getFullData = getFullData;
 
@@ -445,7 +416,6 @@
         this.statusCallback = statusCallback;
       }
 
-      console.log('✅ React state integration configured');
       return this;
     }
 
@@ -455,7 +425,6 @@
     updateReactState(getFullData) {
       if (this.getFullData) {
         this.getFullData = getFullData;
-        console.log('🔄 React state getter updated');
       }
     }
 
@@ -464,11 +433,9 @@
      */
     startAutosave() {
       if (this.state.isRunning) {
-        console.log('ℹ️ Autosave already running');
         return;
       }
 
-      console.log('🎯 Starting autosave service');
       this.state.isRunning = true;
 
       // Start periodic save interval
@@ -488,7 +455,6 @@
      * Stop the autosave service
      */
     stopAutosave() {
-      console.log('🛑 Stopping autosave service');
       this.state.isRunning = false;
 
       // Clear all timers
@@ -539,7 +505,6 @@
 
       // Check if we have a data provider
       if (!this.dataProvider) {
-        console.log('ℹ️ No data provider set, skipping autosave');
         return;
       }
 
@@ -556,11 +521,6 @@
 
         // Get current data with debugging
         const data = this.dataProvider();
-        console.log(
-          '🔍 Autosave debug - Data provider returned:',
-          !!data,
-          data ? `${Object.keys(data).length} keys` : 'null/undefined'
-        );
 
         if (!data) {
           this.updateStatus('error', 'No data available to save');
@@ -622,10 +582,6 @@
         this.state.permissionStatus = permission;
 
         if (previousStatus !== permission) {
-          console.log(
-            `🔐 Permission changed from ${previousStatus} to ${permission}`
-          );
-
           if (
             permission === 'granted' &&
             this.config.enabled &&
@@ -637,7 +593,6 @@
           }
         }
       } catch (error) {
-        console.warn('Error checking permissions:', error);
         this.state.permissionStatus = 'unknown';
       }
     }
@@ -704,7 +659,6 @@
       this.stopAutosave();
       this.dataProvider = null;
       this.statusCallback = null;
-      console.log('🗑️ AutosaveFileService destroyed');
     }
 
     /**
@@ -713,7 +667,7 @@
      */
     static createForReact({
       fileName = 'nightingale-data.json',
-      errorCallback = console.error,
+      errorCallback = () => {},
       sanitizeFn = (str) => str,
       tabId = null,
 
@@ -751,7 +705,6 @@
   // Register the service globally
   if (typeof window !== 'undefined') {
     window.AutosaveFileService = AutosaveFileService;
-    console.log('✅ AutosaveFileService registered globally');
   }
 
   // Export for ES6 modules

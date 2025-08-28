@@ -229,7 +229,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error('TemplateService.createTemplate error:', error);
         return {
           success: false,
           error: error.message,
@@ -327,7 +326,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error('TemplateService.updateTemplate error:', error);
         return {
           success: false,
           error: error.message,
@@ -394,7 +392,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error('TemplateService.deleteTemplate error:', error);
         return {
           success: false,
           error: error.message,
@@ -467,7 +464,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error('TemplateService.addCategory error:', error);
         return {
           success: false,
           error: error.message,
@@ -566,7 +562,6 @@
           data: newData,
         };
       } catch (error) {
-        console.error('TemplateService.removeCategory error:', error);
         return {
           success: false,
           error: error.message,
@@ -584,16 +579,9 @@
      */
     async _saveWithSync(data, action, metadata = {}) {
       try {
-        console.log(
-          `Template service: Attempting immediate file write for ${action}...`
-        );
         const success = await this.fileService.writeFile(data);
 
         if (success) {
-          console.log(
-            `Template service: File write successful, sending broadcast for ${action}...`
-          );
-
           // Send data integrity broadcast to notify CMS to refresh
           const integrityChannel = new BroadcastChannel('nightingale_suite');
           integrityChannel.postMessage({
@@ -607,21 +595,11 @@
           });
           integrityChannel.close();
 
-          console.log(
-            `Template service: Broadcast sent successfully for ${action}`
-          );
           return true;
         } else {
-          console.error(
-            `Template service: FileService.writeFile returned false for ${action}`
-          );
           return false;
         }
       } catch (error) {
-        console.error(
-          `Template service: Error during immediate save for ${action}:`,
-          error
-        );
         return false;
       }
     }
@@ -641,7 +619,7 @@
       ) {
         this.toastService.show(message, type);
       } else {
-        console.log(`[${type.toUpperCase()}] ${message}`);
+        // Fallback for no toast service available
       }
     }
 

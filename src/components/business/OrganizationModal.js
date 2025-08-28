@@ -219,10 +219,6 @@ function OrganizationModal({
 
         return errors;
       } catch (error) {
-        console.warn(
-          `Organization validation error for step ${stepIndex}:`,
-          error
-        );
         return {};
       }
     },
@@ -447,7 +443,6 @@ function OrganizationModal({
         successMessage = 'Organization created successfully';
       }
 
-      console.log('Saving updated data:', updatedData); // Debug log
       const saveResult = await fileService.writeFile(updatedData);
 
       if (!saveResult) {
@@ -464,7 +459,6 @@ function OrganizationModal({
       onOrganizationCreated(resultOrganization);
       onClose();
     } catch (error) {
-      console.error('Error saving organization:', error);
       window.showToast?.(
         'Error saving organization: ' + error.message,
         'error'

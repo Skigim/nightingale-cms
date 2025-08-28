@@ -39,27 +39,20 @@ function SettingsModal({
 
   // React safety check
   if (!window.React) {
-    console.warn('React not available for SettingsModal component');
     return null;
   }
 
   // Get dependencies
   const Modal = window.Modal || window.NightingaleUI?.getComponent?.('Modal');
   const showToast =
-    window.showToast ||
-    window.NightingaleToast?.show ||
-    function (message, type) {
-      console.log(`Toast ${type}: ${message}`);
-    };
+    window.showToast || window.NightingaleToast?.show || function () {};
 
   // Validate required props
   if (!Modal) {
-    console.warn('SettingsModal: Modal component not available');
     return null;
   }
 
   if (typeof onClose !== 'function') {
-    console.warn('SettingsModal: onClose prop is required');
     return null;
   }
 
@@ -80,7 +73,6 @@ function SettingsModal({
         showToast('Failed to connect to directory', 'error');
       }
     } catch (error) {
-      console.error('Connection error:', error);
       if (onFileStatusChange) onFileStatusChange('disconnected');
       showToast('Error connecting to directory', 'error');
     } finally {
@@ -113,7 +105,6 @@ function SettingsModal({
         showToast('No data file found', 'warning');
       }
     } catch (error) {
-      console.error('Load data error:', error);
       showToast('Error loading data file', 'error');
     } finally {
       setLoadingData(false);
@@ -239,7 +230,6 @@ function SettingsModal({
       showToast('Sample data created and loaded!', 'success');
       onClose();
     } catch (error) {
-      console.error('Create sample error:', error);
       showToast('Error creating sample data', 'error');
     }
   };

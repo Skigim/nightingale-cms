@@ -21,11 +21,7 @@ function FinancialItemModal({
 
   // Get toast function with fallback
   const showToast =
-    window.showToast ||
-    window.NightingaleToast?.show ||
-    function (message, type) {
-      console.log(`Toast ${type}: ${message}`);
-    };
+    window.showToast || window.NightingaleToast?.show || function () {};
 
   const [formData, setFormData] = useState({
     id: editingItem?.id || null,

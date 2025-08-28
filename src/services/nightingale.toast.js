@@ -73,13 +73,11 @@ class ToastQueue {
   add(message, type = 'info', duration = null) {
     // Validate message
     if (!message || typeof message !== 'string') {
-      console.warn('Toast message must be a non-empty string');
       return;
     }
 
     // Validate type
     if (!TOAST_CONFIG.types[type]) {
-      console.warn(`Invalid toast type: ${type}. Using 'info' instead.`);
       type = 'info';
     }
 
@@ -284,9 +282,6 @@ function showToast(message, type = 'info', duration = null) {
 
     return toastQueue.add(message, type, duration);
   } catch (error) {
-    console.error('Toast system error:', error);
-    // Fallback to console if toast system fails
-    console.log(`Toast: ${type.toUpperCase()} - ${message}`);
     return null;
   }
 }

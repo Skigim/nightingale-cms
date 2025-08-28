@@ -93,7 +93,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
 
   // AVS Import Handler
   const handleAvsImport = (importedItems) => {
-    console.log('🔄 Importing AVS data:', importedItems);
+    // AVS data import processed
 
     // Transform imported items using helper function
     const transformedItems = window.NightingaleUtils.transformFinancialItems

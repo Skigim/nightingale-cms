@@ -78,7 +78,6 @@
    */
   function generateCaseSummary(caseData) {
     if (!caseData) {
-      console.warn('generateCaseSummary: No case data provided');
       return null;
     }
 
@@ -101,8 +100,6 @@
         (caseData.financials?.expenses?.length || 0),
     };
 
-    console.log('Generated summary for case:', summaryData);
-
     // Use toast service if available
     if (window.showToast) {
       window.showToast('Case summary generation feature coming soon', 'info');
@@ -118,7 +115,6 @@
    */
   function openVRApp(caseData, targetApp = 'correspondence') {
     if (!caseData) {
-      console.warn('openVRApp: No case data provided');
       if (window.showToast) {
         window.showToast('No case data available', 'error');
       }
@@ -135,9 +131,7 @@
 
     try {
       window.open(vrUrl, '_blank');
-      console.log(`Opened ${targetApp} app for case:`, caseData.mcn);
     } catch (error) {
-      console.error('Failed to open VR app:', error);
       if (window.showToast) {
         window.showToast('Failed to open VR application', 'error');
       }
@@ -152,8 +146,6 @@
    * Test financial item migration functionality
    */
   function testFinancialMigration() {
-    console.group('🧪 Testing Financial Item Migration');
-
     const legacyFinancialItem = {
       id: 1,
       type: 'Checking Account', // Legacy field
@@ -165,8 +157,6 @@
       owner: 'applicant',
     };
 
-    console.log('Legacy Item:', legacyFinancialItem);
-
     // Simulate migration using data management service
     const migratedItem = {
       ...legacyFinancialItem,
@@ -176,12 +166,6 @@
       frequency: 'monthly',
       dateAdded: new Date().toISOString(),
     };
-
-    console.log('Migrated Item:', migratedItem);
-    console.log(
-      '✅ Migration test completed - both type/description and value/amount fields preserved'
-    );
-    console.groupEnd();
 
     return {
       legacy: legacyFinancialItem,
@@ -217,7 +201,6 @@
   // Export to global scope
   if (typeof window !== 'undefined') {
     window.NightingaleCMSUtilities = NightingaleCMSUtilities;
-    console.log('✅ Nightingale CMS Utilities Service loaded');
 
     // Register with service registry if available
     if (
@@ -228,9 +211,6 @@
         'cmsUtilities',
         NightingaleCMSUtilities,
         'business'
-      );
-      console.log(
-        '🏢 CMS Utilities Service registered with Nightingale Services'
       );
     }
 

@@ -43,13 +43,7 @@ function StepperModal({
           stepContentRef.current,
           newStep,
           {
-            onFocused: (element) => {
-              console.debug(
-                `Focused step ${newStep + 1}:`,
-                element.tagName,
-                element.type || ''
-              );
-            },
+            onFocused: () => {},
           }
         );
       }, 50);

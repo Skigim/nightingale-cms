@@ -16,13 +16,7 @@ function useOrganizationsData(props) {
   } = props;
   const { useState, useMemo, useEffect, useCallback } = window.React || {};
 
-  // Get toast function with fallback
-  const showToast =
-    window.showToast ||
-    window.NightingaleToast?.show ||
-    function (message, type) {
-      console.log(`Toast ${type}: ${message}`);
-    };
+  const showToast = window.showToast;
 
   // All state hooks (called unconditionally per React rules)
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,7 +93,7 @@ function useOrganizationsData(props) {
       );
       setConfirmingOrganizationDelete(null);
     },
-    [fullData, onUpdateData]
+    [fullData, onUpdateData, showToast]
   );
 
   const cancelOrganizationDelete = useCallback(() => {
@@ -143,11 +137,10 @@ function useOrganizationsData(props) {
           showToast('Organization updated successfully!', 'success');
         }
       } catch (error) {
-        console.error('Error saving organization:', error);
         showToast('Error saving organization', 'error');
       }
     },
-    [fullData, fileService, onUpdateData, editValues]
+    [fullData, fileService, onUpdateData, editValues, showToast]
   );
 
   // Check for React availability

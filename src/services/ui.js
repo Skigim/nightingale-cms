@@ -47,7 +47,6 @@
           : container;
 
       if (!containerElement) {
-        console.warn('NightingaleFocusManager: Container not found');
         return null;
       }
 
@@ -94,7 +93,7 @@
               return element;
             }
           } catch (error) {
-            console.warn('Focus failed for element:', element, error);
+            // Silently handle focus errors
           }
         }
       }
@@ -125,12 +124,8 @@
     static async focusModalOpen(modal, options = {}) {
       return this.focusFirst(modal, {
         delay: 150,
-        onFocused: () => {
-          console.debug('Modal focus established');
-        },
-        onNoFocusable: () => {
-          console.warn('No focusable elements found in modal');
-        },
+        onFocused: () => {},
+        onNoFocusable: () => {},
         ...options,
       });
     }
@@ -141,13 +136,7 @@
     static async focusStepChange(stepContainer, stepIndex = 0, options = {}) {
       return this.focusFirst(stepContainer, {
         delay: 200,
-        onFocused: (element) => {
-          console.debug(
-            `Focused step ${stepIndex + 1}:`,
-            element.tagName,
-            element.type || ''
-          );
-        },
+        onFocused: (element) => {},
         preferredSelectors: [
           'input[type="text"]:not([disabled]):not([readonly])',
           'input[type="email"]:not([disabled]):not([readonly])',
@@ -190,13 +179,7 @@
 
       return this.focusFirst(container, {
         ...config,
-        onFocused: (element) => {
-          console.debug(
-            `Focused ${newState} state:`,
-            element.tagName,
-            element.type || ''
-          );
-        },
+        onFocused: (element) => {},
         ...options,
       });
     }
@@ -236,10 +219,8 @@
 
     if (section) {
       section.scrollIntoView(scrollOptions);
-      console.log(`Scrolled to section: ${sectionSelector}`);
-    } else {
-      console.warn(`Section not found: ${sectionSelector}`);
     }
+    // Section not found - silently ignore
   }
 
   /**
@@ -262,10 +243,9 @@
         testMode: true,
       });
       channel.close();
-      console.log('📤 Test broadcast sent successfully');
+
       return true;
     } catch (error) {
-      console.error('❌ Broadcast test failed:', error);
       return false;
     }
   }
@@ -274,8 +254,6 @@
    * Check application status and dependencies
    */
   function checkAppStatus() {
-    console.group('🔍 Nightingale CMS Status Check');
-
     const status = {
       timestamp: new Date().toISOString(),
       services: {},
@@ -304,9 +282,6 @@
     status.browser.broadcastChannel = !!window.BroadcastChannel;
     status.browser.fetch = !!window.fetch;
 
-    console.log('Application Status:', status);
-    console.groupEnd();
-
     return status;
   }
 
@@ -315,19 +290,16 @@
    */
   function debugComponentLibrary() {
     if (window.NightingaleComponentLibrary) {
-      console.group('🧩 Component Library Debug');
-      console.log(
-        'Available components:',
-        window.NightingaleComponentLibrary.getAvailableComponents()
-      );
-      console.log(
-        'Library status:',
-        window.NightingaleComponentLibrary.getStatus()
-      );
-      console.groupEnd();
-    } else {
-      console.warn('Component library not available');
+      // Placeholder: structured logger hook will emit component registry status here.
+      // Returning lightweight snapshot (non-logging) keeps function non-empty and lint-compliant.
+      return {
+        registrySize: Object.keys(window.NightingaleComponentLibrary || {})
+          .length,
+        // next: logger.debug('componentLibrary.status', { size: registrySize })
+      };
     }
+    // No component library available
+    return null;
   }
 
   // Create service object
@@ -353,7 +325,6 @@
   if (typeof window !== 'undefined') {
     window.NightingaleUIUtilities = NightingaleUIUtilities;
     window.NightingaleFocusManager = NightingaleFocusManager;
-    console.log('✅ Nightingale UI Utilities Service loaded');
 
     // Register with service registry if available
     if (
@@ -364,9 +335,6 @@
         'uiUtilities',
         NightingaleUIUtilities,
         'ui'
-      );
-      console.log(
-        '🎨 UI Utilities Service registered with Nightingale Services'
       );
     }
 

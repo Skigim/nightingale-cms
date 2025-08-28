@@ -26,17 +26,14 @@
   ) {
     // Input validation
     if (!templateContent || typeof templateContent !== 'string') {
-      console.warn('PlaceholderService: Invalid template content provided');
       return templateContent || '';
     }
 
     if (!activeCase) {
-      console.warn('PlaceholderService: No active case provided');
       return templateContent;
     }
 
     if (!fullData) {
-      console.warn('PlaceholderService: No full data provided');
       return templateContent;
     }
 
@@ -348,8 +345,6 @@
 
     // Backward compatibility - register individual functions
     window.processPlaceholders = processPlaceholders;
-
-    console.log('🏷️ Placeholder Service initialized');
   }
 
   // Export for module environments

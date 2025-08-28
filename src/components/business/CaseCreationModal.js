@@ -743,13 +743,8 @@ function CaseCreationModal({
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Get toast function with fallback
-  const showToast =
-    window.showToast ||
-    window.NightingaleToast?.show ||
-    function (message, type) {
-      console.log(`Toast ${type}: ${message}`);
-    };
+  // Use global toast service directly (React best practices - no local definitions)
+  const showToast = window.showToast;
 
   // Create filtered steps config for edit mode (removes Review step)
   const filteredStepsConfig = editCaseId
@@ -808,7 +803,7 @@ function CaseCreationModal({
         const newErrors = validator(caseData, safeFullData);
         return newErrors;
       } catch (error) {
-        console.warn(`Step validation error for step ${stepIndex}:`, error);
+        // Step validation error suppressed (no-op)
         // In case of validation error, return empty errors (allow the step)
         return {};
       }
@@ -840,10 +835,7 @@ function CaseCreationModal({
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
-          showToast(
-            'Please fix validation errors before continuing',
-            'error'
-          );
+          showToast('Please fix validation errors before continuing', 'error');
           return;
         }
       }
@@ -851,7 +843,14 @@ function CaseCreationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editCaseId, setCurrentStep, setValidationErrors]
+    [
+      currentStep,
+      validateStep,
+      editCaseId,
+      setCurrentStep,
+      setValidationErrors,
+      showToast,
+    ]
   );
 
   const handleComplete = async () => {
@@ -867,10 +866,7 @@ function CaseCreationModal({
         setValidationErrors(stepErrors);
         setCurrentStep(i);
         const stepTitle = configToUse[i]?.title || `Step ${i + 1}`;
-        showToast(
-          `Please fix the errors on the '${stepTitle}' step.`,
-          'error'
-        );
+        showToast(`Please fix the errors on the '${stepTitle}' step.`, 'error');
         return;
       }
     }
@@ -949,7 +945,7 @@ function CaseCreationModal({
       showToast(successMessage, 'success');
       onClose();
     } catch (error) {
-      console.error('Error saving case:', error);
+      // Error saving case suppressed (no-op)
       showToast('Error saving case: ' + error.message, 'error');
     } finally {
       setIsLoading(false);
@@ -1061,8 +1057,7 @@ function CaseCreationModal({
                 onClose(); // Close the modal first
                 onViewCaseDetails(editCaseId); // Switch to case details view
               } else {
-                console.log('View Full Case clicked for case:', editCaseId);
-                console.warn('onViewCaseDetails callback not provided');
+                // View full case callback not provided - no-op
               }
             },
             icon: 'view',

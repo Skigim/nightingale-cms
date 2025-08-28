@@ -8,7 +8,7 @@
 
 // Prevent multiple declarations if script loads twice
 if (typeof window !== 'undefined' && window.dateUtils) {
-  console.log('⚠️ dateUtils already loaded, skipping redefinition');
+  // Already loaded, skip redefinition
 } else {
   // The Day.js library and its plugins are expected to be loaded globally before this script.
   const dateUtils = {

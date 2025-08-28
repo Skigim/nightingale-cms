@@ -55,16 +55,8 @@ function Modal({
       // Use NightingaleFocusManager if available, fallback to basic focus
       if (window.NightingaleFocusManager) {
         window.NightingaleFocusManager.focusModalOpen(modalRef.current, {
-          onFocused: (element) => {
-            console.debug(
-              'Modal focused element:',
-              element.tagName,
-              element.type || ''
-            );
-          },
-          onNoFocusable: () => {
-            console.warn('No focusable elements found in modal');
-          },
+          onFocused: () => {},
+          onNoFocusable: () => {},
         });
       } else {
         // Fallback focus management
@@ -316,8 +308,6 @@ function FormModal({
 function showModalToast(message, type = 'success') {
   if (typeof window.showToast === 'function') {
     window.showToast(message, type);
-  } else {
-    console.log(`Modal Toast (${type}): ${message}`);
   }
 }
 

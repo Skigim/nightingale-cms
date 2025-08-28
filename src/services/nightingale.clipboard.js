@@ -67,7 +67,6 @@
         // Fallback to execCommand for older browsers
         return this._fallbackCopy(sanitizedText, config);
       } catch (error) {
-        console.warn('Clipboard API failed, trying fallback:', error);
         return this._fallbackCopy(sanitizedText, config);
       }
     }
@@ -104,7 +103,6 @@
           throw new Error('execCommand failed');
         }
       } catch (error) {
-        console.error('Fallback copy failed:', error);
         if (config.showToast && window.showToast) {
           window.showToast(config.errorMessage, 'error');
         }
@@ -317,7 +315,6 @@
   // Export to global scope
   if (typeof window !== 'undefined') {
     window.NightingaleClipboard = NightingaleClipboard;
-    console.log('✅ Nightingale Clipboard Service loaded');
 
     // Register with service registry if available
     if (
@@ -329,7 +326,6 @@
         NightingaleClipboard,
         'core'
       );
-      console.log('📋 Clipboard Service registered with Nightingale Services');
     }
 
     // Legacy global functions for backward compatibility

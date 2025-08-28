@@ -255,7 +255,7 @@ function PersonCreationModal({
 
         return errors;
       } catch (error) {
-        console.warn(`Person validation error for step ${stepIndex}:`, error);
+        // Person validation error suppressed (no-op)
         // In case of validation error, return empty errors (allow the step)
         return {};
       }
@@ -443,7 +443,6 @@ function PersonCreationModal({
         successMessage = 'Person created successfully';
       }
 
-      console.log('Saving updated data:', updatedData); // Debug log
       const saveResult = await fileService.writeFile(updatedData);
 
       if (!saveResult) {
@@ -460,7 +459,6 @@ function PersonCreationModal({
       onPersonCreated(resultPerson);
       onClose();
     } catch (error) {
-      console.error('Error saving person:', error);
       window.showToast?.('Error saving person: ' + error.message, 'error');
     } finally {
       setIsLoading(false);

@@ -36,12 +36,7 @@ class ErrorBoundary extends window.React.Component {
       error: error,
       errorInfo: errorInfo,
     });
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-
-    // You can also log the error to an error reporting service here
-    if (window.console && window.console.error) {
-      console.error('Component stack trace:', errorInfo.componentStack);
-    }
+    // (logging removed) hook for future logger integration
   }
 
   render() {

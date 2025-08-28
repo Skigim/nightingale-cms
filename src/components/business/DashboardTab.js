@@ -43,6 +43,9 @@ function DashboardTab({ fullData }) {
     };
   }, [fullData]);
 
+  // Note: Hash navigation is handled by user actions, no automatic side effects needed
+  // Hash changes are triggered by user interactions (e.g., clicking quick actions)
+
   if (!window.React) {
     // If React is not available, the component cannot render.
     return null;
