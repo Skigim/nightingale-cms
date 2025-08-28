@@ -1,0 +1,653 @@
+{
+  "cases": [
+    {
+      "id": "case-001",
+      "mcn": "VR46578",
+      "masterCaseNumber": "VR46578",
+      "clientName": "Sarah Michelle Johnson",
+      "personId": "person-001",
+      "status": "Active",
+      "priority": true,
+      "caseType": "SIMP",
+      "serviceType": "Vocational Rehabilitation",
+      "applicationDate": "2025-08-15T10:30:00.000Z",
+      "createdDate": "2025-08-15T10:30:00.000Z",
+      "lastUpdated": "2025-08-28T14:22:00.000Z",
+      "description": "Vocational rehabilitation case for client with mobility limitations seeking employment assistance and adaptive technology training.",
+      "withWaiver": false,
+      "retroRequested": "Yes",
+      "livingArrangement": "Lives independently in accessible apartment",
+      "organizationAddress": "Springfield Rehabilitation Services - 100 Community Drive, Springfield, IL 62701",
+      "clientAddress": {
+        "street": "456 Oak Street, Apt 2B",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62701"
+      },
+      "authorizedReps": [
+        {
+          "id": "rep-001",
+          "name": "Michael Thompson",
+          "relationship": "Legal Guardian",
+          "phone": "(555) 987-6543",
+          "email": "m.thompson@legalaid.org"
+        }
+      ],
+      "appDetails": {
+        "appDate": "2025-08-15T10:30:00.000Z",
+        "caseType": "SIMP",
+        "serviceType": "Vocational Rehabilitation"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": "financial-001",
+            "description": "First National Checking Account",
+            "type": "Checking Account",
+            "amount": 2450.75,
+            "value": 2450.75,
+            "location": "First National Bank",
+            "accountNumber": "****4321",
+            "frequency": "monthly",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "Bank Statement",
+            "verificationSource": "Bank Statement July 2025",
+            "notes": "Primary checking account for daily expenses",
+            "verified": true
+          },
+          {
+            "id": "financial-002",
+            "description": "Emergency Savings Account",
+            "type": "Savings Account",
+            "amount": 8750,
+            "value": 8750,
+            "location": "Springfield Credit Union",
+            "accountNumber": "****9876",
+            "frequency": "monthly",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "Bank Statement",
+            "verificationSource": "Credit Union Statement July 2025",
+            "notes": "Emergency fund savings account",
+            "verified": true
+          },
+          {
+            "id": "financial-003",
+            "description": "2020 Honda Civic",
+            "type": "Vehicle",
+            "amount": 15500,
+            "value": 15500,
+            "location": "Personal Vehicle",
+            "accountNumber": "VIN: 1HGBH41JXMN109186",
+            "frequency": "one-time",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "KBB Valuation",
+            "verificationSource": "Kelley Blue Book Estimate",
+            "notes": "Adaptive controls installed for mobility assistance",
+            "verified": true
+          }
+        ],
+        "income": [
+          {
+            "id": "income-001",
+            "description": "Social Security Disability Insurance",
+            "type": "SSDI",
+            "amount": 1284,
+            "value": 1284,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "SSA Award Letter",
+            "verificationSource": "SSA Award Letter 2025",
+            "location": "Social Security Administration",
+            "notes": "Monthly SSDI benefit payment",
+            "verified": true
+          },
+          {
+            "id": "income-002",
+            "description": "Part-time Remote Work",
+            "type": "Employment Income",
+            "amount": 1200,
+            "value": 1200,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-20T09:15:00.000Z",
+            "source": "Pay Stub",
+            "verificationSource": "TechSolutions Inc. Pay Stub",
+            "location": "TechSolutions Inc. (Remote)",
+            "notes": "Part-time data entry position, 20 hours/week",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Apartment Rent",
+            "type": "Housing",
+            "amount": 950,
+            "value": 950,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "Lease Agreement",
+            "verificationSource": "Lease Agreement - Oak Gardens Apartments",
+            "location": "456 Oak Street, Springfield IL",
+            "notes": "Accessible apartment with wheelchair accessibility",
+            "verified": true
+          },
+          {
+            "id": "expense-002",
+            "description": "Medical Expenses",
+            "type": "Healthcare",
+            "amount": 385.5,
+            "value": 385.5,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "Medical Bills",
+            "verificationSource": "Springfield Medical Center Statements",
+            "location": "Springfield Medical Center",
+            "notes": "Monthly prescription costs and therapy sessions",
+            "verified": true
+          },
+          {
+            "id": "expense-003",
+            "description": "Transportation Costs",
+            "type": "Transportation",
+            "amount": 275,
+            "value": 275,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-15T10:30:00.000Z",
+            "source": "Receipts",
+            "verificationSource": "Gas and maintenance receipts",
+            "location": "Various",
+            "notes": "Vehicle maintenance, gas, and adaptive equipment upkeep",
+            "verified": true
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Initial Case Opening",
+          "content": "Client submitted complete application package. All required documents received and verified. Initial assessment scheduled for 8/20/2025.",
+          "author": "Maria Rodriguez, Case Manager",
+          "date": "2025-08-15T10:45:00.000Z",
+          "category": "initial",
+          "lastModified": "2025-08-15T10:45:00.000Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Vocational Assessment Completed",
+          "content": "Comprehensive vocational assessment completed. Client shows strong aptitude for computer-based work. Recommended for adaptive technology training program.",
+          "author": "Dr. James Chen, VR Counselor",
+          "date": "2025-08-20T14:30:00.000Z",
+          "category": "assessment",
+          "lastModified": "2025-08-20T14:30:00.000Z"
+        },
+        {
+          "id": "note-003",
+          "title": "Employment Placement Success",
+          "content": "Client successfully placed in part-time remote position with TechSolutions Inc. Employer has agreed to provide necessary accommodations and adaptive software.",
+          "author": "Sarah Williams, Employment Specialist",
+          "date": "2025-08-25T11:20:00.000Z",
+          "category": "employment",
+          "lastModified": "2025-08-25T11:20:00.000Z"
+        },
+        {
+          "id": "note-004",
+          "title": "30-Day Follow-up",
+          "content": "Client is adapting well to new position. Employer reports excellent performance. Client requested additional training on advanced software features.",
+          "author": "Maria Rodriguez, Case Manager",
+          "date": "2025-08-28T09:15:00.000Z",
+          "category": "follow-up",
+          "lastModified": "2025-08-28T09:15:00.000Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Schedule 60-day employment follow-up",
+          "status": "pending",
+          "dueDate": "2025-09-25T00:00:00.000Z",
+          "completedDate": "",
+          "assignedTo": "Maria Rodriguez",
+          "priority": "medium",
+          "notes": "Follow up on job performance and any accommodation needs"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete final documentation for case closure",
+          "status": "pending",
+          "dueDate": "2025-10-15T00:00:00.000Z",
+          "completedDate": "",
+          "assignedTo": "Maria Rodriguez",
+          "priority": "high",
+          "notes": "Prepare case summary and outcome documentation"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Vocational Assessment",
+          "status": "completed",
+          "requestDate": "2025-08-15T10:30:00.000Z",
+          "completedDate": "2025-08-20T14:30:00.000Z",
+          "notes": "Comprehensive assessment including skills evaluation and accommodation needs",
+          "assignedTo": "Dr. James Chen",
+          "description": "Complete vocational assessment to determine employment potential and training needs"
+        },
+        {
+          "id": "vr-002",
+          "type": "Job Placement Services",
+          "status": "completed",
+          "requestDate": "2025-08-21T09:00:00.000Z",
+          "completedDate": "2025-08-25T11:20:00.000Z",
+          "notes": "Successfully placed client in remote position with accommodations",
+          "assignedTo": "Sarah Williams",
+          "description": "Job placement assistance and employer negotiations for accommodations"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Financial and Medical",
+        "status": "completed",
+        "dateRequested": "2025-08-15T10:30:00.000Z",
+        "dateCompleted": "2025-08-18T16:45:00.000Z",
+        "notes": "All financial documents verified. Medical documentation confirms disability status and accommodation needs.",
+        "requestedBy": "Maria Rodriguez",
+        "completedBy": "Jennifer Walsh, Verification Specialist"
+      },
+      "searchableText": "Sarah Johnson SIMP vocational rehabilitation employment adaptive technology remote work disability SSDI Springfield",
+      "source": "VR Office Application",
+      "verificationSource": "Complete Documentation Package"
+    }
+  ],
+  "people": [
+    {
+      "id": "person-001",
+      "name": "Sarah Michelle Johnson",
+      "firstName": "Sarah",
+      "lastName": "Johnson",
+      "middleName": "Michelle",
+      "ssn": "123-45-6789",
+      "dateOfBirth": "1985-03-12T00:00:00.000Z",
+      "phone": "(555) 123-4567",
+      "email": "sarah.johnson@email.com",
+      "status": "active",
+      "dateAdded": "2025-08-15T10:30:00.000Z",
+      "lastUpdated": "2025-08-28T14:22:00.000Z",
+      "relationship": "client",
+      "address": {
+        "street": "456 Oak Street, Apt 2B",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62701"
+      },
+      "mailingAddress": {
+        "street": "456 Oak Street, Apt 2B",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62701",
+        "sameAsPhysical": true
+      },
+      "emergencyContact": {
+        "name": "Robert Johnson",
+        "phone": "(555) 987-1234",
+        "relationship": "brother"
+      },
+      "notes": "Client with mobility limitations seeking vocational rehabilitation services. Highly motivated and tech-savvy. Successfully completed adaptive technology training.",
+      "tags": [
+        "client",
+        "active",
+        "VR",
+        "employment-success"
+      ]
+    },
+    {
+      "id": "person-002",
+      "name": "Michael Thompson",
+      "firstName": "Michael",
+      "lastName": "Thompson",
+      "middleName": "David",
+      "ssn": "",
+      "dateOfBirth": "1972-11-08T00:00:00.000Z",
+      "phone": "(555) 987-6543",
+      "email": "m.thompson@legalaid.org",
+      "status": "active",
+      "dateAdded": "2025-08-15T10:30:00.000Z",
+      "lastUpdated": "2025-08-15T10:30:00.000Z",
+      "relationship": "legal-representative",
+      "address": {
+        "street": "789 Legal Plaza",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62703"
+      },
+      "mailingAddress": {
+        "street": "789 Legal Plaza",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62703",
+        "sameAsPhysical": true
+      },
+      "emergencyContact": {
+        "name": "Legal Aid Society",
+        "phone": "(555) 987-6500",
+        "relationship": "employer"
+      },
+      "notes": "Legal guardian and advocate for Sarah Johnson. Licensed attorney specializing in disability rights.",
+      "tags": [
+        "legal-representative",
+        "active",
+        "attorney"
+      ]
+    }
+  ],
+  "organizations": [
+    {
+      "id": "org-001",
+      "name": "Springfield Rehabilitation Services",
+      "type": "Government Agency",
+      "status": "active",
+      "phone": "(555) 987-6543",
+      "email": "info@springfieldvr.gov",
+      "website": "https://www.springfieldvr.gov",
+      "dateAdded": "2025-08-15T10:30:00.000Z",
+      "lastUpdated": "2025-08-28T14:22:00.000Z",
+      "address": {
+        "street": "100 Community Drive",
+        "city": "Springfield",
+        "state": "IL",
+        "zip": "62701"
+      },
+      "contactPerson": {
+        "name": "Maria Rodriguez",
+        "title": "Senior Case Manager",
+        "phone": "(555) 987-6544",
+        "email": "maria.rodriguez@springfieldvr.gov"
+      },
+      "services": [
+        "Vocational Rehabilitation",
+        "Job Placement",
+        "Adaptive Technology Training",
+        "Case Management"
+      ],
+      "notes": "Primary VR services provider for the Springfield region. Specializes in employment services for individuals with disabilities.",
+      "tags": [
+        "government",
+        "VR-services",
+        "active",
+        "primary-provider"
+      ]
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2025-08-28T14:22:00.000Z",
+    "type": "sample-data",
+    "description": "Complete Nightingale CMS data structure with sample case data",
+    "schemaVersion": "2024.1",
+    "totalCases": 1,
+    "totalPeople": 2,
+    "totalOrganizations": 1,
+    "dataFormat": "normalized",
+    "migrationNotes": "Sample data for development and testing - includes fully populated case example"
+  },
+  "caseTemplate": {
+    "id": "case-template",
+    "mcn": "MCN12345",
+    "masterCaseNumber": "MCN12345",
+    "clientName": "Client Full Name",
+    "personId": "person-001",
+    "status": "Pending",
+    "priority": false,
+    "caseType": "SIMP",
+    "serviceType": "Vocational Rehabilitation",
+    "applicationDate": "2025-08-28T00:00:00.000Z",
+    "createdDate": "2025-08-28T00:00:00.000Z",
+    "lastUpdated": "2025-08-28T00:00:00.000Z",
+    "description": "Case description text",
+    "withWaiver": false,
+    "retroRequested": "No",
+    "livingArrangement": "Not specified",
+    "organizationAddress": "Not specified",
+    "clientAddress": {
+      "street": "123 Main Street",
+      "city": "City Name",
+      "state": "State",
+      "zip": "12345"
+    },
+    "authorizedReps": [
+      {
+        "id": "rep-001",
+        "name": "Representative Name",
+        "relationship": "Attorney",
+        "phone": "(555) 123-4567",
+        "email": "rep@example.com"
+      }
+    ],
+    "appDetails": {
+      "appDate": "2025-08-28T00:00:00.000Z",
+      "caseType": "SIMP",
+      "serviceType": "Vocational Rehabilitation"
+    },
+    "financials": {
+      "resources": [
+        {
+          "id": "financial-001",
+          "description": "Checking Account",
+          "type": "Checking Account",
+          "amount": 1500,
+          "value": 1500,
+          "location": "Bank Name",
+          "accountNumber": "****1234",
+          "frequency": "monthly",
+          "dateAdded": "2025-08-28T00:00:00.000Z",
+          "source": "Bank Statement",
+          "verificationSource": "Bank Statement",
+          "notes": "Primary checking account",
+          "verified": true
+        }
+      ],
+      "income": [
+        {
+          "id": "income-001",
+          "description": "Employment Income",
+          "type": "Employment Income",
+          "amount": 2500,
+          "value": 2500,
+          "frequency": "monthly",
+          "dateAdded": "2025-08-28T00:00:00.000Z",
+          "source": "Pay Stub",
+          "verificationSource": "Pay Stub",
+          "location": "Employer Name",
+          "notes": "Full-time employment",
+          "verified": true
+        }
+      ],
+      "expenses": [
+        {
+          "id": "expense-001",
+          "description": "Housing Costs",
+          "type": "Housing Costs",
+          "amount": 1200,
+          "value": 1200,
+          "frequency": "monthly",
+          "dateAdded": "2025-08-28T00:00:00.000Z",
+          "source": "Lease Agreement",
+          "verificationSource": "Lease Agreement",
+          "location": "Home Address",
+          "notes": "Rent payment",
+          "verified": true
+        }
+      ]
+    },
+    "notes": [
+      {
+        "id": "note-001",
+        "title": "Case Opening",
+        "content": "Initial case assessment completed",
+        "author": "Case Manager",
+        "date": "2025-08-28T00:00:00.000Z",
+        "category": "initial",
+        "lastModified": "2025-08-28T00:00:00.000Z"
+      }
+    ],
+    "todos": [
+      {
+        "id": "todo-001",
+        "task": "Complete intake documentation",
+        "status": "pending",
+        "dueDate": "2025-09-15T00:00:00.000Z",
+        "completedDate": "",
+        "assignedTo": "Case Manager",
+        "priority": "high",
+        "notes": "Required for case processing"
+      }
+    ],
+    "vrRequests": [
+      {
+        "id": "vr-001",
+        "type": "Assessment",
+        "status": "pending",
+        "requestDate": "2025-08-28T00:00:00.000Z",
+        "completedDate": "",
+        "notes": "Initial vocational assessment",
+        "assignedTo": "VR Counselor",
+        "description": "Comprehensive vocational evaluation"
+      }
+    ],
+    "verificationRequest": {
+      "requestType": "Financial",
+      "status": "pending",
+      "dateRequested": "2025-08-28T00:00:00.000Z",
+      "dateCompleted": "",
+      "notes": "Verification of income and resources",
+      "requestedBy": "Case Manager",
+      "completedBy": ""
+    },
+    "searchableText": "case search text content",
+    "source": "Application Form",
+    "verificationSource": "Application Form"
+  },
+  "personTemplate": {
+    "id": "person-001",
+    "name": "John Doe",
+    "firstName": "John",
+    "lastName": "Doe",
+    "middleName": "Michael",
+    "ssn": "123-45-6789",
+    "dateOfBirth": "1980-01-15T00:00:00.000Z",
+    "phone": "(555) 123-4567",
+    "email": "john.doe@example.com",
+    "status": "active",
+    "dateAdded": "2025-08-28T00:00:00.000Z",
+    "lastUpdated": "2025-08-28T00:00:00.000Z",
+    "relationship": "client",
+    "address": {
+      "street": "123 Main Street",
+      "city": "Springfield",
+      "state": "IL",
+      "zip": "62701"
+    },
+    "mailingAddress": {
+      "street": "PO Box 456",
+      "city": "Springfield",
+      "state": "IL",
+      "zip": "62702",
+      "sameAsPhysical": false
+    },
+    "emergencyContact": {
+      "name": "Jane Doe",
+      "phone": "(555) 987-6543",
+      "relationship": "spouse"
+    },
+    "notes": "Client notes and additional information",
+    "tags": [
+      "client",
+      "active"
+    ]
+  },
+  "organizationTemplate": {
+    "id": "org-001",
+    "name": "Springfield Community Services",
+    "type": "Non-Profit",
+    "status": "active",
+    "phone": "(555) 987-6543",
+    "email": "info@springfieldcs.org",
+    "website": "https://www.springfieldcs.org",
+    "dateAdded": "2025-08-28T00:00:00.000Z",
+    "lastUpdated": "2025-08-28T00:00:00.000Z",
+    "address": {
+      "street": "100 Community Drive",
+      "city": "Springfield",
+      "state": "IL",
+      "zip": "62701"
+    },
+    "contactPerson": {
+      "name": "Mary Wilson",
+      "title": "Program Director",
+      "phone": "(555) 987-6544",
+      "email": "mary.wilson@springfieldcs.org"
+    },
+    "services": [
+      "Case Management",
+      "Vocational Training",
+      "Support Services"
+    ],
+    "notes": "Primary service provider for vocational rehabilitation",
+    "tags": [
+      "service-provider",
+      "active"
+    ]
+  },
+  "nextPersonId": 1003,
+  "nextCaseId": 1002,
+  "nextOrganizationId": 1002,
+  "nextFinancialItemId": 1004,
+  "nextNoteId": 1005,
+  "showAllCases": false,
+  "showAllContacts": false,
+  "showAllPeople": true,
+  "caseSortReversed": false,
+  "priorityFilterActive": false,
+  "contacts": [],
+  "vrTemplates": [
+    {
+      "id": "vr-template-001",
+      "name": "Standard Assessment Template",
+      "category": "Assessment",
+      "content": "Template content for vocational assessment",
+      "dateCreated": "2025-08-28T00:00:00.000Z"
+    }
+  ],
+  "nextVrTemplateId": 1001,
+  "vrCategories": [
+    "Assessment",
+    "Training",
+    "Support",
+    "Evaluation"
+  ],
+  "vrRequests": [
+    {
+      "id": "vr-request-001",
+      "caseId": "case-001",
+      "type": "Assessment",
+      "status": "pending",
+      "requestDate": "2025-08-28T00:00:00.000Z",
+      "description": "Initial vocational assessment request"
+    }
+  ],
+  "nextVrRequestId": 1001,
+  "vrDraftItems": [],
+  "activeCase": null,
+  "isDataLoaded": true,
+  "showAllOrganizations": false,
+  "accordionState": {
+    "simp_applicant": true,
+    "simp_joint": false,
+    "simp_spouse": true
+  },
+  "viewState": {
+    "currentTab": "case-management",
+    "currentTitle": "Cases",
+    "currentCaseId": null,
+    "lastRefreshTimestamp": "2025-08-28T00:00:00.000Z",
+    "expandedFinancialCards": {}
+  }
+}
