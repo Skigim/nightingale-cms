@@ -470,6 +470,12 @@ function createBusinessComponent(config) {
           renderModals({ components, data: dataResult, props: finalProps })
       );
     } catch (renderError) {
+      const logger = window.NightingaleLogger?.get('ui:tabRender');
+      logger?.error('Tab render failed', { 
+        error: renderError.message, 
+        tabName: name,
+        stack: renderError.stack 
+      });
       return e(
         'div',
         {
