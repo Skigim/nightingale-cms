@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bank Statement Reviewer</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Oxygen,
+          Ubuntu,
+          Cantarell,
+          'Open Sans',
+          'Helvetica Neue',
+          sans-serif;
+        margin: 2em;
+        color: #333;
+        background-color: #f8f9fa;
+      }
+      h1 {
+        color: #1a1a1a;
+      }
+      #root {
+        padding: 1.5em;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      /* New Page Grid Layout */
+      .page-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+        gap: 2em;
+      }
+
+      /* Month Card Styles with Header */
+      .month-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 2em;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .month-header {
+        background-color: #f8f9fa;
+        padding: 0.75em 1em;
+        border-bottom: 1px solid #dee2e6;
+        text-align: center;
+        font-weight: bold;
+      }
+      .year-label {
+        font-size: 1.5em;
+        color: #333;
+        margin-right: 0.5em;
+      }
+      .month-label {
+        font-size: 1.2em;
+        color: #007bff;
+      }
+      .transactions-column {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .transaction-row {
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr 1fr 1fr;
+        padding: 0.75em 1em;
+        border-bottom: 1px solid #e9ecef;
+        text-align: right;
+        align-items: center;
+      }
+      .transaction-header {
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr 1fr 1fr;
+        padding: 0.75em 1em;
+        background-color: #f1f3f5;
+        font-weight: bold;
+        text-align: right;
+        color: #495057;
+      }
+      .transaction-header div {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s;
+        padding: 0.25em;
+        border-radius: 4px;
+      }
+      .transaction-header div:hover {
+        background-color: #e9ecef;
+      }
+      .sort-indicator {
+        margin-left: 0.5em;
+        font-size: 0.8em;
+      }
+      .filter-controls {
+        display: flex;
+        gap: 1em;
+        align-items: center;
+        margin-left: 1em;
+      }
+      .filter-select {
+        padding: 0.25em 0.5em;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+
+      /* Print Styles for Landscape Format */
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+          background: white;
+          font-size: 10pt;
+        }
+
+        h1 {
+          display: none;
+        }
+
+        /* Hide upload section completely */
+        .file-upload-section {
+          display: none !important;
+        }
+
+        #root > div:first-child {
+          display: none !important;
+        }
+
+        /* Optimize page layout for landscape */
+        .page-grid {
+          display: block;
+          margin: 0;
+          padding: 0;
+        }
+
+        .month-card {
+          page-break-inside: avoid;
+          margin-bottom: 1em;
+          border: 1px solid #000;
+          box-shadow: none;
+        }
+
+        .month-header {
+          background: #f0f0f0 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          font-size: 12pt;
+          font-weight: bold;
+          border-bottom: 1px solid #000;
+        }
+
+        /* Hide filter controls in print */
+        .filter-controls {
+          display: none !important;
+        }
+
+        .transaction-header {
+          background: #f8f8f8 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          font-size: 9pt;
+          font-weight: bold;
+          border-bottom: 1px solid #000;
+        }
+
+        .transaction-row {
+          font-size: 8pt;
+          border-bottom: 1px solid #ccc;
+          padding: 0.5em 1em;
+          grid-template-columns: 1fr 3fr 1fr 1fr 1fr;
+        }
+
+        .balance-summary {
+          background: #f0f0f0 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          font-size: 9pt;
+          font-weight: bold;
+          border-top: 1px solid #000;
+        }
+
+        /* Ensure text colors print correctly */
+        .credit {
+          color: #000 !important;
+        }
+
+        .debit {
+          color: #000 !important;
+        }
+
+        /* Hide sort indicators in print */
+        .sort-indicator {
+          display: none;
+        }
+
+        /* Optimize for landscape orientation */
+        @page {
+          size: landscape;
+          margin: 0.5in;
+        }
+      }
+      .transaction-description {
+        text-align: left;
+      }
+      .transaction-date {
+        text-align: left;
+      }
+      .balance-summary {
+        display: flex;
+        justify-content: space-around;
+        padding: 0.75em 1em;
+        background-color: #f8f9fa;
+        font-weight: bold;
+        margin-top: auto;
+      }
+      .balance {
+        font-weight: bold;
+      }
+      .credit {
+        color: #28a745;
+      }
+      .debit {
+        color: #dc3545;
+      }
+
+      /* Warning flag styles */
+      .warning-flag {
+        color: #ff6b35;
+        font-weight: bold;
+        cursor: help;
+        margin-left: 0.5em;
+      }
+      .warning-row {
+        background-color: #fff3cd;
+        border-left: 4px solid #ff6b35;
+      }
+      .warning-tooltip {
+        position: relative;
+      }
+      .warning-tooltip:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        background: #333;
+        color: white;
+        padding: 0.5em;
+        border-radius: 4px;
+        white-space: nowrap;
+        z-index: 1000;
+        font-size: 0.8em;
+      }
+    </style>
+
+    <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
+    <script src="https://unpkg.com/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+    <script>
+      // Required configuration for PDF.js
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js`;
+    </script>
+  </head>
+  <body>
+    <h1>Bank Statement Review Tool</h1>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      /**
+       * A robust, stateful parser that handles multi-line descriptions by looking ahead.
+       */
+
+      /**
+       * Validates a transaction for potential OCR/parsing errors
+       */
+      function validateTransaction(transaction, previousBalance) {
+        const warnings = [];
+
+        // Debug logging
+        console.log('🔍 Validating transaction:', {
+          description: transaction.description,
+          debit: transaction.debit,
+          credit: transaction.credit,
+          balance: transaction.balance,
+          previousBalance: previousBalance,
+        });
+
+        // Check for unrealistic transaction amounts
+        const totalAmount = transaction.debit + transaction.credit;
+        console.log('  💰 Total amount:', totalAmount);
+
+        if (totalAmount > 10000) {
+          const warning = `Large amount: $${totalAmount.toFixed(2)} - check for missing decimal`;
+          console.log('  ⚠️ LARGE AMOUNT WARNING:', warning);
+          warnings.push(warning);
+        }
+
+        // Check for amounts without proper decimal formatting
+        if (totalAmount > 0) {
+          const amountStr = totalAmount.toString();
+          console.log('  🔢 Amount string analysis:', {
+            amountStr,
+            length: amountStr.length,
+            hasDecimal: amountStr.includes('.'),
+            isWholeNumber: totalAmount % 1 === 0,
+            triggerCondition: amountStr.length > 4 && !amountStr.includes('.') && totalAmount % 1 === 0,
+          });
+
+          if (amountStr.length > 4 && !amountStr.includes('.') && totalAmount % 1 === 0) {
+            const warning = `Missing decimal? Amount: $${totalAmount} might be $${(totalAmount / 100).toFixed(2)}`;
+            console.log('  ⚠️ DECIMAL WARNING:', warning);
+            warnings.push(warning);
+          }
+        }
+
+        // Check balance math if we have a previous balance (TEMPORARILY DISABLED - parsing issues)
+        if (false && previousBalance !== null && previousBalance !== undefined) {
+          const expectedBalance = previousBalance + transaction.credit - transaction.debit;
+          const balanceDiff = Math.abs(expectedBalance - transaction.balance);
+          console.log('  🧮 Balance math check:', {
+            previousBalance,
+            credit: transaction.credit,
+            debit: transaction.debit,
+            expectedBalance,
+            actualBalance: transaction.balance,
+            difference: balanceDiff,
+          });
+
+          if (balanceDiff > 0.01) {
+            const warning = `Balance mismatch: Expected $${expectedBalance.toFixed(2)}, got $${transaction.balance.toFixed(2)}`;
+            console.log('  ⚠️ BALANCE MISMATCH WARNING:', warning);
+            warnings.push(warning);
+          }
+        }
+
+        // Check for incomplete descriptions (common OCR issue)
+        console.log('  📝 Description check:', {
+          description: transaction.description,
+          length: transaction.description.length,
+          tooShort: transaction.description.length < 3,
+        });
+
+        if (transaction.description.length < 3) {
+          const warning = 'Description too short - possible OCR error';
+          console.log('  ⚠️ SHORT DESCRIPTION WARNING:', warning);
+          warnings.push(warning);
+        }
+
+        // Check for suspicious characters in description
+        const suspiciousChars = /[~§¥£€]/.test(transaction.description);
+        console.log('  🔍 Special character check:', {
+          description: transaction.description,
+          hasSuspiciousChars: suspiciousChars,
+          pattern: '/[~§¥£€]/',
+        });
+
+        if (suspiciousChars) {
+          const warning = 'Special characters detected - possible OCR error';
+          console.log('  ⚠️ SPECIAL CHARS WARNING:', warning);
+          warnings.push(warning);
+        }
+
+        // Check for missing amounts (but allow opening balance and other balance transactions)
+        const missingAmounts =
+          transaction.debit === 0 &&
+          transaction.credit === 0 &&
+          !transaction.description.toUpperCase().includes('OPENING BALANCE') &&
+          !transaction.description.toUpperCase().includes('BALANCE');
+        console.log('  💸 Missing amounts check:', {
+          debit: transaction.debit,
+          credit: transaction.credit,
+          isOpeningBalance: transaction.description.toUpperCase().includes('OPENING BALANCE'),
+          isBalanceTransaction: transaction.description.toUpperCase().includes('BALANCE'),
+          missingAmounts,
+        });
+
+        if (missingAmounts) {
+          const warning = 'No debit or credit amount found';
+          console.log('  ⚠️ MISSING AMOUNTS WARNING:', warning);
+          warnings.push(warning);
+        }
+
+        console.log('  📋 Final warnings for this transaction:', warnings);
+        console.log('  ===============================');
+
+        return warnings;
+      }
+
+function parseStatementText(text) {
+        const originalLines = text.split('\n');
+        const yearlyData = {};
+        const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const creditKeywords = [
+          'DEPOSIT',
+          'INTEREST EARNED',
+          'FROM',
+          'VENMO PAYMENT FROM',
+          'CHECK #',
+          'MOBILE DEPOSIT',
+          'CASH DEPOSIT',
+        ];
+        const dateRegex = /^\s*(\d{1,2}[.,\/]\d{1,2}[.,\/]\d{4})/;
+
+        for (let i = 0; i < originalLines.length; i++) {
+          let line = originalLines[i]; // Keep original line for now
+          const dateMatch = line.match(dateRegex);
+
+          if (dateMatch) {
+            // --- Start: Multi-line description handling (same as before) ---
+            let fullTransactionText = line.replace(dateRegex, '').trim();
+            let nextIndex = i + 1;
+            while (nextIndex < originalLines.length && !dateRegex.test(originalLines[nextIndex])) {
+              const continuation = originalLines[nextIndex].trim();
+              if (continuation && !continuation.toLowerCase().includes('date description')) {
+                fullTransactionText += ` ${continuation}`;
+              }
+              nextIndex++;
+            }
+            fullTransactionText = fullTransactionText.replace(/\s+/g, ' ').trim();
+            // --- End: Multi-line description handling ---
+
+            console.log('🔍 PARSING TRANSACTION:', {
+              date: dateMatch[1],
+              fullText: fullTransactionText,
+            });
+
+            // --- Start: New Column-Aware Parsing Logic ---
+            const moneyValues = fullTransactionText.match(/\$?[\d,.-]+/g) || [];
+            const numbers = moneyValues.map((val) => parseFloat(val.replace(/[$,]/g, '')) || 0);
+
+            console.log('💰 MONEY EXTRACTION:', {
+              moneyValues: moneyValues,
+              numbers: numbers,
+            });
+
+            let cleanDescription = fullTransactionText;
+            // Remove all found monetary values to isolate the description text
+            moneyValues.forEach((val) => {
+              cleanDescription = cleanDescription.replace(val, '');
+            });
+            cleanDescription = cleanDescription.replace(/[~§]/g, '').replace(/\s+/g, ' ').trim();
+
+            console.log('📝 CLEANED DESCRIPTION:', cleanDescription);
+
+            let debit = 0,
+              credit = 0,
+              balance = 0;
+
+            if (cleanDescription.toUpperCase().includes('OPENING BALANCE') && numbers.length > 0) {
+              balance = numbers[0];
+              console.log('💰 OPENING BALANCE DETECTED:', balance);
+            } else if (numbers.length >= 2) {
+              // Apply positional logic: last number is balance, second-to-last is the amount
+              balance = numbers[numbers.length - 1];
+              const amount = numbers[numbers.length - 2];
+
+              console.log('💰 TRANSACTION WITH AMOUNTS:', {
+                amount: amount,
+                balance: balance,
+                isCredit: creditKeywords.some((kw) => cleanDescription.toUpperCase().includes(kw)),
+              });
+
+              if (creditKeywords.some((kw) => cleanDescription.toUpperCase().includes(kw))) {
+                credit = amount;
+              } else {
+                debit = amount;
+              }
+            } else {
+              console.log('⚠️ INSUFFICIENT NUMBERS FOUND - SKIPPING TRANSACTION');
+              i = nextIndex - 1; // Advance loop to the next potential transaction
+              continue;
+            }
+            // --- End: New Column-Aware Parsing Logic ---
+
+            console.log('💰 FINAL AMOUNTS:', {
+              debit: debit,
+              credit: credit,
+              balance: balance,
+            });
+
+            const date = new Date(dateMatch[1].replace(/,/g, '/'));
+            if (isNaN(date.getTime())) {
+              console.log('❌ INVALID DATE - SKIPPING');
+              i = nextIndex - 1;
+              continue;
+            }
+
+            const year = date.getFullYear();
+            const month = monthNames[date.getMonth()];
+
+            if (!yearlyData[year]) yearlyData[year] = {};
+            if (!yearlyData[year][month]) {
+              yearlyData[year][month] = { transactions: [], highBalance: -Infinity, lowBalance: Infinity };
+            }
+
+            const previousBalance =
+              yearlyData[year][month].transactions.length > 0
+                ? yearlyData[year][month].transactions[yearlyData[year][month].transactions.length - 1].balance
+                : null;
+
+            const transaction = {
+              date: date,
+              description: cleanDescription,
+              debit,
+              credit,
+              balance,
+            };
+
+            const warnings = validateTransaction(transaction, previousBalance);
+            if (warnings.length > 0) {
+              transaction.warnings = warnings;
+              transaction.hasWarnings = true;
+            }
+
+            yearlyData[year][month].transactions.push(transaction);
+
+            if (balance > yearlyData[year][month].highBalance) yearlyData[year][month].highBalance = balance;
+            if (balance < yearlyData[year][month].lowBalance) yearlyData[year][month].lowBalance = balance;
+
+            i = nextIndex - 1; // IMPORTANT: Advance the loop counter
+          }
+        }
+
+        // Summary logging (unchanged)
+        const result = Object.keys(yearlyData)
+          .sort()
+          .map((year) => ({
+            year: parseInt(year),
+            months: Object.keys(yearlyData[year]).map((month) => ({
+              month: month,
+              ...yearlyData[year][month],
+            })),
+          }));
+
+        let totalTransactions = 0;
+        let totalWarnings = 0;
+        const warningBreakdown = {};
+
+        result.forEach((yearData) => {
+          yearData.months.forEach((monthData) => {
+            totalTransactions += monthData.transactions.length;
+            monthData.transactions.forEach((transaction) => {
+              if (transaction.hasWarnings) {
+                totalWarnings++;
+                transaction.warnings.forEach((warning) => {
+                  const warningType = warning.split(':')[0];
+                  warningBreakdown[warningType] = (warningBreakdown[warningType] || 0) + 1;
+                });
+              }
+            });
+          });
+        });
+
+        console.log('📊 VALIDATION SUMMARY:');
+        console.log(`  📝 Total transactions parsed: ${totalTransactions}`);
+        console.log(`  ⚠️ Total transactions with warnings: ${totalWarnings}`);
+        if (totalTransactions > 0) {
+          console.log(`  📈 Warning rate: ${((totalWarnings / totalTransactions) * 100).toFixed(1)}%`);
+        }
+        console.log('  🔍 Warning breakdown:', warningBreakdown);
+        console.log('==========================================');
+
+        return result;
+      }
+
+      // --- React Components (Defined before App) ---
+
+      function FileUpload({ onProcess, isLoading, progressMessage, rawText }) {
+        const [copyButtonText, setCopyButtonText] = React.useState('Copy Raw Text');
+        const handleFileChange = (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            onProcess(file);
+          }
+          event.target.value = null;
+        };
+        const handleCopy = () => {
+          navigator.clipboard.writeText(rawText).then(() => {
+            setCopyButtonText('Copied!');
+            setTimeout(() => setCopyButtonText('Copy Raw Text'), 2000);
+          });
+        };
+        return (
+          <div style={{ marginBottom: '1.5em', padding: '1em', border: '1px dashed #ccc', borderRadius: '8px' }}>
+            <h3 style={{ marginTop: 0 }}>Upload Statement</h3>
+            <input type="file" accept=".pdf" onChange={handleFileChange} disabled={isLoading} />
+            {isLoading && (
+              <div style={{ marginTop: '1em' }}>
+                <p>
+                  <strong>Processing...</strong> {progressMessage}
+                </p>
+              </div>
+            )}
+            {!isLoading && rawText && (
+              <div style={{ marginTop: '1em' }}>
+                <button
+                  onClick={handleCopy}
+                  style={{
+                    padding: '8px 12px',
+                    border: '1px solid #007bff',
+                    background: '#e7f3ff',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {copyButtonText}
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function StatementDisplay({ data }) {
+        const [sortConfig, setSortConfig] = React.useState({ key: null, direction: 'asc' });
+        const [filterType, setFilterType] = React.useState('all');
+
+        if (!data || data.length === 0) {
+          return <p>Upload a statement to see the data.</p>;
+        }
+
+        const handleSort = (key) => {
+          let direction = 'asc';
+          if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+          }
+          setSortConfig({ key, direction });
+        };
+
+        const getSortIndicator = (key) => {
+          if (sortConfig.key === key) {
+            return sortConfig.direction === 'asc' ? '↑' : '↓';
+          }
+          return '';
+        };
+
+        const sortTransactions = (transactions) => {
+          if (!sortConfig.key) return transactions;
+
+          return [...transactions].sort((a, b) => {
+            let aVal = a[sortConfig.key];
+            let bVal = b[sortConfig.key];
+
+            if (sortConfig.key === 'description') {
+              aVal = aVal.toLowerCase();
+              bVal = bVal.toLowerCase();
+            } else if (sortConfig.key === 'date') {
+              // Handle date sorting - convert to timestamp for comparison
+              aVal = aVal ? aVal.getTime() : 0;
+              bVal = bVal ? bVal.getTime() : 0;
+            }
+
+            if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+          });
+        };
+
+        const filterTransactions = (transactions) => {
+          if (filterType === 'all') return transactions;
+          if (filterType === 'credit') return transactions.filter((t) => t.credit > 0);
+          if (filterType === 'debit') return transactions.filter((t) => t.debit > 0);
+          if (filterType === 'warnings') return transactions.filter((t) => t.hasWarnings);
+          return transactions;
+        };
+
+        return (
+          <div className="page-grid">
+            {data.flatMap((yearData) =>
+              yearData.months.map((monthData) => {
+                const processedTransactions = filterTransactions(sortTransactions(monthData.transactions));
+
+                return (
+                  <div key={`${yearData.year}-${monthData.month}`} className="month-card">
+                    <div className="month-header">
+                      <span className="year-label">{yearData.year}</span>
+                      <span className="month-label">{monthData.month}</span>
+                      <div className="filter-controls">
+                        <select
+                          className="filter-select"
+                          value={filterType}
+                          onChange={(e) => setFilterType(e.target.value)}
+                        >
+                          <option value="all">All Transactions</option>
+                          <option value="credit">Credits Only</option>
+                          <option value="debit">Debits Only</option>
+                          <option value="warnings">Warnings Only</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="transactions-column">
+                      <div className="transaction-header">
+                        <div className="transaction-date" onClick={() => handleSort('date')}>
+                          Date<span className="sort-indicator">{getSortIndicator('date')}</span>
+                        </div>
+                        <div className="transaction-description" onClick={() => handleSort('description')}>
+                          Description<span className="sort-indicator">{getSortIndicator('description')}</span>
+                        </div>
+                        <div onClick={() => handleSort('debit')}>
+                          Debit<span className="sort-indicator">{getSortIndicator('debit')}</span>
+                        </div>
+                        <div onClick={() => handleSort('credit')}>
+                          Credit<span className="sort-indicator">{getSortIndicator('credit')}</span>
+                        </div>
+                        <div onClick={() => handleSort('balance')}>
+                          Balance<span className="sort-indicator">{getSortIndicator('balance')}</span>
+                        </div>
+                      </div>
+                      {processedTransactions.map((trans, index) => (
+                        <div key={index} className={`transaction-row ${trans.hasWarnings ? 'warning-row' : ''}`}>
+                          <div className="transaction-date">
+                            {trans.date
+                              ? trans.date.toLocaleDateString('en-US', {
+                                  month: '2-digit',
+                                  day: '2-digit',
+                                  year: '2-digit',
+                                })
+                              : '-'}
+                          </div>
+                          <div className="transaction-description">
+                            {trans.description}
+                            {trans.hasWarnings && (
+                              <span className="warning-flag warning-tooltip" title={trans.warnings.join('; ')}>
+                                ⚠️
+                              </span>
+                            )}
+                          </div>
+                          <div className="debit">{trans.debit > 0 ? `($${trans.debit.toFixed(2)})` : '-'}</div>
+                          <div className="credit">{trans.credit > 0 ? `$${trans.credit.toFixed(2)}` : '-'}</div>
+                          <div className="balance">${trans.balance.toFixed(2)}</div>
+                        </div>
+                      ))}
+                      <div className="balance-summary">
+                        <div>
+                          High: <span className="balance">${monthData.highBalance.toFixed(2)}</span>
+                        </div>
+                        <div>
+                          Low: <span className="balance">${monthData.lowBalance.toFixed(2)}</span>
+                        </div>
+                        <div>
+                          Showing: {processedTransactions.length} of {monthData.transactions.length}
+                        </div>
+                        <div>Warnings: {monthData.transactions.filter((t) => t.hasWarnings).length}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        );
+      }
+
+      // --- Main Application Component ---
+
+      function App() {
+        const [statementData, setStatementData] = React.useState([]);
+        const [isLoading, setIsLoading] = React.useState(false);
+        const [progressMessage, setProgressMessage] = React.useState('');
+        const [rawOcrText, setRawOcrText] = React.useState('');
+
+        const handleFileProcess = async (file) => {
+          setIsLoading(true);
+          setProgressMessage('Reading file...');
+          setStatementData([]);
+          setRawOcrText('');
+          try {
+            const fileReader = new FileReader();
+            fileReader.readAsArrayBuffer(file);
+            fileReader.onload = async (e) => {
+              const typedarray = new Uint8Array(e.target.result);
+              const pdf = await pdfjsLib.getDocument(typedarray).promise;
+              let fullText = '';
+              for (let i = 1; i <= pdf.numPages; i++) {
+                setProgressMessage(`Performing OCR on page ${i} of ${pdf.numPages}...`);
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 2 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                const {
+                  data: { text },
+                } = await Tesseract.recognize(canvas, 'eng');
+                fullText += text + '\n';
+              }
+              setRawOcrText(fullText);
+              setProgressMessage('Parsing extracted text...');
+              const parsedData = parseStatementText(fullText);
+              setStatementData(parsedData);
+              setProgressMessage('Processing complete!');
+              setIsLoading(false);
+            };
+          } catch (error) {
+            console.error('Error processing PDF:', error);
+            setProgressMessage('An error occurred. Check the console for details.');
+            setIsLoading(false);
+          }
+        };
+
+        return (
+          <div>
+            <FileUpload
+              onProcess={handleFileProcess}
+              isLoading={isLoading}
+              progressMessage={progressMessage}
+              rawText={rawOcrText}
+            />
+            <StatementDisplay data={statementData} />
+          </div>
+        );
+      }
+
+      const container = document.getElementById('root');
+      const root = ReactDOM.createRoot(container);
+      root.render(<App />);
+    </script>
+  </body>
+</html>

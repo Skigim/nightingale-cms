@@ -1,0 +1,2920 @@
+<!doctype html>
+<html lang="en" class="h-full bg-gray-900 text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Standalone VR Generator (File-Based)</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self';"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Day.js for enhanced date management -->
+    <script src="lib/dayjs.min.js"></script>
+    <script src="lib/dayjs-relativeTime.min.js"></script>
+    <script src="lib/dayjs-customParseFormat.min.js"></script>
+    <script>
+  // Initialize Day.js plugins
+  if (typeof dayjs !== "undefined") {
+    dayjs.extend(window.dayjs_plugin_relativeTime);
+    dayjs.extend(window.dayjs_plugin_customParseFormat);
+  }
+</script>
+    <script src="js/nightingale.utils.js"></script>
+    <script src="js/nightingale.dayjs.js"></script>
+    <script src="js/nightingale.parsers.js"></script>
+    <script src="js/nightingale.fileservice.js"></script>
+    <script src="lib/fuse.min.js"></script>
+    <script src="js/nightingale.search.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html {
+        font-family: "Inter", sans-serif;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1f2937;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
+      }
+      /* Softer focus ring */
+      input:focus,
+      select:focus,
+      textarea:focus {
+        --tw-ring-color: rgba(96, 165, 250, 0.5);
+      }
+      .drag-handle {
+        cursor: move;
+      }
+      /* The #modal-backdrop CSS has been removed for the new modal system. */
+      .toast {
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        color: white;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        opacity: 0;
+        transform: translateX(100%);
+        transition:
+          opacity 0.3s ease,
+          transform 0.3s ease;
+      }
+      #modal-layer {
+        pointer-events: none;
+      }
+      .modal {
+        pointer-events: auto;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .toast.success {
+        background-color: #16a34a;
+      }
+      .toast.error {
+        background-color: #dc2626;
+      }
+    </style>
+  </head>
+  <body class="h-full flex flex-col">
+    <div
+      id="app-container"
+      class="flex flex-col h-screen bg-gray-900 text-gray-200"
+    >
+      <!-- Header -->
+      <div
+        id="title-bar"
+        class="flex items-center justify-between bg-gray-800 p-3 shadow-md flex-shrink-0"
+      >
+        <div class="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 mr-2 text-blue-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          <span class="font-bold text-lg">Standalone VR Generator</span>
+        </div>
+
+        <!-- Management Buttons -->
+        <div class="flex items-center space-x-3">
+          <button
+            id="manage-vr-templates-btn"
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 text-sm"
+            title="Manage VR Templates"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 inline mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Templates
+          </button>
+          <button
+            id="view-vr-requests-btn"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 text-sm"
+            title="View VR Request History"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 inline mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+            History
+          </button>
+          <button
+            id="save-data-btn"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-md transition-colors duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled
+            title="Save Data File"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 inline mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+              />
+            </svg>
+            Save
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main
+        class="flex-grow p-6 bg-gray-900 overflow-auto grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
+        <!-- Left Panel: Data Inputs -->
+        <div
+          id="data-input-panel"
+          class="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col space-y-6 overflow-y-auto"
+        >
+          <h2
+            class="text-2xl font-bold text-blue-300 border-b border-gray-700 pb-2"
+          >
+            Case Data
+          </h2>
+
+          <!-- Load & Find Section -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-blue-400">
+              Load & Find Case
+            </h3>
+            <div>
+              <button
+                id="load-data-btn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all duration-200"
+              >
+                Select Data Directory
+              </button>
+              <input
+                type="file"
+                id="file-input"
+                class="hidden"
+                accept=".json"
+              />
+              <div id="file-status" class="mt-2 text-sm text-gray-400 hidden">
+                <span class="text-green-400">📄</span>
+                <span id="file-name"></span>
+                <span id="auto-save-indicator" class="ml-2 text-blue-400 hidden"
+                  >⚡ Auto-save enabled</span
+                >
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <input
+                type="text"
+                id="mcn-search"
+                placeholder="Enter Master Case Number..."
+                class="flex-grow bg-gray-700 p-2 rounded-md disabled:opacity-50"
+                disabled
+              />
+              <button
+                id="find-case-btn"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Find
+              </button>
+            </div>
+          </div>
+
+          <!-- Loaded Case Info -->
+          <div id="case-info-container" class="space-y-4 hidden">
+            <h3 class="text-lg font-semibold text-blue-400">Client Info</h3>
+            <div
+              id="client-info-display"
+              class="bg-gray-900/50 p-3 rounded-md text-sm"
+            ></div>
+          </div>
+
+          <!-- Financial Items -->
+          <div id="financial-items-container" class="space-y-4 hidden">
+            <h3 class="text-lg font-semibold text-blue-400">
+              Select Financial Items
+            </h3>
+            <div
+              id="financial-items-list"
+              class="space-y-2 max-h-64 overflow-y-auto p-2 bg-gray-900/50 rounded-md"
+            >
+              <!-- Financial items will be dynamically inserted here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: VR Builder -->
+        <div
+          id="vr-builder-panel"
+          class="bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col space-y-6 overflow-y-auto"
+        >
+          <h2
+            class="text-2xl font-bold text-blue-300 border-b border-gray-700 pb-2"
+          >
+            Request Builder
+          </h2>
+
+          <!-- Template Selection -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-blue-400">
+              Template Selection
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="vr-template-category-select"
+                  class="block text-sm font-medium text-gray-400 mb-1"
+                  >Category</label
+                >
+                <select
+                  id="vr-template-category-select"
+                  class="w-full bg-gray-700 rounded-md p-2"
+                ></select>
+              </div>
+              <div>
+                <label
+                  for="vr-template-select"
+                  class="block text-sm font-medium text-gray-400 mb-1"
+                  >Template</label
+                >
+                <select
+                  id="vr-template-select"
+                  class="w-full bg-gray-700 rounded-md p-2"
+                ></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Request Content -->
+          <div class="space-y-4 flex-grow flex flex-col">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold text-blue-400">
+                Final Request Content
+              </h3>
+              <div id="vr-draft-status" class="text-sm text-gray-400 hidden">
+                <span
+                  class="bg-blue-600 text-white px-2 py-1 rounded-md text-xs"
+                >
+                  Draft: <span id="vr-draft-count">0</span> items selected
+                </span>
+              </div>
+            </div>
+            <textarea
+              id="vr-final-content"
+              placeholder="Your compiled verification request will appear here..."
+              class="flex-grow w-full bg-gray-700 rounded-md p-3 text-sm font-mono"
+            ></textarea>
+            <div class="flex space-x-2 pt-2">
+              <button
+                id="vr-add-to-request-btn"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Add to Request
+              </button>
+              <button
+                id="vr-add-general-btn"
+                class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Add General Text
+              </button>
+              <button
+                id="vr-clear-request-btn"
+                class="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+              >
+                Clear Request
+              </button>
+              <button
+                id="vr-copy-btn"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md ml-auto"
+              >
+                Copy to Clipboard
+              </button>
+            </div>
+          </div>
+
+          <!-- Due Date & Create -->
+          <div class="space-y-4 border-t border-gray-700 pt-4">
+            <h3 class="text-lg font-semibold text-blue-400">
+              Due Date & Create
+            </h3>
+            <div class="flex items-center justify-between">
+              <div class="flex space-x-6 items-center">
+                <div class="flex space-x-4">
+                  <label class="flex items-center"
+                    ><input
+                      type="radio"
+                      name="vr-due-date"
+                      value="15"
+                      checked
+                      class="h-4 w-4 text-blue-500 border-gray-500 focus:ring-blue-500/50 mr-2"
+                    /><span>15 days</span></label
+                  >
+                  <label class="flex items-center"
+                    ><input
+                      type="radio"
+                      name="vr-due-date"
+                      value="30"
+                      class="h-4 w-4 text-blue-500 border-gray-500 focus:ring-blue-500/50 mr-2"
+                    /><span>30 days</span></label
+                  >
+                </div>
+                <label class="flex items-center pt-1">
+                  <input
+                    type="checkbox"
+                    id="include-vr-footer-checkbox"
+                    checked
+                    class="h-4 w-4 text-blue-500 border-gray-500 focus:ring-blue-500/50 mr-2"
+                  />
+                  <span>Include VR Contact Footer</span>
+                </label>
+              </div>
+              <button
+                id="create-vr-request-btn"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Create VR & Update Statuses
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="modal-layer" class="fixed inset-0 z-[1000]"></div>
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[2000] flex flex-col gap-3"
+    ></div>
+
+    <style>
+      /* Toast Animations */
+      .toast {
+        padding: 12px 16px;
+        border-radius: 6px;
+        color: white;
+        font-weight: 500;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+      }
+      .toast.success {
+        background-color: #059669;
+      }
+      .toast.error {
+        background-color: #dc2626;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      /* Modal Styling */
+      #modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+      }
+      #modal-backdrop.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+      .autocomplete-input {
+        background-color: transparent !important;
+      }
+      .tab-hint {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 1px 5px;
+        border: 1px solid #4b5563; /* gray-600 */
+        border-radius: 4px;
+        background-color: #374151; /* gray-700 */
+        font-size: 0.7rem;
+        line-height: 1;
+        color: #9ca3af; /* gray-400 */
+        font-family: monospace;
+        opacity: 0.7;
+        vertical-align: middle;
+      }
+
+      /* Autocomplete Overlay Styling */
+      #vr-autocomplete-overlay {
+        border: 1px solid transparent;
+        resize: none;
+        outline: none;
+        line-height: inherit;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        pointer-events: none;
+      }
+
+      #vr-template-content {
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Ensure the textarea cursor is visible */
+      #vr-template-content:focus {
+        outline: 2px solid #3b82f6;
+        outline-offset: -2px;
+        border-color: #3b82f6;
+      }
+
+      /* Tab hint styling */
+      #vr-autocomplete-hint::after {
+        content: " ⇥";
+        font-weight: bold;
+        opacity: 0.7;
+      }
+    </style>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const TAB_ID = `correspondence-tab-${dayjs().valueOf()}-${Math.random()}`;
+
+        const VR_CONTACT_FOOTER = `Your Master Case number is {MCN}. Please reference your case number on all documents submitted. You may submit your verifications in any of the following ways:
+
+1. Drop off at your nearest local office
+2. Fax to 402-742-2351
+3. Online at https://iserve.ne.gov
+4. Email to DHHS.ANDICenter@nebraska.gov (Subject: Master Case #)
+5. Mail to:
+\tNebraska DHHS
+\tPO Box 2992
+\tOmaha, NE 68172-9659
+
+Thank you,
+Nebraska Medicaid
+
+To register to vote, please visit: https://www.nebraska.gov/apps-sos-voter-registration/`;
+
+        // --- STATE MANAGEMENT ---
+        let caseSearchService = null;
+        let rawInitialState = {
+          cases: [],
+          people: [],
+          contacts: [],
+          vrTemplates: [],
+          nextVrTemplateId: 1,
+          vrCategories: ["Banking", "Facility", "Government"],
+          vrRequests: [],
+          nextVrRequestId: 1,
+          vrDraftItems: [],
+          activeCase: null,
+          isDataLoaded: false,
+        };
+        // StateManagementService will be initialized after class definitions
+        let stateManager;
+        let state;
+        const TEMPLATE_STORAGE_KEY = "vrGeneratorTemplates_v1";
+
+        // --- UTILITY FUNCTIONS ---
+        const getCaseByMcn = (mcn) =>
+          state.cases.find((c) => c.masterCaseNumber === mcn);
+        const getPerson = (id) => state.people.find((p) => p.id == id);
+        const getContact = (id) => state.contacts.find((c) => c.id == id); // This is now legacy and can be removed later.
+        const getOrganization = (id) =>
+          state.organizations.find((o) => o.id == id);
+        const getVrTemplate = (id) => state.vrTemplates.find((t) => t.id == id);
+        const getVrTemplatesByCategory = (category) =>
+          state.vrTemplates.filter((t) => t.category === category);
+        const getVrRequest = (id) => state.vrRequests.find((r) => r.id == id);
+        const getVrRequestsByCase = (caseId) =>
+          state.vrRequests.filter((r) => r.caseId == caseId);
+
+        // Verification Status Constants (corrected workflow order: AVS before VR)
+        const VERIFICATION_STATUS_OPTIONS = [
+          "Needs VR",
+          "AVS Pending",
+          "VR Pending",
+          "Verified",
+        ];
+        const VERIFICATION_STATUS_COLORS = {
+          "Needs VR": "bg-red-600 text-red-100",
+          "AVS Pending": "bg-orange-500 text-orange-100",
+          "VR Pending": "bg-yellow-600 text-yellow-100",
+          Verified: "bg-green-600 text-green-100",
+        };
+
+        // Helper function to get status badge HTML
+        const getStatusBadge = (status) => {
+          const colorClass =
+            VERIFICATION_STATUS_COLORS[status] || "bg-gray-600 text-gray-100";
+          return `<span class="px-2 py-1 text-xs rounded-full ${colorClass}">${sanitize(
+            status || "Unknown"
+          )}</span>`;
+        };
+
+        // The sanitize() function is now loaded from the shared nightingale.utils.js file.
+        /**
+         * Generates the required HTML for a text input with an autocomplete overlay.
+         * Standardized function ported from NightingaleCMS.
+         * @param {string} id - The base ID for the input element.
+         * @param {string} label - The label text for the input.
+         * @param {string} value - The initial value of the input.
+         * @param {string} placeholder - The placeholder text.
+         * @returns {string} The HTML string for the autocomplete input component.
+         */
+        function createAutocompleteInputHTML(
+          id,
+          label,
+          value = "",
+          placeholder = ""
+        ) {
+          return `
+            <div>
+              <label for="${id}" class="block text-sm font-medium text-gray-400">${sanitize(
+                label
+              )}</label>
+              <div class="relative mt-1">
+                <div id="${id}-overlay" class="absolute inset-0 p-2 pointer-events-none text-gray-500 whitespace-pre overflow-hidden rounded-md"></div>
+                <input type="text" id="${id}" value="${sanitize(
+                  value
+                )}" placeholder="${sanitize(placeholder)}"
+                  class="relative w-full bg-gray-700 autocomplete-input border border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 z-10">
+              </div>
+            </div>
+          `;
+        }
+        /**
+         * Initializes an autocomplete feature on a text input created with createAutocompleteInputHTML.
+         * This function is self-contained and manages its own state.
+         * @param {string} inputId - The ID of the input element to attach autocomplete to.
+         * @param {string[]} sourceData - An array of strings for autocomplete suggestions.
+         */
+        function setupAutocomplete(inputId, sourceData) {
+          const input = document.getElementById(inputId);
+          const overlay = document.getElementById(`${inputId}-overlay`);
+          if (!input || !overlay) return;
+
+          let currentSuggestion = null;
+
+          const updateSuggestion = () => {
+            const value = input.value;
+            if (!value) {
+              overlay.innerHTML = "";
+              currentSuggestion = null;
+              return;
+            }
+
+            const match = sourceData.find((item) =>
+              item.toLowerCase().startsWith(value.toLowerCase())
+            );
+
+            if (match && match.toLowerCase() !== value.toLowerCase()) {
+              currentSuggestion = match;
+              const suggestionPart = match.substring(value.length);
+              overlay.innerHTML = `${sanitize(
+                value
+              )}<span class="text-gray-400">${sanitize(
+                suggestionPart
+              )}</span><span class="tab-hint">Tab</span>`;
+            } else {
+              overlay.innerHTML = "";
+              currentSuggestion = null;
+            }
+          };
+
+          const acceptSuggestion = () => {
+            if (currentSuggestion) {
+              input.value = currentSuggestion;
+              overlay.innerHTML = "";
+              currentSuggestion = null;
+              input.dispatchEvent(new Event("input", { bubbles: true }));
+              return true;
+            }
+            return false;
+          };
+
+          input.addEventListener("input", updateSuggestion);
+          input.addEventListener("focus", updateSuggestion);
+          input.addEventListener("blur", () => {
+            overlay.innerHTML = "";
+            currentSuggestion = null;
+          });
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Tab" && !e.shiftKey && currentSuggestion) {
+              e.preventDefault();
+              acceptSuggestion();
+            } else if (
+              e.key === "ArrowRight" &&
+              input.selectionStart === input.value.length &&
+              currentSuggestion
+            ) {
+              e.preventDefault();
+              acceptSuggestion();
+            }
+          });
+        }
+
+        function showToast(message, type = "success") {
+          const container = document.getElementById("toast-container");
+          const toastElement = document.createElement("div");
+          toastElement.className = `toast ${type}`;
+          toastElement.textContent = message;
+          container.appendChild(toastElement);
+          setTimeout(() => toastElement.classList.add("show"), 10);
+          setTimeout(() => {
+            toastElement.classList.remove("show");
+            toastElement.addEventListener("transitionend", () =>
+              toastElement.remove()
+            );
+          }, 3000);
+        }
+
+        // The formatPhoneNumber() function is now loaded from the shared nightingale.utils.js file.
+
+        // --- FORM VALIDATION SYSTEM ---
+        // Centralized validation matching main app patterns
+        function validateAndClear(modal) {
+          modal.querySelectorAll(".error-message").forEach((el) => el.remove());
+          modal
+            .querySelectorAll(".input-error")
+            .forEach((el) => el.classList.remove("input-error"));
+        }
+
+        function validateInput(modal, selector, condition, message) {
+          const input = modal.querySelector(selector);
+          if (condition) {
+            input.classList.add("input-error");
+            const errorElement = document.createElement("p");
+            errorElement.className = "error-message text-red-400 text-sm mt-1";
+            errorElement.textContent = message;
+            input.parentElement.appendChild(errorElement);
+            return false;
+          }
+          return true;
+        }
+
+        // The Validators object is now loaded from the shared nightingale.utils.js file.
+
+        // --- FORM VALIDATION SYSTEM ---
+        // The Validators object is now loaded from the shared nightingale.utils.js file.
+
+        function validateForm(modal, validationRules) {
+          validateAndClear(modal);
+
+          const errors = [];
+          const sanitizedValues = {};
+          let isValid = true;
+
+          for (const [selector, validators] of Object.entries(
+            validationRules
+          )) {
+            const input = modal.querySelector(selector);
+            if (!input) continue;
+
+            const value = input.value;
+            const validatorArray = Array.isArray(validators)
+              ? validators
+              : [validators];
+
+            for (const validator of validatorArray) {
+              const result = validator(value);
+              if (!result.isValid) {
+                validateInput(modal, selector, true, result.message);
+                errors.push({ selector, message: result.message });
+                isValid = false;
+                break;
+              } else if (result.sanitizedValue !== undefined) {
+                sanitizedValues[selector] = result.sanitizedValue;
+              }
+            }
+          }
+
+          return { isValid, errors, sanitizedValues };
+        }
+
+        // --- STANDARDIZED FILE SYSTEM SERVICE (MODULAR VERSION) ---
+        // The FileSystemService class is now loaded from the shared nightingale.fileservice.js file.
+
+        /**
+         * StateManagementService - Live auto-saving state manager
+         * Uses a Proxy to intercept all state mutations and trigger an immediate, defensive save.
+         */
+        class StateManagementService {
+          constructor(initialState, fileService) {
+            this.fileService = fileService;
+            this.lastSaveTimestamp = null;
+            this.isWriting = false; // Flag to prevent re-entrant saves
+            this.isBatchLoading = false; // Flag to disable saves during file load
+
+            const handler = {
+              get: (target, property, receiver) => {
+                const value = Reflect.get(target, property, receiver);
+                if (typeof value === "object" && value !== null) {
+                  return new Proxy(value, handler);
+                }
+                return value;
+              },
+              set: (target, property, value, receiver) => {
+                const success = Reflect.set(target, property, value, receiver);
+                if (success && !this.isWriting && !this.isBatchLoading) {
+                  this.saveState(initialState);
+                }
+                return success;
+              },
+              deleteProperty: (target, property) => {
+                const success = Reflect.deleteProperty(target, property);
+                if (success && !this.isWriting && !this.isBatchLoading) {
+                  this.saveState(initialState);
+                }
+                return success;
+              },
+            };
+
+            this.state = new Proxy(initialState, handler);
+          }
+
+          async saveState(stateObject) {
+            if (
+              this.isWriting ||
+              this.isBatchLoading ||
+              !this.fileService.directoryHandle
+            )
+              return;
+
+            this.isWriting = true;
+            const success = await this.fileService.writeFile(stateObject);
+            if (success) {
+              this.lastSaveTimestamp = dayjs().valueOf();
+              console.log("Auto-save successful.");
+              updateSaveButtonState(false);
+            } else {
+              console.error("Auto-save failed.");
+            }
+            this.isWriting = false;
+          }
+
+          startBatchLoad() {
+            this.isBatchLoading = true;
+          }
+          endBatchLoad() {
+            this.isBatchLoading = false;
+          }
+        }
+
+        // Initialize services
+        const fileService = new FileSystemService({
+          tabId: TAB_ID,
+          errorCallback: showToast,
+          sanitizeFn: sanitize,
+        }); // Initialize StateManagementService now that all dependencies are available
+        stateManager = new StateManagementService(rawInitialState, fileService);
+        state = stateManager.state; // The global `state` variable is now the proxied state
+
+        // Try to restore directory access from previous session
+        async function initializeFileAccess() {
+          if (fileService.isSupported()) {
+            const restored = await fileService.restoreLastDirectoryAccess();
+            if (restored) {
+              // Try to load data from the restored directory
+              try {
+                const data = await fileService.readFile();
+                if (data) {
+                  processImportedData(data);
+
+                  // Update UI to show restored connection
+                  document.getElementById("file-name").textContent =
+                    fileService.fileName;
+                  document
+                    .getElementById("file-status")
+                    .classList.remove("hidden");
+                  document
+                    .getElementById("auto-save-indicator")
+                    .classList.remove("hidden");
+
+                  showToast(
+                    "Directory access restored from previous session.",
+                    "success"
+                  );
+                } else {
+                  // Directory connected but no data file yet
+                  document.getElementById("file-name").textContent =
+                    `${fileService.fileName} (will be created)`;
+                  document
+                    .getElementById("file-status")
+                    .classList.remove("hidden");
+                  document
+                    .getElementById("auto-save-indicator")
+                    .classList.remove("hidden");
+
+                  showToast(
+                    "Directory access restored. Ready to work.",
+                    "success"
+                  );
+                }
+              } catch (error) {
+                console.error(
+                  "Error loading data from restored directory:",
+                  error
+                );
+                showToast(
+                  "Directory restored but couldn't load data.",
+                  "warning"
+                );
+              }
+            }
+          }
+        }
+
+        // Initialize file access when DOM is ready
+        initializeFileAccess();
+
+        // Parse URL parameters for case context from main app
+        function parseUrlParameters() {
+          const params = new URLSearchParams(window.location.search);
+          const mcn = params.get("mcn");
+
+          if (mcn) {
+            const mcnInput = document.getElementById("mcn-search");
+            if (mcnInput) {
+              mcnInput.value = mcn;
+              showToast(`Case ${mcn} loaded from main app.`, "success");
+            }
+          }
+        }
+
+        // Initialize URL parameter parsing
+        parseUrlParameters();
+
+        // --- DATA HANDLING ---
+        function loadDataFromFile(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const importedState = JSON.parse(e.target.result);
+              processImportedData(importedState);
+
+              fileService.directoryHandle = null;
+              document.getElementById("file-status").classList.add("hidden");
+              document
+                .getElementById("auto-save-indicator")
+                .classList.add("hidden");
+            } catch (error) {
+              showToast(`Error loading file: ${error.message}`, "error");
+            }
+          };
+          reader.readAsText(file);
+        }
+
+        async function loadDataWithFileSystemAPI() {
+          if (!fileService.isSupported()) {
+            showToast(
+              "File System Access API not supported. Using file picker.",
+              "error"
+            );
+            document.getElementById("file-input").click();
+            return;
+          }
+
+          try {
+            const connected = await fileService.connect();
+            if (!connected) return;
+
+            const importedState = await fileService.readFile();
+            if (importedState) {
+              processImportedData(importedState);
+              document.getElementById("file-name").textContent =
+                fileService.fileName;
+              document.getElementById("file-status").classList.remove("hidden");
+              document
+                .getElementById("auto-save-indicator")
+                .classList.remove("hidden");
+              showToast(
+                "Data file loaded successfully with File System API.",
+                "success"
+              );
+            } else {
+              document.getElementById("file-name").textContent =
+                `${fileService.fileName} (will be created)`;
+              document.getElementById("file-status").classList.remove("hidden");
+              document
+                .getElementById("auto-save-indicator")
+                .classList.remove("hidden");
+              showToast(
+                "Directory connected. Data file will be created when you save.",
+                "success"
+              );
+            }
+          } catch (error) {
+            showToast(
+              `Error connecting to directory: ${error.message}`,
+              "error"
+            );
+            document.getElementById("file-input").click();
+          }
+        }
+
+        function processImportedData(importedState) {
+          if (!importedState.cases || !importedState.people) {
+            throw new Error("Invalid data file format.");
+          }
+
+          // Initialize search service with case data. Now supports searching by name and MCN.
+          caseSearchService = new NightingaleSearchService(
+            importedState.cases,
+            {
+              keys: ["masterCaseNumber", "name"],
+              threshold: 0.2, // A lower threshold is better for precise data like MCNs
+            }
+          );
+
+          stateManager.startBatchLoad(); // --- CRITICAL: Disable auto-save
+
+          const { activeCase, vrDraftItems, isDataDirty, ...coreData } =
+            importedState;
+
+          // Clear existing data arrays on the raw object
+          rawInitialState.cases.length = 0;
+          rawInitialState.people.length = 0;
+          rawInitialState.contacts.length = 0;
+          rawInitialState.vrTemplates.length = 0;
+          rawInitialState.vrCategories.length = 0;
+          rawInitialState.vrRequests.length = 0;
+
+          // Overwrite the raw object with new data from the file
+          Object.assign(rawInitialState, coreData);
+
+          stateManager.endBatchLoad(); // --- CRITICAL: Re-enable auto-save
+
+          state.isDataLoaded = true;
+
+          loadTemplateCategories();
+          loadTemplates();
+
+          // Initialize autocomplete for the institution field
+          const institutionNames = [
+            ...new Set(
+              state.cases
+                .flatMap((c) =>
+                  [
+                    ...(c.financials?.resources || []),
+                    ...(c.financials?.income || []),
+                    ...(c.financials?.expenses || []),
+                  ].map((item) => item.location)
+                )
+                .filter(Boolean)
+            ),
+          ];
+          setupAutocomplete("vr-institution-name", institutionNames);
+
+          updateUIonDataLoad();
+
+          // If there's an active case in the current session, re-render its data
+          if (state.activeCase) {
+            const updatedActiveCase = state.cases.find(
+              (c) => c.id === state.activeCase.id
+            );
+            if (updatedActiveCase) {
+              state.activeCase = updatedActiveCase;
+              renderCaseData(state.activeCase);
+            } else {
+              clearCaseData();
+            }
+          } else {
+            const mcnInput = document.getElementById("mcn-search");
+            if (mcnInput && mcnInput.value.trim()) {
+              setTimeout(() => searchCaseByMcn(), 100);
+            }
+          }
+
+          updateSaveButtonState();
+        }
+
+        function updateSaveButtonState() {
+          const saveBtn = document.getElementById("save-data-btn");
+          const hasChanges = state.isDataLoaded && state.isDataDirty;
+
+          saveBtn.disabled = !hasChanges;
+          if (hasChanges) {
+            saveBtn.classList.remove(
+              "disabled:opacity-50",
+              "disabled:cursor-not-allowed"
+            );
+            saveBtn.title = fileService.directoryHandle
+              ? "Save changes to directory"
+              : "Save data file";
+          } else {
+            saveBtn.classList.add(
+              "disabled:opacity-50",
+              "disabled:cursor-not-allowed"
+            );
+            saveBtn.title = "No changes to save";
+          }
+        }
+
+        async function saveDataToFile() {
+          if (!state.isDataLoaded) {
+            showToast("No data to save.", "error");
+            return;
+          }
+
+          const dataToSave = {
+            cases: state.cases,
+            people: state.people,
+            contacts: state.contacts,
+            vrTemplates: state.vrTemplates,
+            vrCategories: state.vrCategories,
+            nextVrTemplateId: state.nextVrTemplateId,
+            vrRequests: state.vrRequests,
+            nextVrRequestId: state.nextVrRequestId,
+          };
+
+          // Try File System Access API first
+          if (fileService.isSupported()) {
+            try {
+              let success = false;
+
+              // If we have a directory connection, save directly
+              if (fileService.directoryHandle) {
+                success = await fileService.writeFile(dataToSave);
+                if (success) {
+                  showToast("Data saved to directory successfully.", "success");
+                  state.isDataDirty = false;
+                  updateSaveButtonState();
+                  return;
+                }
+              } else {
+                // Need to connect to directory first
+                const connected = await fileService.connect();
+                if (connected) {
+                  success = await fileService.writeFile(dataToSave);
+                  if (success) {
+                    // Update UI to show directory connection
+                    document.getElementById("file-name").textContent =
+                      fileService.fileName;
+                    document
+                      .getElementById("file-status")
+                      .classList.remove("hidden");
+                    document
+                      .getElementById("auto-save-indicator")
+                      .classList.remove("hidden");
+
+                    showToast(
+                      "Directory connected and data saved successfully.",
+                      "success"
+                    );
+                    state.isDataDirty = false;
+                    updateSaveButtonState();
+                    return;
+                  }
+                } else {
+                  // User cancelled directory selection, fall back to download
+                  showToast(
+                    "Directory access cancelled. Using download instead.",
+                    "warning"
+                  );
+                }
+              }
+            } catch (error) {
+              console.warn(
+                "File System API save failed, falling back to download:",
+                error
+              );
+              showToast(
+                "File System API failed, using download instead.",
+                "error"
+              );
+            }
+          }
+
+          // Fallback to traditional download
+          fallbackSaveAsDownload(dataToSave);
+        }
+
+        function fallbackSaveAsDownload(dataToSave) {
+          const dataStr = JSON.stringify(dataToSave, null, 2);
+          const blob = new Blob([dataStr], { type: "application/json" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `nightingale-data-updated-${dateUtils.format(
+            dateUtils.now(),
+            "YYYY-MM-DD"
+          )}.json`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+
+          state.isDataDirty = false;
+          updateSaveButtonState();
+          showToast("Data downloaded successfully.", "success");
+        }
+
+        function searchCaseByMcn() {
+          const searchInput = document.getElementById("mcn-search");
+          if (!searchInput) return;
+
+          const searchTerm = searchInput.value.trim();
+          if (!searchTerm) {
+            showToast("Please enter a Case Number or Client Name.", "error");
+            return;
+          }
+
+          if (!caseSearchService) {
+            showToast(
+              "Data is not loaded. Please connect to a directory first.",
+              "error"
+            );
+            return;
+          }
+
+          const results = caseSearchService.search(searchTerm);
+          const foundCase = results.length > 0 ? results[0] : null; // Get the best match
+
+          state.activeCase = foundCase;
+          if (foundCase) {
+            renderCaseData(foundCase);
+            const person = getPerson(foundCase.personId);
+            showToast(
+              `Displaying best match: ${sanitize(person?.name)}.`,
+              "success"
+            );
+            document.getElementById("create-vr-request-btn").disabled = false;
+            document
+              .getElementById("create-vr-request-btn")
+              .classList.remove(
+                "disabled:opacity-50",
+                "disabled:cursor-not-allowed"
+              );
+          } else {
+            clearCaseData();
+            showToast("Case not found.", "error");
+            document.getElementById("create-vr-request-btn").disabled = true;
+            document
+              .getElementById("create-vr-request-btn")
+              .classList.add(
+                "disabled:opacity-50",
+                "disabled:cursor-not-allowed"
+              );
+          }
+        }
+
+        // --- UI RENDERING ---
+        function updateUIonDataLoad() {
+          document.getElementById("mcn-search").disabled = false;
+          document.getElementById("find-case-btn").disabled = false;
+          document
+            .getElementById("find-case-btn")
+            .classList.remove(
+              "disabled:opacity-50",
+              "disabled:cursor-not-allowed"
+            );
+        }
+
+        function renderCaseData(caseData) {
+          const clientInfoContainer = document.getElementById(
+            "client-info-display"
+          );
+          const financialListContainer = document.getElementById(
+            "financial-items-list"
+          );
+          const person = getPerson(caseData.personId);
+
+          clientInfoContainer.innerHTML = `
+                <p><strong>Name:</strong> ${sanitize(person?.name) || "N/A"}</p>
+                <p><strong>MCN:</strong> ${
+                  sanitize(caseData.masterCaseNumber) || "N/A"
+                }</p>
+            `;
+          document
+            .getElementById("case-info-container")
+            .classList.remove("hidden");
+
+          const allFinancials = [
+            ...(caseData.financials?.resources || []),
+            ...(caseData.financials?.income || []),
+            ...(caseData.financials?.expenses || []),
+          ];
+
+          if (allFinancials.length > 0) {
+            financialListContainer.innerHTML = allFinancials
+              .map((item) => {
+                // Check if item is in draft
+                const isDraft =
+                  state.vrDraftItems &&
+                  state.vrDraftItems.some(
+                    (draftItem) => draftItem.id === item.id
+                  );
+                const draftIndicator = isDraft
+                  ? '<span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-600/20 text-blue-400 rounded-full ml-2">In Draft</span>'
+                  : "";
+                const borderClass = isDraft ? "border-l-4 border-blue-500" : "";
+                const bgClass = isDraft ? "bg-blue-900/20" : "bg-gray-700/50";
+
+                return `
+                    <label class="flex items-center p-2 ${bgClass} ${borderClass} rounded-md hover:bg-gray-700 cursor-pointer">
+                        <input type="checkbox" class="vr-financial-item-checkbox h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500/50 mr-3" 
+                            value="${item.id}" data-type="${sanitize(
+                              item.type
+                            )}" data-location="${sanitize(item.location)}" 
+                            data-account="${sanitize(
+                              item.accountNumber || ""
+                            )}" data-value="${item.value || 0}" ${
+                              isDraft ? "checked" : ""
+                            }>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <div class="font-medium">${sanitize(
+                                  item.type
+                                )} ${
+                                  item.accountNumber
+                                    ? `(${sanitize(item.accountNumber)})`
+                                    : ""
+                                }${draftIndicator}</div>
+                                <div class="flex items-center gap-2">
+                                    ${getStatusBadge(item.verificationStatus)}
+                                    ${
+                                      isDraft
+                                        ? '<button class="remove-from-draft-btn text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded bg-red-900/20" data-item-id="' +
+                                          item.id +
+                                          '" title="Remove from draft">✕</button>'
+                                        : ""
+                                    }
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-400">${sanitize(
+                              item.location
+                            )} - $${(item.value || 0).toFixed(2)}</div>
+                        </div>
+                    </label>
+                  `;
+              })
+              .join("");
+          } else {
+            financialListContainer.innerHTML =
+              '<p class="text-gray-500 text-center py-4">No financial items found for this case.</p>';
+          }
+          document
+            .getElementById("financial-items-container")
+            .classList.remove("hidden");
+        }
+
+        function clearCaseData() {
+          document
+            .getElementById("case-info-container")
+            .classList.add("hidden");
+          document
+            .getElementById("financial-items-container")
+            .classList.add("hidden");
+          document.getElementById("client-info-display").innerHTML = "";
+          document.getElementById("financial-items-list").innerHTML = "";
+
+          // Clear VR draft when switching cases
+          state.vrDraftItems = [];
+          updateVrDraftStatus();
+
+          // Clear VR content textarea
+          const finalContentTextarea =
+            document.getElementById("vr-final-content");
+          if (finalContentTextarea) {
+            finalContentTextarea.value = "";
+          }
+
+          state.activeCase = null;
+        }
+
+        function refreshFinancialItemsDisplay() {
+          if (state.activeCase) {
+            // Re-render the financial items to update visual indicators
+            renderCaseData(state.activeCase);
+          }
+        }
+
+        function updateVrDraftStatus() {
+          const draftStatus = document.getElementById("vr-draft-status");
+          const draftCount = document.getElementById("vr-draft-count");
+
+          if (draftStatus && draftCount) {
+            const count = state.vrDraftItems ? state.vrDraftItems.length : 0;
+            draftCount.textContent = count;
+
+            if (count > 0) {
+              draftStatus.classList.remove("hidden");
+            } else {
+              draftStatus.classList.add("hidden");
+            }
+          }
+        }
+
+        // --- VR TEMPLATE AUTOCOMPLETE SYSTEM ---
+        let currentSuggestion = null;
+        let currentSuggestionStart = -1;
+
+        function getAllPlaceholders() {
+          const placeholders = [];
+          Object.values(PLACEHOLDER_OPTIONS).forEach((group) => {
+            group.forEach((placeholder) => {
+              placeholders.push(placeholder);
+            });
+          });
+          return placeholders.sort();
+        }
+
+        function findPlaceholderSuggestion(text, cursorPos) {
+          // Look for partial placeholder patterns
+          const beforeCursor = text.substring(0, cursorPos);
+
+          // Find the last occurrence of { or start of word that could be a placeholder
+          let searchStart = cursorPos - 1;
+          let inBrackets = false;
+          let partialMatch = "";
+
+          // Look backwards to find the start of a potential placeholder
+          for (let i = cursorPos - 1; i >= 0; i--) {
+            const char = beforeCursor[i];
+            if (char === "}") break; // We're after a completed placeholder
+            if (char === "{") {
+              inBrackets = true;
+              searchStart = i + 1;
+              break;
+            }
+            if (
+              char === " " ||
+              char === "\n" ||
+              char === "\t" ||
+              char === "\r"
+            ) {
+              searchStart = i + 1;
+              break;
+            }
+            if (i === 0) {
+              searchStart = 0; // Start of text
+            }
+          }
+
+          partialMatch = beforeCursor.substring(searchStart);
+
+          // Need at least 2 characters for autocomplete
+          if (partialMatch.length < 2) return null;
+
+          // Remove leading { if present
+          const cleanMatch = partialMatch.replace(/^{/, "");
+          if (cleanMatch.length < 2) return null;
+
+          // Find matching placeholders (case insensitive)
+          const allPlaceholders = getAllPlaceholders();
+          const matches = allPlaceholders.filter((placeholder) =>
+            placeholder.toLowerCase().startsWith(cleanMatch.toLowerCase())
+          );
+
+          if (matches.length === 0) return null;
+
+          // Get the best match (prioritize exact case match, then first alphabetical)
+          let bestMatch = matches[0];
+          for (const match of matches) {
+            if (match.startsWith(cleanMatch)) {
+              // Exact case match
+              bestMatch = match;
+              break;
+            }
+          }
+
+          // Determine what to suggest
+          const suggestion = inBrackets ? `${bestMatch}}` : `{${bestMatch}}`;
+
+          return {
+            suggestion,
+            startPos: searchStart,
+            partialLength: partialMatch.length,
+            fullReplacement: suggestion,
+            inBrackets,
+          };
+        }
+
+        function updateAutocompleteOverlay(textarea) {
+          const overlay = document.getElementById("vr-autocomplete-overlay");
+          const hint = document.getElementById("vr-autocomplete-hint");
+
+          if (!overlay || !textarea) return;
+
+          const cursorPos = textarea.selectionStart;
+          const text = textarea.value;
+
+          const suggestion = findPlaceholderSuggestion(text, cursorPos);
+
+          if (suggestion) {
+            currentSuggestion = suggestion;
+            currentSuggestionStart = suggestion.startPos;
+
+            const beforeText = text.substring(0, suggestion.startPos);
+            const typedPart = text.substring(suggestion.startPos, cursorPos);
+            const suggestionPart = suggestion.fullReplacement.substring(
+              typedPart.length
+            );
+            const afterText = text.substring(cursorPos);
+
+            // Render the suggestion in blue, but keep the rest of the overlay transparent to avoid "double text"
+            overlay.innerHTML =
+              `<span style="color: transparent;">${sanitize(
+                beforeText
+              )}</span>` +
+              `<span style="color: transparent;">${sanitize(
+                typedPart
+              )}</span>` +
+              `<span style="color: #60a5fa; background-color: rgba(96, 165, 250, 0.2); border-radius: 2px; padding: 0 1px;">${sanitize(
+                suggestionPart
+              )}</span>` +
+              `<span style="color: transparent;">${sanitize(afterText)}</span>`;
+
+            hint.style.opacity = "1";
+          } else {
+            currentSuggestion = null;
+            // When there's no suggestion, the overlay should be empty
+            overlay.innerHTML = "";
+            hint.style.opacity = "0";
+          }
+        }
+
+        function acceptAutocompleteSuggestion(textarea) {
+          if (!currentSuggestion) return false;
+
+          const cursorPos = textarea.selectionStart;
+          const text = textarea.value;
+
+          // Replace the partial text with the full suggestion
+          const beforeReplacement = text.substring(0, currentSuggestionStart);
+          const afterCursor = text.substring(cursorPos);
+
+          const newText =
+            beforeReplacement + currentSuggestion.fullReplacement + afterCursor;
+          const newCursorPos =
+            currentSuggestionStart + currentSuggestion.fullReplacement.length;
+
+          textarea.value = newText;
+          textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+          // Clear suggestion
+          currentSuggestion = null;
+          updateAutocompleteOverlay(textarea);
+
+          return true;
+        }
+
+        function setupTemplateAutocomplete(modal) {
+          const textarea = modal.querySelector("#vr-template-content");
+          const overlay = modal.querySelector("#vr-autocomplete-overlay");
+
+          if (!textarea || !overlay) return;
+
+          // Sync overlay styling with textarea
+          const syncStyles = () => {
+            const computedStyle = window.getComputedStyle(textarea);
+            overlay.style.fontSize = computedStyle.fontSize;
+            overlay.style.lineHeight = computedStyle.lineHeight;
+            overlay.style.padding = computedStyle.padding;
+            overlay.style.fontFamily = computedStyle.fontFamily;
+            overlay.style.border = computedStyle.border;
+            overlay.style.borderRadius = computedStyle.borderRadius;
+          };
+
+          syncStyles();
+
+          // Make textarea background transparent so overlay shows through
+          textarea.style.background = "transparent";
+          textarea.style.color = "#d1d5db"; // Light gray for normal text
+
+          // Initial overlay update
+          updateAutocompleteOverlay(textarea);
+
+          // Handle input events
+          textarea.addEventListener("input", () => {
+            updateAutocompleteOverlay(textarea);
+          });
+
+          // Handle cursor movement
+          textarea.addEventListener("selectionchange", () => {
+            updateAutocompleteOverlay(textarea);
+          });
+
+          textarea.addEventListener("click", () => {
+            setTimeout(() => updateAutocompleteOverlay(textarea), 10);
+          });
+
+          textarea.addEventListener("keyup", (e) => {
+            if (e.key !== "Tab") {
+              updateAutocompleteOverlay(textarea);
+            }
+          });
+
+          // Handle Tab key for accepting suggestions
+          textarea.addEventListener("keydown", (e) => {
+            if (e.key === "Tab" && currentSuggestion) {
+              e.preventDefault();
+              acceptAutocompleteSuggestion(textarea);
+              return false;
+            }
+          });
+
+          // Handle scroll sync
+          textarea.addEventListener("scroll", () => {
+            overlay.scrollTop = textarea.scrollTop;
+            overlay.scrollLeft = textarea.scrollLeft;
+          });
+        }
+
+        // --- VR TEMPLATE LOGIC ---
+        const PLACEHOLDER_OPTIONS = {
+          "Client Info": ["ClientName", "ClientDOB", "ClientPhone", "MCN"],
+          "Financial Item": [
+            "ItemName",
+            "Location",
+            "AccountNumber",
+            "Value",
+            "KnownAccount",
+          ],
+          "Case Info": [
+            "CaseType",
+            "ApplicationDate",
+            "FacilityName",
+            "AdminName",
+            "AVSConsentDate",
+          ],
+          "Contact Info": [
+            "ContactName",
+            "ContactTitle",
+            "ContactPhone",
+            "ContactEmail",
+          ],
+          System: ["CurrentDate", "DueDate"],
+        };
+
+        function loadTemplateCategories() {
+          const categorySelect = document.getElementById(
+            "vr-template-category-select"
+          );
+          categorySelect.innerHTML =
+            '<option value="">All Categories</option>' +
+            state.vrCategories
+              .map(
+                (cat) =>
+                  `<option value="${sanitize(cat)}">${sanitize(cat)}</option>`
+              )
+              .join("");
+        }
+
+        function loadTemplates(categoryFilter = "") {
+          const templateSelect = document.getElementById("vr-template-select");
+          const templates = categoryFilter
+            ? getVrTemplatesByCategory(categoryFilter)
+            : state.vrTemplates;
+          templateSelect.innerHTML =
+            '<option value="">Select a template...</option>' +
+            templates
+              .map(
+                (t) => `<option value="${t.id}">${sanitize(t.name)}</option>`
+              )
+              .join("");
+          const btns = [
+            document.getElementById("vr-add-to-request-btn"),
+            document.getElementById("vr-add-general-btn"),
+          ];
+          btns.forEach((btn) => {
+            if (btn) {
+              btn.disabled = true;
+              btn.classList.add(
+                "disabled:opacity-50",
+                "disabled:cursor-not-allowed"
+              );
+            }
+          });
+        }
+
+        function getKnownAccountsForCase(caseObj) {
+          if (!caseObj || !caseObj.financials?.resources)
+            return "[KNOWN ACCOUNTS]";
+
+          const ACCOUNT_TYPES = [
+            "checking",
+            "savings",
+            "cd",
+            "ira",
+            "money market",
+            "brokerage",
+          ];
+          const institutions = new Set();
+
+          const knownAccounts = caseObj.financials.resources.filter((item) =>
+            ACCOUNT_TYPES.some((type) => item.type.toLowerCase().includes(type))
+          );
+
+          knownAccounts.forEach((item) => {
+            if (item.location && item.location.trim()) {
+              institutions.add(item.location.trim());
+            }
+          });
+
+          if (institutions.size === 0) return "[KNOWN ACCOUNTS]";
+
+          return Array.from(institutions).join(", ");
+        }
+        function processPlaceholders(templateContent, customReplacements = {}) {
+          if (!state.activeCase) return templateContent;
+          const person = getPerson(state.activeCase.personId);
+          const appDetails = state.activeCase.appDetails || {};
+
+          // Refactored to use the new organizations model
+          const organization = person?.organizationId
+            ? getOrganization(person.organizationId)
+            : null;
+          const primaryContact =
+            organization?.personnel?.find((p) => p.title === "Administrator") ||
+            organization?.personnel?.[0] ||
+            null;
+
+          const baseDateValues = {
+            ApplicationDate: appDetails.appDate,
+            AVSConsentDate: appDetails.avsConsentDate,
+            CurrentDate: dateUtils.now(),
+            ClientDOB: person?.dob,
+          };
+
+          const baseReplacements = {
+            ClientName: person?.name || "[CLIENT NAME]",
+            ClientPhone: person?.phone
+              ? formatPhoneNumber(person.phone)
+              : "[PHONE]",
+            MCN: state.activeCase?.masterCaseNumber || "[MCN]",
+            KnownAccount: getKnownAccountsForCase(state.activeCase), // Default value from helper
+            CaseType: appDetails.caseType || "[CASE TYPE]",
+            FacilityName: organization?.name || "[FACILITY NAME]",
+            AdminName: primaryContact?.name || "[ADMIN NAME]",
+            ContactName: primaryContact?.name || "[CONTACT NAME]",
+            ContactTitle: primaryContact?.title || "Administrator",
+            ContactPhone: primaryContact?.phone
+              ? formatPhoneNumber(primaryContact.phone)
+              : "[CONTACT PHONE]",
+            ContactEmail: primaryContact?.email || "[CONTACT EMAIL]",
+            DueDate: "[DUE DATE]",
+            ...customReplacements,
+          };
+
+          return templateContent.replace(/{([^}]+)}/g, (match, placeholder) => {
+            // Check for date modifier pattern: {DateKey+5} or {DateKey-10}
+            const dateModifierRegex = /^(\w+)\s*([+-])\s*(\d+)$/;
+            const dateMatch = placeholder.match(dateModifierRegex);
+
+            if (dateMatch) {
+              const [, dateKey, operator, daysStr] = dateMatch;
+              const days = parseInt(daysStr, 10);
+              const baseDateStr = baseDateValues[dateKey];
+
+              if (baseDateStr) {
+                const baseDate = new Date(baseDateStr);
+                // Check if the baseDate is valid
+                if (!isNaN(baseDate.getTime())) {
+                  const modifier = operator === "+" ? days : -days;
+                  baseDate.setUTCDate(baseDate.getUTCDate() + modifier);
+                  return baseDate.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    timeZone: "UTC",
+                  });
+                }
+              }
+              return `[INVALID DATE: ${dateKey}]`; // Return error if base date not found/invalid
+            }
+
+            // Handle standard date placeholders
+            if (baseDateValues[placeholder]) {
+              const date = new Date(baseDateValues[placeholder]);
+              return !isNaN(date.getTime())
+                ? date.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    timeZone: "UTC",
+                  })
+                : `[INVALID DATE: ${placeholder}]`;
+            }
+
+            // Handle non-date placeholders
+            if (baseReplacements[placeholder] !== undefined) {
+              return baseReplacements[placeholder];
+            }
+
+            // If no match found, return the original placeholder
+            return match;
+          });
+        }
+
+        // --- MODAL SYSTEM & TEMPLATE MANAGER ---
+        let modalCount = 0;
+        function createModal(title, contentHTML, onSave, options = {}) {
+          modalCount++;
+          const modalId = `modal-${dayjs().valueOf()}`;
+          const modalWrapper = document.createElement("div");
+          modalWrapper.className = `modal fixed top-1/2 left-1/2 ${
+            options.widthClass || "w-11/12 md:w-2/3 lg:w-1/2"
+          } max-w-4xl bg-gray-800 rounded-lg shadow-2xl flex flex-col`;
+          modalWrapper.id = modalId;
+          modalWrapper.style.zIndex = 1000 + modalCount;
+          const offset = (modalCount - 1) * 20;
+          modalWrapper.style.transform = `translate(calc(-50% + ${offset}px), calc(-50% + ${offset}px))`;
+          const deleteButtonHTML = options.onDelete
+            ? `<button class="delete-in-modal-btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md mr-auto">Delete</button>`
+            : "";
+          modalWrapper.innerHTML = `<div class="drag-handle bg-gray-900 p-3 flex justify-between items-center rounded-t-lg"><h3 class="font-bold text-lg text-blue-300">${title}</h3><button class="close-modal-btn text-gray-400 hover:text-white text-2xl leading-none">&times;</button></div><div class="p-6 overflow-y-auto" style="max-height: 70vh;">${contentHTML}</div><div id="modal-footer" class="bg-gray-900/50 p-3 flex justify-end space-x-3 rounded-b-lg">${deleteButtonHTML}<button class="cancel-modal-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button><button class="save-modal-btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">${
+            options.saveButtonText || "Save"
+          }</button></div>`;
+          document.getElementById("modal-layer").appendChild(modalWrapper);
+
+          const modalElement = document.getElementById(modalId);
+          const saveButton = modalElement.querySelector(".save-modal-btn");
+          const onSaveWrapper = () => {
+            if (onSave(modalElement)) closeModal(modalElement);
+          };
+          saveButton.onclick = onSaveWrapper;
+          modalElement.querySelector(".cancel-modal-btn").onclick = () =>
+            closeModal(modalElement);
+          modalElement.querySelector(".close-modal-btn").onclick = () =>
+            closeModal(modalElement);
+          if (options.onDelete) {
+            modalElement.querySelector(".delete-in-modal-btn").onclick = () => {
+              closeModal(modalElement);
+              options.onDelete();
+            };
+          }
+          makeDraggable(modalElement);
+          modalElement
+            .querySelector("input:not([type=hidden]), select, textarea")
+            ?.focus();
+          return modalElement;
+        }
+
+        function closeModal(modalElement) {
+          if (modalElement) {
+            modalElement.remove();
+            modalCount--;
+            if (modalCount <= 0) {
+              modalCount = 0;
+              // Backdrop logic has been removed.
+            }
+          }
+        }
+
+        function makeDraggable(element) {
+          let pos1 = 0,
+            pos2 = 0,
+            pos3 = 0,
+            pos4 = 0;
+          const header = element.querySelector(".drag-handle");
+          if (header) {
+            header.onmousedown = dragMouseDown;
+          }
+
+          function dragMouseDown(e) {
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+          }
+
+          function elementDrag(e) {
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            element.style.top = element.offsetTop - pos2 + "px";
+            element.style.left = element.offsetLeft - pos1 + "px";
+          }
+
+          function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+          }
+        }
+
+        function openVrTemplateManagerModal(onUpdate = null) {
+          const templatesHTML =
+            state.vrTemplates.length > 0
+              ? state.vrTemplates
+                  .map(
+                    (template) => `
+                    <div class="bg-gray-700/50 p-3 rounded-md flex items-center justify-between">
+                        <div class="flex-1"><div class="font-medium">${sanitize(
+                          template.name
+                        )}</div><div class="text-sm text-gray-400">${sanitize(
+                          template.category
+                        )}</div></div>
+                        <div class="flex space-x-2">
+                            <button class="edit-vr-template-btn text-blue-400 hover:text-blue-300 p-1" data-template-id="${
+                              template.id
+                            }" title="Edit"><svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
+                            <button class="delete-vr-template-btn text-red-400 hover:text-red-300 p-1" data-template-id="${
+                              template.id
+                            }" title="Delete"><svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                        </div>
+                    </div>`
+                  )
+                  .join("")
+              : '<p class="text-gray-500 text-center py-4">No templates created yet.</p>';
+
+          const managerHTML = `<div class="space-y-6"><div><div class="flex justify-between items-center mb-4"><h4 class="text-lg font-semibold text-blue-400">VR Templates</h4><button id="add-vr-template-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">Add Template</button></div><div class="space-y-2 max-h-64 overflow-y-auto">${templatesHTML}</div></div><div><h4 class="text-lg font-semibold text-blue-400 mb-4">Manage Categories</h4><button id="manage-vr-categories-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md">Manage Categories</button></div></div>`;
+
+          const managerModal = createModal(
+            "VR Template Manager",
+            managerHTML,
+            () => true,
+            { widthClass: "w-11/12 md:w-2/3", saveButtonText: "Close" }
+          );
+
+          managerModal.addEventListener("click", (e) => {
+            const addBtn = e.target.closest("#add-vr-template-btn");
+            const editBtn = e.target.closest(".edit-vr-template-btn");
+            const deleteBtn = e.target.closest(".delete-vr-template-btn");
+            const manageCategoriesBtn = e.target.closest(
+              "#manage-vr-categories-btn"
+            );
+
+            if (addBtn) {
+              const modal = createModal(
+                "Add VR Template",
+                getVrTemplateFormHTML(),
+                (modal) => {
+                  const success = saveVrTemplate(modal);
+                  if (success) {
+                    closeModal(managerModal);
+                    openVrTemplateManagerModal(onUpdate);
+                    if (onUpdate) onUpdate();
+                  }
+                  return success;
+                },
+                { widthClass: "w-11/12 lg:w-3/4" }
+              );
+              // Setup autocomplete after modal is created
+              setTimeout(() => setupTemplateAutocomplete(modal), 100);
+            } else if (editBtn) {
+              const templateId = editBtn.dataset.templateId;
+              const template = getVrTemplate(templateId);
+              const modal = createModal(
+                "Edit VR Template",
+                getVrTemplateFormHTML(template),
+                (modal) => {
+                  const success = saveVrTemplate(modal);
+                  if (success) {
+                    closeModal(managerModal);
+                    openVrTemplateManagerModal(onUpdate);
+                    if (onUpdate) onUpdate();
+                  }
+                  return success;
+                },
+                { widthClass: "w-11/12 lg:w-3/4" }
+              );
+              // Setup autocomplete after modal is created
+              setTimeout(() => setupTemplateAutocomplete(modal), 100);
+            } else if (deleteBtn) {
+              const templateId = deleteBtn.dataset.templateId;
+              const template = getVrTemplate(templateId);
+              createConfirmationModal(
+                `Delete template "${sanitize(template?.name)}"?`,
+                () => {
+                  state.vrTemplates = state.vrTemplates.filter(
+                    (t) => t.id != templateId
+                  );
+                  saveState();
+                  closeModal(managerModal);
+                  openVrTemplateManagerModal(onUpdate);
+                  if (onUpdate) onUpdate();
+                  showToast("Template deleted.", "error");
+                  return true;
+                },
+                "Delete"
+              );
+            } else if (manageCategoriesBtn) {
+              openVrCategoryManagerModal(() => {
+                closeModal(managerModal);
+                openVrTemplateManagerModal(onUpdate);
+              });
+            }
+          });
+        }
+
+        function getVrTemplateFormHTML(templateData = null) {
+          const categoryOptions = state.vrCategories
+            .map(
+              (cat) =>
+                `<option value="${sanitize(cat)}" ${
+                  templateData?.category === cat ? "selected" : ""
+                }>${sanitize(cat)}</option>`
+            )
+            .join("");
+          const placeholderHelpHTML = Object.entries(PLACEHOLDER_OPTIONS)
+            .map(
+              ([group, placeholders]) =>
+                `<div class="mb-2"><strong class="text-blue-400">${group}:</strong><br><span class="text-sm text-gray-400">${placeholders
+                  .map((p) => `{${p}}`)
+                  .join(", ")}</span></div>`
+            )
+            .join("");
+          return `<input type="hidden" id="vr-template-id" value="${
+            templateData?.id || ""
+          }"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div><div class="space-y-4"><div><label for="vr-template-name" class="block text-sm font-medium text-gray-400">Template Name</label><input type="text" id="vr-template-name" value="${sanitize(
+            templateData?.name || ""
+          )}" placeholder="e.g., Bank Statement Request" class="mt-1 block w-full bg-gray-700 rounded-md p-2"></div><div><label for="vr-template-category" class="block text-sm font-medium text-gray-400">Category</label><select id="vr-template-category" class="mt-1 block w-full bg-gray-700 rounded-md p-2">${categoryOptions}</select></div><div class="relative"><label for="vr-template-content" class="block text-sm font-medium text-gray-400">Template Content</label><div class="relative" style="position: relative;"><div id="vr-autocomplete-overlay" class="absolute inset-0 mt-1 p-2 pointer-events-none font-mono whitespace-pre-wrap overflow-hidden rounded-md bg-gray-700" style="z-index: 5; color: #d1d5db;"></div><textarea id="vr-template-content" rows="8" placeholder="Enter your template text here. Start typing placeholders like 'Cli' for {ClientName}..." class="absolute inset-0 mt-1 w-full bg-gray-700 rounded-md p-2 font-mono" style="background: transparent !important; z-index: 10; caret-color: #d1d5db; resize: none;">${sanitize(
+            templateData?.content || ""
+          )}</textarea></div><div id="vr-autocomplete-hint" class="text-xs text-blue-400 mt-1 opacity-0 transition-opacity">Press Tab to accept suggestion</div></div></div></div><div><h4 class="text-lg font-semibold text-blue-400 mb-3">Available Placeholders</h4><div class="bg-gray-800 p-4 rounded-lg text-sm">${placeholderHelpHTML}</div></div></div>`;
+        }
+
+        function saveVrTemplate(modal) {
+          // Use centralized validation system
+          const validation = validateForm(modal, {
+            "#vr-template-name": [
+              Validators.required("Template name is required."),
+              Validators.minLength(
+                3,
+                "Template name must be at least 3 characters."
+              ),
+              Validators.maxLength(
+                100,
+                "Template name must be no more than 100 characters."
+              ),
+            ],
+            "#vr-template-content": [
+              Validators.required("Template content is required."),
+              Validators.minLength(
+                10,
+                "Template content must be at least 10 characters."
+              ),
+            ],
+          });
+
+          if (!validation.isValid) {
+            showToast("Please fix the errors above.", "error");
+            return false;
+          }
+
+          const name = validation.sanitizedValues["#vr-template-name"];
+          const content = validation.sanitizedValues["#vr-template-content"];
+          const id = modal.querySelector("#vr-template-id").value;
+
+          if (id) {
+            const index = state.vrTemplates.findIndex((t) => t.id == id);
+            if (index > -1) {
+              state.vrTemplates[index] = {
+                ...state.vrTemplates[index],
+                name,
+                category: modal.querySelector("#vr-template-category").value,
+                content,
+              };
+            }
+          } else {
+            state.vrTemplates.push({
+              id: state.nextVrTemplateId++,
+              name,
+              category: modal.querySelector("#vr-template-category").value,
+              content,
+            });
+          }
+
+          document.getElementById("save-data-btn").disabled = false;
+          document
+            .getElementById("save-data-btn")
+            .classList.remove(
+              "disabled:opacity-50",
+              "disabled:cursor-not-allowed"
+            );
+
+          showToast("VR Template saved successfully.");
+          return true;
+        }
+
+        function openVrCategoryManagerModal(onUpdate = null) {
+          const categoriesHTML = state.vrCategories
+            .map(
+              (cat) =>
+                `<div class="flex items-center justify-between p-2 bg-gray-700 rounded-md"><span>${sanitize(
+                  cat
+                )}</span><button class="delete-vr-category-btn text-red-400 hover:text-red-300" data-category="${sanitize(
+                  cat
+                )}"><svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button></div>`
+            )
+            .join("");
+          const managerHTML = `<div class="space-y-4"><div><label for="new-vr-category" class="block text-sm font-medium text-gray-400">Add New Category</label><div class="flex mt-1 space-x-2"><input type="text" id="new-vr-category" placeholder="e.g., Insurance, Legal" class="flex-1 bg-gray-700 rounded-md p-2"><button id="add-vr-category-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">Add</button></div></div><div><h4 class="text-sm font-medium text-gray-400 mb-2">Current Categories</h4><div class="space-y-2 max-h-64 overflow-y-auto">${categoriesHTML}</div></div></div>`;
+          const categoryModal = createModal(
+            "Manage VR Categories",
+            managerHTML,
+            () => true,
+            { widthClass: "w-11/12 md:w-1/2", saveButtonText: "Close" }
+          );
+
+          categoryModal.addEventListener("click", (e) => {
+            const addBtn = e.target.closest("#add-vr-category-btn");
+            const deleteBtn = e.target.closest(".delete-vr-category-btn");
+
+            if (addBtn) {
+              const input = categoryModal.querySelector("#new-vr-category");
+              const newCategory = input.value.trim();
+              if (newCategory && !state.vrCategories.includes(newCategory)) {
+                state.vrCategories.push(newCategory);
+                saveState();
+                input.value = "";
+                closeModal(categoryModal);
+                openVrCategoryManagerModal(onUpdate);
+                showToast("Category added.");
+              } else if (state.vrCategories.includes(newCategory)) {
+                showToast("Category already exists.", "error");
+              }
+            } else if (deleteBtn) {
+              const categoryToDelete = deleteBtn.dataset.category;
+              const templatesUsingCategory = state.vrTemplates.filter(
+                (t) => t.category === categoryToDelete
+              );
+              if (templatesUsingCategory.length > 0) {
+                createAlertModal(
+                  "Cannot Delete Category",
+                  `This category is used by ${templatesUsingCategory.length} template(s). Please reassign or delete those templates first.`
+                );
+              } else {
+                createConfirmationModal(
+                  `Delete category "${sanitize(categoryToDelete)}"?`,
+                  () => {
+                    state.vrCategories = state.vrCategories.filter(
+                      (c) => c !== categoryToDelete
+                    );
+                    saveState();
+                    closeModal(categoryModal);
+                    openVrCategoryManagerModal(onUpdate);
+                    showToast("Category deleted.", "error");
+                  },
+                  "Delete"
+                );
+              }
+            }
+          });
+        }
+
+        function createConfirmationModal(
+          message,
+          onConfirm,
+          confirmText = "Confirm",
+          cancelText = "Cancel"
+        ) {
+          const modal = createModal(
+            "Confirm",
+            `<p class="text-gray-300">${message}</p>`,
+            () => {},
+            { widthClass: "w-11/12 md:w-1/3" }
+          );
+          const footer = modal.querySelector("#modal-footer");
+          footer.innerHTML = `<button class="cancel-modal-btn bg-gray-600 hover:bg-gray-700 font-bold py-2 px-4 rounded-md">${cancelText}</button><button class="confirm-delete bg-blue-600 hover:bg-blue-700 font-bold py-2 px-4 rounded-md">${confirmText}</button>`;
+          modal.querySelector(".cancel-modal-btn").onclick = () =>
+            closeModal(modal);
+          modal.querySelector(".confirm-delete").onclick = () => {
+            onConfirm();
+            closeModal(modal);
+          };
+        }
+
+        function createAlertModal(title, message) {
+          const modal = createModal(
+            title,
+            `<p class="text-gray-300">${message}</p>`,
+            () => {},
+            { widthClass: "w-11/12 md:w-1/3" }
+          );
+          modal.querySelector("#modal-footer").innerHTML =
+            `<button class="cancel-modal-btn bg-blue-600 hover:bg-blue-700 font-bold py-2 px-4 rounded-md">OK</button>`;
+          modal.querySelector(".cancel-modal-btn").onclick = () =>
+            closeModal(modal);
+        }
+
+        function openVrRequestManagerModal() {
+          if (state.vrRequests.length === 0) {
+            showToast("No VR requests found.", "error");
+            return;
+          }
+
+          const requestsHTML = state.vrRequests
+            .sort((a, b) =>
+              dateUtils.compareDates(b.createdDate, a.createdDate)
+            )
+            .map((request) => {
+              const createdDate = new Date(
+                request.createdDate
+              ).toLocaleDateString();
+              const dueDate = new Date(request.dueDate).toLocaleDateString();
+              const isOverdue = dateUtils.isBefore(
+                request.dueDate,
+                dateUtils.now()
+              );
+              const statusColor =
+                request.status === "Pending"
+                  ? isOverdue
+                    ? "text-red-400"
+                    : "text-yellow-400"
+                  : "text-green-400";
+
+              return `
+                <div class="bg-gray-700/50 p-4 rounded-md border-l-4 ${
+                  isOverdue && request.status === "Pending"
+                    ? "border-red-500"
+                    : "border-blue-500"
+                }">
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-3">
+                      ${
+                        request.status === "Pending" ||
+                        request.status === "Returned"
+                          ? `<input type="checkbox" class="bulk-request-checkbox h-4 w-4 rounded border-gray-500 text-purple-500" 
+                                data-request-id="${request.id}">`
+                          : ""
+                      }
+                      <div>
+                        <div class="font-semibold text-blue-300">VR Request #${
+                          request.id
+                        }</div>
+                        <div class="text-sm text-gray-400">${sanitize(
+                          request.clientName
+                        )} (${sanitize(request.masterCaseNumber)})</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-sm ${statusColor} font-medium">${
+                        request.status
+                      }</div>
+                      <div class="text-xs text-gray-400">Due: ${dueDate}</div>
+                    </div>
+                  </div>
+                  <div class="text-sm text-gray-300 mb-2">
+                    <strong>Created:</strong> ${createdDate} | 
+                    <strong>Items:</strong> ${request.financialItems.length}
+                  </div>
+                  <details class="text-sm">
+                    <summary class="cursor-pointer text-blue-400 hover:text-blue-300">View Details</summary>
+                    <div class="mt-2 p-2 bg-gray-800 rounded">
+                      <div class="mb-2"><strong>Content:</strong></div>
+                      <div class="bg-gray-900 p-2 rounded text-xs font-mono whitespace-pre-wrap mb-2">${sanitize(
+                        request.content
+                      )}</div>
+                      <div><strong>Financial Items:</strong></div>
+                      <ul class="list-disc list-inside text-xs mt-1 mb-3">
+                        ${request.financialItems
+                          .map(
+                            (item) =>
+                              `<li>${sanitize(item.type)} at ${sanitize(
+                                item.location
+                              )} - $${item.value.toFixed(2)}</li>`
+                          )
+                          .join("")}
+                      </ul>
+                      ${
+                        request.status === "Pending"
+                          ? `
+                        <div class="border-t border-gray-600 pt-2">
+                          <button class="vr-mark-returned-btn bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded" 
+                                  data-request-id="${request.id}">
+                            Mark as Returned
+                          </button>
+                        </div>
+                      `
+                          : ""
+                      }
+                    </div>
+                  </details>
+                </div>
+              `;
+            })
+            .join("");
+
+          const managerHTML = `
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <h4 class="text-lg font-semibold text-blue-400">VR Request History</h4>
+                <div class="text-sm text-gray-400">${state.vrRequests.length} total requests</div>
+              </div>
+              
+              <!-- Bulk Operations Section -->
+              <div class="bg-gray-800 p-3 rounded border-l-4 border-purple-500">
+                <div class="flex items-center justify-between mb-2">
+                  <h5 class="text-sm font-semibold text-purple-400">Bulk Operations</h5>
+                  <div class="flex gap-2">
+                    <button id="bulk-select-all" class="text-xs bg-gray-600 hover:bg-gray-500 text-white px-2 py-1 rounded">
+                      Select All Pending
+                    </button>
+                    <button id="bulk-clear-selection" class="text-xs bg-gray-600 hover:bg-gray-500 text-white px-2 py-1 rounded">
+                      Clear Selection
+                    </button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="text" id="bulk-verification-source" placeholder="Verification source (e.g., Bank statement, Pay stub)" 
+                         class="flex-1 bg-gray-700 text-white text-xs px-2 py-1 rounded border border-gray-600">
+                  <button id="bulk-mark-verified" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded">
+                    Mark Selected as Verified
+                  </button>
+                </div>
+              </div>
+              
+              <div class="space-y-3 max-h-96 overflow-y-auto">
+                ${requestsHTML}
+              </div>
+            </div>
+          `;
+
+          createModal("VR Request Manager", managerHTML, () => true, {
+            widthClass: "w-11/12 lg:w-3/4",
+            saveButtonText: "Close",
+          });
+
+          // Add event delegation for "Mark as Returned" buttons and bulk verification
+          document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("vr-mark-returned-btn")) {
+              const requestId = parseInt(e.target.dataset.requestId, 10);
+              markVrRequestAsReturned(requestId);
+            }
+
+            if (e.target.id === "bulk-mark-verified") {
+              // Get selected checkboxes from modal context only
+              const modal = e.target.closest(".modal");
+              const selectedCheckboxes =
+                modal?.querySelectorAll(".bulk-request-checkbox:checked") || [];
+              bulkMarkAsVerified(selectedCheckboxes);
+            }
+
+            // Handle remove from draft buttons
+            if (e.target.classList.contains("remove-from-draft-btn")) {
+              e.preventDefault();
+              e.stopPropagation();
+              const itemId = parseInt(e.target.dataset.itemId, 10);
+              removeItemFromDraft(itemId);
+            }
+          });
+        }
+
+        // VR Request Status Management
+        function markVrRequestAsReturned(requestId) {
+          const vrRequest = getVrRequest(requestId);
+          if (!vrRequest) {
+            showToast("VR Request not found.", "error");
+            return;
+          }
+
+          if (vrRequest.status !== "Pending") {
+            showToast(
+              "Only pending VR requests can be marked as returned.",
+              "error"
+            );
+            return;
+          }
+
+          // Update VR request status
+          vrRequest.status = "Returned";
+          vrRequest.returnedDate = dateUtils.now();
+
+          // Update financial item statuses to "AVS Pending"
+          const allFinancials = [
+            ...(state.activeCase.financials?.resources || []),
+            ...(state.activeCase.financials?.income || []),
+            ...(state.activeCase.financials?.expenses || []),
+          ];
+
+          vrRequest.financialItemIds.forEach((itemId) => {
+            const itemToUpdate = allFinancials.find(
+              (item) => item.id === itemId
+            );
+            if (
+              itemToUpdate &&
+              itemToUpdate.verificationStatus === "VR Pending"
+            ) {
+              itemToUpdate.verificationStatus = "AVS Pending";
+            }
+          });
+
+          // Mark data as dirty and enable save button
+          saveState();
+          document.getElementById("save-data-btn").disabled = false;
+          document
+            .getElementById("save-data-btn")
+            .classList.remove(
+              "disabled:opacity-50",
+              "disabled:cursor-not-allowed"
+            );
+
+          showToast(
+            `VR Request #${requestId} marked as returned. Financial items updated to AVS Pending.`,
+            "success"
+          );
+
+          // Refresh the modal by closing and reopening it
+          document.querySelector(".modal")?.remove();
+          openVrRequestManagerModal();
+        }
+
+        function bulkMarkAsVerified(selectedCheckboxes = null) {
+          // If no checkboxes passed, get them from the modal
+          if (!selectedCheckboxes) {
+            const modal = document.querySelector(".modal");
+            selectedCheckboxes =
+              modal?.querySelectorAll(".bulk-request-checkbox:checked") || [];
+          }
+
+          const verificationSource = document
+            .getElementById("bulk-verification-source")
+            ?.value.trim();
+
+          if (selectedCheckboxes.length === 0) {
+            showToast(
+              "Please select at least one VR request to mark as verified.",
+              "error"
+            );
+            return;
+          }
+
+          if (!verificationSource) {
+            showToast(
+              "Please enter a verification source (e.g., 'Bank statement 07/2025').",
+              "error"
+            );
+            document.getElementById("bulk-verification-source")?.focus();
+            return;
+          }
+
+          const requestIds = Array.from(selectedCheckboxes).map((cb) =>
+            parseInt(cb.dataset.requestId || cb.value)
+          );
+          let updatedCount = 0;
+          let financialItemsUpdated = 0;
+
+          // Get all financial items across all cases for bulk updates
+          const allFinancials = [
+            ...(state.activeCase?.financials?.resources || []),
+            ...(state.activeCase?.financials?.income || []),
+            ...(state.activeCase?.financials?.expenses || []),
+          ];
+
+          requestIds.forEach((requestId) => {
+            const vrRequest = state.vrRequests.find((r) => r.id === requestId);
+            if (vrRequest && vrRequest.status === "Returned") {
+              // Update VR request status to completed
+              vrRequest.status = "Verified";
+              vrRequest.verifiedDate = dateUtils.now();
+              vrRequest.verificationSource = verificationSource;
+              updatedCount++;
+
+              // Update linked financial items to "Verified" status
+              vrRequest.financialItemIds.forEach((itemId) => {
+                const itemToUpdate = allFinancials.find(
+                  (item) => item.id === itemId
+                );
+                if (
+                  itemToUpdate &&
+                  itemToUpdate.verificationStatus === "AVS Pending"
+                ) {
+                  itemToUpdate.verificationStatus = "Verified";
+                  itemToUpdate.source = verificationSource;
+                  financialItemsUpdated++;
+                }
+              });
+            }
+          });
+
+          if (updatedCount > 0) {
+            saveState();
+            document.getElementById("save-data-btn").disabled = false;
+            document
+              .getElementById("save-data-btn")
+              .classList.remove(
+                "disabled:opacity-50",
+                "disabled:cursor-not-allowed"
+              );
+
+            showToast(
+              `${updatedCount} VR request(s) marked as verified. ${financialItemsUpdated} financial item(s) updated.`,
+              "success"
+            );
+
+            // Clear the verification source input
+            document.getElementById("bulk-verification-source").value = "";
+
+            // Refresh the modal
+            document.querySelector(".modal")?.remove();
+            openVrRequestManagerModal();
+          } else {
+            showToast(
+              "No eligible VR requests found. Only 'Returned' requests can be marked as verified.",
+              "error"
+            );
+          }
+        }
+
+        // --- EVENT LISTENERS ---
+        // Safe event listener attachment with null checks
+        const loadDataBtn = document.getElementById("load-data-btn");
+        if (loadDataBtn) {
+          loadDataBtn.addEventListener("click", loadDataWithFileSystemAPI);
+        }
+
+        const fileInput = document.getElementById("file-input");
+        if (fileInput) {
+          fileInput.addEventListener("change", loadDataFromFile);
+        }
+
+        const findCaseBtn = document.getElementById("find-case-btn");
+        if (findCaseBtn) {
+          findCaseBtn.addEventListener("click", searchCaseByMcn);
+        }
+
+        const saveDataBtn = document.getElementById("save-data-btn");
+        if (saveDataBtn) {
+          saveDataBtn.addEventListener("click", saveDataToFile);
+        }
+
+        const manageTemplatesBtn = document.getElementById(
+          "manage-vr-templates-btn"
+        );
+        if (manageTemplatesBtn) {
+          manageTemplatesBtn.addEventListener("click", () =>
+            openVrTemplateManagerModal(loadTemplates)
+          );
+        }
+
+        const viewRequestsBtn = document.getElementById("view-vr-requests-btn");
+        if (viewRequestsBtn) {
+          viewRequestsBtn.addEventListener("click", openVrRequestManagerModal);
+        }
+
+        const categorySelect = document.getElementById(
+          "vr-template-category-select"
+        );
+        if (categorySelect) {
+          categorySelect.addEventListener("change", (e) =>
+            loadTemplates(e.target.value)
+          );
+        }
+
+        const templateSelect = document.getElementById("vr-template-select");
+        if (templateSelect) {
+          templateSelect.addEventListener("change", (e) => {
+            const isDisabled = !e.target.value;
+            const btns = [
+              document.getElementById("vr-add-to-request-btn"),
+              document.getElementById("vr-add-general-btn"),
+            ];
+            btns.forEach((btn) => {
+              if (btn) {
+                btn.disabled = isDisabled;
+                btn.classList.toggle("disabled:opacity-50", isDisabled);
+                btn.classList.toggle("disabled:cursor-not-allowed", isDisabled);
+              }
+            });
+          });
+        }
+
+        const addToRequestBtn = document.getElementById(
+          "vr-add-to-request-btn"
+        );
+        if (addToRequestBtn) {
+          addToRequestBtn.addEventListener("click", () => {
+            const templateSelectElement =
+              document.getElementById("vr-template-select");
+            const templateId = templateSelectElement?.value;
+            if (!templateId) return;
+            const template = getVrTemplate(templateId);
+            if (!template) return;
+
+            const selectedItems = Array.from(
+              document.querySelectorAll(".vr-financial-item-checkbox:checked")
+            );
+
+            if (selectedItems.length === 0) {
+              showToast("Please select at least one financial item.", "error");
+              return;
+            }
+
+            if (!state.vrDraftItems) {
+              state.vrDraftItems = [];
+            }
+
+            let processedContent = "";
+            let newItemsAdded = 0;
+            let skippedItems = 0;
+
+            selectedItems.forEach((checkbox) => {
+              const itemId = parseInt(checkbox.value, 10);
+
+              if (!state.vrDraftItems.some((item) => item.id === itemId)) {
+                state.vrDraftItems.push({
+                  id: itemId,
+                  type: checkbox.dataset.type,
+                  location: checkbox.dataset.location,
+                  account: checkbox.dataset.account,
+                  value: parseFloat(checkbox.dataset.value || 0),
+                  templateId: templateId,
+                  templateName: template.name,
+                });
+
+                if (processedContent) processedContent += "\n\n";
+                const knownAccountString = `${checkbox.dataset.type} at ${checkbox.dataset.location} (${checkbox.dataset.account})`;
+                processedContent += processPlaceholders(template.content, {
+                  ItemName: checkbox.dataset.type,
+                  Location: checkbox.dataset.location,
+                  AccountNumber: checkbox.dataset.account,
+                  Value: `$${parseFloat(checkbox.dataset.value || 0).toFixed(
+                    2
+                  )}`,
+                  Banks: checkbox.dataset.location,
+                  KnownAccount: knownAccountString,
+                });
+                newItemsAdded++;
+              } else {
+                skippedItems++;
+              }
+            });
+
+            const finalContentTextarea =
+              document.getElementById("vr-final-content");
+            if (finalContentTextarea && processedContent) {
+              const existingContent = finalContentTextarea.value.trim();
+              finalContentTextarea.value = existingContent
+                ? `${existingContent}\n\n${processedContent}`
+                : processedContent;
+            }
+
+            updateVrDraftStatus();
+            refreshFinancialItemsDisplay();
+
+            selectedItems.forEach((cb) => {
+              const itemId = parseInt(cb.value, 10);
+              const isInDraft = state.vrDraftItems.some(
+                (item) => item.id === itemId
+              );
+              cb.checked = isInDraft;
+            });
+
+            let message = "";
+            if (newItemsAdded > 0 && skippedItems > 0) {
+              message = `Added ${newItemsAdded} new item(s) to VR draft. ${skippedItems} item(s) were already in draft.`;
+            } else if (newItemsAdded > 0) {
+              message = `Added ${newItemsAdded} item(s) to VR draft`;
+            } else if (skippedItems > 0) {
+              message = `${skippedItems} item(s) were already in VR draft`;
+            }
+
+            if (message) {
+              showToast(message, "success");
+            }
+          });
+        }
+
+        const addGeneralBtn = document.getElementById("vr-add-general-btn");
+        if (addGeneralBtn) {
+          addGeneralBtn.addEventListener("click", () => {
+            const templateSelectElement =
+              document.getElementById("vr-template-select");
+            const templateId = templateSelectElement?.value;
+            if (!templateId) return;
+            const template = getVrTemplate(templateId);
+            if (!template) return;
+
+            const processedContent = processPlaceholders(template.content, {});
+            const finalContentTextarea =
+              document.getElementById("vr-final-content");
+            if (finalContentTextarea) {
+              const existingContent = finalContentTextarea.value.trim();
+              finalContentTextarea.value = existingContent
+                ? `${existingContent}\n\n${processedContent}`
+                : processedContent;
+            }
+            showToast("General text added.", "success");
+          });
+        }
+
+        const clearRequestBtn = document.getElementById("vr-clear-request-btn");
+        if (clearRequestBtn) {
+          clearRequestBtn.addEventListener("click", () => {
+            const finalContentTextarea =
+              document.getElementById("vr-final-content");
+            if (finalContentTextarea) {
+              finalContentTextarea.value = "";
+            }
+            state.vrDraftItems = [];
+            updateVrDraftStatus();
+            refreshFinancialItemsDisplay();
+            showToast("VR draft cleared", "success");
+          });
+        }
+
+        const copyBtn = document.getElementById("vr-copy-btn");
+        if (copyBtn) {
+          copyBtn.addEventListener("click", () => {
+            let contentToCopy =
+              document.getElementById("vr-final-content")?.value || "";
+
+            const includeFooter = document.getElementById(
+              "include-vr-footer-checkbox"
+            ).checked;
+            if (includeFooter && contentToCopy.trim()) {
+              const footerText = processPlaceholders(VR_CONTACT_FOOTER);
+              contentToCopy += `\n\n${footerText}`;
+            }
+
+            navigator.clipboard.writeText(contentToCopy).then(
+              () => {
+                showToast("Content copied to clipboard!", "success");
+              },
+              () => {
+                showToast("Failed to copy content.", "error");
+              }
+            );
+          });
+        }
+
+        const createVrRequestBtn = document.getElementById(
+          "create-vr-request-btn"
+        );
+        if (createVrRequestBtn) {
+          createVrRequestBtn.addEventListener("click", () => {
+            const finalContentElement =
+              document.getElementById("vr-final-content");
+            let finalContent = finalContentElement?.value.trim() || "";
+            if (!finalContent) {
+              showToast("Please create some content before saving.", "error");
+              return;
+            }
+
+            const includeFooter = document.getElementById(
+              "include-vr-footer-checkbox"
+            ).checked;
+            if (includeFooter) {
+              const footerText = processPlaceholders(VR_CONTACT_FOOTER);
+              finalContent += `\n\n${footerText}`;
+            }
+
+            if (!state.vrDraftItems || state.vrDraftItems.length === 0) {
+              showToast(
+                "Please add at least one financial item to the VR draft before creating the request.",
+                "error"
+              );
+              return;
+            }
+
+            const selectedDueDateRadio = document.querySelector(
+              'input[name="vr-due-date"]:checked'
+            );
+            const dueDays = parseInt(selectedDueDateRadio?.value || "15", 10);
+            const dueDate = dateUtils.dayjs().add(dueDays, "day").toDate();
+
+            const vrRequest = {
+              id: state.nextVrRequestId++,
+              caseId: state.activeCase.id,
+              masterCaseNumber: state.activeCase.masterCaseNumber,
+              clientName:
+                getPerson(state.activeCase.personId)?.name || "Unknown",
+              content: finalContent,
+              createdDate: dateUtils.now(),
+              dueDate: dueDate.toISOString(),
+              status: "Pending",
+              financialItemIds: state.vrDraftItems.map((item) => item.id),
+              financialItems: state.vrDraftItems.map((item) => ({
+                id: item.id,
+                type: item.type,
+                location: item.location,
+                accountNumber: item.accountNumber || "",
+                value: parseFloat(item.value || 0),
+              })),
+            };
+
+            state.vrRequests.push(vrRequest);
+
+            state.vrDraftItems.forEach((draftItem) => {
+              const allFinancials = [
+                ...(state.activeCase.financials?.resources || []),
+                ...(state.activeCase.financials?.income || []),
+                ...(state.activeCase.financials?.expenses || []),
+              ];
+              const itemToUpdate = allFinancials.find(
+                (item) => item.id === draftItem.id
+              );
+              if (itemToUpdate) {
+                itemToUpdate.verificationStatus = "VR Pending";
+                itemToUpdate.vrRequestId = vrRequest.id;
+              }
+            });
+
+            const saveDataBtn = document.getElementById("save-data-btn");
+            if (saveDataBtn) {
+              saveDataBtn.disabled = false;
+              saveDataBtn.classList.remove(
+                "disabled:opacity-50",
+                "disabled:cursor-not-allowed"
+              );
+            }
+
+            const itemCount = state.vrDraftItems.length;
+
+            if (finalContentElement) {
+              finalContentElement.value = "";
+            }
+
+            state.vrDraftItems = [];
+            updateVrDraftStatus();
+            refreshFinancialItemsDisplay();
+
+            showToast(
+              `VR Request #${
+                vrRequest.id
+              } created with ${itemCount} item(s). Due: ${dueDate.toLocaleDateString()}`,
+              "success"
+            );
+          });
+        }
+
+        // --- INITIALIZATION ---
+
+        // Add auto-refresh on focus, and immediate save on blur/unload
+        function setupSyncListeners() {
+          let isWindowActive = !document.hidden;
+          let isRefreshing = false; // Add a lock to prevent concurrent refreshes
+
+          // This function forces an immediate save if there are pending changes.
+          const forceSave = () => {
+            // Check the global dirty flag
+            if (stateManager && state.isDataDirty) {
+              console.log(
+                "Window hidden or unloading, forcing immediate save..."
+              );
+              // Use the state manager's save method directly.
+              // This is an async function, but we call it without `await`
+              // to ensure it runs quickly as the page becomes hidden.
+              stateManager.saveState();
+            }
+          };
+
+          // This function reloads data from the file if it has changed.
+          const performAutoRefresh = async () => {
+            if (document.querySelector("#modal-layer .modal") || isRefreshing) {
+              console.log(
+                "Auto-refresh paused: Modal is open or another refresh is in progress."
+              );
+              return;
+            }
+
+            isRefreshing = true;
+
+            try {
+              const fileData = await fileService.readFile();
+              if (fileData) {
+                // Create a comparable version of the current state by removing the dirty flag
+                const dataToCompare = { ...state };
+                delete dataToCompare.isDataDirty;
+
+                const currentStateString = JSON.stringify(dataToCompare);
+                const fileDataString = JSON.stringify(fileData);
+
+                if (currentStateString !== fileDataString) {
+                  console.log("Data change detected, refreshing...");
+                  processImportedData(fileData);
+                  showToast("Data refreshed from source.", "success");
+                } else {
+                  console.log("Auto-refresh: No changes detected.");
+                }
+              }
+            } catch (err) {
+              console.error("Auto-refresh failed:", err);
+              showToast("Sync Failed: Could not read data file.", "error");
+            } finally {
+              isRefreshing = false;
+            }
+          };
+
+          // --- Event Listeners ---
+
+          // Handle when the tab becomes visible/active
+          const handleVisibilityChange = () => {
+            if (document.hidden) {
+              isWindowActive = false;
+              forceSave();
+            } else if (!isWindowActive) {
+              isWindowActive = true;
+              setTimeout(performAutoRefresh, 250);
+            }
+          };
+
+          document.addEventListener("visibilitychange", handleVisibilityChange);
+          window.addEventListener("focus", handleVisibilityChange);
+          window.addEventListener("beforeunload", forceSave);
+
+          // Listen for save events from other tabs
+          window.addEventListener("storage", (e) => {
+            if (e.key === "nightingale-last-save" && e.newValue) {
+              try {
+                const { tabId } = JSON.parse(e.newValue);
+                if (tabId !== TAB_ID) {
+                  console.log(
+                    "Received save event from another tab. Refreshing data..."
+                  );
+                  // FIX: Add a small, randomized delay to prevent file lock race conditions.
+                  const randomDelay = Math.random() * 200 + 100; // Delay between 100ms and 300ms
+                  setTimeout(() => performAutoRefresh(), randomDelay);
+                }
+              } catch (err) {
+                console.error("Could not parse storage event:", err);
+                const randomDelay = Math.random() * 200 + 100;
+                setTimeout(() => performAutoRefresh(), randomDelay); // Fallback for safety
+              }
+            }
+          });
+
+          console.log(
+            "File-aware sync system initialized (refresh on focus, save on blur, cross-tab sync)."
+          );
+        }
+
+        function setupGlobalErrorHandler() {
+          window.addEventListener("error", function (event) {
+            event.preventDefault();
+            console.error("An unexpected global error occurred:", event.error);
+            createAlertModal(
+              "An Unexpected Error Occurred",
+              "A critical error was encountered. Please save any unsaved work if possible and reload the application. Details of the error have been logged to the developer console."
+            );
+          });
+        }
+
+        setupSyncListeners();
+        setupGlobalErrorHandler();
+      });
+    </script>
+  </body>
+</html>

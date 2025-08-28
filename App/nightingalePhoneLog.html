@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-900 text-white">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nightingale Phone Log</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="lib/fuse.min.js"></script>
+    <script src="lib/dayjs.min.js"></script>
+    
+    <script src="js/nightingale.utils.js"></script>
+    <script src="js/nightingale.dayjs.js"></script>
+    <script src="js/nightingale.search.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <style>
+      html { font-family: "Inter", sans-serif; }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #1f2937; }
+      ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+      input:focus, select:focus, textarea:focus, button:focus {
+           --tw-ring-color: rgba(96, 165, 250, 0.5);
+           outline: none;
+      }
+      .log-item:hover .delete-btn {
+          opacity: 1;
+      }
+    </style>
+</head>
+<body class="h-full">
+
+    <div id="root" class="h-full"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        const STORAGE_KEY = 'nightingale_phoneLog_v1';
+        const ENCRYPTION_KEY = 'NightingaleSecretKey';
+
+        /**
+         * Encrypts data before storing it.
+         * @param {any} data The data to encrypt (e.g., the logs array).
+         * @returns {string} The encrypted string.
+         */
+        function encryptData(data) {
+            try {
+                const jsonString = JSON.stringify(data);
+                const encoded = btoa(jsonString); // Base64 encode
+                // Simple XOR cipher for an extra layer of obfuscation
+                return encoded.split('').map((char, i) => 
+                    String.fromCharCode(char.charCodeAt(0) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length))
+                ).join('');
+            } catch (error) {
+                console.error("Encryption failed:", error);
+                return null;
+            }
+        }
+
+        /**
+         * Decrypts data after loading it.
+         * @param {string} encryptedData The encrypted string from storage.
+         * @returns {any} The decrypted data.
+         */
+        function decryptData(encryptedData) {
+            try {
+                // Reverse the XOR cipher
+                const decoded = encryptedData.split('').map((char, i) => 
+                    String.fromCharCode(char.charCodeAt(0) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length))
+                ).join('');
+                const jsonString = atob(decoded); // Base64 decode
+                return JSON.parse(jsonString);
+            } catch (error) {
+                console.error("Decryption failed:", error);
+                return null;
+            }
+        }
+
+        const initialFormState = {
+            callType: 'Outgoing',
+            contactName: '',
+            contactNumber: '',
+            dateTimeReturned: '',
+            dateTimeCallReceived: '',
+            vmDetails: '',
+            mcNumber: '',
+            caseName: '',
+            callDetails: '',
+            duration: '',
+        };
+
+        /**
+         * A custom React hook to manage state persistence in localStorage with encryption.
+         * It mirrors the useState API.
+         * @param {string} key The localStorage key.
+         * @param {any} initialValue The default value if nothing is in storage.
+         * @returns {[any, Function]} A stateful value and a function to update it.
+         */
+        function useEncryptedLocalStorage(key, initialValue) {
+            const [storedValue, setStoredValue] = useState(() => {
+                try {
+                    const item = window.localStorage.getItem(key);
+                    if (item) {
+                        const decrypted = decryptData(item);
+                        return decrypted ? decrypted : initialValue;
+                    }
+                } catch (error) {
+                    console.error("Error reading from localStorage:", error);
+                }
+                return initialValue;
+            });
+
+            useEffect(() => {
+                try {
+                    const encryptedValue = encryptData(storedValue);
+                    if (encryptedValue) {
+                        window.localStorage.setItem(key, encryptedValue);
+                    }
+                } catch (error) {
+                    console.error("Error writing to localStorage:", error);
+                }
+            }, [key, storedValue]);
+
+            return [storedValue, setStoredValue];
+        }
+
+        // --- COMPONENTS ---
+
+        function Header() {
+            return (
+                <header className="flex items-center bg-gray-800 p-4 shadow-md flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                    </svg>
+                    <h1 className="text-xl font-bold">Nightingale Phone Log</h1>
+                </header>
+            );
+        }
+        
+        function LogEntryForm({ onAddLog, onClose }) {
+            const [formState, setFormState] = useState(initialFormState);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormState(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handlePhoneBlur = (e) => {
+                const { name, value } = e.target;
+                setFormState(prev => ({ ...prev, [name]: formatPhoneNumber(value) }));
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!formState.contactName || !formState.callDetails) {
+                    alert('Please fill out at least the Contact Name and Call Details.');
+                    return;
+                }
+                onAddLog(formState);
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
+                    <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-2xl flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                             <h2 className="text-xl font-bold text-blue-400">Add New Call Log</h2>
+                             <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto" style={{maxHeight: '80vh'}}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Call Type</label>
+                                    <select name="callType" value={formState.callType} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2">
+                                        <option>Outgoing</option>
+                                        <option>Incoming</option>
+                                        <option>Callback</option>
+                                    </select>
+                                </div>
+                                
+                                {formState.callType === 'Callback' && (
+                                    <div className="md:col-span-2 bg-gray-900/50 p-3 rounded-md space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-400 mb-1">Date/Time Call Received</label>
+                                            <input type="datetime-local" name="dateTimeCallReceived" value={formState.dateTimeCallReceived} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-400 mb-1">Voicemail Details</label>
+                                            <textarea name="vmDetails" value={formState.vmDetails} onChange={handleChange} rows="2" className="w-full bg-gray-700 rounded-md p-2" placeholder="Details from the voicemail..."></textarea>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Contact Name</label>
+                                    <input type="text" name="contactName" value={formState.contactName} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" required />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Contact #</label>
+                                    <input type="tel" name="contactNumber" value={formState.contactNumber} onChange={handleChange} onBlur={handlePhoneBlur} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Case Name</label>
+                                    <input type="text" name="caseName" value={formState.caseName} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">MC#</label>
+                                    <input type="text" name="mcNumber" value={formState.mcNumber} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Call Details</label>
+                                <textarea name="callDetails" value={formState.callDetails} onChange={handleChange} rows="4" className="w-full bg-gray-700 rounded-md p-2" required></textarea>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Date/Time Call Returned</label>
+                                <input type="datetime-local" name="dateTimeReturned" value={formState.dateTimeReturned} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Duration (minutes)</label>
+                                <input type="number" name="duration" value={formState.duration} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                            </div>
+                            <div className="flex justify-end space-x-3 pt-4">
+                                <button type="button" onClick={onClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Save Log</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        function LogItem({ log, onDelete }) {
+            const typeInfo = {
+                'Outgoing': { color: 'border-blue-500', iconColor: 'text-blue-400', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" /></svg> },
+                'Incoming': { color: 'border-green-500', iconColor: 'text-green-400', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg> },
+                'Callback': { color: 'border-yellow-500', iconColor: 'text-yellow-400', icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.707-10.293a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L9.414 11H13a1 1 0 100-2H9.414l1.293-1.293z" clipRule="evenodd" /></svg> },
+            };
+            const currentType = typeInfo[log.callType] || typeInfo['Outgoing'];
+
+            const handleCopy = () => {
+                const formattedText = formatLogEntryForExport(log);
+                navigator.clipboard.writeText(formattedText).then(() => {
+                    alert('Log entry copied to clipboard!');
+                }).catch(err => {
+                    console.error('Failed to copy log entry: ', err);
+                    alert('Failed to copy log entry.');
+                });
+            };
+
+            return (
+                <div className={`log-item relative bg-gray-800 p-4 rounded-lg shadow-md border-l-4 ${currentType.color} space-y-3`}>
+                    <div className="absolute top-3 right-3 flex space-x-2">
+                         <button onClick={handleCopy} title="Copy Log" className="delete-btn text-gray-500 hover:text-blue-400 transition-opacity opacity-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
+                        </button>
+                        <button onClick={() => onDelete(log.id)} title="Delete Log" className="delete-btn text-gray-500 hover:text-red-400 transition-opacity opacity-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
+                        </button>
+                    </div>
+                    
+                    <div className="flex justify-between items-start">
+                        <div className="flex items-center space-x-3">
+                            <span className={currentType.iconColor}>{currentType.icon}</span>
+                            <div>
+                                <p className="font-bold text-lg text-blue-400">{log.caseName || 'No Case Name'}</p>
+                                <p className="text-sm text-gray-300">
+                                    <span className="font-semibold text-gray-400">Contact:</span> {log.contactName}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="text-right text-sm flex-shrink-0 ml-4">
+                            <p className="text-gray-400" title={`Call Placed: ${dateUtils.format(log.timestamp, 'MM/DD/YYYY h:mm A')}`}>{dateUtils.format(log.timestamp, 'MM/DD/YYYY')}</p>
+                            <p className="text-gray-500">{dateUtils.format(log.timestamp, 'h:mm A')}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 className="font-semibold text-gray-400 text-xs uppercase tracking-wider">Call Details</h4>
+                        <p className="text-gray-300 whitespace-pre-wrap">{log.callDetails}</p>
+                    </div>
+
+                    {log.vmDetails && (
+                        <div>
+                            <h4 className="font-semibold text-gray-400 text-xs uppercase tracking-wider">Voicemail Details</h4>
+                            <p className="text-gray-300 whitespace-pre-wrap">{log.vmDetails}</p>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between items-center text-sm pt-2 text-gray-400 border-t border-gray-700/50">
+                        <div>
+                            {log.mcNumber && <span>MC#: <span className="font-mono text-gray-300">{log.mcNumber}</span></span>}
+                            {log.mcNumber && log.contactNumber && " | "}
+                            {log.contactNumber && <span>Phone: <span className="font-mono text-gray-300">{log.contactNumber}</span></span>}
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            {log.dateTimeReturned && <span className="text-green-400" title="Call Returned">✓ {dateUtils.format(log.dateTimeReturned, 'MM/DD h:mm A')}</span>}
+                            {log.duration && <span className="font-mono">{log.duration} min</span>}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function LogList({ logs, onDelete }) {
+            if (logs.length === 0) {
+                return <div className="text-center py-10 text-gray-500">No call logs found.</div>;
+            }
+            return (
+                <div className="space-y-4">
+                    {logs.map(log => <LogItem key={log.id} log={log} onDelete={onDelete} />)}
+                </div>
+            );
+        }
+
+        // --- MAIN APP ---
+        
+        function PreCallModal({ logData, setLogData, onNext, onClose }) {
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setLogData(prev => ({ ...prev, [name]: value }));
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
+                    <div className="w-full max-w-lg bg-gray-800 rounded-lg shadow-2xl flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                             <h2 className="text-xl font-bold text-blue-400">Log a Call (Step 1 of 2)</h2>
+                             <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">What type of call are you logging?</label>
+                                <select name="callType" value={logData.callType} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2">
+                                    <option>Outgoing</option>
+                                    <option>Incoming</option>
+                                    <option>Callback</option>
+                                </select>
+                            </div>
+                            {logData.callType === 'Callback' && (
+                                <div className="bg-gray-900/50 p-4 rounded-md space-y-4">
+                                    <p className="text-sm text-blue-300">Please provide the details of the message you are returning.</p>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-1">Date/Time Call Was Received</label>
+                                        <input type="datetime-local" name="dateTimeCallReceived" value={logData.dateTimeCallReceived} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-400 mb-1">Voicemail Details</label>
+                                        <textarea name="vmDetails" value={logData.vmDetails} onChange={handleChange} rows="3" className="w-full bg-gray-700 rounded-md p-2" placeholder="Details from the voicemail..."></textarea>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-end space-x-3 p-4 bg-gray-900/50 rounded-b-lg">
+                            <button type="button" onClick={onClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                            <button type="button" onClick={onNext} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Next →</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function CallDetailsModal({ logData, setLogData, onSave, onBack, onClose }) {
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setLogData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handlePhoneBlur = (e) => {
+                const { name, value } = e.target;
+                setLogData(prev => ({ ...prev, [name]: formatPhoneNumber(value) }));
+            };
+            
+            return (
+                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
+                    <div className="w-full max-w-2xl bg-gray-800 rounded-lg shadow-2xl flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                             <h2 className="text-xl font-bold text-blue-400">Log a Call (Step 2 of 2)</h2>
+                             <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                        </div>
+                        <div className="p-6 space-y-4 overflow-y-auto" style={{maxHeight: '80vh'}}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Contact Name</label>
+                                    <input type="text" name="contactName" value={logData.contactName} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" required />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Contact #</label>
+                                    <input type="tel" name="contactNumber" value={logData.contactNumber} onChange={handleChange} onBlur={handlePhoneBlur} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Case Name</label>
+                                    <input type="text" name="caseName" value={logData.caseName} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">MC#</label>
+                                    <input type="text" name="mcNumber" value={logData.mcNumber} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Call Details</label>
+                                <textarea name="callDetails" value={logData.callDetails} onChange={handleChange} rows="4" className="w-full bg-gray-700 rounded-md p-2" required></textarea>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Date/Time Call Returned</label>
+                                    <input type="datetime-local" name="dateTimeReturned" value={logData.dateTimeReturned} onChange={handleChange} className="w-full bg-gamma-700 rounded-md p-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Duration (minutes)</label>
+                                    <input type="number" name="duration" value={logData.duration} onChange={handleChange} className="w-full bg-gray-700 rounded-md p-2" />
+                                </div>
+                            </div>
+                        </div>
+                         <div className="flex justify-between items-center p-4 bg-gray-900/50 rounded-b-lg">
+                            <button type="button" onClick={onBack} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">← Back</button>
+                            <div className="space-x-3">
+                                <button type="button" onClick={onClose} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md">Cancel</button>
+                                <button type="button" onClick={onSave} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Save Log</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        function triggerTextFileDownload(content, fileName) {
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * Formats a single log object into a standardized string for export or clipboard.
+         * @param {object} log The log entry object.
+         * @returns {string} A formatted string representing the log entry.
+         */
+        function formatLogEntryForExport(log) {
+            let entry = [];
+            entry.push(`Date/Time: ${dateUtils.format(log.timestamp, 'YYYY-MM-DD h:mm A')}`);
+            entry.push(`Call Type: ${log.callType || 'N/A'}`);
+            if (log.caseName) entry.push(`Case Name: ${log.caseName}`);
+            if (log.mcNumber) entry.push(`MC#: ${log.mcNumber}`);
+            entry.push(`Contact: ${log.contactName || 'N/A'}`);
+            if (log.contactNumber) entry.push(`Phone: ${log.contactNumber}`);
+            if (log.duration) entry.push(`Duration: ${log.duration} minutes`);
+            
+            if (log.callType === 'Callback') {
+                if (log.dateTimeCallReceived) entry.push(`Original Call Received: ${dateUtils.format(log.dateTimeCallReceived, 'YYYY-MM-DD h:mm A')}`);
+                if (log.vmDetails) entry.push(`\nVoicemail Details:\n${log.vmDetails}`);
+            }
+            
+            entry.push(`\nCall Details:\n${log.callDetails || 'No details provided.'}`);
+            
+            if (log.dateTimeReturned) entry.push(`\nCall Returned: ${dateUtils.format(log.dateTimeReturned, 'YYYY-MM-DD h:mm A')}`);
+            
+            return entry.join('\n');
+        }
+
+        function App() {
+            const [logs, setLogs] = useEncryptedLocalStorage(STORAGE_KEY, []);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [modalStep, setModalStep] = useState(0);
+            const [currentLog, setCurrentLog] = useState(initialFormState);
+            const [activeFilter, setActiveFilter] = useState('All');
+            const searchService = useRef(null);
+
+            const filterOptions = ['All', 'Outgoing', 'Incoming', 'Callback'];
+
+            useEffect(() => {
+                searchService.current = new NightingaleSearchService(logs, {
+                    keys: ['contactName', 'caseName', 'mcNumber', 'callDetails', 'vmDetails', 'contactNumber'],
+                    threshold: 0.3
+                });
+            }, []);
+
+            useEffect(() => {
+                if(searchService.current) {
+                    searchService.current.updateCollection(logs);
+                }
+            }, [logs]);
+            
+            const handleStartNewLog = () => {
+                setCurrentLog(initialFormState);
+                setModalStep(1);
+            };
+
+            const handleCloseModals = () => {
+                setModalStep(0);
+            };
+
+            const handleSaveLog = () => {
+                if (!currentLog.contactName || !currentLog.callDetails) {
+                    alert('Please fill out at least the Contact Name and Call Details.');
+                    return;
+                }
+                const newLog = { ...currentLog, id: getNextId(logs), timestamp: dateUtils.now() };
+                setLogs(prevLogs => [newLog, ...prevLogs]);
+                handleCloseModals();
+            };
+
+            const handleDeleteLog = (logId) => {
+                if (window.confirm('Are you sure you want to delete this log?')) {
+                    setLogs(prevLogs => prevLogs.filter(log => log.id !== logId));
+                }
+            };
+
+            const handleExport = () => {
+                if (logs.length === 0) {
+                    alert('There are no logs to export.');
+                    return;
+                }
+
+                const header = `Nightingale Phone Log Export\nGenerated on: ${dateUtils.format(dateUtils.now(), 'YYYY-MM-DD HH:mm')}\nTotal Logs: ${logs.length}\n\n`;
+
+                const formattedLogs = logs.map(formatLogEntryForExport).join('\n\n==================================================\n\n');
+
+                triggerTextFileDownload(header + formattedLogs, `Nightingale-PhoneLog-Export-${dateUtils.format(dateUtils.now(), 'YYYY-MM-DD')}.txt`);
+            };
+
+            const displayedLogs = useMemo(() => {
+                const filteredByType = activeFilter === 'All'
+                    ? logs
+                    : logs.filter(log => log.callType === activeFilter);
+                
+                if (!searchTerm.trim()) return filteredByType;
+                
+                searchService.current.updateCollection(filteredByType);
+                return searchService.current.search(searchTerm);
+            }, [searchTerm, logs, activeFilter]);
+
+            return (
+                <div className="flex flex-col h-full bg-gray-900 text-gray-200">
+                    <Header />
+                    <main className="flex-grow p-6 overflow-auto">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex-grow mr-4">
+                                    <input 
+                                        type="text"
+                                        placeholder="Search logs by name, MC#, notes..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full bg-gray-700 p-3 rounded-md placeholder-gray-500"
+                                    />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <button onClick={handleExport} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200 whitespace-nowrap" title="Export All Logs to .txt">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <button onClick={handleStartNewLog} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 whitespace-nowrap">
+                                        Add New Call Log
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mb-6 flex space-x-2 border-b border-gray-700">
+                                {filterOptions.map(filter => (
+                                    <button 
+                                        key={filter}
+                                        onClick={() => setActiveFilter(filter)}
+                                        className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                            activeFilter === filter 
+                                            ? 'bg-gray-800 text-blue-400 border-b-2 border-blue-400' 
+                                            : 'text-gray-400 hover:bg-gray-800/50'
+                                        }`}
+                                    >
+                                        {filter}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <LogList logs={displayedLogs} onDelete={handleDeleteLog} />
+                        </div>
+                    </main>
+                    {modalStep === 1 && ( <PreCallModal logData={currentLog} setLogData={setCurrentLog} onNext={() => setModalStep(2)} onClose={handleCloseModals} /> )}
+                    {modalStep === 2 && ( <CallDetailsModal logData={currentLog} setLogData={setCurrentLog} onSave={handleSaveLog} onBack={() => setModalStep(1)} onClose={handleCloseModals} /> )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+</body>
+</html>
