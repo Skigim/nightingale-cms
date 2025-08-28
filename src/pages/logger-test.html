@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logger Test - "When one falls, we continue"</title>
+  </head>
+  <body>
+    <h1>Nightingale Logger Test</h1>
+    <p>Check the browser console (F12) to see log output.</p>
+
+    <button onclick="testBasicLogging()">Test Basic Logging</button>
+    <button onclick="testErrorLogging()">Test Error Logging</button>
+    <button onclick="exportLogs()">Export Recent Logs</button>
+    <button onclick="testSilentCatchReplacement()">Test Silent Catch Fix</button>
+
+    <div
+      id="output"
+      style="margin-top: 20px; padding: 10px; background: #f5f5f5; font-family: monospace; white-space: pre-wrap"
+    ></div>
+
+    <!-- Load the logger service -->
+    <script src="../src/services/nightingale.logger.js"></script>
+
+    <script>
+      // Initialize logging - "Light the beacon"
+      function initLogger() {
+        const logger = window.NightingaleLogger;
+
+        if (!logger) {
+          addOutput('❌ Logger not found');
+          return null;
+        }
+
+        // Set up console and memory transports with enrichers
+        logger.setupBasic(true);
+        logger.configure({ level: 'debug' }); // Show all levels for testing
+
+        addOutput('✅ Logger initialized with console + memory transports');
+        addOutput('✅ Session and performance enrichers added');
+
+        return logger;
+      }
+
+      function testBasicLogging() {
+        const logger = window.NightingaleLogger?.get('test:basic');
+
+        if (!logger) {
+          addOutput('❌ Logger not available');
+          return;
+        }
+
+        addOutput('\n--- Testing Basic Logging ---');
+
+        logger.trace('Trace message - deepest level');
+        logger.debug('Debug message - development info');
+        logger.info('Info message - general information', {
+          test: 'basic logging',
+          timestamp: new Date().toISOString(),
+        });
+        logger.warn('Warning message - something concerning', {
+          concern: 'This is just a test',
+        });
+
+        addOutput('✅ Basic logging test complete - check console for output');
+      }
+
+      function testErrorLogging() {
+        const logger = window.NightingaleLogger?.get('test:errors');
+
+        if (!logger) {
+          addOutput('❌ Logger not available');
+          return;
+        }
+
+        addOutput('\n--- Testing Error Logging ---');
+
+        try {
+          // Simulate an error
+          throw new Error('Simulated test error - "When one falls, we continue"');
+        } catch (error) {
+          logger.error('Caught test error', {
+            error: error.message,
+            stack: error.stack,
+            operation: 'error logging test',
+            context: 'user testing',
+          });
+        }
+
+        addOutput('✅ Error logging test complete - check console for formatted error');
+      }
+
+      function testSilentCatchReplacement() {
+        const logger = window.NightingaleLogger?.get('test:migration');
+
+        if (!logger) {
+          addOutput('❌ Logger not available');
+          return;
+        }
+
+        addOutput('\n--- Testing Silent Catch Replacement ---');
+
+        // Old way (silent failure) - DON'T DO THIS
+        function oldWayDemo() {
+          try {
+            JSON.parse('invalid json string');
+          } catch (error) {
+            // Silent failure - bad!
+          }
+          return null;
+        }
+
+        // New way (logged failure) - DO THIS
+        function newWayDemo() {
+          try {
+            JSON.parse('invalid json string');
+          } catch (error) {
+            logger.warn('JSON parse failed but continuing', {
+              error: error.message,
+              operation: 'data parsing',
+              input: 'invalid json string',
+              recovery: 'returned null',
+            });
+          }
+          return null;
+        }
+
+        addOutput('Running old way (silent)...');
+        oldWayDemo();
+        addOutput('✅ Old way complete - no log output (bad)');
+
+        addOutput('Running new way (logged)...');
+        newWayDemo();
+        addOutput('✅ New way complete - check console for warning (good)');
+      }
+
+      function exportLogs() {
+        const logger = window.NightingaleLogger;
+
+        if (!logger) {
+          addOutput('❌ Logger not available');
+          return;
+        }
+
+        addOutput('\n--- Exporting Logs ---');
+
+        // Export in different formats
+        const jsonLogs = logger.exportLogs('json');
+        const textLogs = logger.exportLogs('text');
+
+        addOutput('📋 JSON Export (first 200 chars):');
+        addOutput(jsonLogs.substring(0, 200) + '...');
+
+        addOutput('\n📋 Text Export (last 300 chars):');
+        addOutput('...' + textLogs.slice(-300));
+
+        // Show current config
+        const config = logger.getConfig();
+        addOutput('\n⚙️ Current Config:');
+        addOutput(`Level: ${config.level}`);
+        addOutput(`Transports: ${config.transports.length}`);
+        addOutput(`Enrichers: ${config.enrichers.length}`);
+        addOutput(`Buffered: ${config.buffered}`);
+      }
+
+      function addOutput(text) {
+        const output = document.getElementById('output');
+        output.textContent += text + '\n';
+        output.scrollTop = output.scrollHeight;
+      }
+
+      // Initialize when page loads
+      window.addEventListener('load', () => {
+        addOutput('🌟 Nightingale Logger Test Page');
+        addOutput('"For those who come after" - Testing enhanced logging\n');
+
+        initLogger();
+
+        // Log the page load
+        const logger = window.NightingaleLogger?.get('test:page');
+        logger?.info('Test page loaded', {
+          page: 'logger-test.html',
+          userAgent: navigator.userAgent.substring(0, 50) + '...',
+          timestamp: new Date().toISOString(),
+        });
+      });
+    </script>
+  </body>
+</html>

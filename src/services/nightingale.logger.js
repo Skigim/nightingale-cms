@@ -160,12 +160,193 @@
   }
 
   // ============================================================================
-  // PUBLIC API
+  // BUILT-IN TRANSPORTS - "When one falls, we continue."
+  // ============================================================================
+
+  /**
+   * Console Transport - Echoes through the void
+   * Sends log entries to browser developer console
+   */
+  const ConsoleTransport = {
+    id: 'console',
+    enabled: true,
+
+    write(entry) {
+      if (!this.enabled || typeof console === 'undefined') return;
+
+      const prefix = `[${entry.level.toUpperCase()}] ${entry.namespace || 'unknown'}`;
+      const message = `${prefix} - ${entry.message}`;
+
+      // "The darkness reveals what daylight conceals"
+      switch (entry.level) {
+        case 'trace':
+        case 'debug':
+          if (console.debug) console.debug(message, entry.data || '');
+          else console.log(message, entry.data || '');
+          break;
+        case 'info':
+          console.info(message, entry.data || '');
+          break;
+        case 'warn':
+          console.warn(message, entry.data || '');
+          break;
+        case 'error':
+          console.error(message, entry.data || '');
+          break;
+        default:
+          console.log(message, entry.data || '');
+      }
+    },
+
+    enable() {
+      this.enabled = true;
+    },
+    disable() {
+      this.enabled = false;
+    },
+  };
+
+  /**
+   * Memory Transport - "For those who come after"
+   * Keeps recent entries in memory for export/debugging
+   */
+  function createMemoryTransport(maxEntries = 1000) {
+    const entries = [];
+
+    return {
+      id: 'memory',
+      maxEntries,
+
+      write(entry) {
+        entries.push({
+          ...entry,
+          capturedAt: new Date().toISOString(),
+        });
+
+        // "Time erodes all things, but some traces remain"
+        if (entries.length > maxEntries) {
+          entries.shift();
+        }
+      },
+
+      getEntries() {
+        return [...entries]; // Return copy to prevent mutation
+      },
+
+      clear() {
+        entries.length = 0;
+      },
+
+      export(format = 'json') {
+        switch (format) {
+          case 'json':
+            return JSON.stringify(entries, null, 2);
+          case 'csv': {
+            if (entries.length === 0) return '';
+            const headers = 'timestamp,level,namespace,message,data\n';
+            const rows = entries
+              .map(
+                (e) =>
+                  `${e.capturedAt},${e.level},${e.namespace || ''},"${(e.message || '').replace(/"/g, '""')}","${JSON.stringify(e.data || '').replace(/"/g, '""')}"`
+              )
+              .join('\n');
+            return headers + rows;
+          }
+          case 'text':
+            return entries
+              .map(
+                (e) =>
+                  `[${e.capturedAt}] ${e.level.toUpperCase()} ${e.namespace || 'unknown'} - ${e.message} ${e.data ? JSON.stringify(e.data) : ''}`
+              )
+              .join('\n');
+          default:
+            return entries;
+        }
+      },
+    };
+  }
+
+  // ============================================================================
+  // BUILT-IN ENRICHERS - "Every detail tells a story"
+  // ============================================================================
+
+  /**
+   * Session ID Enricher - Tracks the journey of a single session
+   */
+  function createSessionEnricher() {
+    // "Each expedition bears a unique mark"
+    const sessionId =
+      'expedition-' +
+      Math.random().toString(36).substr(2, 9) +
+      '-' +
+      Date.now().toString(36);
+
+    return function sessionEnricher(entry) {
+      entry.meta = entry.meta || {};
+      entry.meta.sessionId = sessionId;
+    };
+  }
+
+  /**
+   * Performance Enricher - Adds timing and memory info when available
+   */
+  function createPerformanceEnricher() {
+    const startTime = performance?.now?.() || Date.now();
+
+    return function performanceEnricher(entry) {
+      entry.meta = entry.meta || {};
+
+      // "Time flows differently in the depths"
+      if (typeof performance !== 'undefined' && performance.now) {
+        entry.meta.elapsed =
+          Math.round((performance.now() - startTime) * 100) / 100; // ms, 2 decimals
+      }
+
+      // "Memory shapes the possible"
+      if (typeof performance !== 'undefined' && performance.memory) {
+        entry.meta.memory = {
+          used:
+            Math.round(
+              (performance.memory.usedJSHeapSize / 1024 / 1024) * 100
+            ) / 100, // MB
+          total:
+            Math.round(
+              (performance.memory.totalJSHeapSize / 1024 / 1024) * 100
+            ) / 100,
+        };
+      }
+    };
+  }
+
+  /**
+   * Context Enricher - Adds user action context when available
+   */
+  function createContextEnricher(getContext) {
+    return function contextEnricher(entry) {
+      if (typeof getContext === 'function') {
+        try {
+          const context = getContext();
+          if (context) {
+            entry.meta = entry.meta || {};
+            entry.meta.context = context;
+          }
+        } catch (_) {
+          // "Some knowledge is meant to remain hidden"
+        }
+      }
+    };
+  }
+
+  // ============================================================================
+  // PUBLIC API - "The light that guides through darkness"
   // ============================================================================
   const NightingaleLogger = {
-    version: '0.1.0',
+    version: '0.2.0',
     name: 'NightingaleLogger',
+
+    // Core logger factory
     get: (namespace = '') => buildLogger(namespace),
+
     configure(options = {}) {
       if (!options || typeof options !== 'object') return clone(activeConfig);
       activeConfig = { ...activeConfig, ...options };
@@ -181,12 +362,15 @@
       else if (activeConfig.transports.length > 0) flushBuffer();
       return clone(activeConfig);
     },
+
+    // Transport management
     addTransport(transport) {
       if (!transport || typeof transport.write !== 'function') return false;
       activeConfig.transports.push(transport);
       flushBuffer();
       return true;
     },
+
     removeTransport(id) {
       const before = activeConfig.transports.length;
       activeConfig.transports = activeConfig.transports.filter(
@@ -194,21 +378,62 @@
       );
       return before !== activeConfig.transports.length;
     },
+
+    // Enricher management
     addEnricher(enricher) {
       if (typeof enricher !== 'function') return false;
       activeConfig.enrichers.push(enricher);
       return true;
     },
+
     clearEnrichers() {
       activeConfig.enrichers = [];
     },
+
+    // Built-in factories - "Tools forged for the expedition"
+    transports: {
+      console: () => ConsoleTransport,
+      memory: (maxEntries) => createMemoryTransport(maxEntries),
+    },
+
+    enrichers: {
+      session: () => createSessionEnricher(),
+      performance: () => createPerformanceEnricher(),
+      context: (getContextFn) => createContextEnricher(getContextFn),
+    },
+
+    // Utility methods
     getConfig() {
       return clone(activeConfig);
     },
+
     flush: flushBuffer,
+
     // Quick diagnostic snapshot (no console output)
     snapshotBuffer() {
       return clone(buffer);
+    },
+
+    // Convenience setup methods - "The path made clear"
+    setupBasic(enableConsole = true) {
+      if (enableConsole) {
+        this.addTransport(this.transports.console());
+      }
+      this.addTransport(this.transports.memory(500));
+      this.addEnricher(this.enrichers.session());
+      this.addEnricher(this.enrichers.performance());
+      return this;
+    },
+
+    // Export recent logs for debugging
+    exportLogs(format = 'json') {
+      const memoryTransport = activeConfig.transports.find(
+        (t) => t.id === 'memory'
+      );
+      if (memoryTransport && memoryTransport.export) {
+        return memoryTransport.export(format);
+      }
+      return this.snapshotBuffer();
     },
   };
 

@@ -93,7 +93,13 @@
               return element;
             }
           } catch (error) {
-            // Silently handle focus errors
+            // When one falls, we continue - focus attempt failed but expedition proceeds
+            const logger = window.NightingaleLogger?.get('ui:focus');
+            logger?.debug('Focus attempt failed, we continue.', {
+              selector,
+              error: error.message,
+              element: element?.tagName || 'unknown',
+            });
           }
         }
       }
@@ -133,10 +139,9 @@
     /**
      * Enhanced focus for stepper modal step changes
      */
-    static async focusStepChange(stepContainer, stepIndex = 0, options = {}) {
+    static async focusStepChange(stepContainer, options = {}) {
       return this.focusFirst(stepContainer, {
         delay: 200,
-        onFocused: (element) => {},
         preferredSelectors: [
           'input[type="text"]:not([disabled]):not([readonly])',
           'input[type="email"]:not([disabled]):not([readonly])',
@@ -179,7 +184,6 @@
 
       return this.focusFirst(container, {
         ...config,
-        onFocused: (element) => {},
         ...options,
       });
     }
@@ -191,8 +195,7 @@
       return {
         focusFirst: (options) => this.focusFirst(container, options),
         focusModalOpen: (options) => this.focusModalOpen(container, options),
-        focusStepChange: (stepIndex, options) =>
-          this.focusStepChange(container, stepIndex, options),
+        focusStepChange: (options) => this.focusStepChange(container, options),
         focusStateChange: (newState, options) =>
           this.focusStateChange(container, newState, options),
       };
