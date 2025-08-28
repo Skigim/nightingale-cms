@@ -26,6 +26,7 @@ import fusePromise from './assets/fuse.js';
 // ========================================================================
 
 // Phase 1: Core Services (no dependencies)
+import NightingaleLogger from './services/nightingale.logger.js';
 import NightingaleCoreUtilities from './services/core.js';
 import DayJSService from './services/nightingale.dayjs.js';
 import ParsersService from './services/nightingale.parsers.js';
@@ -98,6 +99,7 @@ import SettingsModal from './components/business/SettingsModal.js';
  */
 function registerServices() {
   // Core Services
+  window.NightingaleLogger = NightingaleLogger;
   window.NightingaleCoreUtilities = NightingaleCoreUtilities;
   window.NightingaleDayJS = DayJSService;
   window.NightingaleParsers = ParsersService;
@@ -188,6 +190,10 @@ async function initializeNightingaleCMS() {
     console.log('✅ Day.js loaded successfully');
     console.log('✅ Fuse.js loaded successfully');
 
+    // Initialize logger service first (before other services)
+    NightingaleLogger.setupBasic(true); // Enable console + memory transports with session/performance enrichers
+    console.log('✅ Logger service initialized');
+
     // Register services and components
     registerServices();
     registerComponents();
@@ -223,6 +229,11 @@ async function initializeNightingaleCMS() {
     console.log(
       '🔄 Attempting fallback initialization without external libraries...'
     );
+    
+    // Initialize logger service even in fallback mode
+    NightingaleLogger.setupBasic(true);
+    console.log('✅ Logger service initialized (fallback mode)');
+    
     registerServices();
     registerComponents();
 
@@ -255,6 +266,7 @@ if (document.readyState === 'loading') {
 export default NightingaleCMSApp;
 export {
   // Services
+  NightingaleLogger,
   NightingaleCoreUtilities,
   AutosaveFileService,
   ToastService,
