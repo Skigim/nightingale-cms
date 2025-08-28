@@ -191,8 +191,8 @@ async function initializeNightingaleCMS() {
     console.log('✅ Fuse.js loaded successfully');
 
     // Initialize logger service first (before other services)
-    NightingaleLogger.setupBasic(true); // Enable console + memory transports with session/performance enrichers
-    console.log('✅ Logger service initialized');
+    NightingaleLogger.setupWithFileLogging(true); // Enable console + memory + file transports
+    console.log('✅ Logger service initialized with file logging');
 
     // Register services and components
     registerServices();
@@ -231,8 +231,8 @@ async function initializeNightingaleCMS() {
     );
     
     // Initialize logger service even in fallback mode
-    NightingaleLogger.setupBasic(true);
-    console.log('✅ Logger service initialized (fallback mode)');
+    NightingaleLogger.setupWithFileLogging(true);
+    console.log('✅ Logger service initialized with file logging (fallback mode)');
     
     registerServices();
     registerComponents();

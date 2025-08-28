@@ -207,6 +207,151 @@
   };
 
   /**
+   * File Transport - "The archive that endures"
+   * Writes error logs to local files for persistent debugging
+   */
+  function createFileTransport(options = {}) {
+    const config = {
+      minLevel: 'error', // Only log errors and above by default
+      autoFlush: true,
+      filename: null, // Auto-generate if not provided
+      maxFileSize: 5 * 1024 * 1024, // 5MB max per file
+      ...options,
+    };
+
+    let currentHandle = null;
+    let pendingWrites = [];
+    let isWriting = false;
+
+    const generateFilename = () => {
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
+      const level = config.minLevel;
+      return `logs/${level}-${timestamp}.log`;
+    };
+
+    const ensureFileHandle = async () => {
+      if (currentHandle) return currentHandle;
+      
+      try {
+        // Check if File System Access API is available
+        if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
+          // Try to get existing logs directory handle
+          let logsHandle = null;
+          const handles = await window.NightingaleAutoSave?.getStoredHandles?.() || {};
+          
+          if (handles.logsDirectory) {
+            try {
+              logsHandle = handles.logsDirectory;
+              // Verify handle is still valid
+              await logsHandle.requestPermission({ mode: 'readwrite' });
+            } catch {
+              logsHandle = null;
+            }
+          }
+
+          if (!logsHandle) {
+            // Request permission to logs directory
+            const rootHandle = await window.showDirectoryPicker();
+            try {
+              logsHandle = await rootHandle.getDirectoryHandle('logs', { create: true });
+            } catch {
+              // Fallback: use root directory
+              logsHandle = rootHandle;
+            }
+            
+            // Store for future use
+            if (window.NightingaleAutoSave?.storeHandle) {
+              await window.NightingaleAutoSave.storeHandle('logsDirectory', logsHandle);
+            }
+          }
+
+          const filename = config.filename || generateFilename().split('/')[1];
+          currentHandle = await logsHandle.getFileHandle(filename, { create: true });
+          
+          return currentHandle;
+        }
+      } catch (error) {
+        // File System Access API not available or failed
+        console.warn('File logging unavailable:', error.message);
+        return null;
+      }
+      
+      return null;
+    };
+
+    const writeToFile = async (entry) => {
+      try {
+        const handle = await ensureFileHandle();
+        if (!handle) return false;
+
+        const logLine = JSON.stringify({
+          timestamp: new Date().toISOString(),
+          level: entry.level,
+          namespace: entry.namespace,
+          message: entry.message,
+          data: entry.data,
+          meta: entry.meta,
+        }) + '\n';
+
+        const writable = await handle.createWritable({ keepExistingData: true });
+        await writable.seek(await handle.getFile().then(f => f.size)); // Append
+        await writable.write(logLine);
+        await writable.close();
+        
+        return true;
+      } catch (error) {
+        console.warn('Failed to write log to file:', error.message);
+        return false;
+      }
+    };
+
+    const processQueue = async () => {
+      if (isWriting || pendingWrites.length === 0) return;
+      
+      isWriting = true;
+      const batch = pendingWrites.splice(0, 10); // Process up to 10 entries at once
+      
+      for (const entry of batch) {
+        await writeToFile(entry);
+      }
+      
+      isWriting = false;
+      
+      // Process remaining queue if any
+      if (pendingWrites.length > 0) {
+        setTimeout(processQueue, 100);
+      }
+    };
+
+    return {
+      id: 'file',
+      minLevel: config.minLevel,
+
+      write(entry) {
+        // Check if entry level meets minimum threshold
+        if (LEVEL_WEIGHT[entry.level] < LEVEL_WEIGHT[config.minLevel]) {
+          return;
+        }
+
+        // Add to pending writes queue
+        pendingWrites.push(entry);
+
+        // Process queue (async, non-blocking)
+        if (config.autoFlush) {
+          setTimeout(processQueue, 0);
+        }
+      },
+
+      flush: processQueue,
+
+      configure(newOptions) {
+        Object.assign(config, newOptions);
+        return this;
+      },
+    };
+  }
+
+  /**
    * Memory Transport - "For those who come after"
    * Keeps recent entries in memory for export/debugging
    */
@@ -394,6 +539,7 @@
     transports: {
       console: () => ConsoleTransport,
       memory: (maxEntries) => createMemoryTransport(maxEntries),
+      file: (options) => createFileTransport(options),
     },
 
     enrichers: {
@@ -420,6 +566,18 @@
         this.addTransport(this.transports.console());
       }
       this.addTransport(this.transports.memory(500));
+      this.addEnricher(this.enrichers.session());
+      this.addEnricher(this.enrichers.performance());
+      return this;
+    },
+
+    // Enhanced setup with file logging for errors
+    setupWithFileLogging(enableConsole = true, fileOptions = {}) {
+      if (enableConsole) {
+        this.addTransport(this.transports.console());
+      }
+      this.addTransport(this.transports.memory(500));
+      this.addTransport(this.transports.file({ minLevel: 'error', ...fileOptions }));
       this.addEnricher(this.enrichers.session());
       this.addEnricher(this.enrichers.performance());
       return this;
