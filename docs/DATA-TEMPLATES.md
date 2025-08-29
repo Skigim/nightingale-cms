@@ -195,21 +195,36 @@ Complete case record structure with all possible fields:
 
 ### Case Field Definitions
 
-| Field            | Type    | Required | Description                                          |
-| ---------------- | ------- | -------- | ---------------------------------------------------- |
-| `id`             | String  | Yes      | Unique case identifier                               |
-| `mcn`            | String  | Yes      | Master Case Number - numeric string, digits 0-9 only |
-| `clientName`     | String  | Yes      | Full name of primary client                          |
-| `personId`       | String  | Yes      | Reference to person record                           |
-| `status`         | String  | Yes      | Case status (Pending, Active, Closed)                |
-| `priority`       | Boolean | No       | Priority case flag                                   |
-| `caseType`       | String  | Yes      | Case type (SIMP, LTC, etc.)                          |
-| `retroRequested` | String  | Yes      | Retro eligibility (Yes, No)                          |
-| `withWaiver`     | Boolean | No       | Waiver application flag                              |
-| `financials`     | Object  | No       | Financial information arrays                         |
-| `notes`          | Array   | No       | Case notes and documentation                         |
-| `todos`          | Array   | No       | Outstanding tasks                                    |
-| `vrRequests`     | Array   | No       | VR service requests                                  |
+| Field                 | Type    | Required | Description                                          |
+| --------------------- | ------- | -------- | ---------------------------------------------------- |
+| `id`                  | String  | Yes      | Unique case identifier                               |
+| `mcn`                 | String  | Yes      | Master Case Number - numeric string, digits 0-9 only |
+| `masterCaseNumber`    | String  | No       | Alternative MCN field (legacy compatibility)         |
+| `clientName`          | String  | Yes      | Full name of primary client                          |
+| `personId`            | String  | Yes      | Reference to person record                           |
+| `status`              | String  | Yes      | Case status (Pending, Active, Closed)                |
+| `priority`            | Boolean | No       | Priority case flag                                   |
+| `caseType`            | String  | Yes      | Case type (SIMP, LTC, etc.)                          |
+| `serviceType`         | String  | No       | Service type description                             |
+| `applicationDate`     | String  | No       | Date application was submitted (ISO 8601)            |
+| `createdDate`         | String  | Yes      | Date case was created (ISO 8601)                     |
+| `lastUpdated`         | String  | Yes      | Date case was last modified (ISO 8601)               |
+| `description`         | String  | No       | Case description text                                |
+| `withWaiver`          | Boolean | No       | Waiver application flag                              |
+| `retroRequested`      | String  | Yes      | Retro eligibility (Yes, No)                          |
+| `livingArrangement`   | String  | No       | Client living arrangement description                |
+| `organizationAddress` | String  | No       | Service organization address                         |
+| `clientAddress`       | Object  | No       | Client physical address                              |
+| `authorizedReps`      | Array   | No       | Authorized representatives list                      |
+| `appDetails`          | Object  | No       | Application details                                  |
+| `financials`          | Object  | No       | Financial information arrays                         |
+| `notes`               | Array   | No       | Case notes and documentation                         |
+| `todos`               | Array   | No       | Outstanding tasks                                    |
+| `vrRequests`          | Array   | No       | VR service requests                                  |
+| `verificationRequest` | Object  | No       | Verification request details                         |
+| `searchableText`      | String  | No       | Full-text search content                             |
+| `source`              | String  | No       | Data source reference                                |
+| `verificationSource`  | String  | No       | Verification documentation source                    |
 
 ---
 
@@ -245,11 +260,6 @@ Complete person record structure:
     "zip": "62702",
     "sameAsPhysical": false
   },
-  "emergencyContact": {
-    "name": "Jane Doe",
-    "phone": "(555) 987-6543",
-    "relationship": "spouse"
-  },
   "notes": "Client notes and additional information",
   "tags": ["client", "active"]
 }
@@ -263,12 +273,19 @@ Complete person record structure:
 | `name`           | String | Yes      | Full display name                                             |
 | `firstName`      | String | Yes      | First name                                                    |
 | `lastName`       | String | Yes      | Last name                                                     |
+| `middleName`     | String | No       | Middle name                                                   |
+| `ssn`            | String | No       | Social Security Number                                        |
+| `dateOfBirth`    | String | No       | Date of birth (ISO 8601)                                      |
 | `phone`          | String | No       | Primary phone number                                          |
 | `email`          | String | No       | Email address                                                 |
 | `status`         | String | Yes      | Person status (active, inactive)                              |
+| `dateAdded`      | String | Yes      | Date record was created (ISO 8601)                            |
+| `lastUpdated`    | String | Yes      | Date record was last modified (ISO 8601)                      |
 | `relationship`   | String | No       | Relationship to other person (spouse, parent, attorney, etc.) |
 | `address`        | Object | No       | Physical address                                              |
 | `mailingAddress` | Object | No       | Mailing address if different                                  |
+| `notes`          | String | No       | Additional notes about the person                             |
+| `tags`           | Array  | No       | Classification tags                                           |
 
 ---
 
@@ -316,9 +333,13 @@ Complete organization record structure:
 | `phone`         | String | No       | Primary phone number                             |
 | `email`         | String | No       | Primary email address                            |
 | `website`       | String | No       | Organization website                             |
+| `dateAdded`     | String | Yes      | Date record was created (ISO 8601)               |
+| `lastUpdated`   | String | Yes      | Date record was last modified (ISO 8601)         |
 | `address`       | Object | No       | Physical address                                 |
 | `contactPerson` | Object | No       | Primary contact information                      |
 | `services`      | Array  | No       | List of services provided                        |
+| `notes`         | String | No       | Additional notes about the organization          |
+| `tags`          | Array  | No       | Classification tags                              |
 
 ---
 
