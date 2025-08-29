@@ -178,18 +178,6 @@
             </button>
         </div>
         
-        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px;" id="optionsPanel" style="display: none;">
-            <h3 style="color: #2d3748; margin-bottom: 16px;">Migration Options</h3>
-            
-            <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" id="generateEmptySchema" style="margin-right: 8px; transform: scale(1.2);">
-                <span style="color: #4a5568; font-weight: 600;">� Generate Empty Schema</span>
-            </label>
-            <p style="color: #718096; font-size: 14px; margin-left: 28px; margin-bottom: 16px;">
-                Generate a clean, empty data structure for development and testing
-            </p>
-        </div>
-        
         <div style="text-align: center;">
             <button class="btn" id="migrateBtn" onclick="migrateData()" disabled>
                 🔄 Migrate Data
@@ -230,117 +218,6 @@
             const timestamp = Date.now().toString(36);
             const randomPart = Math.random().toString(36).substring(2, 8);
             return `${prefix}-${timestamp}-${randomPart}`;
-        }
-
-        // Generate empty schema for development
-        function generateEmptySchema() {
-            log('📋 Generating empty Nightingale CMS schema...', 'info');
-            
-            const emptySchema = {
-                version: "2.0.0",
-                lastModified: new Date().toISOString(),
-                metadata: {
-                    generatedBy: "Nightingale CMS Data Migration Tool",
-                    generatedAt: new Date().toISOString(),
-                    description: "Empty schema for development and testing",
-                    totalCases: 0,
-                    totalPeople: 0,
-                    totalOrganizations: 0,
-                    totalVRRequests: 0
-                },
-                cases: [],
-                people: [],
-                organizations: [],
-                vrRequests: [],
-                caseTemplate: {
-                    id: "",
-                    mcn: "",
-                    personId: "",
-                    spouseId: "",
-                    status: "Pending",
-                    applicationDate: "",
-                    description: "",
-                    caseType: "LTC",
-                    priority: false,
-                    livingArrangement: "",
-                    withWaiver: false,
-                    admissionDate: "",
-                    organizationId: "",
-                    organizationAddress: "",
-                    authorizedReps: [],
-                    retroRequested: "No",
-                    financials: {
-                        resources: [],
-                        income: [],
-                        expenses: []
-                    },
-                    notes: [],
-                    tags: [],
-                    createdDate: "",
-                    lastUpdated: ""
-                },
-                personTemplate: {
-                    id: "",
-                    name: "",
-                    dob: "",
-                    ssn: "",
-                    gender: "",
-                    phone: "",
-                    email: "",
-                    status: "active",
-                    dateAdded: "",
-                    lastUpdated: "",
-                    relationship: "",
-                    address: {
-                        street: "",
-                        city: "",
-                        state: "",
-                        zip: ""
-                    },
-                    mailingAddress: {
-                        street: "",
-                        city: "",
-                        state: "",
-                        zip: "",
-                        sameAsPhysical: false
-                    },
-                    emergencyContact: {
-                        name: "",
-                        phone: "",
-                        relationship: ""
-                    },
-                    notes: "",
-                    tags: []
-                },
-                organizationTemplate: {
-                    id: "",
-                    name: "",
-                    type: "",
-                    status: "active",
-                    phone: "",
-                    email: "",
-                    website: "",
-                    dateAdded: "",
-                    lastUpdated: "",
-                    address: {
-                        street: "",
-                        city: "",
-                        state: "",
-                        zip: ""
-                    },
-                    contactPerson: {
-                        name: "",
-                        title: "",
-                        phone: "",
-                        email: ""
-                    },
-                    notes: "",
-                    tags: []
-                }
-            };
-
-            log('✅ Empty schema generated successfully', 'success');
-            return emptySchema;
         }
 
         // Main migration function
@@ -635,23 +512,13 @@
             migrateBtn.textContent = '🔄 Processing...';
 
             try {
-                const shouldGenerateEmpty = document.getElementById('generateEmptySchema').checked;
+                // Apply data migrations
+                log('🔄 Starting data migration process...', 'info');
+                migratedData = await normalizeDataMigrations(rawData);
                 
-                if (shouldGenerateEmpty) {
-                    // Generate empty schema instead of migrating
-                    log('📋 Generating empty schema...', 'info');
-                    migratedData = generateEmptySchema();
-                } else {
-                    // Apply data migrations only
-                    log('� Starting data migration process...', 'info');
-                    migratedData = await normalizeDataMigrations(rawData);
-                }
-                
-                // Create download link with appropriate filename
+                // Create download link
                 const timestamp = new Date().toISOString().split('T')[0];
-                const filename = shouldGenerateEmpty 
-                    ? `nightingale-empty-schema-${timestamp}.json`
-                    : `nightingale-data-migrated-${timestamp}.json`;
+                const filename = `nightingale-data-migrated-${timestamp}.json`;
                 
                 const dataStr = JSON.stringify(migratedData, null, 2);
                 const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -663,16 +530,10 @@
                 downloadLink.style.display = 'inline-block';
                 document.getElementById('downloadSection').style.display = 'block';
                 
-                const processType = shouldGenerateEmpty ? 'Empty schema generation' : 'Migration';
-                
                 // Final summary
-                if (shouldGenerateEmpty) {
-                    log(`📊 Generated empty schema with metadata`, 'info');
-                } else {
-                    log(`📊 Final: ${migratedData.cases ? migratedData.cases.length : 0} cases, ${migratedData.people ? migratedData.people.length : 0} people, ${migratedData.organizations ? migratedData.organizations.length : 0} organizations`, 'info');
-                }
+                log(`📊 Final: ${migratedData.cases ? migratedData.cases.length : 0} cases, ${migratedData.people ? migratedData.people.length : 0} people, ${migratedData.organizations ? migratedData.organizations.length : 0} organizations`, 'info');
                 
-                log(`🎉 ${processType} completed! File is ready for download.`, 'success');
+                log('🎉 Migration completed! File is ready for download.', 'success');
                 
             } catch (error) {
                 log(`❌ Process failed: ${error.message}`, 'error');
