@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nightingale CMS Data Migra        
-        <div style="text-align: center;">
-            <button class="btn" id="migrateBtn" onclick="migrateData()" disabled>
-                🔄 Migrate Data
-            </button>
-        </div>    <style>
+    <title>Nightingale CMS Data Migration Tool</title>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -234,6 +230,117 @@
             const timestamp = Date.now().toString(36);
             const randomPart = Math.random().toString(36).substring(2, 8);
             return `${prefix}-${timestamp}-${randomPart}`;
+        }
+
+        // Generate empty schema for development
+        function generateEmptySchema() {
+            log('📋 Generating empty Nightingale CMS schema...', 'info');
+            
+            const emptySchema = {
+                version: "2.0.0",
+                lastModified: new Date().toISOString(),
+                metadata: {
+                    generatedBy: "Nightingale CMS Data Migration Tool",
+                    generatedAt: new Date().toISOString(),
+                    description: "Empty schema for development and testing",
+                    totalCases: 0,
+                    totalPeople: 0,
+                    totalOrganizations: 0,
+                    totalVRRequests: 0
+                },
+                cases: [],
+                people: [],
+                organizations: [],
+                vrRequests: [],
+                caseTemplate: {
+                    id: "",
+                    mcn: "",
+                    personId: "",
+                    spouseId: "",
+                    status: "Pending",
+                    applicationDate: "",
+                    description: "",
+                    caseType: "LTC",
+                    priority: false,
+                    livingArrangement: "",
+                    withWaiver: false,
+                    admissionDate: "",
+                    organizationId: "",
+                    organizationAddress: "",
+                    authorizedReps: [],
+                    retroRequested: "No",
+                    financials: {
+                        resources: [],
+                        income: [],
+                        expenses: []
+                    },
+                    notes: [],
+                    tags: [],
+                    createdDate: "",
+                    lastUpdated: ""
+                },
+                personTemplate: {
+                    id: "",
+                    name: "",
+                    dob: "",
+                    ssn: "",
+                    gender: "",
+                    phone: "",
+                    email: "",
+                    status: "active",
+                    dateAdded: "",
+                    lastUpdated: "",
+                    relationship: "",
+                    address: {
+                        street: "",
+                        city: "",
+                        state: "",
+                        zip: ""
+                    },
+                    mailingAddress: {
+                        street: "",
+                        city: "",
+                        state: "",
+                        zip: "",
+                        sameAsPhysical: false
+                    },
+                    emergencyContact: {
+                        name: "",
+                        phone: "",
+                        relationship: ""
+                    },
+                    notes: "",
+                    tags: []
+                },
+                organizationTemplate: {
+                    id: "",
+                    name: "",
+                    type: "",
+                    status: "active",
+                    phone: "",
+                    email: "",
+                    website: "",
+                    dateAdded: "",
+                    lastUpdated: "",
+                    address: {
+                        street: "",
+                        city: "",
+                        state: "",
+                        zip: ""
+                    },
+                    contactPerson: {
+                        name: "",
+                        title: "",
+                        phone: "",
+                        email: ""
+                    },
+                    notes: "",
+                    tags: []
+                }
+            };
+
+            log('✅ Empty schema generated successfully', 'success');
+            return emptySchema;
         }
 
         // Main migration function
