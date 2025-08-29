@@ -47,6 +47,9 @@ import PlaceholdersService from './services/nightingale.placeholders.js';
 import TemplatesService from './services/nightingale.templates.js';
 import DocumentGenerationService from './services/nightingale.documentgeneration.js';
 
+// Development: Toast system test
+import './services/toast-test.js';
+
 // ========================================================================
 // NIGHTINGALE COMPONENTS - Layered Architecture
 // ========================================================================
