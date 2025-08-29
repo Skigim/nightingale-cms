@@ -19,9 +19,8 @@ function FinancialItemModal({
   const e = window.React.createElement;
   const { useState, useEffect } = window.React;
 
-  // Get toast function with fallback
-  const showToast =
-    window.showToast || window.NightingaleToast?.show || function () {};
+  // Toast function - now guaranteed to work by main.js setup
+  const showToast = window.showToast;
 
   const [formData, setFormData] = useState({
     id: editingItem?.id || null,

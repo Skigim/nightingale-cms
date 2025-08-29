@@ -16,9 +16,8 @@ function useOrganizationsData(props) {
   } = props;
   const { useState, useMemo, useEffect, useCallback } = window.React || {};
 
-  // Get toast function with fallback to prevent undefined errors
-  const showToast =
-    window.showToast || window.NightingaleToast?.show || function () {};
+  // Toast function - now guaranteed to work by main.js setup
+  const showToast = window.showToast;
 
   // All state hooks (called unconditionally per React rules)
   const [searchTerm, setSearchTerm] = useState('');

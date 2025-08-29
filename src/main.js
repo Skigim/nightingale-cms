@@ -47,9 +47,6 @@ import PlaceholdersService from './services/nightingale.placeholders.js';
 import TemplatesService from './services/nightingale.templates.js';
 import DocumentGenerationService from './services/nightingale.documentgeneration.js';
 
-// Development: Toast system test
-import './services/toast-test.js';
-
 // ========================================================================
 // NIGHTINGALE COMPONENTS - Layered Architecture
 // ========================================================================
@@ -125,7 +122,12 @@ function registerServices() {
 
   // Legacy global function aliases (for existing code compatibility)
   window.sanitize = NightingaleCoreUtilities.sanitize;
-  window.showToast = ToastService.showToast;
+  // Ensure showToast is always a function - never overwrite a working function with undefined
+  if (!window.showToast || typeof window.showToast !== 'function') {
+    window.showToast = typeof ToastService.showToast === 'function' 
+      ? ToastService.showToast 
+      : ToastService.show || function() {};
+  }
   window.openVRApp = CMSUtilities.openVRApp;
 
   console.log('✅ All Nightingale Services registered globally');

@@ -407,10 +407,14 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Make available globally for browser environments
 if (typeof window !== 'undefined') {
-  // Ensure we don't overwrite existing functions if they exist and work
-  if (!window.showToast || typeof window.showToast !== 'function') {
-    window.showToast = showToast;
-  }
+  // Bulletproof assignment - ensure showToast is always a working function
+  const ensureToastFunction = () => {
+    if (typeof window.showToast !== 'function') {
+      window.showToast = showToast;
+    }
+  };
+  
+  ensureToastFunction();
   
   // Always set convenience functions
   window.showSuccessToast = showSuccessToast;
@@ -439,7 +443,10 @@ if (typeof window !== 'undefined') {
 
   // Initialize the system immediately when available
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeToastSystem);
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeToastSystem();
+      ensureToastFunction(); // Re-ensure after DOM ready
+    });
   } else {
     initializeToastSystem();
   }
