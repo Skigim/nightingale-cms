@@ -743,8 +743,9 @@ function CaseCreationModal({
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Use global toast service directly (React best practices - no local definitions)
-  const showToast = window.showToast;
+  // Get toast function with fallback to prevent undefined errors
+  const showToast =
+    window.showToast || window.NightingaleToast?.show || function () {};
 
   // Create filtered steps config for edit mode (removes Review step)
   const filteredStepsConfig = editCaseId

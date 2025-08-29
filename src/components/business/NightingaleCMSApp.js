@@ -124,7 +124,9 @@ function NightingaleCMSApp() {
     [servicesReady, fileService, autosaveFileService]
   );
 
-  const showToast = window.showToast;
+  // Get toast function with fallback to prevent undefined errors
+  const showToast =
+    window.showToast || window.NightingaleToast?.show || function () {};
 
   // Initialize combined autosave & file service when services are ready
   useEffect(() => {
