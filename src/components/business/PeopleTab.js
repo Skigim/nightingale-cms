@@ -55,8 +55,10 @@ function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
     let filtered = fullData.people;
 
     // Apply search filter only (DataTable component handles sorting)
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
+    // Ensure searchTerm is a string before using string methods
+    const searchString = typeof searchTerm === 'string' ? searchTerm : '';
+    if (searchString.trim()) {
+      const term = searchString.toLowerCase();
       filtered = filtered.filter((person) => {
         // Helper function to get searchable address text
         const getAddressText = (address) => {
@@ -181,7 +183,11 @@ function renderPeopleContent({ components, data: dataResult, props }) {
     e(SearchSection, {
       searchBar: e(SearchBar, {
         value: dataResult.searchTerm,
-        onChange: dataResult.setSearchTerm,
+        onChange: (e) => {
+          // Handle both direct string values and event objects
+          const value = typeof e === 'string' ? e : e?.target?.value || '';
+          dataResult.setSearchTerm(value);
+        },
         placeholder: 'Search people by name, email, phone, address...',
         className: 'w-full',
       }),

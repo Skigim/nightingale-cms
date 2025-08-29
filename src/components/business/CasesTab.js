@@ -55,8 +55,10 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     let filtered = fullData.cases;
 
     // Apply search filter only (DataTable component handles sorting)
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
+    // Ensure searchTerm is a string before using string methods
+    const searchString = typeof searchTerm === 'string' ? searchTerm : '';
+    if (searchString.trim()) {
+      const term = searchString.toLowerCase();
       filtered = filtered.filter((caseItem) => {
         const person = window.NightingaleDataManagement?.findPersonById?.(
           fullData.people,
@@ -181,7 +183,11 @@ function renderCasesContent({ components, data: dataResult, props }) {
     e(SearchSection, {
       searchBar: e(SearchBar, {
         value: dataResult.searchTerm,
-        onChange: dataResult.setSearchTerm,
+        onChange: (e) => {
+          // Handle both direct string values and event objects
+          const value = typeof e === 'string' ? e : e?.target?.value || '';
+          dataResult.setSearchTerm(value);
+        },
         placeholder: 'Search cases by MCN, person name, status...',
         className: 'w-full',
       }),

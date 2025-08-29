@@ -46,8 +46,10 @@ function useOrganizationsData(props) {
 
     let filtered = fullData.organizations;
 
-    if (searchTerm && searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
+    // Ensure searchTerm is a string before using string methods
+    const searchString = typeof searchTerm === 'string' ? searchTerm : '';
+    if (searchString && searchString.trim()) {
+      const term = searchString.toLowerCase();
       filtered = filtered.filter((org) => {
         return (
           org.name?.toLowerCase().includes(term) ||
