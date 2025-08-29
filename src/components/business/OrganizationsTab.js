@@ -331,7 +331,11 @@ function renderOrganizationsContent({ components, data }) {
           { className: 'flex-1' },
           e(SearchBar, {
             value: state.searchTerm,
-            onChange: (value) => state.setSearchTerm(value),
+            onChange: (e) => {
+              // Handle both direct string values and event objects
+              const value = typeof e === 'string' ? e : e?.target?.value || '';
+              state.setSearchTerm(value);
+            },
             placeholder:
               'Search organizations by name, type, email, or phone...',
             className: 'w-full',
