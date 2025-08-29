@@ -51,13 +51,24 @@ function useOrganizationsData(props) {
     if (searchString && searchString.trim()) {
       const term = searchString.toLowerCase();
       filtered = filtered.filter((org) => {
+        // Helper function to safely search address object
+        const searchAddress = (address) => {
+          if (!address || typeof address !== 'object') return false;
+          return (
+            address.street?.toLowerCase?.().includes(term) ||
+            address.city?.toLowerCase?.().includes(term) ||
+            address.state?.toLowerCase?.().includes(term) ||
+            address.zip?.includes?.(term)
+          );
+        };
+
         return (
-          org.name?.toLowerCase().includes(term) ||
-          org.type?.toLowerCase().includes(term) ||
-          org.email?.toLowerCase().includes(term) ||
-          org.phone?.includes(term) ||
-          org.address?.toLowerCase().includes(term) ||
-          org.status?.toLowerCase().includes(term)
+          org.name?.toLowerCase?.().includes(term) ||
+          org.type?.toLowerCase?.().includes(term) ||
+          org.email?.toLowerCase?.().includes(term) ||
+          org.phone?.includes?.(term) ||
+          searchAddress(org.address) ||
+          org.status?.toLowerCase?.().includes(term)
         );
       });
     }
