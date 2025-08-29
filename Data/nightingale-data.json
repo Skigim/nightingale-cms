@@ -2,161 +2,129 @@
   "cases": [
     {
       "id": "case-001",
-      "mcn": "VR46578",
-      "masterCaseNumber": "VR46578",
-      "clientName": "Sarah Michelle Johnson",
+      "mcn": "78941",
+      "masterCaseNumber": "78941",
+      "clientName": "Mark Nicole Miller",
       "personId": "person-001",
       "status": "Active",
       "priority": true,
-      "caseType": "SIMP",
-      "serviceType": "Vocational Rehabilitation",
-      "applicationDate": "2025-08-15T10:30:00.000Z",
-      "createdDate": "2025-08-15T10:30:00.000Z",
-      "lastUpdated": "2025-08-28T14:22:00.000Z",
-      "description": "Vocational rehabilitation case for client with mobility limitations seeking employment assistance and adaptive technology training.",
-      "withWaiver": false,
+      "caseType": "LTC",
+      "serviceType": "LTC",
+      "createdDate": "2025-03-18T03:36:29.370Z",
+      "lastUpdated": "2025-08-23T03:36:29.370Z",
       "retroRequested": "Yes",
-      "livingArrangement": "Lives independently in accessible apartment",
-      "organizationAddress": "Springfield Rehabilitation Services - 100 Community Drive, Springfield, IL 62701",
+      "applicationDate": "2025-06-21T03:36:29.370Z",
+      "description": "Case for Mark Nicole Miller - LTC services",
+      "livingArrangement": "With Family",
+      "organizationAddress": "9595 Maple Avenue, Kingston",
       "clientAddress": {
-        "street": "456 Oak Street, Apt 2B",
-        "city": "Springfield",
-        "state": "IL",
-        "zip": "62701"
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
       },
       "authorizedReps": [
         {
-          "id": "rep-001",
-          "name": "Michael Thompson",
-          "relationship": "Legal Guardian",
-          "phone": "(555) 987-6543",
-          "email": "m.thompson@legalaid.org"
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@yahoo.com"
         }
       ],
       "appDetails": {
-        "appDate": "2025-08-15T10:30:00.000Z",
-        "caseType": "SIMP",
-        "serviceType": "Vocational Rehabilitation"
+        "appDate": "2025-06-21T03:36:29.370Z",
+        "caseType": "LTC",
+        "serviceType": "Long-term Care"
       },
       "financials": {
         "resources": [
           {
-            "id": "financial-001",
-            "description": "First National Checking Account",
-            "type": "Checking Account",
-            "amount": 2450.75,
-            "value": 2450.75,
-            "location": "First National Bank",
-            "accountNumber": "****4321",
-            "frequency": "monthly",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "Bank Statement",
-            "verificationSource": "Bank Statement July 2025",
-            "notes": "Primary checking account for daily expenses",
-            "verified": true
-          },
-          {
-            "id": "financial-002",
-            "description": "Emergency Savings Account",
-            "type": "Savings Account",
-            "amount": 8750,
-            "value": 8750,
-            "location": "Springfield Credit Union",
-            "accountNumber": "****9876",
-            "frequency": "monthly",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "Bank Statement",
-            "verificationSource": "Credit Union Statement July 2025",
-            "notes": "Emergency fund savings account",
-            "verified": true
-          },
-          {
-            "id": "financial-003",
-            "description": "2020 Honda Civic",
+            "id": "resource-001",
+            "description": "Vehicle",
             "type": "Vehicle",
-            "amount": 15500,
-            "value": 15500,
-            "location": "Personal Vehicle",
-            "accountNumber": "VIN: 1HGBH41JXMN109186",
+            "amount": 3895,
+            "value": 3895,
             "frequency": "one-time",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "KBB Valuation",
-            "verificationSource": "Kelley Blue Book Estimate",
-            "notes": "Adaptive controls installed for mobility assistance",
+            "dateAdded": "2025-03-29T03:36:29.370Z",
+            "source": "Invoice",
+            "verificationSource": "Pay Stub",
+            "location": "Financial Institution",
+            "notes": "Vehicle for case management",
             "verified": true
           }
         ],
         "income": [
           {
-            "id": "income-001",
-            "description": "Social Security Disability Insurance",
-            "type": "SSDI",
-            "amount": 1284,
-            "value": 1284,
-            "frequency": "monthly",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "SSA Award Letter",
-            "verificationSource": "SSA Award Letter 2025",
-            "location": "Social Security Administration",
-            "notes": "Monthly SSDI benefit payment",
-            "verified": true
-          },
-          {
-            "id": "income-002",
-            "description": "Part-time Remote Work",
+            "id": "incom-001",
+            "description": "Employment Income",
             "type": "Employment Income",
-            "amount": 1200,
-            "value": 1200,
-            "frequency": "monthly",
-            "dateAdded": "2025-08-20T09:15:00.000Z",
-            "source": "Pay Stub",
-            "verificationSource": "TechSolutions Inc. Pay Stub",
-            "location": "TechSolutions Inc. (Remote)",
-            "notes": "Part-time data entry position, 20 hours/week",
+            "amount": 1222,
+            "value": 1222,
+            "frequency": "weekly",
+            "dateAdded": "2025-04-30T03:36:29.370Z",
+            "source": "Receipt",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Employment Income for case management",
             "verified": true
           }
         ],
         "expenses": [
           {
             "id": "expense-001",
-            "description": "Apartment Rent",
-            "type": "Housing",
-            "amount": 950,
-            "value": 950,
-            "frequency": "monthly",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "Lease Agreement",
-            "verificationSource": "Lease Agreement - Oak Gardens Apartments",
-            "location": "456 Oak Street, Springfield IL",
-            "notes": "Accessible apartment with wheelchair accessibility",
+            "description": "Utilities",
+            "type": "Utilities",
+            "amount": 1602,
+            "value": 1602,
+            "frequency": "annually",
+            "dateAdded": "2025-08-10T03:36:29.370Z",
+            "source": "Receipt",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Utilities for case management",
             "verified": true
           },
           {
             "id": "expense-002",
-            "description": "Medical Expenses",
-            "type": "Healthcare",
-            "amount": 385.5,
-            "value": 385.5,
-            "frequency": "monthly",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "Medical Bills",
-            "verificationSource": "Springfield Medical Center Statements",
-            "location": "Springfield Medical Center",
-            "notes": "Monthly prescription costs and therapy sessions",
-            "verified": true
+            "description": "Housing",
+            "type": "Housing",
+            "amount": 3571,
+            "value": 3571,
+            "frequency": "weekly",
+            "dateAdded": "2025-05-27T03:36:29.370Z",
+            "source": "Invoice",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Housing for case management",
+            "verified": false
           },
           {
             "id": "expense-003",
-            "description": "Transportation Costs",
+            "description": "Medical",
+            "type": "Medical",
+            "amount": 4947,
+            "value": 4947,
+            "frequency": "one-time",
+            "dateAdded": "2025-07-10T03:36:29.370Z",
+            "source": "Tax Return",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Medical for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-004",
+            "description": "Transportation",
             "type": "Transportation",
-            "amount": 275,
-            "value": 275,
-            "frequency": "monthly",
-            "dateAdded": "2025-08-15T10:30:00.000Z",
-            "source": "Receipts",
-            "verificationSource": "Gas and maintenance receipts",
-            "location": "Various",
-            "notes": "Vehicle maintenance, gas, and adaptive equipment upkeep",
+            "amount": 2947,
+            "value": 2947,
+            "frequency": "annually",
+            "dateAdded": "2025-05-06T03:36:29.370Z",
+            "source": "Pay Stub",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Transportation for case management",
             "verified": true
           }
         ]
@@ -164,490 +132,3065 @@
       "notes": [
         {
           "id": "note-001",
-          "title": "Initial Case Opening",
-          "content": "Client submitted complete application package. All required documents received and verified. Initial assessment scheduled for 8/20/2025.",
-          "author": "Maria Rodriguez, Case Manager",
-          "date": "2025-08-15T10:45:00.000Z",
-          "category": "initial",
-          "lastModified": "2025-08-15T10:45:00.000Z"
+          "category": "contact",
+          "text": "sfsf",
+          "timestamp": "2025-08-29T03:52:09.459Z"
         },
         {
           "id": "note-002",
-          "title": "Vocational Assessment Completed",
-          "content": "Comprehensive vocational assessment completed. Client shows strong aptitude for computer-based work. Recommended for adaptive technology training program.",
-          "author": "Dr. James Chen, VR Counselor",
-          "date": "2025-08-20T14:30:00.000Z",
-          "category": "assessment",
-          "lastModified": "2025-08-20T14:30:00.000Z"
-        },
-        {
-          "id": "note-003",
-          "title": "Employment Placement Success",
-          "content": "Client successfully placed in part-time remote position with TechSolutions Inc. Employer has agreed to provide necessary accommodations and adaptive software.",
-          "author": "Sarah Williams, Employment Specialist",
-          "date": "2025-08-25T11:20:00.000Z",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-07T03:36:29.370Z",
           "category": "employment",
-          "lastModified": "2025-08-25T11:20:00.000Z"
-        },
-        {
-          "id": "note-004",
-          "title": "30-Day Follow-up",
-          "content": "Client is adapting well to new position. Employer reports excellent performance. Client requested additional training on advanced software features.",
-          "author": "Maria Rodriguez, Case Manager",
-          "date": "2025-08-28T09:15:00.000Z",
-          "category": "follow-up",
-          "lastModified": "2025-08-28T09:15:00.000Z"
+          "lastModified": "2025-08-25T03:36:29.370Z"
         }
       ],
       "todos": [
         {
           "id": "todo-001",
-          "task": "Schedule 60-day employment follow-up",
-          "status": "pending",
-          "dueDate": "2025-09-25T00:00:00.000Z",
-          "completedDate": "",
-          "assignedTo": "Maria Rodriguez",
-          "priority": "medium",
-          "notes": "Follow up on job performance and any accommodation needs"
+          "task": "Complete documentation",
+          "status": "completed",
+          "dueDate": "2025-09-14T03:36:29.370Z",
+          "completedDate": "2025-08-22T03:36:29.370Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
         },
         {
           "id": "todo-002",
-          "task": "Complete final documentation for case closure",
+          "task": "Complete documentation",
           "status": "pending",
-          "dueDate": "2025-10-15T00:00:00.000Z",
+          "dueDate": "2025-09-17T03:36:29.370Z",
           "completedDate": "",
-          "assignedTo": "Maria Rodriguez",
+          "assignedTo": "Case Manager",
           "priority": "high",
-          "notes": "Prepare case summary and outcome documentation"
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete assessment",
+          "status": "pending",
+          "dueDate": "2025-09-25T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Identity",
+        "status": "completed",
+        "dateRequested": "2025-07-28T03:36:29.370Z",
+        "dateCompleted": "2025-08-27T03:36:29.370Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller LTC Active",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "withWaiver": false
+    },
+    {
+      "id": "case-002",
+      "mcn": "63864",
+      "masterCaseNumber": "63864",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Active",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "LTC",
+      "createdDate": "2024-10-17T03:36:29.370Z",
+      "lastUpdated": "2025-08-26T03:36:29.370Z",
+      "retroRequested": "Yes",
+      "livingArrangement": "Independent",
+      "organizationAddress": "7025 Center Street, Springfield",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2024-10-17T03:36:29.370Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": "resource-001",
+            "description": "Savings Account",
+            "type": "Savings Account",
+            "amount": 3544,
+            "value": 3544,
+            "frequency": "monthly",
+            "dateAdded": "2025-05-26T03:36:29.370Z",
+            "source": "Pay Stub",
+            "verificationSource": "Tax Return",
+            "location": "Financial Institution",
+            "notes": "Savings Account for case management",
+            "verified": true
+          },
+          {
+            "id": "resource-002",
+            "description": "Investment Account",
+            "type": "Investment Account",
+            "amount": 511,
+            "value": 511,
+            "frequency": "weekly",
+            "dateAdded": "2025-08-01T03:36:29.370Z",
+            "source": "Tax Return",
+            "verificationSource": "Bank Statement",
+            "location": "Financial Institution",
+            "notes": "Investment Account for case management",
+            "verified": false
+          }
+        ],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Pension",
+            "type": "Pension",
+            "amount": 2325,
+            "value": 2325,
+            "frequency": "monthly",
+            "dateAdded": "2025-04-06T03:36:29.370Z",
+            "source": "Tax Return",
+            "verificationSource": "Bank Statement",
+            "location": "Employer/Agency",
+            "notes": "Pension for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Transportation",
+            "type": "Transportation",
+            "amount": 1961,
+            "value": 1961,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-16T03:36:29.370Z",
+            "source": "Pay Stub",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Transportation for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-002",
+            "description": "Insurance",
+            "type": "Insurance",
+            "amount": 1969,
+            "value": 1969,
+            "frequency": "monthly",
+            "dateAdded": "2025-05-18T03:36:29.370Z",
+            "source": "Invoice",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Insurance for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-003",
+            "description": "Transportation",
+            "type": "Transportation",
+            "amount": 1868,
+            "value": 1868,
+            "frequency": "weekly",
+            "dateAdded": "2025-08-14T03:36:29.370Z",
+            "source": "Pay Stub",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Transportation for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-004",
+            "description": "Medical",
+            "type": "Medical",
+            "amount": 1002,
+            "value": 1002,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-24T03:36:29.370Z",
+            "source": "Pay Stub",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Medical for case management",
+            "verified": true
+          }
+        ]
+      },
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete assessment",
+          "status": "completed",
+          "dueDate": "2025-09-23T03:36:29.370Z",
+          "completedDate": "2025-08-25T03:36:29.370Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-18T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete review",
+          "status": "pending",
+          "dueDate": "2025-09-13T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
         }
       ],
       "vrRequests": [
         {
           "id": "vr-001",
-          "type": "Vocational Assessment",
+          "type": "Training",
           "status": "completed",
-          "requestDate": "2025-08-15T10:30:00.000Z",
-          "completedDate": "2025-08-20T14:30:00.000Z",
-          "notes": "Comprehensive assessment including skills evaluation and accommodation needs",
-          "assignedTo": "Dr. James Chen",
-          "description": "Complete vocational assessment to determine employment potential and training needs"
+          "requestDate": "2025-08-27T03:36:29.370Z",
+          "completedDate": "2025-08-16T03:36:29.370Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
         },
         {
           "id": "vr-002",
-          "type": "Job Placement Services",
-          "status": "completed",
-          "requestDate": "2025-08-21T09:00:00.000Z",
-          "completedDate": "2025-08-25T11:20:00.000Z",
-          "notes": "Successfully placed client in remote position with accommodations",
-          "assignedTo": "Sarah Williams",
-          "description": "Job placement assistance and employer negotiations for accommodations"
+          "type": "Assessment",
+          "status": "pending",
+          "requestDate": "2025-07-24T03:36:29.370Z",
+          "completedDate": "",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "searchableText": "Mark Nicole Miller SIMP Active",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2024-10-17T03:36:29.370Z",
+      "description": "",
+      "withWaiver": false,
+      "authorizedReps": []
+    },
+    {
+      "id": "case-003",
+      "mcn": "25651",
+      "masterCaseNumber": "25651",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Active",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "LTC",
+      "createdDate": "2024-12-28T04:36:29.370Z",
+      "lastUpdated": "2025-08-23T03:36:29.370Z",
+      "retroRequested": "Yes",
+      "description": "Case for Mark Nicole Miller - SIMP services",
+      "livingArrangement": "Group Home",
+      "organizationAddress": "6649 Union Street, Madison",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "authorizedReps": [
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@outlook.com"
+        },
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@hotmail.com"
+        }
+      ],
+      "appDetails": {
+        "appDate": "2024-12-28T04:36:29.370Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-03T03:36:29.370Z",
+          "category": "assessment",
+          "lastModified": "2025-08-29T03:36:29.370Z"
         }
       ],
       "verificationRequest": {
-        "requestType": "Financial and Medical",
+        "requestType": "Identity",
         "status": "completed",
-        "dateRequested": "2025-08-15T10:30:00.000Z",
-        "dateCompleted": "2025-08-18T16:45:00.000Z",
-        "notes": "All financial documents verified. Medical documentation confirms disability status and accommodation needs.",
-        "requestedBy": "Maria Rodriguez",
-        "completedBy": "Jennifer Walsh, Verification Specialist"
+        "dateRequested": "2025-08-17T03:36:29.370Z",
+        "dateCompleted": "2025-08-20T03:36:29.370Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
       },
-      "searchableText": "Sarah Johnson SIMP vocational rehabilitation employment adaptive technology remote work disability SSDI Springfield",
-      "source": "VR Office Application",
-      "verificationSource": "Complete Documentation Package"
+      "searchableText": "Mark Nicole Miller SIMP Active",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2024-12-28T04:36:29.370Z",
+      "withWaiver": false,
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
+    },
+    {
+      "id": "case-004",
+      "mcn": "41908",
+      "masterCaseNumber": "41908",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Active",
+      "priority": false,
+      "caseType": "Waiver",
+      "serviceType": "LTC",
+      "createdDate": "2025-08-12T03:36:29.370Z",
+      "lastUpdated": "2025-08-25T03:36:29.370Z",
+      "retroRequested": "Yes",
+      "description": "Case for Mark Nicole Miller - Waiver services",
+      "livingArrangement": "Group Home",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2025-08-12T03:36:29.370Z",
+        "caseType": "Waiver",
+        "serviceType": "Waiver Services"
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-22T03:36:29.370Z",
+          "category": "initial",
+          "lastModified": "2025-08-26T03:36:29.370Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-16T03:36:29.370Z",
+          "category": "employment",
+          "lastModified": "2025-08-25T03:36:29.370Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-26T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete verification",
+          "status": "pending",
+          "dueDate": "2025-09-23T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-19T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Employment",
+        "status": "completed",
+        "dateRequested": "2025-08-14T03:36:29.370Z",
+        "dateCompleted": "2025-08-21T03:36:29.370Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller Waiver Active",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2025-08-12T03:36:29.370Z",
+      "withWaiver": false,
+      "authorizedReps": [],
+      "organizationAddress": "Not specified",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
+    },
+    {
+      "id": "case-005",
+      "mcn": "98296",
+      "masterCaseNumber": "98296",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Suspended",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "SIMP",
+      "createdDate": "2025-03-31T03:36:29.370Z",
+      "lastUpdated": "2025-08-29T03:36:29.370Z",
+      "retroRequested": "No",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "authorizedReps": [
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@gmail.com"
+        },
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@yahoo.com"
+        }
+      ],
+      "appDetails": {
+        "appDate": "2025-03-31T03:36:29.370Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": "resource-001",
+            "description": "Real Estate",
+            "type": "Real Estate",
+            "amount": 3967,
+            "value": 3967,
+            "frequency": "annually",
+            "dateAdded": "2025-04-05T03:36:29.370Z",
+            "source": "Tax Return",
+            "verificationSource": "Tax Return",
+            "location": "Financial Institution",
+            "notes": "Real Estate for case management",
+            "verified": true
+          }
+        ],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Unemployment Benefits",
+            "type": "Unemployment Benefits",
+            "amount": 1773,
+            "value": 1773,
+            "frequency": "annually",
+            "dateAdded": "2025-06-24T03:36:29.370Z",
+            "source": "Receipt",
+            "verificationSource": "Receipt",
+            "location": "Employer/Agency",
+            "notes": "Unemployment Benefits for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Housing",
+            "type": "Housing",
+            "amount": 3852,
+            "value": 3852,
+            "frequency": "annually",
+            "dateAdded": "2025-08-26T03:36:29.370Z",
+            "source": "Receipt",
+            "verificationSource": "Receipt",
+            "location": "Employer/Agency",
+            "notes": "Housing for case management",
+            "verified": false
+          },
+          {
+            "id": "expense-002",
+            "description": "Insurance",
+            "type": "Insurance",
+            "amount": 4273,
+            "value": 4273,
+            "frequency": "weekly",
+            "dateAdded": "2025-06-18T03:36:29.370Z",
+            "source": "Bank Statement",
+            "verificationSource": "Bank Statement",
+            "location": "Employer/Agency",
+            "notes": "Insurance for case management",
+            "verified": false
+          },
+          {
+            "id": "expense-003",
+            "description": "Insurance",
+            "type": "Insurance",
+            "amount": 1421,
+            "value": 1421,
+            "frequency": "weekly",
+            "dateAdded": "2025-07-04T03:36:29.370Z",
+            "source": "Bank Statement",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Insurance for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-004",
+            "description": "Housing",
+            "type": "Housing",
+            "amount": 3168,
+            "value": 3168,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-06T03:36:29.370Z",
+            "source": "Bank Statement",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Housing for case management",
+            "verified": true
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-17T03:36:29.370Z",
+          "category": "employment",
+          "lastModified": "2025-08-25T03:36:29.370Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-02T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete review",
+          "status": "pending",
+          "dueDate": "2025-09-13T03:36:29.370Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Identity",
+        "status": "pending",
+        "dateRequested": "2025-08-17T03:36:29.370Z",
+        "dateCompleted": "",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": ""
+      },
+      "searchableText": "Mark Nicole Miller SIMP Suspended",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2025-03-31T03:36:29.370Z",
+      "description": "",
+      "withWaiver": false,
+      "livingArrangement": "Not specified",
+      "organizationAddress": "Not specified"
+    },
+    {
+      "id": "case-006",
+      "mcn": "87611",
+      "masterCaseNumber": "87611",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Suspended",
+      "priority": false,
+      "caseType": "Waiver",
+      "serviceType": "Waiver",
+      "createdDate": "2025-02-07T04:36:29.371Z",
+      "lastUpdated": "2025-08-26T03:36:29.371Z",
+      "retroRequested": "No",
+      "applicationDate": "2024-08-30T03:36:29.371Z",
+      "description": "Case for Mark Nicole Miller - Waiver services",
+      "withWaiver": false,
+      "livingArrangement": "With Family",
+      "appDetails": {
+        "appDate": "2024-08-30T03:36:29.371Z",
+        "caseType": "Waiver",
+        "serviceType": "Waiver Services"
+      },
+      "financials": {
+        "resources": [],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Unemployment Benefits",
+            "type": "Unemployment Benefits",
+            "amount": 3312,
+            "value": 3312,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-14T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Bank Statement",
+            "location": "Employer/Agency",
+            "notes": "Unemployment Benefits for case management",
+            "verified": false
+          },
+          {
+            "id": "incom-002",
+            "description": "Pension",
+            "type": "Pension",
+            "amount": 3744,
+            "value": 3744,
+            "frequency": "weekly",
+            "dateAdded": "2025-05-19T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Pension for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Utilities",
+            "type": "Utilities",
+            "amount": 467,
+            "value": 467,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-02T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Receipt",
+            "location": "Employer/Agency",
+            "notes": "Utilities for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-002",
+            "description": "Food",
+            "type": "Food",
+            "amount": 3894,
+            "value": 3894,
+            "frequency": "monthly",
+            "dateAdded": "2025-06-25T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Food for case management",
+            "verified": false
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-05T03:36:29.371Z",
+          "category": "follow-up",
+          "lastModified": "2025-08-26T03:36:29.371Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-09T03:36:29.371Z",
+          "category": "contact",
+          "lastModified": "2025-08-25T03:36:29.371Z"
+        },
+        {
+          "id": "note-003",
+          "title": "Case Note 3",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-03T03:36:29.371Z",
+          "category": "assessment",
+          "lastModified": "2025-08-28T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete verification",
+          "status": "pending",
+          "dueDate": "2025-09-08T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete documentation",
+          "status": "completed",
+          "dueDate": "2025-09-24T03:36:29.371Z",
+          "completedDate": "2025-08-29T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Training",
+          "status": "completed",
+          "requestDate": "2025-07-03T03:36:29.371Z",
+          "completedDate": "2025-08-08T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        },
+        {
+          "id": "vr-002",
+          "type": "Training",
+          "status": "completed",
+          "requestDate": "2025-07-18T03:36:29.371Z",
+          "completedDate": "2025-08-13T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "searchableText": "Mark Nicole Miller Waiver Suspended",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "authorizedReps": [],
+      "organizationAddress": "Not specified"
+    },
+    {
+      "id": "case-007",
+      "mcn": "66628",
+      "masterCaseNumber": "66628",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Suspended",
+      "priority": true,
+      "caseType": "LTC",
+      "serviceType": "SIMP",
+      "createdDate": "2024-11-15T04:36:29.371Z",
+      "lastUpdated": "2025-08-29T03:36:29.371Z",
+      "retroRequested": "Yes",
+      "applicationDate": "2024-10-30T03:36:29.371Z",
+      "organizationAddress": "6724 Cedar Lane, Riverside",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": "resource-001",
+            "description": "Savings Account",
+            "type": "Savings Account",
+            "amount": 1919,
+            "value": 1919,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-23T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Receipt",
+            "location": "Financial Institution",
+            "notes": "Savings Account for case management",
+            "verified": false
+          },
+          {
+            "id": "resource-002",
+            "description": "Investment Account",
+            "type": "Investment Account",
+            "amount": 3440,
+            "value": 3440,
+            "frequency": "weekly",
+            "dateAdded": "2025-05-20T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Tax Return",
+            "location": "Financial Institution",
+            "notes": "Investment Account for case management",
+            "verified": true
+          },
+          {
+            "id": "resource-003",
+            "description": "Checking Account",
+            "type": "Checking Account",
+            "amount": 4947,
+            "value": 4947,
+            "frequency": "annually",
+            "dateAdded": "2025-08-12T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Bank Statement",
+            "location": "Financial Institution",
+            "notes": "Checking Account for case management",
+            "verified": true
+          }
+        ],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "SSDI",
+            "type": "SSDI",
+            "amount": 2025,
+            "value": 2025,
+            "frequency": "weekly",
+            "dateAdded": "2025-08-23T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Bank Statement",
+            "location": "Employer/Agency",
+            "notes": "SSDI for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Food",
+            "type": "Food",
+            "amount": 3529,
+            "value": 3529,
+            "frequency": "monthly",
+            "dateAdded": "2025-08-26T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Bank Statement",
+            "location": "Employer/Agency",
+            "notes": "Food for case management",
+            "verified": true
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-10T03:36:29.371Z",
+          "category": "follow-up",
+          "lastModified": "2025-08-23T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete review",
+          "status": "completed",
+          "dueDate": "2025-09-13T03:36:29.371Z",
+          "completedDate": "2025-08-28T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-15T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete documentation",
+          "status": "completed",
+          "dueDate": "2025-08-30T03:36:29.371Z",
+          "completedDate": "2025-08-27T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Medical",
+        "status": "completed",
+        "dateRequested": "2025-08-24T03:36:29.371Z",
+        "dateCompleted": "2025-08-21T03:36:29.371Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller LTC Suspended",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "description": "",
+      "withWaiver": false,
+      "authorizedReps": [],
+      "livingArrangement": "Not specified"
+    },
+    {
+      "id": "case-008",
+      "mcn": "91223",
+      "masterCaseNumber": "91223",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Suspended",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "SIMP",
+      "createdDate": "2025-02-08T04:36:29.371Z",
+      "lastUpdated": "2025-08-26T03:36:29.371Z",
+      "retroRequested": "No",
+      "livingArrangement": "Not specified",
+      "organizationAddress": "7025 Center Street, Springfield",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2025-02-08T04:36:29.371Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "financials": {
+        "resources": [],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Employment Income",
+            "type": "Employment Income",
+            "amount": 3519,
+            "value": 3519,
+            "frequency": "monthly",
+            "dateAdded": "2025-07-11T03:36:29.371Z",
+            "source": "Tax Return",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Employment Income for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Food",
+            "type": "Food",
+            "amount": 663,
+            "value": 663,
+            "frequency": "one-time",
+            "dateAdded": "2025-08-08T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Food for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-002",
+            "description": "Food",
+            "type": "Food",
+            "amount": 3579,
+            "value": 3579,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-27T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Food for case management",
+            "verified": false
+          },
+          {
+            "id": "expense-003",
+            "description": "Medical",
+            "type": "Medical",
+            "amount": 805,
+            "value": 805,
+            "frequency": "one-time",
+            "dateAdded": "2025-03-15T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Medical for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-004",
+            "description": "Insurance",
+            "type": "Insurance",
+            "amount": 1688,
+            "value": 1688,
+            "frequency": "annually",
+            "dateAdded": "2025-03-25T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Insurance for case management",
+            "verified": false
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-29T03:36:29.371Z",
+          "category": "assessment",
+          "lastModified": "2025-08-22T03:36:29.371Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-19T03:36:29.371Z",
+          "category": "assessment",
+          "lastModified": "2025-08-26T03:36:29.371Z"
+        },
+        {
+          "id": "note-003",
+          "title": "Case Note 3",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-21T03:36:29.371Z",
+          "category": "follow-up",
+          "lastModified": "2025-08-29T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete verification",
+          "status": "completed",
+          "dueDate": "2025-09-02T03:36:29.371Z",
+          "completedDate": "2025-08-27T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-14T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Training",
+          "status": "pending",
+          "requestDate": "2025-08-09T03:36:29.371Z",
+          "completedDate": "",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Employment",
+        "status": "completed",
+        "dateRequested": "2025-08-21T03:36:29.371Z",
+        "dateCompleted": "2025-08-18T03:36:29.371Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller SIMP Suspended",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2025-02-08T04:36:29.371Z",
+      "description": "",
+      "withWaiver": false,
+      "authorizedReps": []
+    },
+    {
+      "id": "case-009",
+      "mcn": "11928",
+      "masterCaseNumber": "11928",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Closed",
+      "priority": true,
+      "caseType": "SIMP",
+      "serviceType": "Waiver",
+      "createdDate": "2025-01-08T04:36:29.371Z",
+      "lastUpdated": "2025-08-26T03:36:29.371Z",
+      "retroRequested": "No",
+      "applicationDate": "2025-03-19T03:36:29.371Z",
+      "description": "Case for Mark Nicole Miller - SIMP services",
+      "organizationAddress": "9595 Maple Avenue, Kingston",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "financials": {
+        "resources": [],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Social Security",
+            "type": "Social Security",
+            "amount": 1399,
+            "value": 1399,
+            "frequency": "one-time",
+            "dateAdded": "2025-04-16T03:36:29.371Z",
+            "source": "Tax Return",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Social Security for case management",
+            "verified": true
+          },
+          {
+            "id": "incom-002",
+            "description": "Unemployment Benefits",
+            "type": "Unemployment Benefits",
+            "amount": 1646,
+            "value": 1646,
+            "frequency": "weekly",
+            "dateAdded": "2025-06-16T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Pay Stub",
+            "location": "Employer/Agency",
+            "notes": "Unemployment Benefits for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Insurance",
+            "type": "Insurance",
+            "amount": 2821,
+            "value": 2821,
+            "frequency": "weekly",
+            "dateAdded": "2025-04-28T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Insurance for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-002",
+            "description": "Transportation",
+            "type": "Transportation",
+            "amount": 553,
+            "value": 553,
+            "frequency": "monthly",
+            "dateAdded": "2025-07-21T03:36:29.371Z",
+            "source": "Receipt",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Transportation for case management",
+            "verified": false
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-08T03:36:29.371Z",
+          "category": "contact",
+          "lastModified": "2025-08-25T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete assessment",
+          "status": "completed",
+          "dueDate": "2025-09-03T03:36:29.371Z",
+          "completedDate": "2025-08-26T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Training",
+          "status": "completed",
+          "requestDate": "2025-08-29T03:36:29.371Z",
+          "completedDate": "2025-08-03T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        },
+        {
+          "id": "vr-002",
+          "type": "Training",
+          "status": "completed",
+          "requestDate": "2025-08-02T03:36:29.371Z",
+          "completedDate": "2025-08-18T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "searchableText": "Mark Nicole Miller SIMP Closed",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "withWaiver": false,
+      "authorizedReps": [],
+      "livingArrangement": "Not specified"
+    },
+    {
+      "id": "case-010",
+      "mcn": "52199",
+      "masterCaseNumber": "52199",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Active",
+      "priority": true,
+      "caseType": "Waiver",
+      "serviceType": "Waiver",
+      "createdDate": "2025-07-27T03:36:29.371Z",
+      "lastUpdated": "2025-08-26T03:36:29.371Z",
+      "retroRequested": "No",
+      "applicationDate": "2025-05-15T03:36:29.371Z",
+      "description": "Case for Mark Nicole Miller - Waiver services",
+      "withWaiver": false,
+      "livingArrangement": "Nursing Home",
+      "organizationAddress": "7025 Center Street, Springfield",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2025-05-15T03:36:29.371Z",
+        "caseType": "Waiver",
+        "serviceType": "Waiver Services"
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-05T03:36:29.371Z",
+          "category": "follow-up",
+          "lastModified": "2025-08-24T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete review",
+          "status": "pending",
+          "dueDate": "2025-09-02T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete verification",
+          "status": "completed",
+          "dueDate": "2025-09-04T03:36:29.371Z",
+          "completedDate": "2025-08-28T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete verification",
+          "status": "pending",
+          "dueDate": "2025-09-14T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Support",
+          "status": "completed",
+          "requestDate": "2025-08-09T03:36:29.371Z",
+          "completedDate": "2025-08-07T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        },
+        {
+          "id": "vr-002",
+          "type": "Assessment",
+          "status": "completed",
+          "requestDate": "2025-07-04T03:36:29.371Z",
+          "completedDate": "2025-08-12T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "searchableText": "Mark Nicole Miller Waiver Active",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "authorizedReps": [],
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
+    },
+    {
+      "id": "case-011",
+      "mcn": "89842",
+      "masterCaseNumber": "89842",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Suspended",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "Waiver",
+      "createdDate": "2024-11-10T04:36:29.371Z",
+      "lastUpdated": "2025-08-28T03:36:29.371Z",
+      "retroRequested": "Yes",
+      "applicationDate": "2025-05-20T03:36:29.371Z",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "authorizedReps": [
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@yahoo.com"
+        },
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@hotmail.com"
+        }
+      ],
+      "appDetails": {
+        "appDate": "2025-05-20T03:36:29.371Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-28T03:36:29.371Z",
+          "category": "initial",
+          "lastModified": "2025-08-25T03:36:29.371Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-29T03:36:29.371Z",
+          "category": "assessment",
+          "lastModified": "2025-08-25T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete documentation",
+          "status": "completed",
+          "dueDate": "2025-09-07T03:36:29.371Z",
+          "completedDate": "2025-08-29T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Employment",
+        "status": "completed",
+        "dateRequested": "2025-08-24T03:36:29.371Z",
+        "dateCompleted": "2025-08-25T03:36:29.371Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller SIMP Suspended",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "description": "",
+      "withWaiver": false,
+      "livingArrangement": "Not specified",
+      "organizationAddress": "Not specified",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
+    },
+    {
+      "id": "case-012",
+      "mcn": "13082",
+      "masterCaseNumber": "13082",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Pending",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "Waiver",
+      "createdDate": "2024-11-18T04:36:29.371Z",
+      "lastUpdated": "2025-08-22T03:36:29.371Z",
+      "retroRequested": "Yes",
+      "description": "Case for Mark Nicole Miller - SIMP services",
+      "withWaiver": true,
+      "livingArrangement": "Independent",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2024-11-18T04:36:29.371Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "financials": {
+        "resources": [],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Employment Income",
+            "type": "Employment Income",
+            "amount": 236,
+            "value": 236,
+            "frequency": "annually",
+            "dateAdded": "2025-06-03T03:36:29.371Z",
+            "source": "Receipt",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Employment Income for case management",
+            "verified": false
+          },
+          {
+            "id": "incom-002",
+            "description": "Social Security",
+            "type": "Social Security",
+            "amount": 3398,
+            "value": 3398,
+            "frequency": "annually",
+            "dateAdded": "2025-07-01T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Social Security for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Food",
+            "type": "Food",
+            "amount": 2788,
+            "value": 2788,
+            "frequency": "weekly",
+            "dateAdded": "2025-08-04T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Food for case management",
+            "verified": true
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-26T03:36:29.371Z",
+          "category": "employment",
+          "lastModified": "2025-08-28T03:36:29.371Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-04T03:36:29.371Z",
+          "category": "initial",
+          "lastModified": "2025-08-29T03:36:29.371Z"
+        },
+        {
+          "id": "note-003",
+          "title": "Case Note 3",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-17T03:36:29.371Z",
+          "category": "initial",
+          "lastModified": "2025-08-29T03:36:29.371Z"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Support",
+          "status": "completed",
+          "requestDate": "2025-08-15T03:36:29.371Z",
+          "completedDate": "2025-08-05T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        },
+        {
+          "id": "vr-002",
+          "type": "Equipment",
+          "status": "completed",
+          "requestDate": "2025-08-22T03:36:29.371Z",
+          "completedDate": "2025-08-02T03:36:29.371Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "searchableText": "Mark Nicole Miller SIMP Pending",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2024-11-18T04:36:29.371Z",
+      "authorizedReps": [],
+      "organizationAddress": "Not specified"
+    },
+    {
+      "id": "case-013",
+      "mcn": "50744",
+      "masterCaseNumber": "50744",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Suspended",
+      "priority": true,
+      "caseType": "Waiver",
+      "serviceType": "SIMP",
+      "createdDate": "2025-02-27T04:36:29.371Z",
+      "lastUpdated": "2025-08-29T03:36:29.371Z",
+      "retroRequested": "No",
+      "livingArrangement": "Not specified",
+      "organizationAddress": "2864 Center Street, Riverside",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2025-02-27T04:36:29.371Z",
+        "caseType": "Waiver",
+        "serviceType": "Waiver Services"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": "resource-001",
+            "description": "Checking Account",
+            "type": "Checking Account",
+            "amount": 714,
+            "value": 714,
+            "frequency": "monthly",
+            "dateAdded": "2025-05-26T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Tax Return",
+            "location": "Financial Institution",
+            "notes": "Checking Account for case management",
+            "verified": false
+          }
+        ],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "Unemployment Benefits",
+            "type": "Unemployment Benefits",
+            "amount": 3070,
+            "value": 3070,
+            "frequency": "one-time",
+            "dateAdded": "2025-03-29T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Unemployment Benefits for case management",
+            "verified": true
+          },
+          {
+            "id": "incom-002",
+            "description": "Employment Income",
+            "type": "Employment Income",
+            "amount": 1556,
+            "value": 1556,
+            "frequency": "annually",
+            "dateAdded": "2025-06-23T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Bank Statement",
+            "location": "Employer/Agency",
+            "notes": "Employment Income for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Utilities",
+            "type": "Utilities",
+            "amount": 338,
+            "value": 338,
+            "frequency": "weekly",
+            "dateAdded": "2025-07-26T03:36:29.371Z",
+            "source": "Receipt",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Utilities for case management",
+            "verified": true
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-15T03:36:29.371Z",
+          "category": "initial",
+          "lastModified": "2025-08-28T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete assessment",
+          "status": "pending",
+          "dueDate": "2025-09-22T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete assessment",
+          "status": "completed",
+          "dueDate": "2025-09-15T03:36:29.371Z",
+          "completedDate": "2025-08-22T03:36:29.371Z",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete verification",
+          "status": "pending",
+          "dueDate": "2025-09-26T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "medium",
+          "notes": "Task notes"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Employment",
+        "status": "completed",
+        "dateRequested": "2025-08-04T03:36:29.371Z",
+        "dateCompleted": "2025-08-16T03:36:29.371Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller Waiver Suspended",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2025-02-27T04:36:29.371Z",
+      "description": "",
+      "withWaiver": false,
+      "authorizedReps": []
+    },
+    {
+      "id": "case-014",
+      "mcn": "33857",
+      "masterCaseNumber": "33857",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Pending",
+      "priority": false,
+      "caseType": "LTC",
+      "serviceType": "Waiver",
+      "createdDate": "2024-12-25T04:36:29.371Z",
+      "lastUpdated": "2025-08-26T03:36:29.371Z",
+      "retroRequested": "No",
+      "description": "Case for Mark Nicole Miller - LTC services",
+      "livingArrangement": "Assisted Living",
+      "organizationAddress": "7025 Center Street, Springfield",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "appDetails": {
+        "appDate": "2024-12-25T04:36:29.371Z",
+        "caseType": "LTC",
+        "serviceType": "Long-term Care"
+      },
+      "financials": {
+        "resources": [
+          {
+            "id": "resource-001",
+            "description": "Investment Account",
+            "type": "Investment Account",
+            "amount": 4551,
+            "value": 4551,
+            "frequency": "monthly",
+            "dateAdded": "2025-03-16T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Invoice",
+            "location": "Financial Institution",
+            "notes": "Investment Account for case management",
+            "verified": true
+          }
+        ],
+        "income": [
+          {
+            "id": "incom-001",
+            "description": "SSDI",
+            "type": "SSDI",
+            "amount": 3667,
+            "value": 3667,
+            "frequency": "annually",
+            "dateAdded": "2025-07-26T03:36:29.371Z",
+            "source": "Receipt",
+            "verificationSource": "Receipt",
+            "location": "Employer/Agency",
+            "notes": "SSDI for case management",
+            "verified": true
+          }
+        ],
+        "expenses": [
+          {
+            "id": "expense-001",
+            "description": "Housing",
+            "type": "Housing",
+            "amount": 212,
+            "value": 212,
+            "frequency": "monthly",
+            "dateAdded": "2025-04-20T03:36:29.371Z",
+            "source": "Receipt",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Housing for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-002",
+            "description": "Utilities",
+            "type": "Utilities",
+            "amount": 4867,
+            "value": 4867,
+            "frequency": "one-time",
+            "dateAdded": "2025-05-09T03:36:29.371Z",
+            "source": "Bank Statement",
+            "verificationSource": "Receipt",
+            "location": "Employer/Agency",
+            "notes": "Utilities for case management",
+            "verified": true
+          },
+          {
+            "id": "expense-003",
+            "description": "Food",
+            "type": "Food",
+            "amount": 4223,
+            "value": 4223,
+            "frequency": "monthly",
+            "dateAdded": "2025-05-22T03:36:29.371Z",
+            "source": "Pay Stub",
+            "verificationSource": "Invoice",
+            "location": "Employer/Agency",
+            "notes": "Food for case management",
+            "verified": false
+          },
+          {
+            "id": "expense-004",
+            "description": "Utilities",
+            "type": "Utilities",
+            "amount": 4983,
+            "value": 4983,
+            "frequency": "monthly",
+            "dateAdded": "2025-04-08T03:36:29.371Z",
+            "source": "Invoice",
+            "verificationSource": "Tax Return",
+            "location": "Employer/Agency",
+            "notes": "Utilities for case management",
+            "verified": true
+          }
+        ]
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-17T03:36:29.371Z",
+          "category": "assessment",
+          "lastModified": "2025-08-24T03:36:29.371Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-17T03:36:29.371Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Assessment",
+          "status": "pending",
+          "requestDate": "2025-08-05T03:36:29.371Z",
+          "completedDate": "",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Financial",
+        "status": "completed",
+        "dateRequested": "2025-08-19T03:36:29.371Z",
+        "dateCompleted": "2025-08-24T03:36:29.372Z",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": "Verification Team"
+      },
+      "searchableText": "Mark Nicole Miller LTC Pending",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2024-12-25T04:36:29.371Z",
+      "withWaiver": false,
+      "authorizedReps": []
+    },
+    {
+      "id": "case-015",
+      "mcn": "48134",
+      "masterCaseNumber": "48134",
+      "clientName": "Mark Nicole Miller",
+      "personId": "person-001",
+      "status": "Pending",
+      "priority": false,
+      "caseType": "SIMP",
+      "serviceType": "Waiver",
+      "createdDate": "2025-08-24T03:36:29.372Z",
+      "lastUpdated": "2025-08-25T03:36:29.372Z",
+      "retroRequested": "No",
+      "description": "Case for Mark Nicole Miller - SIMP services",
+      "withWaiver": false,
+      "livingArrangement": "Not specified",
+      "clientAddress": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "authorizedReps": [
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@gmail.com"
+        },
+        {
+          "id": "person-016",
+          "name": "Steven Marie Lee",
+          "relationship": "representative",
+          "phone": "(297) 943-9252",
+          "email": "steven.lee@yahoo.com"
+        }
+      ],
+      "appDetails": {
+        "appDate": "2025-08-24T03:36:29.372Z",
+        "caseType": "SIMP",
+        "serviceType": "Simplified Services"
+      },
+      "notes": [
+        {
+          "id": "note-001",
+          "title": "Case Note 1",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-10T03:36:29.372Z",
+          "category": "contact",
+          "lastModified": "2025-08-24T03:36:29.372Z"
+        },
+        {
+          "id": "note-002",
+          "title": "Case Note 2",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-21T03:36:29.372Z",
+          "category": "follow-up",
+          "lastModified": "2025-08-24T03:36:29.372Z"
+        },
+        {
+          "id": "note-003",
+          "title": "Case Note 3",
+          "content": "Case management note for Mark Nicole Miller",
+          "author": "Case Manager",
+          "date": "2025-08-18T03:36:29.372Z",
+          "category": "contact",
+          "lastModified": "2025-08-25T03:36:29.372Z"
+        }
+      ],
+      "todos": [
+        {
+          "id": "todo-001",
+          "task": "Complete documentation",
+          "status": "pending",
+          "dueDate": "2025-09-23T03:36:29.372Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-002",
+          "task": "Complete assessment",
+          "status": "pending",
+          "dueDate": "2025-09-09T03:36:29.372Z",
+          "completedDate": "",
+          "assignedTo": "Case Manager",
+          "priority": "low",
+          "notes": "Task notes"
+        },
+        {
+          "id": "todo-003",
+          "task": "Complete documentation",
+          "status": "completed",
+          "dueDate": "2025-09-20T03:36:29.372Z",
+          "completedDate": "2025-08-23T03:36:29.372Z",
+          "assignedTo": "Case Manager",
+          "priority": "high",
+          "notes": "Task notes"
+        }
+      ],
+      "vrRequests": [
+        {
+          "id": "vr-001",
+          "type": "Equipment",
+          "status": "completed",
+          "requestDate": "2025-07-13T03:36:29.372Z",
+          "completedDate": "2025-08-03T03:36:29.372Z",
+          "notes": "VR service request",
+          "assignedTo": "VR Counselor",
+          "description": "Vocational rehabilitation service"
+        }
+      ],
+      "verificationRequest": {
+        "requestType": "Financial",
+        "status": "pending",
+        "dateRequested": "2025-07-31T03:36:29.372Z",
+        "dateCompleted": "",
+        "notes": "Verification of information",
+        "requestedBy": "Case Manager",
+        "completedBy": ""
+      },
+      "searchableText": "Mark Nicole Miller SIMP Pending",
+      "source": "Application Form",
+      "verificationSource": "Application Form",
+      "applicationDate": "2025-08-24T03:36:29.372Z",
+      "organizationAddress": "Not specified",
+      "financials": {
+        "resources": [],
+        "income": [],
+        "expenses": []
+      }
     }
   ],
   "people": [
     {
       "id": "person-001",
-      "name": "Sarah Michelle Johnson",
-      "firstName": "Sarah",
-      "lastName": "Johnson",
-      "middleName": "Michelle",
-      "ssn": "123-45-6789",
-      "dateOfBirth": "1985-03-12T00:00:00.000Z",
-      "phone": "(555) 123-4567",
-      "email": "sarah.johnson@email.com",
+      "name": "Mark Nicole Miller",
+      "firstName": "Mark",
+      "lastName": "Miller",
       "status": "active",
-      "dateAdded": "2025-08-15T10:30:00.000Z",
-      "lastUpdated": "2025-08-28T14:22:00.000Z",
+      "dateAdded": "2025-07-22T03:36:29.367Z",
+      "lastUpdated": "2025-07-31T03:36:29.367Z",
       "relationship": "client",
-      "address": {
-        "street": "456 Oak Street, Apt 2B",
-        "city": "Springfield",
-        "state": "IL",
-        "zip": "62701"
-      },
-      "mailingAddress": {
-        "street": "456 Oak Street, Apt 2B",
-        "city": "Springfield",
-        "state": "IL",
-        "zip": "62701",
-        "sameAsPhysical": true
-      },
-      "emergencyContact": {
-        "name": "Robert Johnson",
-        "phone": "(555) 987-1234",
-        "relationship": "brother"
-      },
-      "notes": "Client with mobility limitations seeking vocational rehabilitation services. Highly motivated and tech-savvy. Successfully completed adaptive technology training.",
       "tags": [
         "client",
-        "active",
-        "VR",
-        "employment-success"
-      ]
+        "active"
+      ],
+      "middleName": "Nicole",
+      "ssn": "545-79-7228",
+      "dateOfBirth": "1958-08-29T03:36:29.367Z",
+      "phone": "(557) 365-8870",
+      "email": "mark.miller@outlook.com",
+      "address": {
+        "street": "959 Pine Street",
+        "city": "Kingston",
+        "state": "WA",
+        "zip": "89515"
+      },
+      "notes": "Additional information about Mark Nicole Miller"
     },
     {
       "id": "person-002",
-      "name": "Michael Thompson",
-      "firstName": "Michael",
-      "lastName": "Thompson",
-      "middleName": "David",
-      "ssn": "",
-      "dateOfBirth": "1972-11-08T00:00:00.000Z",
-      "phone": "(555) 987-6543",
-      "email": "m.thompson@legalaid.org",
-      "status": "active",
-      "dateAdded": "2025-08-15T10:30:00.000Z",
-      "lastUpdated": "2025-08-15T10:30:00.000Z",
-      "relationship": "legal-representative",
+      "name": "Lisa Scott",
+      "firstName": "Lisa",
+      "lastName": "Scott",
+      "status": "inactive",
+      "dateAdded": "2025-05-08T03:36:29.368Z",
+      "lastUpdated": "2025-08-06T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "middleName": null,
+      "ssn": "859-70-5140",
+      "dateOfBirth": "1997-08-29T03:36:29.368Z",
       "address": {
-        "street": "789 Legal Plaza",
-        "city": "Springfield",
-        "state": "IL",
-        "zip": "62703"
+        "street": "1407 High Street",
+        "city": "Fairview",
+        "state": "WI",
+        "zip": "16035"
       },
       "mailingAddress": {
-        "street": "789 Legal Plaza",
-        "city": "Springfield",
-        "state": "IL",
-        "zip": "62703",
-        "sameAsPhysical": true
+        "street": "1281 Pine Street",
+        "city": "Madison",
+        "state": "CA",
+        "zip": "77707",
+        "sameAsPhysical": false
       },
-      "emergencyContact": {
-        "name": "Legal Aid Society",
-        "phone": "(555) 987-6500",
-        "relationship": "employer"
-      },
-      "notes": "Legal guardian and advocate for Sarah Johnson. Licensed attorney specializing in disability rights.",
+      "notes": "Additional information about Lisa Scott"
+    },
+    {
+      "id": "person-003",
+      "name": "Michelle Robert Moore",
+      "firstName": "Michelle",
+      "lastName": "Moore",
+      "status": "active",
+      "dateAdded": "2024-04-28T03:36:29.368Z",
+      "lastUpdated": "2025-08-10T03:36:29.368Z",
+      "relationship": "client",
       "tags": [
-        "legal-representative",
-        "active",
-        "attorney"
-      ]
+        "client",
+        "active"
+      ],
+      "middleName": "Robert",
+      "ssn": "792-26-1033",
+      "dateOfBirth": "1971-08-29T03:36:29.368Z",
+      "phone": "(465) 819-7638",
+      "email": "michelle.moore@example.com",
+      "address": {
+        "street": "3658 Park Avenue",
+        "city": "Clinton",
+        "state": "TX",
+        "zip": "57019"
+      },
+      "notes": "Additional information about Michelle Robert Moore"
+    },
+    {
+      "id": "person-004",
+      "name": "Ronald James Brown",
+      "firstName": "Ronald",
+      "lastName": "Brown",
+      "status": "inactive",
+      "dateAdded": "2023-10-12T03:36:29.368Z",
+      "lastUpdated": "2025-08-01T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "middleName": "James",
+      "ssn": "710-46-4099",
+      "dateOfBirth": "1954-08-29T03:36:29.368Z",
+      "phone": "(462) 827-5006",
+      "email": "ronald.brown@yahoo.com"
+    },
+    {
+      "id": "person-005",
+      "name": "Linda Jane Johnson",
+      "firstName": "Linda",
+      "lastName": "Johnson",
+      "status": "active",
+      "dateAdded": "2025-06-29T03:36:29.368Z",
+      "lastUpdated": "2025-08-23T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": "Jane",
+      "dateOfBirth": "1944-08-29T03:36:29.368Z",
+      "phone": "(671) 833-7942",
+      "email": "linda.johnson@gmail.com",
+      "address": {
+        "street": "586 Church Street",
+        "city": "Warren",
+        "state": "UT",
+        "zip": "25755"
+      },
+      "notes": "Additional information about Linda Jane Johnson"
+    },
+    {
+      "id": "person-006",
+      "name": "Andrew Jane Torres",
+      "firstName": "Andrew",
+      "lastName": "Torres",
+      "status": "inactive",
+      "dateAdded": "2024-12-19T04:36:29.368Z",
+      "lastUpdated": "2025-08-06T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "ssn": "898-41-4840",
+      "dateOfBirth": "1999-08-29T03:36:29.368Z",
+      "phone": "(531) 510-8724",
+      "address": {
+        "street": "6041 Park Avenue",
+        "city": "Oxford",
+        "state": "SC",
+        "zip": "60325"
+      }
+    },
+    {
+      "id": "person-007",
+      "name": "Ryan Rose Thompson",
+      "firstName": "Ryan",
+      "lastName": "Thompson",
+      "status": "inactive",
+      "dateAdded": "2024-01-22T04:36:29.368Z",
+      "lastUpdated": "2025-08-27T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "middleName": "Rose",
+      "ssn": "601-50-1166",
+      "dateOfBirth": "1951-08-29T03:36:29.368Z",
+      "phone": "(376) 596-2175",
+      "email": "ryan.thompson@hotmail.com",
+      "address": {
+        "street": "5532 Elm Street",
+        "city": "Marion",
+        "state": "SC",
+        "zip": "56721"
+      }
+    },
+    {
+      "id": "person-008",
+      "name": "Matthew Alan Lee",
+      "firstName": "Matthew",
+      "lastName": "Lee",
+      "status": "inactive",
+      "dateAdded": "2024-12-17T04:36:29.368Z",
+      "lastUpdated": "2025-08-15T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "middleName": "Alan",
+      "ssn": "214-97-9351",
+      "dateOfBirth": "1986-08-29T03:36:29.368Z",
+      "email": "matthew.lee@example.com",
+      "address": {
+        "street": "4078 Franklin Street",
+        "city": "Springfield",
+        "state": "OH",
+        "zip": "68933"
+      },
+      "mailingAddress": {
+        "street": "3099 First Street",
+        "city": "Warren",
+        "state": "MI",
+        "zip": "47087",
+        "sameAsPhysical": false
+      }
+    },
+    {
+      "id": "person-009",
+      "name": "Nancy Jane Garcia",
+      "firstName": "Nancy",
+      "lastName": "Garcia",
+      "status": "inactive",
+      "dateAdded": "2024-11-15T04:36:29.368Z",
+      "lastUpdated": "2025-08-24T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "ssn": "182-61-1676",
+      "dateOfBirth": "1950-08-29T03:36:29.368Z",
+      "email": "nancy.garcia@example.com",
+      "address": {
+        "street": "7596 Court Street",
+        "city": "Riverside",
+        "state": "PA",
+        "zip": "99941"
+      },
+      "mailingAddress": {
+        "street": "7289 Cedar Lane",
+        "city": "Fairview",
+        "state": "AL",
+        "zip": "33097",
+        "sameAsPhysical": false
+      }
+    },
+    {
+      "id": "person-010",
+      "name": "Edward Allen",
+      "firstName": "Edward",
+      "lastName": "Allen",
+      "status": "active",
+      "dateAdded": "2024-01-22T04:36:29.368Z",
+      "lastUpdated": "2025-08-15T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": null,
+      "ssn": "199-99-5806",
+      "dateOfBirth": "1966-08-29T03:36:29.368Z",
+      "phone": "(959) 348-2222",
+      "email": "edward.allen@yahoo.com",
+      "address": {
+        "street": "7246 Elm Street",
+        "city": "Franklin",
+        "state": "MS",
+        "zip": "79116"
+      },
+      "notes": "Additional information about Edward Allen"
+    },
+    {
+      "id": "person-011",
+      "name": "Michelle Marie Scott",
+      "firstName": "Michelle",
+      "lastName": "Scott",
+      "status": "active",
+      "dateAdded": "2025-03-05T04:36:29.368Z",
+      "lastUpdated": "2025-07-31T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": "Marie",
+      "ssn": "322-78-5744",
+      "dateOfBirth": "1950-08-29T03:36:29.368Z",
+      "phone": "(335) 671-4622",
+      "email": "michelle.scott@gmail.com",
+      "address": {
+        "street": "5976 Washington Street",
+        "city": "Hudson",
+        "state": "NV",
+        "zip": "81677"
+      },
+      "mailingAddress": {
+        "street": "7403 Mill Road",
+        "city": "Springfield",
+        "state": "MS",
+        "zip": "19951",
+        "sameAsPhysical": false
+      },
+      "notes": "Additional information about Michelle Marie Scott"
+    },
+    {
+      "id": "person-012",
+      "name": "Steven Wright",
+      "firstName": "Steven",
+      "lastName": "Wright",
+      "status": "active",
+      "dateAdded": "2023-10-22T03:36:29.368Z",
+      "lastUpdated": "2025-08-22T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": null,
+      "ssn": "428-49-1424",
+      "dateOfBirth": "1996-08-29T03:36:29.368Z",
+      "phone": "(312) 746-4603",
+      "email": "steven.wright@gmail.com",
+      "address": {
+        "street": "5361 Park Avenue",
+        "city": "Hudson",
+        "state": "MO",
+        "zip": "38258"
+      },
+      "mailingAddress": {
+        "street": "8100 Main Street",
+        "city": "Madison",
+        "state": "MI",
+        "zip": "94681",
+        "sameAsPhysical": false
+      }
+    },
+    {
+      "id": "person-013",
+      "name": "Paul Flores",
+      "firstName": "Paul",
+      "lastName": "Flores",
+      "status": "active",
+      "dateAdded": "2024-01-07T04:36:29.368Z",
+      "lastUpdated": "2025-08-06T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": null,
+      "ssn": "696-85-5732",
+      "dateOfBirth": "2000-08-29T03:36:29.368Z",
+      "phone": "(560) 376-2627",
+      "email": "paul.flores@outlook.com",
+      "address": {
+        "street": "9094 First Street",
+        "city": "Clinton",
+        "state": "GA",
+        "zip": "41346"
+      }
+    },
+    {
+      "id": "person-014",
+      "name": "Jeffrey Robert Allen",
+      "firstName": "Jeffrey",
+      "lastName": "Allen",
+      "status": "active",
+      "dateAdded": "2024-10-28T03:36:29.368Z",
+      "lastUpdated": "2025-08-11T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": "Robert",
+      "ssn": "993-60-5700",
+      "phone": "(763) 318-5779",
+      "email": "jeffrey.allen@gmail.com",
+      "address": {
+        "street": "6811 Hill Street",
+        "city": "Springfield",
+        "state": "AR",
+        "zip": "60471"
+      }
+    },
+    {
+      "id": "person-015",
+      "name": "Jeffrey Ramirez",
+      "firstName": "Jeffrey",
+      "lastName": "Ramirez",
+      "status": "inactive",
+      "dateAdded": "2023-11-23T04:36:29.368Z",
+      "lastUpdated": "2025-08-01T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "ssn": "408-94-7827",
+      "dateOfBirth": "2005-08-29T03:36:29.368Z",
+      "phone": "(499) 859-9452",
+      "address": {
+        "street": "8113 Mill Road",
+        "city": "Bristol",
+        "state": "LA",
+        "zip": "61876"
+      },
+      "mailingAddress": {
+        "street": "454 Spring Street",
+        "city": "Lancaster",
+        "state": "NY",
+        "zip": "50093",
+        "sameAsPhysical": false
+      },
+      "notes": "Additional information about Jeffrey Ramirez"
+    },
+    {
+      "id": "person-016",
+      "name": "Steven Marie Lee",
+      "firstName": "Steven",
+      "lastName": "Lee",
+      "status": "active",
+      "dateAdded": "2024-02-23T04:36:29.368Z",
+      "lastUpdated": "2025-08-24T03:36:29.368Z",
+      "relationship": "representative",
+      "tags": [
+        "representative",
+        "active"
+      ],
+      "middleName": "Marie",
+      "dateOfBirth": "1950-08-29T03:36:29.368Z",
+      "phone": "(297) 943-9252",
+      "address": {
+        "street": "3962 Oak Street",
+        "city": "Auburn",
+        "state": "WV",
+        "zip": "62430"
+      },
+      "mailingAddress": {
+        "street": "560 Maple Avenue",
+        "city": "Fairview",
+        "state": "IN",
+        "zip": "86787",
+        "sameAsPhysical": false
+      },
+      "notes": "Additional information about Steven Marie Lee"
+    },
+    {
+      "id": "person-017",
+      "name": "Kenneth David Hill",
+      "firstName": "Kenneth",
+      "lastName": "Hill",
+      "status": "active",
+      "dateAdded": "2025-01-14T04:36:29.368Z",
+      "lastUpdated": "2025-08-11T03:36:29.368Z",
+      "relationship": "attorney",
+      "tags": [
+        "attorney",
+        "active"
+      ],
+      "middleName": "David",
+      "ssn": "639-23-5586",
+      "dateOfBirth": "1947-08-29T03:36:29.368Z",
+      "phone": "(575) 650-4818",
+      "email": "kenneth.hill@hotmail.com",
+      "address": {
+        "street": "877 Center Street",
+        "city": "Riverside",
+        "state": "HI",
+        "zip": "63090"
+      },
+      "mailingAddress": {
+        "street": "5849 Park Avenue",
+        "city": "Franklin",
+        "state": "AL",
+        "zip": "90342",
+        "sameAsPhysical": false
+      },
+      "notes": "Additional information about Kenneth David Hill"
+    },
+    {
+      "id": "person-018",
+      "name": "Kenneth Hill",
+      "firstName": "Kenneth",
+      "lastName": "Hill",
+      "status": "active",
+      "dateAdded": "2025-02-19T04:36:29.368Z",
+      "lastUpdated": "2025-08-23T03:36:29.368Z",
+      "relationship": "attorney",
+      "tags": [
+        "attorney",
+        "active"
+      ],
+      "ssn": "360-74-2347",
+      "dateOfBirth": "1955-08-29T03:36:29.368Z",
+      "phone": "(238) 271-9648",
+      "email": "kenneth.hill@yahoo.com",
+      "address": {
+        "street": "7897 Oak Street",
+        "city": "Salem",
+        "state": "SD",
+        "zip": "27263"
+      },
+      "mailingAddress": {
+        "street": "5311 High Street",
+        "city": "Salem",
+        "state": "KS",
+        "zip": "98287",
+        "sameAsPhysical": false
+      }
+    },
+    {
+      "id": "person-019",
+      "name": "Ryan Ann Anderson",
+      "firstName": "Ryan",
+      "lastName": "Anderson",
+      "status": "active",
+      "dateAdded": "2025-05-15T03:36:29.368Z",
+      "lastUpdated": "2025-08-06T03:36:29.368Z",
+      "relationship": "attorney",
+      "tags": [
+        "attorney",
+        "active"
+      ],
+      "middleName": "Ann",
+      "ssn": "462-97-6603",
+      "dateOfBirth": "1962-08-29T03:36:29.368Z",
+      "phone": "(594) 613-6873",
+      "email": "ryan.anderson@example.com"
+    },
+    {
+      "id": "person-020",
+      "name": "Mark Marie White",
+      "firstName": "Mark",
+      "lastName": "White",
+      "status": "active",
+      "dateAdded": "2024-06-29T03:36:29.368Z",
+      "lastUpdated": "2025-08-19T03:36:29.368Z",
+      "relationship": "representative",
+      "tags": [
+        "representative",
+        "active"
+      ],
+      "middleName": "Marie",
+      "ssn": "722-90-7577",
+      "dateOfBirth": "1950-08-29T03:36:29.368Z",
+      "phone": "(931) 665-7291",
+      "email": "mark.white@yahoo.com",
+      "address": {
+        "street": "5129 Second Street",
+        "city": "Clinton",
+        "state": "WV",
+        "zip": "56655"
+      }
+    },
+    {
+      "id": "person-021",
+      "name": "Jeffrey Clark",
+      "firstName": "Jeffrey",
+      "lastName": "Clark",
+      "status": "active",
+      "dateAdded": "2025-06-07T03:36:29.368Z",
+      "lastUpdated": "2025-08-29T03:36:29.368Z",
+      "relationship": "attorney",
+      "tags": [
+        "attorney",
+        "active"
+      ],
+      "middleName": null,
+      "ssn": "748-97-7901",
+      "dateOfBirth": "1985-08-29T03:36:29.368Z",
+      "phone": "(951) 933-2213",
+      "address": {
+        "street": "1048 Washington Street",
+        "city": "Warren",
+        "state": "VT",
+        "zip": "69553"
+      }
+    },
+    {
+      "id": "person-022",
+      "name": "Donna Martin",
+      "firstName": "Donna",
+      "lastName": "Martin",
+      "status": "inactive",
+      "dateAdded": "2024-10-13T03:36:29.368Z",
+      "lastUpdated": "2025-08-15T03:36:29.368Z",
+      "relationship": "representative",
+      "tags": [
+        "representative"
+      ],
+      "dateOfBirth": "1997-08-29T03:36:29.368Z",
+      "phone": "(235) 551-2272",
+      "address": {
+        "street": "4003 Pine Street",
+        "city": "Clinton",
+        "state": "NC",
+        "zip": "95228"
+      }
+    },
+    {
+      "id": "person-023",
+      "name": "Joshua Lee Clark",
+      "firstName": "Joshua",
+      "lastName": "Clark",
+      "status": "active",
+      "dateAdded": "2025-05-29T03:36:29.368Z",
+      "lastUpdated": "2025-08-21T03:36:29.368Z",
+      "relationship": "representative",
+      "tags": [
+        "representative",
+        "active"
+      ],
+      "ssn": "302-52-4901",
+      "dateOfBirth": "1982-08-29T03:36:29.368Z",
+      "phone": "(683) 859-7413",
+      "email": "joshua.clark@gmail.com",
+      "mailingAddress": {
+        "street": "3352 Cedar Lane",
+        "city": "Georgetown",
+        "state": "UT",
+        "zip": "63351",
+        "sameAsPhysical": false
+      },
+      "notes": "Additional information about Joshua Lee Clark"
+    },
+    {
+      "id": "person-024",
+      "name": "Jacob Thomas",
+      "firstName": "Jacob",
+      "lastName": "Thomas",
+      "status": "inactive",
+      "dateAdded": "2025-06-15T03:36:29.368Z",
+      "lastUpdated": "2025-08-05T03:36:29.368Z",
+      "relationship": "case-manager",
+      "tags": [
+        "case-manager"
+      ],
+      "middleName": null,
+      "ssn": "178-44-8392",
+      "dateOfBirth": "1991-08-29T03:36:29.368Z",
+      "phone": "(443) 416-3729",
+      "email": "jacob.thomas@outlook.com",
+      "address": {
+        "street": "232 Cedar Lane",
+        "city": "Franklin",
+        "state": "AR",
+        "zip": "23301"
+      },
+      "notes": "Additional information about Jacob Thomas"
+    },
+    {
+      "id": "person-025",
+      "name": "Joshua Rose Robinson",
+      "firstName": "Joshua",
+      "lastName": "Robinson",
+      "status": "inactive",
+      "dateAdded": "2023-11-26T04:36:29.368Z",
+      "lastUpdated": "2025-08-12T03:36:29.368Z",
+      "relationship": "case-manager",
+      "tags": [
+        "case-manager"
+      ],
+      "middleName": "Rose",
+      "dateOfBirth": "1978-08-29T03:36:29.368Z",
+      "email": "joshua.robinson@gmail.com"
+    },
+    {
+      "id": "person-026",
+      "name": "Michelle Alan Walker",
+      "firstName": "Michelle",
+      "lastName": "Walker",
+      "status": "inactive",
+      "dateAdded": "2024-10-20T03:36:29.368Z",
+      "lastUpdated": "2025-08-27T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client"
+      ],
+      "ssn": "632-84-1391",
+      "dateOfBirth": "1944-08-29T03:36:29.368Z",
+      "phone": "(913) 905-9044",
+      "email": "michelle.walker@example.com",
+      "address": {
+        "street": "7080 Church Street",
+        "city": "Salem",
+        "state": "NV",
+        "zip": "70490"
+      }
+    },
+    {
+      "id": "person-027",
+      "name": "Matthew Grace Harris",
+      "firstName": "Matthew",
+      "lastName": "Harris",
+      "status": "inactive",
+      "dateAdded": "2024-05-11T03:36:29.368Z",
+      "lastUpdated": "2025-08-25T03:36:29.368Z",
+      "relationship": "parent",
+      "tags": [
+        "parent"
+      ],
+      "ssn": "802-70-8313",
+      "dateOfBirth": "1989-08-29T03:36:29.368Z",
+      "phone": "(667) 777-2004",
+      "email": "matthew.harris@outlook.com",
+      "address": {
+        "street": "8821 School Street",
+        "city": "Fairview",
+        "state": "NY",
+        "zip": "80920"
+      },
+      "mailingAddress": {
+        "street": "3590 Union Street",
+        "city": "Lancaster",
+        "state": "UT",
+        "zip": "52942",
+        "sameAsPhysical": false
+      }
+    },
+    {
+      "id": "person-028",
+      "name": "Melissa Flores",
+      "firstName": "Melissa",
+      "lastName": "Flores",
+      "status": "active",
+      "dateAdded": "2023-12-07T04:36:29.368Z",
+      "lastUpdated": "2025-08-28T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": null,
+      "ssn": "808-34-1001",
+      "dateOfBirth": "1994-08-29T03:36:29.368Z",
+      "phone": "(471) 627-8188",
+      "email": "melissa.flores@outlook.com",
+      "address": {
+        "street": "9526 Franklin Street",
+        "city": "Oxford",
+        "state": "MO",
+        "zip": "38748"
+      },
+      "mailingAddress": {
+        "street": "3807 Spring Street",
+        "city": "Auburn",
+        "state": "IA",
+        "zip": "55602",
+        "sameAsPhysical": false
+      }
+    },
+    {
+      "id": "person-029",
+      "name": "Linda William Walker",
+      "firstName": "Linda",
+      "lastName": "Walker",
+      "status": "active",
+      "dateAdded": "2024-11-21T04:36:29.368Z",
+      "lastUpdated": "2025-08-04T03:36:29.368Z",
+      "relationship": "client",
+      "tags": [
+        "client",
+        "active"
+      ],
+      "middleName": "William",
+      "ssn": "711-74-9792",
+      "phone": "(435) 707-9736",
+      "email": "linda.walker@yahoo.com",
+      "address": {
+        "street": "5875 Second Street",
+        "city": "Clinton",
+        "state": "ND",
+        "zip": "70207"
+      },
+      "mailingAddress": {
+        "street": "6834 Mill Road",
+        "city": "Marion",
+        "state": "NH",
+        "zip": "55554",
+        "sameAsPhysical": false
+      },
+      "notes": "Additional information about Linda William Walker"
+    },
+    {
+      "id": "person-030",
+      "name": "Jessica Harris",
+      "firstName": "Jessica",
+      "lastName": "Harris",
+      "status": "active",
+      "dateAdded": "2025-05-21T03:36:29.368Z",
+      "lastUpdated": "2025-08-21T03:36:29.368Z",
+      "relationship": "spouse",
+      "tags": [
+        "spouse",
+        "active"
+      ],
+      "ssn": "174-20-8371",
+      "dateOfBirth": "1946-08-29T03:36:29.368Z",
+      "phone": "(549) 996-2212",
+      "notes": "Additional information about Jessica Harris"
     }
   ],
   "organizations": [
     {
       "id": "org-001",
-      "name": "Springfield Rehabilitation Services",
-      "type": "Government Agency",
+      "name": "Fairview Career Development Institute",
+      "type": "Community Organization",
       "status": "active",
-      "phone": "(555) 987-6543",
-      "email": "info@springfieldvr.gov",
-      "website": "https://www.springfieldvr.gov",
-      "dateAdded": "2025-08-15T10:30:00.000Z",
-      "lastUpdated": "2025-08-28T14:22:00.000Z",
+      "dateAdded": "2025-06-07T03:36:29.369Z",
+      "lastUpdated": "2025-07-30T03:36:29.369Z",
+      "tags": [
+        "service-provider",
+        "active"
+      ],
+      "phone": "(460) 344-5784",
       "address": {
-        "street": "100 Community Drive",
-        "city": "Springfield",
-        "state": "IL",
-        "zip": "62701"
-      },
-      "contactPerson": {
-        "name": "Maria Rodriguez",
-        "title": "Senior Case Manager",
-        "phone": "(555) 987-6544",
-        "email": "maria.rodriguez@springfieldvr.gov"
+        "street": "2864 Center Street",
+        "city": "Riverside",
+        "state": "MA",
+        "zip": "97661"
       },
       "services": [
-        "Vocational Rehabilitation",
-        "Job Placement",
-        "Adaptive Technology Training",
-        "Case Management"
-      ],
-      "notes": "Primary VR services provider for the Springfield region. Specializes in employment services for individuals with disabilities.",
+        "Case Management",
+        "Equipment Provision",
+        "Job Placement"
+      ]
+    },
+    {
+      "id": "org-002",
+      "name": "Ashland Adaptive Services Group",
+      "type": "Service Provider",
+      "status": "inactive",
+      "dateAdded": "2025-06-16T03:36:29.369Z",
+      "lastUpdated": "2025-07-08T03:36:29.369Z",
       "tags": [
-        "government",
-        "VR-services",
-        "active",
-        "primary-provider"
-      ]
-    }
-  ],
-  "metadata": {
-    "version": "1.0.0",
-    "generatedAt": "2025-08-28T14:22:00.000Z",
-    "type": "sample-data",
-    "description": "Complete Nightingale CMS data structure with sample case data",
-    "schemaVersion": "2024.1",
-    "totalCases": 1,
-    "totalPeople": 2,
-    "totalOrganizations": 1,
-    "dataFormat": "normalized",
-    "migrationNotes": "Sample data for development and testing - includes fully populated case example"
-  },
-  "caseTemplate": {
-    "id": "case-template",
-    "mcn": "MCN12345",
-    "masterCaseNumber": "MCN12345",
-    "clientName": "Client Full Name",
-    "personId": "person-001",
-    "status": "Pending",
-    "priority": false,
-    "caseType": "SIMP",
-    "serviceType": "Vocational Rehabilitation",
-    "applicationDate": "2025-08-28T00:00:00.000Z",
-    "createdDate": "2025-08-28T00:00:00.000Z",
-    "lastUpdated": "2025-08-28T00:00:00.000Z",
-    "description": "Case description text",
-    "withWaiver": false,
-    "retroRequested": "No",
-    "livingArrangement": "Not specified",
-    "organizationAddress": "Not specified",
-    "clientAddress": {
-      "street": "123 Main Street",
-      "city": "City Name",
-      "state": "State",
-      "zip": "12345"
-    },
-    "authorizedReps": [
-      {
-        "id": "rep-001",
-        "name": "Representative Name",
-        "relationship": "Attorney",
-        "phone": "(555) 123-4567",
-        "email": "rep@example.com"
-      }
-    ],
-    "appDetails": {
-      "appDate": "2025-08-28T00:00:00.000Z",
-      "caseType": "SIMP",
-      "serviceType": "Vocational Rehabilitation"
-    },
-    "financials": {
-      "resources": [
-        {
-          "id": "financial-001",
-          "description": "Checking Account",
-          "type": "Checking Account",
-          "amount": 1500,
-          "value": 1500,
-          "location": "Bank Name",
-          "accountNumber": "****1234",
-          "frequency": "monthly",
-          "dateAdded": "2025-08-28T00:00:00.000Z",
-          "source": "Bank Statement",
-          "verificationSource": "Bank Statement",
-          "notes": "Primary checking account",
-          "verified": true
-        }
+        "service-provider"
       ],
-      "income": [
-        {
-          "id": "income-001",
-          "description": "Employment Income",
-          "type": "Employment Income",
-          "amount": 2500,
-          "value": 2500,
-          "frequency": "monthly",
-          "dateAdded": "2025-08-28T00:00:00.000Z",
-          "source": "Pay Stub",
-          "verificationSource": "Pay Stub",
-          "location": "Employer Name",
-          "notes": "Full-time employment",
-          "verified": true
-        }
+      "phone": "(264) 713-6458",
+      "email": "info@ashlandadaptiveservicesgroup.org",
+      "website": "https://www.ashlandadaptiveservicesgroup.org",
+      "contactPerson": {
+        "name": "Lisa Walker",
+        "title": "Coordinator",
+        "phone": "(344) 479-3209",
+        "email": "lisa.walker@ashlandadaptiveservicesgroup.org"
+      },
+      "services": [
+        "Support Services",
+        "Transportation Services",
+        "Equipment Provision",
+        "Vocational Training"
       ],
-      "expenses": [
-        {
-          "id": "expense-001",
-          "description": "Housing Costs",
-          "type": "Housing Costs",
-          "amount": 1200,
-          "value": 1200,
-          "frequency": "monthly",
-          "dateAdded": "2025-08-28T00:00:00.000Z",
-          "source": "Lease Agreement",
-          "verificationSource": "Lease Agreement",
-          "location": "Home Address",
-          "notes": "Rent payment",
-          "verified": true
-        }
+      "notes": "Service provider in Ashland area"
+    },
+    {
+      "id": "org-003",
+      "name": "Bristol Adaptive Services Group",
+      "type": "Government Agency",
+      "status": "active",
+      "dateAdded": "2025-07-20T03:36:29.369Z",
+      "lastUpdated": "2025-08-25T03:36:29.369Z",
+      "tags": [
+        "service-provider",
+        "active"
+      ],
+      "phone": "(210) 944-4605",
+      "email": "info@bristoladaptiveservicesgroup.org",
+      "website": "https://www.bristoladaptiveservicesgroup.org",
+      "address": {
+        "street": "8385 Oak Street",
+        "city": "Greenville",
+        "state": "AR",
+        "zip": "87627"
+      },
+      "services": [
+        "Mental Health Services",
+        "Physical Therapy",
+        "Equipment Provision",
+        "Support Services",
+        "Job Placement"
       ]
     },
-    "notes": [
-      {
-        "id": "note-001",
-        "title": "Case Opening",
-        "content": "Initial case assessment completed",
-        "author": "Case Manager",
-        "date": "2025-08-28T00:00:00.000Z",
-        "category": "initial",
-        "lastModified": "2025-08-28T00:00:00.000Z"
-      }
-    ],
-    "todos": [
-      {
-        "id": "todo-001",
-        "task": "Complete intake documentation",
-        "status": "pending",
-        "dueDate": "2025-09-15T00:00:00.000Z",
-        "completedDate": "",
-        "assignedTo": "Case Manager",
-        "priority": "high",
-        "notes": "Required for case processing"
-      }
-    ],
-    "vrRequests": [
-      {
-        "id": "vr-001",
-        "type": "Assessment",
-        "status": "pending",
-        "requestDate": "2025-08-28T00:00:00.000Z",
-        "completedDate": "",
-        "notes": "Initial vocational assessment",
-        "assignedTo": "VR Counselor",
-        "description": "Comprehensive vocational evaluation"
-      }
-    ],
-    "verificationRequest": {
-      "requestType": "Financial",
-      "status": "pending",
-      "dateRequested": "2025-08-28T00:00:00.000Z",
-      "dateCompleted": "",
-      "notes": "Verification of income and resources",
-      "requestedBy": "Case Manager",
-      "completedBy": ""
-    },
-    "searchableText": "case search text content",
-    "source": "Application Form",
-    "verificationSource": "Application Form"
-  },
-  "personTemplate": {
-    "id": "person-001",
-    "name": "John Doe",
-    "firstName": "John",
-    "lastName": "Doe",
-    "middleName": "Michael",
-    "ssn": "123-45-6789",
-    "dateOfBirth": "1980-01-15T00:00:00.000Z",
-    "phone": "(555) 123-4567",
-    "email": "john.doe@example.com",
-    "status": "active",
-    "dateAdded": "2025-08-28T00:00:00.000Z",
-    "lastUpdated": "2025-08-28T00:00:00.000Z",
-    "relationship": "client",
-    "address": {
-      "street": "123 Main Street",
-      "city": "Springfield",
-      "state": "IL",
-      "zip": "62701"
-    },
-    "mailingAddress": {
-      "street": "PO Box 456",
-      "city": "Springfield",
-      "state": "IL",
-      "zip": "62702",
-      "sameAsPhysical": false
-    },
-    "emergencyContact": {
-      "name": "Jane Doe",
-      "phone": "(555) 987-6543",
-      "relationship": "spouse"
-    },
-    "notes": "Client notes and additional information",
-    "tags": [
-      "client",
-      "active"
-    ]
-  },
-  "organizationTemplate": {
-    "id": "org-001",
-    "name": "Springfield Community Services",
-    "type": "Non-Profit",
-    "status": "active",
-    "phone": "(555) 987-6543",
-    "email": "info@springfieldcs.org",
-    "website": "https://www.springfieldcs.org",
-    "dateAdded": "2025-08-28T00:00:00.000Z",
-    "lastUpdated": "2025-08-28T00:00:00.000Z",
-    "address": {
-      "street": "100 Community Drive",
-      "city": "Springfield",
-      "state": "IL",
-      "zip": "62701"
-    },
-    "contactPerson": {
-      "name": "Mary Wilson",
-      "title": "Program Director",
-      "phone": "(555) 987-6544",
-      "email": "mary.wilson@springfieldcs.org"
-    },
-    "services": [
-      "Case Management",
-      "Vocational Training",
-      "Support Services"
-    ],
-    "notes": "Primary service provider for vocational rehabilitation",
-    "tags": [
-      "service-provider",
-      "active"
-    ]
-  },
-  "nextPersonId": 1003,
-  "nextCaseId": 1002,
-  "nextOrganizationId": 1002,
-  "nextFinancialItemId": 1004,
-  "nextNoteId": 1005,
-  "showAllCases": false,
-  "showAllContacts": false,
-  "showAllPeople": true,
-  "caseSortReversed": false,
-  "priorityFilterActive": false,
-  "contacts": [],
-  "vrTemplates": [
     {
-      "id": "vr-template-001",
-      "name": "Standard Assessment Template",
-      "category": "Assessment",
-      "content": "Template content for vocational assessment",
-      "dateCreated": "2025-08-28T00:00:00.000Z"
-    }
-  ],
-  "nextVrTemplateId": 1001,
-  "vrCategories": [
-    "Assessment",
-    "Training",
-    "Support",
-    "Evaluation"
-  ],
-  "vrRequests": [
+      "id": "org-004",
+      "name": "Dover Employment Training Center",
+      "type": "Non-Profit",
+      "status": "active",
+      "dateAdded": "2025-08-20T03:36:29.369Z",
+      "lastUpdated": "2025-07-10T03:36:29.369Z",
+      "tags": [
+        "service-provider",
+        "active"
+      ],
+      "phone": "(577) 462-7999",
+      "email": "info@doveremploymenttrainingcenter.org",
+      "website": "https://www.doveremploymenttrainingcenter.org",
+      "address": {
+        "street": "8988 Park Avenue",
+        "city": "Kingston",
+        "state": "MI",
+        "zip": "32117"
+      },
+      "contactPerson": {
+        "name": "Jacob Taylor",
+        "title": "Manager",
+        "phone": "(670) 262-9256",
+        "email": "jacob.taylor@doveremploymenttrainingcenter.org"
+      },
+      "services": [
+        "Independent Living",
+        "Disability Services",
+        "Occupational Therapy",
+        "Career Counseling",
+        "Educational Support"
+      ]
+    },
     {
-      "id": "vr-request-001",
-      "caseId": "case-001",
-      "type": "Assessment",
-      "status": "pending",
-      "requestDate": "2025-08-28T00:00:00.000Z",
-      "description": "Initial vocational assessment request"
+      "id": "org-005",
+      "name": "Salem Adaptive Services Group",
+      "type": "Service Provider",
+      "status": "active",
+      "dateAdded": "2023-07-31T03:36:29.369Z",
+      "lastUpdated": "2025-08-26T03:36:29.369Z",
+      "tags": [
+        "service-provider",
+        "active"
+      ],
+      "phone": "(877) 210-4988",
+      "email": "info@salemadaptiveservicesgroup.org",
+      "website": "https://www.salemadaptiveservicesgroup.org",
+      "address": {
+        "street": "6724 Cedar Lane",
+        "city": "Riverside",
+        "state": "NC",
+        "zip": "96113"
+      },
+      "contactPerson": {
+        "name": "Jacob Lewis",
+        "title": "Director",
+        "phone": "(346) 510-5692",
+        "email": "jacob.lewis@salemadaptiveservicesgroup.org"
+      },
+      "services": [
+        "Physical Therapy",
+        "Mental Health Services",
+        "Career Counseling"
+      ],
+      "notes": "Service provider in Salem area"
+    },
+    {
+      "id": "org-006",
+      "name": "Springfield Workforce Development Agency",
+      "type": "Non-Profit",
+      "status": "active",
+      "dateAdded": "2023-03-23T03:36:29.369Z",
+      "lastUpdated": "2025-07-16T03:36:29.369Z",
+      "tags": [
+        "service-provider",
+        "active"
+      ],
+      "phone": "(634) 990-7603",
+      "email": "info@springfieldworkforcedevelopmentagency.org",
+      "website": "https://www.springfieldworkforcedevelopmentagency.org",
+      "address": {
+        "street": "7025 Center Street",
+        "city": "Springfield",
+        "state": "SC",
+        "zip": "86873"
+      },
+      "contactPerson": {
+        "name": "Lisa Gonzalez",
+        "title": "Director",
+        "phone": "(785) 405-3202",
+        "email": "lisa.gonzalez@springfieldworkforcedevelopmentagency.org"
+      },
+      "services": [
+        "Independent Living",
+        "Job Placement",
+        "Educational Support",
+        "Vocational Training",
+        "Transportation Services"
+      ]
+    },
+    {
+      "id": "org-007",
+      "name": "Greenville Recovery Services Center",
+      "type": "Government Agency",
+      "status": "inactive",
+      "dateAdded": "2022-10-01T03:36:29.369Z",
+      "lastUpdated": "2025-08-21T03:36:29.369Z",
+      "tags": [
+        "service-provider"
+      ],
+      "phone": "(247) 506-6515",
+      "email": "info@greenvillerecoveryservicescenter.org",
+      "website": "https://www.greenvillerecoveryservicescenter.org",
+      "address": {
+        "street": "6649 Union Street",
+        "city": "Madison",
+        "state": "ND",
+        "zip": "15693"
+      },
+      "notes": "Service provider in Greenville area"
+    },
+    {
+      "id": "org-008",
+      "name": "Clinton Accessibility Solutions",
+      "type": "Private Company",
+      "status": "inactive",
+      "dateAdded": "2025-01-06T04:36:29.369Z",
+      "lastUpdated": "2025-07-23T03:36:29.369Z",
+      "tags": [
+        "service-provider"
+      ],
+      "phone": "(849) 954-1934",
+      "email": "info@clintonaccessibilitysolutions.org",
+      "website": "https://www.clintonaccessibilitysolutions.org",
+      "address": {
+        "street": "9595 Maple Avenue",
+        "city": "Kingston",
+        "state": "WV",
+        "zip": "59000"
+      },
+      "contactPerson": {
+        "name": "Jessica Walker",
+        "title": "Director",
+        "phone": "(884) 613-2420",
+        "email": "jessica.walker@clintonaccessibilitysolutions.org"
+      }
     }
-  ],
-  "nextVrRequestId": 1001,
-  "vrDraftItems": [],
-  "activeCase": null,
-  "isDataLoaded": true,
-  "showAllOrganizations": false,
-  "accordionState": {
-    "simp_applicant": true,
-    "simp_joint": false,
-    "simp_spouse": true
-  },
-  "viewState": {
-    "currentTab": "case-management",
-    "currentTitle": "Cases",
-    "currentCaseId": null,
-    "lastRefreshTimestamp": "2025-08-28T00:00:00.000Z",
-    "expandedFinancialCards": {}
-  }
+  ]
 }
