@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bank Statement Analyzer - Enhanced OCR</title>
+    <meta
+      name="description"
+      content="Advanced bank statement analysis with enhanced 3-stage OCR processing, parsing error detection, and uncertainty categorization."
+    />
+    <meta name="keywords" content="bank statement, OCR, PDF analysis, financial data, Tesseract, React" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏦%3C/text%3E%3C/svg%3E"
+    />
+
+    <!-- External Dependencies -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+    <!-- Jimp with Backup Loading Strategy -->
+    <script>
+      // Primary Jimp source
+      const primaryJimpScript = document.createElement('script');
+      primaryJimpScript.src = 'https://cdn.jsdelivr.net/npm/jimp@0.22.8/browser/lib/jimp.min.js';
+      primaryJimpScript.onload = () => console.log('✅ Jimp loaded from primary CDN');
+      primaryJimpScript.onerror = () => {
+        console.warn('⚠️ Primary Jimp CDN failed, trying backup...');
+        // Backup Jimp source
+        const backupJimpScript = document.createElement('script');
+        backupJimpScript.src = 'https://unpkg.com/jimp@0.22.8/browser/lib/jimp.min.js';
+        backupJimpScript.onload = () => console.log('✅ Jimp loaded from backup CDN');
+        backupJimpScript.onerror = () => console.error('❌ All Jimp CDN sources failed');
+        document.head.appendChild(backupJimpScript);
+      };
+      document.head.appendChild(primaryJimpScript);
+    </script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../src/styles/main.css" />
+    <link rel="stylesheet" href="../src/styles/components.css" />
+    <link rel="stylesheet" href="../src/styles/warnings.css" />
+  </head>
+  <body>
+    <div id="app-container">
+      <header class="app-header">
+        <h1>🏦 Bank Statement Analyzer</h1>
+        <p class="app-subtitle">Enhanced 3-Stage OCR Processing with Smart Error Detection</p>
+      </header>
+
+      <main id="root" class="app-main">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading application...</p>
+        </div>
+      </main>
+
+      <footer class="app-footer">
+        <p>Powered by React 18, Tesseract.js, PDF.js, and Jimp | Enhanced OCR Processing</p>
+      </footer>
+    </div>
+
+    <!-- Application Scripts -->
+    <script type="module" src="../src/utils/ocr-utils.js"></script>
+    <script type="module" src="../src/utils/parser-utils.js"></script>
+    <script type="module" src="../src/components/FileUpload.js"></script>
+    <script type="module" src="../src/components/TransactionTable.js"></script>
+    <script type="module" src="../src/components/App.js"></script>
+    <script type="module" src="../src/main.js"></script>
+  </body>
+</html>

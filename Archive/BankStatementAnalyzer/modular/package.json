@@ -1,0 +1,46 @@
+{
+  "name": "bank-statement-analyzer",
+  "version": "2.0.0",
+  "description": "Enhanced Bank Statement OCR Analyzer with 3-Stage Processing Pipeline",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npx http-server public -p 3000 -o",
+    "start": "npx http-server public -p 8080",
+    "build": "npm run copy-assets && npm run minify",
+    "copy-assets": "cp -r src/* public/",
+    "minify": "echo 'Minification would happen here in a full build system'",
+    "lint": "eslint src --ext .js",
+    "test": "echo 'Tests would run here'",
+    "deploy": "npm run build && echo 'Deployment commands would run here'"
+  },
+  "keywords": [
+    "bank-statement",
+    "ocr",
+    "pdf-processing",
+    "tesseract",
+    "financial-data",
+    "react",
+    "image-processing"
+  ],
+  "author": "Nightingale CMS Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "eslint": "^8.57.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Skigim/nightingale-cms"
+  },
+  "bugs": {
+    "url": "https://github.com/Skigim/nightingale-cms/issues"
+  },
+  "homepage": "https://github.com/Skigim/nightingale-cms#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": ["> 1%", "last 2 versions", "not dead"]
+}

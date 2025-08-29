@@ -1,0 +1,264 @@
+{
+  "cases": [],
+  "people": [],
+  "organizations": [],
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2025-08-28T00:00:00.000Z",
+    "type": "empty-schema",
+    "description": "Complete Nightingale CMS data structure template with all possible fields",
+    "schemaVersion": "2024.1",
+    "totalCases": 0,
+    "totalPeople": 0,
+    "totalOrganizations": 0,
+    "dataFormat": "normalized",
+    "migrationNotes": "Template structure for development and testing"
+  },
+  "caseTemplate": {
+    "id": "case-template",
+    "mcn": "MCN12345",
+    "masterCaseNumber": "MCN12345",
+    "clientName": "Client Full Name",
+    "personId": "person-001",
+    "status": "Pending",
+    "priority": false,
+    "caseType": "SIMP",
+    "serviceType": "Vocational Rehabilitation",
+    "applicationDate": "2025-08-28T00:00:00.000Z",
+    "createdDate": "2025-08-28T00:00:00.000Z",
+    "lastUpdated": "2025-08-28T00:00:00.000Z",
+    "description": "Case description text",
+    "withWaiver": false,
+    "retroRequested": "No",
+    "livingArrangement": "Not specified",
+    "organizationAddress": "Not specified",
+    "clientAddress": {
+      "street": "123 Main Street",
+      "city": "City Name",
+      "state": "State",
+      "zip": "12345"
+    },
+    "authorizedReps": [
+      {
+        "id": "rep-001",
+        "name": "Representative Name",
+        "relationship": "Attorney",
+        "phone": "(555) 123-4567",
+        "email": "rep@example.com"
+      }
+    ],
+    "appDetails": {
+      "appDate": "2025-08-28T00:00:00.000Z",
+      "caseType": "SIMP",
+      "serviceType": "Vocational Rehabilitation"
+    },
+    "financials": {
+      "resources": [
+        {
+          "id": "financial-001",
+          "description": "Checking Account",
+          "type": "Checking Account",
+          "amount": 1500,
+          "value": 1500,
+          "location": "Bank Name",
+          "accountNumber": "****1234",
+          "frequency": "monthly",
+          "dateAdded": "2025-08-28T00:00:00.000Z",
+          "source": "Bank Statement",
+          "verificationSource": "Bank Statement",
+          "notes": "Primary checking account",
+          "verified": true
+        }
+      ],
+      "income": [
+        {
+          "id": "income-001",
+          "description": "Employment Income",
+          "type": "Employment Income",
+          "amount": 2500,
+          "value": 2500,
+          "frequency": "monthly",
+          "dateAdded": "2025-08-28T00:00:00.000Z",
+          "source": "Pay Stub",
+          "verificationSource": "Pay Stub",
+          "location": "Employer Name",
+          "notes": "Full-time employment",
+          "verified": true
+        }
+      ],
+      "expenses": [
+        {
+          "id": "expense-001",
+          "description": "Housing Costs",
+          "type": "Housing Costs",
+          "amount": 1200,
+          "value": 1200,
+          "frequency": "monthly",
+          "dateAdded": "2025-08-28T00:00:00.000Z",
+          "source": "Lease Agreement",
+          "verificationSource": "Lease Agreement",
+          "location": "Home Address",
+          "notes": "Rent payment",
+          "verified": true
+        }
+      ]
+    },
+    "notes": [
+      {
+        "id": "note-001",
+        "title": "Case Opening",
+        "content": "Initial case assessment completed",
+        "author": "Case Manager",
+        "date": "2025-08-28T00:00:00.000Z",
+        "category": "initial",
+        "lastModified": "2025-08-28T00:00:00.000Z"
+      }
+    ],
+    "todos": [
+      {
+        "id": "todo-001",
+        "task": "Complete intake documentation",
+        "status": "pending",
+        "dueDate": "2025-09-15T00:00:00.000Z",
+        "completedDate": "",
+        "assignedTo": "Case Manager",
+        "priority": "high",
+        "notes": "Required for case processing"
+      }
+    ],
+    "vrRequests": [
+      {
+        "id": "vr-001",
+        "type": "Assessment",
+        "status": "pending",
+        "requestDate": "2025-08-28T00:00:00.000Z",
+        "completedDate": "",
+        "notes": "Initial vocational assessment",
+        "assignedTo": "VR Counselor",
+        "description": "Comprehensive vocational evaluation"
+      }
+    ],
+    "verificationRequest": {
+      "requestType": "Financial",
+      "status": "pending",
+      "dateRequested": "2025-08-28T00:00:00.000Z",
+      "dateCompleted": "",
+      "notes": "Verification of income and resources",
+      "requestedBy": "Case Manager",
+      "completedBy": ""
+    },
+    "searchableText": "case search text content",
+    "source": "Application Form",
+    "verificationSource": "Application Form"
+  },
+  "personTemplate": {
+    "id": "person-001",
+    "name": "John Doe",
+    "firstName": "John",
+    "lastName": "Doe",
+    "middleName": "Michael",
+    "ssn": "123-45-6789",
+    "dateOfBirth": "1980-01-15T00:00:00.000Z",
+    "phone": "(555) 123-4567",
+    "email": "john.doe@example.com",
+    "status": "active",
+    "dateAdded": "2025-08-28T00:00:00.000Z",
+    "lastUpdated": "2025-08-28T00:00:00.000Z",
+    "relationship": "client",
+    "address": {
+      "street": "123 Main Street",
+      "city": "Springfield",
+      "state": "IL",
+      "zip": "62701"
+    },
+    "mailingAddress": {
+      "street": "PO Box 456",
+      "city": "Springfield",
+      "state": "IL",
+      "zip": "62702",
+      "sameAsPhysical": false
+    },
+    "emergencyContact": {
+      "name": "Jane Doe",
+      "phone": "(555) 987-6543",
+      "relationship": "spouse"
+    },
+    "notes": "Client notes and additional information",
+    "tags": ["client", "active"]
+  },
+  "organizationTemplate": {
+    "id": "org-001",
+    "name": "Springfield Community Services",
+    "type": "Non-Profit",
+    "status": "active",
+    "phone": "(555) 987-6543",
+    "email": "info@springfieldcs.org",
+    "website": "https://www.springfieldcs.org",
+    "dateAdded": "2025-08-28T00:00:00.000Z",
+    "lastUpdated": "2025-08-28T00:00:00.000Z",
+    "address": {
+      "street": "100 Community Drive",
+      "city": "Springfield",
+      "state": "IL",
+      "zip": "62701"
+    },
+    "contactPerson": {
+      "name": "Mary Wilson",
+      "title": "Program Director",
+      "phone": "(555) 987-6544",
+      "email": "mary.wilson@springfieldcs.org"
+    },
+    "services": ["Case Management", "Vocational Training", "Support Services"],
+    "notes": "Primary service provider for vocational rehabilitation",
+    "tags": ["service-provider", "active"]
+  },
+  "nextPersonId": 1001,
+  "nextCaseId": 1001,
+  "nextOrganizationId": 1001,
+  "nextFinancialItemId": 1001,
+  "nextNoteId": 1001,
+  "showAllCases": false,
+  "showAllContacts": false,
+  "showAllPeople": true,
+  "caseSortReversed": false,
+  "priorityFilterActive": false,
+  "contacts": [],
+  "vrTemplates": [
+    {
+      "id": "vr-template-001",
+      "name": "Standard Assessment Template",
+      "category": "Assessment",
+      "content": "Template content for vocational assessment",
+      "dateCreated": "2025-08-28T00:00:00.000Z"
+    }
+  ],
+  "nextVrTemplateId": 1001,
+  "vrCategories": ["Assessment", "Training", "Support", "Evaluation"],
+  "vrRequests": [
+    {
+      "id": "vr-request-001",
+      "caseId": "case-001",
+      "type": "Assessment",
+      "status": "pending",
+      "requestDate": "2025-08-28T00:00:00.000Z",
+      "description": "Initial vocational assessment request"
+    }
+  ],
+  "nextVrRequestId": 1001,
+  "vrDraftItems": [],
+  "activeCase": null,
+  "isDataLoaded": true,
+  "showAllOrganizations": false,
+  "accordionState": {
+    "simp_applicant": true,
+    "simp_joint": false,
+    "simp_spouse": true
+  },
+  "viewState": {
+    "currentTab": "case-management",
+    "currentTitle": "Cases",
+    "currentCaseId": null,
+    "lastRefreshTimestamp": "2025-08-28T00:00:00.000Z",
+    "expandedFinancialCards": {}
+  }
+}
