@@ -220,25 +220,29 @@
     };
 
     let currentHandle = null;
-    let pendingWrites = [];
+    const pendingWrites = [];
     let isWriting = false;
 
     const generateFilename = () => {
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/[:.]/g, '-');
       const level = config.minLevel;
       return `logs/${level}-${timestamp}.log`;
     };
 
     const ensureFileHandle = async () => {
       if (currentHandle) return currentHandle;
-      
+
       try {
         // Check if File System Access API is available
         if (typeof window !== 'undefined' && 'showDirectoryPicker' in window) {
           // Try to get existing logs directory handle
           let logsHandle = null;
-          const handles = await window.NightingaleAutoSave?.getStoredHandles?.() || {};
-          
+          const handles =
+            (await window.NightingaleAutoSave?.getStoredHandles?.()) || {};
+
           if (handles.logsDirectory) {
             try {
               logsHandle = handles.logsDirectory;
@@ -253,21 +257,28 @@
             // Request permission to logs directory
             const rootHandle = await window.showDirectoryPicker();
             try {
-              logsHandle = await rootHandle.getDirectoryHandle('logs', { create: true });
+              logsHandle = await rootHandle.getDirectoryHandle('logs', {
+                create: true,
+              });
             } catch {
               // Fallback: use root directory
               logsHandle = rootHandle;
             }
-            
+
             // Store for future use
             if (window.NightingaleAutoSave?.storeHandle) {
-              await window.NightingaleAutoSave.storeHandle('logsDirectory', logsHandle);
+              await window.NightingaleAutoSave.storeHandle(
+                'logsDirectory',
+                logsHandle
+              );
             }
           }
 
           const filename = config.filename || generateFilename().split('/')[1];
-          currentHandle = await logsHandle.getFileHandle(filename, { create: true });
-          
+          currentHandle = await logsHandle.getFileHandle(filename, {
+            create: true,
+          });
+
           return currentHandle;
         }
       } catch (error) {
@@ -275,7 +286,7 @@
         console.warn('File logging unavailable:', error.message);
         return null;
       }
-      
+
       return null;
     };
 
@@ -284,20 +295,23 @@
         const handle = await ensureFileHandle();
         if (!handle) return false;
 
-        const logLine = JSON.stringify({
-          timestamp: new Date().toISOString(),
-          level: entry.level,
-          namespace: entry.namespace,
-          message: entry.message,
-          data: entry.data,
-          meta: entry.meta,
-        }) + '\n';
+        const logLine =
+          JSON.stringify({
+            timestamp: new Date().toISOString(),
+            level: entry.level,
+            namespace: entry.namespace,
+            message: entry.message,
+            data: entry.data,
+            meta: entry.meta,
+          }) + '\n';
 
-        const writable = await handle.createWritable({ keepExistingData: true });
-        await writable.seek(await handle.getFile().then(f => f.size)); // Append
+        const writable = await handle.createWritable({
+          keepExistingData: true,
+        });
+        await writable.seek(await handle.getFile().then((f) => f.size)); // Append
         await writable.write(logLine);
         await writable.close();
-        
+
         return true;
       } catch (error) {
         console.warn('Failed to write log to file:', error.message);
@@ -307,16 +321,16 @@
 
     const processQueue = async () => {
       if (isWriting || pendingWrites.length === 0) return;
-      
+
       isWriting = true;
       const batch = pendingWrites.splice(0, 10); // Process up to 10 entries at once
-      
+
       for (const entry of batch) {
         await writeToFile(entry);
       }
-      
+
       isWriting = false;
-      
+
       // Process remaining queue if any
       if (pendingWrites.length > 0) {
         setTimeout(processQueue, 100);
@@ -577,7 +591,9 @@
         this.addTransport(this.transports.console());
       }
       this.addTransport(this.transports.memory(500));
-      this.addTransport(this.transports.file({ minLevel: 'error', ...fileOptions }));
+      this.addTransport(
+        this.transports.file({ minLevel: 'error', ...fileOptions })
+      );
       this.addEnricher(this.enrichers.session());
       this.addEnricher(this.enrichers.performance());
       return this;
