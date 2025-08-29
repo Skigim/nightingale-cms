@@ -275,9 +275,21 @@ function initializeToastSystem() {
  */
 function showToast(message, type = 'info', duration = null) {
   try {
+    // Ensure DOM is ready before showing toasts
+    if (typeof document === 'undefined') {
+      console.warn('Toast system: DOM not available');
+      return null;
+    }
+
     // Initialize if needed
     if (!toastQueue) {
       initializeToastSystem();
+    }
+
+    // Validate message before processing
+    if (!message || typeof message !== 'string') {
+      console.warn('Toast system: Invalid message provided', message);
+      return null;
     }
 
     return toastQueue.add(message, type, duration);
@@ -288,6 +300,8 @@ function showToast(message, type = 'info', duration = null) {
       message,
       type,
     });
+    // Fallback to console for critical errors
+    console.error('Toast system failure:', error.message, { message, type });
     return null;
   }
 }
@@ -393,7 +407,12 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Make available globally for browser environments
 if (typeof window !== 'undefined') {
-  window.showToast = showToast;
+  // Ensure we don't overwrite existing functions if they exist and work
+  if (!window.showToast || typeof window.showToast !== 'function') {
+    window.showToast = showToast;
+  }
+  
+  // Always set convenience functions
   window.showSuccessToast = showSuccessToast;
   window.showErrorToast = showErrorToast;
   window.showWarningToast = showWarningToast;
@@ -402,7 +421,7 @@ if (typeof window !== 'undefined') {
   window.getActiveToastCount = getActiveToastCount;
   window.updateToastConfig = updateToastConfig;
 
-  // Also expose the class and config for advanced usage
+  // Always expose the full API object
   window.NightingaleToast = {
     showToast,
     showSuccessToast,
@@ -415,9 +434,29 @@ if (typeof window !== 'undefined') {
     initializeToastSystem,
     ToastQueue,
     TOAST_CONFIG,
+    show: showToast, // Alias for backward compatibility
   };
+
+  // Initialize the system immediately when available
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeToastSystem);
+  } else {
+    initializeToastSystem();
+  }
 }
 
 // ES6 Module Export
-export default (typeof window !== 'undefined' && window.NightingaleToast) ||
-  null;
+export default {
+  showToast,
+  showSuccessToast,
+  showErrorToast,
+  showWarningToast,
+  showInfoToast,
+  clearAllToasts,
+  getActiveToastCount,
+  updateToastConfig,
+  initializeToastSystem,
+  ToastQueue,
+  TOAST_CONFIG,
+  show: showToast, // Alias for backward compatibility
+};

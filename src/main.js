@@ -122,7 +122,7 @@ function registerServices() {
 
   // Legacy global function aliases (for existing code compatibility)
   window.sanitize = NightingaleCoreUtilities.sanitize;
-  window.showToast = ToastService.show;
+  window.showToast = ToastService.showToast;
   window.openVRApp = CMSUtilities.openVRApp;
 
   console.log('✅ All Nightingale Services registered globally');
