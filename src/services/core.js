@@ -196,9 +196,9 @@
     required:
       (message = 'This field is required.') =>
       (value) => ({
-        isValid: value && value.toString().trim() !== '',
+        isValid: value != null && value.toString().trim() !== '',
         message,
-        sanitizedValue: value ? value.toString().trim() : '',
+        sanitizedValue: value != null ? value.toString().trim() : '',
       }),
 
     email:

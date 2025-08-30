@@ -1,58 +1,94 @@
-# Nightingale CMS - Code Review Action Items
+# Nightingale CMS - Development Action Items
 
-## High Priority (Do First)
+## High Priority (Current Sprint)
 
-### Security & Error Handling
+### Testing Infrastructure
 
-- [ ] **Fix HTML sanitizer** - Current cleaner is too weak, add strict filtering for scripts/events
-- [ ] **Replace silent errors with logging** - Stop ignoring failures, write them to debug log instead
-- [ ] **Add input length limits** - Prevent oversized data from crashing parsers/clipboard
+- [ ] **Implement Jest test suite** - Add tests for UI components (Button, Modal, SearchBar)
+- [ ] **Add React Testing Library tests** - Test business components (CaseCreationModal, PersonCreationModal)
+- [ ] **Component integration tests** - Test component interactions and data flow
+- [ ] **Service layer tests** - Test core utilities, data management, and file operations
 
-### Performance Quick Wins
+### Code Quality Enhancement
 
-- [ ] **Cache currency formatter** - Create once, reuse instead of making new one each time
-- [ ] **Fix deep cloning in migrations** - Process large datasets in chunks to avoid UI freezing
+- [ ] **ESLint rule enforcement** - Fix remaining linting issues across codebase
+- [ ] **Performance optimization** - Add useMemo/useCallback where needed for large data sets
+- [ ] **Error boundary coverage** - Ensure all major UI sections have error boundaries
 
-## Medium Priority (Do Second)
+## Medium Priority (Next Sprint)
 
-### Code Organization
+### Build System Modernization
 
-- [ ] **Reorganize validators** - Group into Validation._, Format._, Sanitize.\* namespaces
-- [ ] **Phase out legacy globals** - Mark old function names as deprecated, plan removal
-- [ ] **Standardize argument checking** - All exported functions should validate inputs consistently
+- [ ] **Production build pipeline** - Create optimized build for deployment
+- [ ] **Bundle size optimization** - Implement code splitting for large components
+- [ ] **Asset optimization** - Optimize images and external dependencies
+
+### Enhanced Features
+
+- [ ] **VR Request UI** - Build interface for verification request tracking
+- [ ] **Enhanced person demographics** - Add demographics section to PersonDetailsModal
+- [ ] **Organization contact management** - Add contact person CRUD for organizations
 
 ### Documentation
 
-- [ ] **Logger quick start guide** - How to enable transports and use structured logging
-- [ ] **HTML sanitization policy** - Document what's allowed vs blocked
-- [ ] **Migration strategy guide** - How data upgrades work and performance considerations
+- [ ] **API documentation** - Generate JSDoc for all services and components
+- [ ] **User guide** - Create end-user documentation for case management workflows
+- [ ] **Developer guide** - Document component creation and contribution patterns
 
-## Lower Priority (Nice to Have)
+## Lower Priority (Future Sprints)
 
-### Advanced Security
+### Advanced Features
 
-- [ ] **URL opener validation** - Whitelist allowed destinations for cross-tab navigation
-- [ ] **Account masking improvements** - Better encryption when user accounts are built
-- [ ] **Add security headers documentation** - CSP and other server-level protections
+- [ ] **Worker assignment system** - Add staff assignment to cases
+- [ ] **Reporting dashboard** - Create analytics and reporting features
+- [ ] **Data export/import** - Add bulk data operations
 
-### Performance Tuning
+### Security & Performance
 
-- [ ] **Optimize search service** - Debounce large dataset updates
-- [ ] **Add performance monitoring** - Track migration times and buffer usage
+- [ ] **Security audit** - Review data handling and sanitization
+- [ ] **Performance monitoring** - Add performance metrics and monitoring
+- [ ] **Accessibility audit** - WCAG compliance review
 
 ## Completed ✅
 
-- [x] Remove console logging across codebase
-- [x] Add structured logger scaffold
-- [x] Clean up lint warnings
+- [x] ES6 module system implementation
+- [x] Two-layer component architecture
+- [x] Service layer reorganization
+- [x] Component library standardization
+- [x] React best practices implementation
+- [x] CaseCreationModal multi-step wizard
+- [x] PersonCreationModal with relationships
+- [x] Financial management system
+- [x] Search system with Fuse.js
+- [x] Data persistence with auto-save
+- [x] Toast notification system
+- [x] Logging infrastructure
+- [x] Documentation cleanup (Tab analysis, service migration guides)
+- [x] Architecture documentation update
 
-## Notes
+## Recent Changes (August 2025)
 
-- Items marked with GitHub issues: #18 (clipboard limits), #19 (account masking), #20 (argument validation), #21 (legacy exports), #22 (JSDoc), #23 (currency formatting)
-- React handles most XSS via JSX - current HTML helpers are for manual DOM manipulation only
-- Financial parsing migration to IBM BACA service planned for later
-- Web Crypto API implementation scheduled with user accounts feature
+### Architecture Improvements
+
+- [x] **Directory structure cleanup** - Removed empty App folder
+- [x] **Documentation consolidation** - Removed outdated analysis documents
+- [x] **Architecture-Context.md update** - Reflects current implementation status
+
+### Component System
+
+- [x] **Component-scoped React patterns** - Proper React.createElement aliasing
+- [x] **Global registration system** - Backward compatibility maintained
+- [x] **Service registration** - Comprehensive service layer available globally
 
 ---
 
-_Last updated: August 27, 2025_
+## Notes
+
+- **Testing Priority**: Focus on UI component tests first, then business logic
+- **Performance**: Current architecture handles expected data volumes well
+- **Security**: React JSX provides good XSS protection, manual DOM updates are minimal
+- **Accessibility**: Components use semantic HTML and ARIA attributes
+
+---
+
+_Last updated: August 30, 2025_

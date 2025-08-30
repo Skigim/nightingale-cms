@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "orta.vscode-jest",
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.test-adapter-converter",
+    "hbenl.vscode-test-explorer"
+  ]
+}
