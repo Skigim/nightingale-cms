@@ -371,6 +371,18 @@ function PersonCreationModal({
         throw new Error('File service not available');
       }
 
+      // Check if file service has directory access
+      const permission = await fileService.checkPermission();
+      if (permission !== 'granted') {
+        // Try to connect to directory first
+        const connected = await fileService.connect();
+        if (!connected) {
+          throw new Error(
+            'Cannot save without folder access. Please click "Connect to Data Folder" in the header first.'
+          );
+        }
+      }
+
       const currentData = await fileService.readFile();
       const dateUtils = window.dateUtils || {};
 
@@ -463,7 +475,21 @@ function PersonCreationModal({
     } catch (error) {
       const logger = window.NightingaleLogger?.get('personCreation:save');
       logger?.error('Person save failed', { error: error.message });
-      window.showToast?.('Error saving person: ' + error.message, 'error');
+
+      // Provide user-friendly error messages
+      let userMessage = 'Error saving person: ';
+      if (
+        error.message.includes('folder access') ||
+        error.message.includes('AbortError') ||
+        error.message.includes('showDirectoryPicker')
+      ) {
+        userMessage =
+          'To save people, please connect to a data folder first. Look for the "Connect to Data Folder" button in the header.';
+      } else {
+        userMessage += error.message;
+      }
+
+      window.showToast?.(userMessage, 'error');
     } finally {
       setIsLoading(false);
     }
