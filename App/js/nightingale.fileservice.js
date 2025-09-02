@@ -29,12 +29,17 @@ class FileSystemService {
     }
 
     isSupported() {
-        return "showDirectoryPicker" in window;
+    // File System Access API requires a secure context (HTTPS) and browser support
+    return window.isSecureContext && ("showDirectoryPicker" in window);
     }
 
     async connect() {
         if (!this.isSupported()) {
-            this.errorCallback("File System Access API is not supported in this browser.", "error");
+            if (!window.isSecureContext) {
+                this.errorCallback("File access requires a secure context (HTTPS). If you're viewing this on GitHub Pages it should already be HTTPS; otherwise switch to https:// or run a local server.", "error");
+            } else {
+                this.errorCallback("File System Access API is not supported in this browser. Use a Chromium-based browser (Chrome / Edge) >= 86.", "error");
+            }
             return false;
         }
         try {

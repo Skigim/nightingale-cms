@@ -104,6 +104,49 @@ npx serve App/
 http://localhost:8000/NightingaleCMS.html
 ```
 
+## Deploying to GitHub Pages (Static Hosting)
+
+The legacy suite is pure static assets, so it can be hosted directly from the repository without a build step while preserving its local‑only security model.
+
+### Branch & Directory Strategy
+You have two common options:
+1. Use the `main` (or `legacy`) branch and set the Pages source to the root. Assets live under `App/` so the main application URL will be:
+```
+https://<username>.github.io/nightingale-cms/App/NightingaleCMS.html
+```
+2. Or create a `gh-pages` branch that contains only the `App/` directory contents at the root (optional if you want a shorter URL).
+
+### Added Deployment Artifacts
+| File | Purpose |
+|------|---------|
+| `App/index.html` | Lightweight redirect to `NightingaleCMS.html` so you can link to `/App/` root. |
+| `App/404.html` | Fallback page required by GitHub Pages (also provides a link back to the app). |
+
+### Security Preservation
+The File System Access API already enforces:
+- Secure context (HTTPS) – GitHub Pages supplies this automatically.
+- Explicit user permission for directory handles.
+
+Enhancements included in this branch:
+- `FileSystemService.isSupported()` now checks `window.isSecureContext` and provides clearer guidance if opened via an insecure context or unsupported browser.
+
+### Limitations on GitHub Pages
+- No service workers or server APIs required/used, so no additional config needed.
+- The File System Access API won’t work in browsers that block it (e.g., some mobile browsers or Firefox without flags). Users will see a friendly error.
+
+### Quick Deployment Steps
+1. Merge this branch (with the new `App/index.html` and `App/404.html`) into `main` if desired.
+2. In the GitHub repository settings, enable Pages and select the branch (`main`) and root (`/`).
+3. After Pages builds, visit: `https://<username>.github.io/nightingale-cms/App/` (redirects to the main app).
+4. Bookmark `NightingaleCMS.html` for direct access.
+
+### Optional: Custom Domain
+Add a `CNAME` file at the repository root (or configure via Settings) containing your domain; GitHub Pages will still serve over HTTPS, satisfying the API’s secure-context requirement.
+
+### Offline / Local Usage Still Recommended
+While Pages hosting is convenient for distribution, users handling sensitive data may prefer local offline usage to reduce any theoretical attack surface (even though no data leaves the browser). Provide instructions for cloning and opening locally for high‑sensitivity environments.
+
+
 ## Application Workflows
 
 ### Case Management Workflow
