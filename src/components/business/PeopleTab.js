@@ -138,10 +138,20 @@ function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
  * Render function for PeopleTab content
  * Implements the TabBase.js renderContent pattern
  */
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+
 function renderPeopleContent({ components, data: dataResult, props }) {
   const e = window.React.createElement;
-  const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } =
-    components;
+  const { SearchBar, SearchSection } = components; // Removed TabHeader & DataTable in MUI migration
   // Import PersonDetailsView directly if available via module system; fallback registry
   let PersonDetailsView = null;
   try {
@@ -163,103 +173,123 @@ function renderPeopleContent({ components, data: dataResult, props }) {
     });
   }
 
-  // Main people list view
+  // Main people list view (MUI implementation)
   return e(
-    'div',
-    { className: 'w-full space-y-4' },
-
-    // Compact Header Bar
-    e(TabHeader, {
-      title: 'People',
-      count: `${dataResult.data.length} ${dataResult.data.length !== 1 ? 'people' : 'person'}`,
-      icon: {
-        d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-      },
-      iconProps: { className: 'w-8 h-8 text-green-400' },
-      actions: e(
-        'button',
-        {
-          className:
-            'bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
-          onClick: () => dataResult.setIsCreateModalOpen(true),
+    Box,
+    { sx: { width: '100%', display: 'flex', flexDirection: 'column', gap: 3 } },
+    // Header
+    e(
+      Box,
+      {
+        sx: {
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          gap: 2,
         },
-        'New Person',
+      },
+      e(
+        Box,
+        { sx: { display: 'flex', flexDirection: 'column', gap: 0.5 } },
+        e(Typography, { variant: 'h4', component: 'h1' }, 'People'),
+        e(
+          Typography,
+          { variant: 'subtitle1', color: 'text.secondary' },
+          `${dataResult.data.length} ${dataResult.data.length !== 1 ? 'people' : 'person'}`,
+        ),
       ),
-    }),
-
-    // Search Section
+      e(
+        Button,
+        {
+          variant: 'contained',
+          color: 'primary',
+          onClick: () => dataResult.setIsCreateModalOpen(true),
+          'aria-label': 'New Person', // keep backward compatibility with existing tests
+        },
+        'Add Person',
+      ),
+    ),
+    // Search Section (keep existing SearchBar integration)
     e(SearchSection, {
       searchBar: e(SearchBar, {
         value: dataResult.searchTerm,
-        onChange: (e) => {
-          // Handle both direct string values and event objects
-          const value = typeof e === 'string' ? e : e?.target?.value || '';
+        onChange: (e2) => {
+          const value = typeof e2 === 'string' ? e2 : e2?.target?.value || '';
           dataResult.setSearchTerm(value);
         },
         placeholder: 'Search people by name, email, phone, address...',
-        className: 'w-full',
       }),
     }),
-
-    // People Table
-    e(ContentSection, {
-      variant: 'table',
-      children: e(DataTable, {
-        data: dataResult.data,
-        columns: [
-          {
-            field: 'name',
-            label: 'Name',
-            sortable: true,
-            render: (value) =>
+    // Table or empty state
+    dataResult.data.length === 0
+      ? e(
+          Paper,
+          { sx: { p: 4, textAlign: 'center' } },
+          e(
+            Typography,
+            { variant: 'body1', color: 'text.secondary' },
+            'No people found',
+          ),
+        )
+      : e(
+          TableContainer,
+          { component: Paper, sx: { maxHeight: 640 } },
+          e(
+            Table,
+            { size: 'small', stickyHeader: true, 'aria-label': 'people table' },
+            e(
+              TableHead,
+              null,
               e(
-                'span',
-                { className: 'font-medium text-white' },
-                value || 'N/A',
+                TableRow,
+                null,
+                ['Name', 'Email', 'Phone', 'Address'].map((header) =>
+                  e(
+                    TableCell,
+                    { key: header, sx: { fontWeight: 600 } },
+                    header,
+                  ),
+                ),
               ),
-          },
-          {
-            field: 'email',
-            label: 'Email',
-            sortable: true,
-            render: (value) =>
-              e('span', { className: 'text-blue-400' }, value || 'N/A'),
-          },
-          {
-            field: 'phone',
-            label: 'Phone',
-            sortable: true,
-            render: (value) =>
-              e('span', { className: 'text-gray-300' }, value || 'N/A'),
-          },
-          {
-            field: 'address',
-            label: 'Address',
-            sortable: true,
-            render: (value) => {
-              // Handle both string and object address formats
-              let addressText = 'N/A';
-              if (typeof value === 'string') {
-                addressText = value;
-              } else if (value && typeof value === 'object') {
-                // Format address object as string
-                const parts = [
-                  value.street,
-                  value.city,
-                  value.state,
-                  value.zip,
-                ].filter(Boolean);
-                addressText = parts.length > 0 ? parts.join(', ') : 'N/A';
-              }
-              return e('span', { className: 'text-gray-300' }, addressText);
-            },
-          },
-        ],
-        onRowClick: dataResult.handleViewDetails,
-        className: 'w-full',
-        emptyMessage: 'No people found',
-      }),
-    }),
+            ),
+            e(
+              TableBody,
+              null,
+              dataResult.data.map((person) => {
+                let addressText = 'N/A';
+                const value = person.address;
+                if (typeof value === 'string') addressText = value;
+                else if (value && typeof value === 'object') {
+                  const parts = [
+                    value.street,
+                    value.city,
+                    value.state,
+                    value.zip,
+                  ].filter(Boolean);
+                  addressText = parts.length ? parts.join(', ') : 'N/A';
+                }
+                return e(
+                  TableRow,
+                  {
+                    key: person.id,
+                    hover: true,
+                    onClick: () => dataResult.handleViewDetails(person),
+                    sx: { cursor: 'pointer' },
+                  },
+                  e(
+                    TableCell,
+                    { sx: { fontWeight: 500 } },
+                    person.name || 'N/A',
+                  ),
+                  e(TableCell, null, person.email || 'N/A'),
+                  e(TableCell, null, person.phone || 'N/A'),
+                  e(TableCell, null, addressText),
+                );
+              }),
+            ),
+          ),
+        ),
   );
 }
 
