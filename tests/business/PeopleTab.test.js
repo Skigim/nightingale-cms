@@ -2,85 +2,36 @@
  * @jest-environment jsdom
  */
 
-// Ultra-light PeopleTab tests using stub components only (avoid heavy UI side-effects)
-
+// PeopleTab tests updated for MUI-based implementation
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 
-// Provide global React
+// Provide global React (project pattern relies on window.React)
 window.React = React;
 
-// Basic registries
-if (!window.NightingaleUI)
+// Minimal registries
+if (!window.NightingaleUI) {
   window.NightingaleUI = {
     components: {},
     registerComponent(n, c) {
       this.components[n] = c;
     },
   };
-if (!window.NightingaleBusiness)
+}
+if (!window.NightingaleBusiness) {
   window.NightingaleBusiness = {
     components: {},
     registerComponent(n, c) {
       this.components[n] = c;
     },
   };
+}
 
-// Import factory (defines window.createBusinessComponent & helpers)
+// Import factory (TabBase defines createBusinessComponent & fallbacks)
 import '../../src/components/ui/TabBase.js';
 
-// STUB: Card (used by SearchSection/ContentSection wrappers)
-function CardStub({ children }) {
-  const e = window.React.createElement;
-  return e('div', null, children);
-}
-// STUB: TabHeader
-function TabHeaderStub({ title, count, actions }) {
-  const e = window.React.createElement;
-  const displayCount =
-    count && count.startsWith('0 ') ? `${count} found` : count;
-  return e(
-    'div',
-    null,
-    e('h1', null, title),
-    displayCount && e('span', null, displayCount),
-    actions,
-  );
-}
-// STUB: SearchBar (simple input only)
-function SearchBarStub({ value, onChange, placeholder }) {
-  const e = window.React.createElement;
-  return e('input', { placeholder, value, onChange });
-}
-// STUB: DataTable (simple cell render invoking column.render when provided)
-function DataTableStub({ data = [], columns = [], onRowClick }) {
-  const e = window.React.createElement;
-  return e(
-    'table',
-    null,
-    e(
-      'tbody',
-      null,
-      data.map((row) =>
-        e(
-          'tr',
-          {
-            key: row.id,
-            onClick: () => onRowClick && onRowClick(row),
-            role: 'row',
-          },
-          columns.map((c) => {
-            const raw = row[c.field];
-            const content = c.render ? c.render(raw, row) : raw;
-            return e('td', { key: c.field }, content);
-          }),
-        ),
-      ),
-    ),
-  );
-}
-// STUB: PersonCreationModal
+// Stub ONLY the PersonCreationModal for predictable modal content text
 function PersonCreationModalStub({ isOpen }) {
   if (!isOpen) return null;
   const e = window.React.createElement;
@@ -90,25 +41,19 @@ function PersonCreationModalStub({ isOpen }) {
     e('h2', null, 'Create New Person'),
   );
 }
-
-// Register stubs
-['Card', 'TabHeader', 'SearchBar', 'DataTable'].forEach((name) =>
-  window.NightingaleUI.registerComponent(
-    name,
-    {
-      Card: CardStub,
-      TabHeader: TabHeaderStub,
-      SearchBar: SearchBarStub,
-      DataTable: DataTableStub,
-    }[name],
-  ),
-);
 window.NightingaleBusiness.registerComponent(
   'PersonCreationModal',
   PersonCreationModalStub,
 );
 
-// Import PeopleTab AFTER stubs
+// Minimal Card stub so SearchSection (which tries to resolve Card) doesn't emit error wrapper
+function CardStub({ children }) {
+  const e = window.React.createElement;
+  return e('div', null, children);
+}
+window.NightingaleUI.registerComponent('Card', CardStub);
+
+// Import PeopleTab after stubbing modal
 import PeopleTab from '../../src/components/business/PeopleTab.js';
 
 const PEOPLE = [
@@ -124,17 +69,20 @@ const baseProps = {
 
 afterEach(() => cleanup());
 
-describe('PeopleTab (stubbed)', () => {
-  test('renders count and names', () => {
+describe('PeopleTab (MUI version)', () => {
+  test('renders header count and all people names', () => {
     render(<PeopleTab {...baseProps} />);
-    expect(screen.getByText('People')).toBeInTheDocument();
+    // Heading
+    expect(screen.getByRole('heading', { name: 'People' })).toBeInTheDocument();
+    // Count subtitle
     expect(screen.getByText(/3 people/)).toBeInTheDocument();
+    // Names in table
     ['Alice Johnson', 'Bob Smith', 'Charlie Brown'].forEach((n) => {
       expect(screen.getByText(n)).toBeInTheDocument();
     });
   });
 
-  test('filters via search', () => {
+  test('filters via search updates list and count', () => {
     render(<PeopleTab {...baseProps} />);
     const input = screen.getByPlaceholderText(
       'Search people by name, email, phone, address...',
@@ -143,59 +91,54 @@ describe('PeopleTab (stubbed)', () => {
     expect(screen.getByText('Alice Johnson')).toBeInTheDocument();
     expect(screen.queryByText('Bob Smith')).toBeNull();
     expect(screen.queryByText('Charlie Brown')).toBeNull();
-    expect(screen.getByText(/1 person/)).toBeInTheDocument();
+    expect(screen.getByText(/1 person$/)).toBeInTheDocument();
   });
 
-  test('opens creation modal', () => {
+  test('opens creation modal when Add Person (aria-label New Person) clicked', () => {
     render(<PeopleTab {...baseProps} />);
     fireEvent.click(screen.getByRole('button', { name: /New Person/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Create New Person')).toBeInTheDocument();
   });
 
-  test('should display an empty state when no people are available', () => {
+  test('shows empty state message for zero people', () => {
     render(
       <PeopleTab
         {...baseProps}
         fullData={{ people: [], cases: [] }}
       />,
     );
-    expect(screen.getByText('0 people found')).toBeInTheDocument();
-    expect(screen.queryByText('Alice Johnson')).toBeNull();
-    expect(screen.queryByText('Bob Smith')).toBeNull();
-    expect(screen.queryByText('Charlie Brown')).toBeNull();
+    // Header count still shows 0 people
+    expect(screen.getByText(/0 people$/)).toBeInTheDocument();
+    // Empty state card text
+    expect(screen.getByText('No people found')).toBeInTheDocument();
   });
 
-  test('should display PersonDetailsView when a person row is clicked', () => {
-    // Provide a lightweight stub PersonDetailsView to assert navigation
-    const e = window.React.createElement;
-    function PersonDetailsViewStub({ personId, onBackToList }) {
-      return e(
-        'div',
-        null,
-        e('h2', null, 'Details for ' + personId),
-        e('button', { onClick: onBackToList }, 'Back to List'),
-      );
-    }
-    window.NightingaleBusiness.registerComponent(
-      'PersonDetailsView',
-      PersonDetailsViewStub,
-    );
-
+  test('navigates to details view on row click', () => {
     render(<PeopleTab {...baseProps} />);
-
-    // Click first row (Alice Johnson)
-    const firstRowCell = screen.getByText('Alice Johnson');
-    // Navigate to its parent tr
-    const row = firstRowCell.closest('tr');
+    const firstCell = screen.getByText('Alice Johnson');
+    const row = firstCell.closest('tr');
     fireEvent.click(row);
-
-    // Expect details view (Back to List button) now visible
+    // Back to List button from real PersonDetailsView
     expect(
       screen.getByRole('button', { name: /Back to List/i }),
     ).toBeInTheDocument();
-    // Original table row text for Bob should not be present indicating list hidden
-    // (Alice name may or may not appear inside details; we check Bob to ensure table removed)
+    // Original table row (Bob) should no longer be visible
     expect(screen.queryByText('Bob Smith')).toBeNull();
+  });
+
+  test('returns to list from details view', () => {
+    render(<PeopleTab {...baseProps} />);
+    // Enter details view
+    fireEvent.click(screen.getByText('Alice Johnson').closest('tr'));
+    expect(
+      screen.getByRole('button', { name: /Back to List/i }),
+    ).toBeInTheDocument();
+    // Go back
+    fireEvent.click(screen.getByRole('button', { name: /Back to List/i }));
+    // Table restored (Bob visible again)
+    expect(screen.getByText('Bob Smith')).toBeInTheDocument();
+    // Count visible
+    expect(screen.getByText(/3 people/)).toBeInTheDocument();
   });
 });
