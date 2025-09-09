@@ -10,6 +10,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "seed": "node scripts/seed.js",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "lint:report": "eslint src/**/*.js --format=json --output-file=lint-report.json",
@@ -39,6 +40,7 @@
   },
   "homepage": "https://github.com/your-org/nightingale-cms#readme",
   "devDependencies": {
+    "@faker-js/faker": "^9.0.0",
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
@@ -62,7 +64,10 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@mui/material": "^7.3.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1"
   },
   "engines": {
     "node": ">=16.0.0",
