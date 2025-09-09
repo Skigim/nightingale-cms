@@ -4,7 +4,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { Modal } from '../../src/components/ui/Modal.js';
+import { Modal } from '../../src/components/ui/Modal.jsx';
 
 describe('Modal Component', () => {
   beforeEach(() => {
