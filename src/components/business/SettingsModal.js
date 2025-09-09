@@ -2,12 +2,13 @@
  * SettingsModal.js - Settings and data management modal
  *
  * Business component for application settings, file system connection, and data management.
- * Provides functionality to connect to directories, load/save data, and create sample datasets.
+ * Migrated to ES module component registry.
  *
  * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
+import { registerComponent } from '../../services/core';
 
 /**
  * SettingsModal Component
@@ -406,17 +407,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 
 // Self-registration for both module and script loading
 if (typeof window !== 'undefined') {
-  // Register globally for backward compatibility
-  window.SettingsModal = SettingsModal;
-
-  // Register with NightingaleBusiness registry if available
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'SettingsModal',
-      SettingsModal,
-      'settings',
-    );
-  }
+  window.SettingsModal = SettingsModal; // legacy global
+  registerComponent('business', 'SettingsModal', SettingsModal);
 }
 
 // Export for ES6 module compatibility

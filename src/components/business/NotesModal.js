@@ -4,7 +4,9 @@
 /**
  * NotesModal - Business Component for Notes Management
  * Full CRUD functionality for case notes with category field and RTF text capabilities
+ * Migrated to ES module component registry.
  */
+import { registerComponent } from '../../services/core';
 
 function NotesModal({
   isOpen,
@@ -547,11 +549,8 @@ function NotesModal({
 
 // Register with Business Components
 if (typeof window !== 'undefined') {
-  window.NotesModal = NotesModal;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent('NotesModal', NotesModal);
-  }
+  window.NotesModal = NotesModal; // legacy global
+  registerComponent('business', 'NotesModal', NotesModal);
 }
 
 // ES6 Module Export

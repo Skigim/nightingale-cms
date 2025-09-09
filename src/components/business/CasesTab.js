@@ -1,3 +1,4 @@
+import { registerComponent } from '../../services/core';
 /**
  * Nightingale CMS - Cases Tab Component
  *
@@ -428,21 +429,8 @@ CasesTab.propTypes = {
 
 // Register with the business component registry
 if (typeof window !== 'undefined') {
-  window.CasesTab = CasesTab;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'CasesTab',
-      CasesTab,
-      'case-management',
-      ['TabBase', 'DataTable', 'SearchBar', 'TabHeader'],
-    );
-  }
-
-  // Legacy registration for backward compatibility
-  if (typeof window.Nightingale !== 'undefined') {
-    window.Nightingale.registerComponent('CasesTab', CasesTab);
-  }
+  window.CasesTab = CasesTab; // legacy global
+  registerComponent('business', 'CasesTab', CasesTab);
 }
 
 // Export for ES6 module compatibility

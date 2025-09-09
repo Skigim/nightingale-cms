@@ -11,6 +11,7 @@
  *
  * @returns {React.Element} Eligibility tab component
  */
+import { registerComponent } from '../../services/core';
 function EligibilityTab() {
   // Early return pattern for React safety
   if (!window.React) {
@@ -46,21 +47,8 @@ EligibilityTab.propTypes = {
 
 // Register with the business component registry
 if (typeof window !== 'undefined') {
-  window.EligibilityTab = EligibilityTab;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'EligibilityTab',
-      EligibilityTab,
-      'eligibility',
-      [],
-    );
-  }
-
-  // Legacy registration for backward compatibility
-  if (typeof window.Nightingale !== 'undefined') {
-    window.Nightingale.registerComponent('EligibilityTab', EligibilityTab);
-  }
+  window.EligibilityTab = EligibilityTab; // legacy global
+  registerComponent('business', 'EligibilityTab', EligibilityTab);
 }
 
 // Export for ES6 module compatibility

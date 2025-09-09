@@ -2,9 +2,8 @@
 /**
  * Nightingale CMS - AVS Data Import Modal
  *
- * A business component for importing and merging AVS (Asset Verification System) data
- * with existing financial resources. Follows React best practices and Nightingale CMS
- * component architecture patterns.
+ * Business component for importing and merging AVS data.
+ * Migrated to ES module component registry.
  *
  * @component
  * @param {Object} props - Component props
@@ -16,6 +15,7 @@
  * @param {Array} props.existingResources - Array of existing financial resources for comparison
  * @returns {React.Element|null} The AVS import modal component
  */
+import { registerComponent } from '../../services/core';
 function AvsImportModal({
   isOpen,
   onClose,
@@ -538,15 +538,8 @@ function PreviewItem({ item, isSelected, onToggle }) {
 
 // Component registration following Nightingale CMS patterns
 if (typeof window !== 'undefined') {
-  window.AvsImportModal = AvsImportModal;
-
-  // Register with business component registry if available
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'AvsImportModal',
-      AvsImportModal,
-    );
-  }
+  window.AvsImportModal = AvsImportModal; // legacy global
+  registerComponent('business', 'AvsImportModal', AvsImportModal);
 }
 
 // ES6 Module Export

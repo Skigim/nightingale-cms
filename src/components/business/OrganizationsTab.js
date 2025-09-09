@@ -1,6 +1,6 @@
-// App/js/components/business/OrganizationsTab.refactored.js
-// PROOF OF CONCEPT: OrganizationsTab using createBusinessComponent factory
-// This demonstrates how the new factory standardizes Tab component architecture
+// OrganizationsTab.js
+// Migrated to ES module component registry.
+import { registerComponent } from '../../services/core';
 
 /**
  * Data management hook for Organizations Tab
@@ -488,14 +488,8 @@ OrganizationsTab.propTypes = {
 
 // Register with the business component registry
 if (typeof window !== 'undefined') {
-  window.OrganizationsTab = OrganizationsTab;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'OrganizationsTab',
-      OrganizationsTab,
-    );
-  }
+  window.OrganizationsTab = OrganizationsTab; // legacy global
+  registerComponent('business', 'OrganizationsTab', OrganizationsTab);
 }
 
 // Export for ES6 module compatibility

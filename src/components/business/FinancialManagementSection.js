@@ -1,22 +1,15 @@
 /**
  * Nightingale CMS - Financial Management Section Component
  *
- * This component handles the display and management of financial information
- * for cases, including resources, income, and expenses. It supports both
- * regular cases and SIMP cases with different layout patterns.
- *
- * Features:
- * - Financial item management (add, edit, delete)
- * - AVS import functionality
- * - SIMP case accordion layout support
- * - Financial item card display
- * - Section expansion/collapse
+ * Handles display and management of financial information for cases.
+ * Migrated to ES module component registry.
  *
  * @param {Object} props.caseData - Current case data with financial information
  * @param {Object} props.fullData - Full application data context
  * @param {Function} props.onUpdateData - Callback to update application data
  * @returns {React.Element} Financial management section component
  */
+import { registerComponent } from '../../services/core';
 function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
   const e = window.React.createElement;
   const { useState } = window.React;
@@ -368,14 +361,12 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
 
 // Register with business component system
 if (typeof window !== 'undefined') {
-  window.FinancialManagementSection = FinancialManagementSection;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'FinancialManagementSection',
-      FinancialManagementSection,
-    );
-  }
+  window.FinancialManagementSection = FinancialManagementSection; // legacy global
+  registerComponent(
+    'business',
+    'FinancialManagementSection',
+    FinancialManagementSection,
+  );
 }
 
 // ES6 Module Export

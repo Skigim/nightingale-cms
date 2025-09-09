@@ -7,7 +7,9 @@
  * Handles financial item display with Nightingale CMS business logic and formatting.
  *
  * Preview-style card designed for financial management sections.
+ * Migrated to ES module component registry.
  */
+import { registerComponent } from '../../services/core';
 function FinancialItemCard({
   item,
   itemType,
@@ -362,31 +364,13 @@ function FinancialItemGrid({
 
 // Register components with the business component system
 if (typeof window !== 'undefined') {
-  window.FinancialItemCard = FinancialItemCard;
+  window.FinancialItemCard = FinancialItemCard; // legacy globals
   window.FinancialItemList = FinancialItemList;
   window.FinancialItemGrid = FinancialItemGrid;
 
-  // Register with Business component library
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'FinancialItemCard',
-      FinancialItemCard,
-      'financial',
-      ['Cards', 'Badge', 'Button'],
-    );
-    window.NightingaleBusiness.registerComponent(
-      'FinancialItemList',
-      FinancialItemList,
-      'financial',
-      ['FinancialItemCard'],
-    );
-    window.NightingaleBusiness.registerComponent(
-      'FinancialItemGrid',
-      FinancialItemGrid,
-      'financial',
-      ['FinancialItemCard'],
-    );
-  }
+  registerComponent('business', 'FinancialItemCard', FinancialItemCard);
+  registerComponent('business', 'FinancialItemList', FinancialItemList);
+  registerComponent('business', 'FinancialItemGrid', FinancialItemGrid);
 }
 
 // Export for ES6 modules

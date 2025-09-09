@@ -1,404 +1,237 @@
-/**
- * Nightingale Core Utilities Service
- *
- * Provides fundamental utility functions for data formatting, validation, and security
- * that are used across all applications in the Nightingale suite. These are pure
- * utility functions with no business logic or domain-specific knowledge.
- *
- * @namespace NightingaleCoreUtilities
- * @version 2.0.0
- * @author Nightingale CMS Team
- * @created 2025-08-24
- */
+// Nightingale Core Utilities - Clean ES Module (v3.0.0-esm)
+// Single authoritative implementation (previous legacy blocks removed)
 
-(function (window) {
-  'use strict';
+// ---- Registries ----
+const UIRegistry = Object.create(null);
+const BusinessRegistry = Object.create(null);
+export function registerComponent(registryName, componentName, component) {
+  if (!componentName || typeof componentName !== 'string') return;
+  const target = registryName === 'business' ? BusinessRegistry : UIRegistry;
+  if (component) target[componentName] = component;
+}
+export function getComponent(registryName, componentName) {
+  const target = registryName === 'business' ? BusinessRegistry : UIRegistry;
+  return target[componentName];
+}
+export function listComponents(registryName) {
+  const target = registryName === 'business' ? BusinessRegistry : UIRegistry;
+  return Object.keys(target).sort();
+}
 
-  // ========================================================================
-  // SECURITY AND SANITIZATION UTILITIES
-  // ========================================================================
+// ---- Security & Sanitization ----
+export function sanitize(str) {
+  if (!str) return '';
+  return str
+    .toString()
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+export function setSanitizedInnerHTML(element, htmlString) {
+  if (!element || typeof htmlString !== 'string') return;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  element.innerHTML = '';
+  Array.from(doc.body.childNodes).forEach((n) => element.appendChild(n));
+}
+export function encodeURL(value) {
+  if (typeof value !== 'string' && typeof value !== 'number') return '';
+  return encodeURIComponent(String(value));
+}
+export function sanitizeHTML(htmlString) {
+  if (typeof htmlString !== 'string') return '';
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlString, 'text/html');
+  return doc.body.innerHTML;
+}
 
-  /**
-   * Legacy sanitization function for simple text escaping.
-   * Converts special characters to HTML entities.
-   * @param {string} str The string to sanitize.
-   * @returns {string} The sanitized string.
-   */
-  function sanitize(str) {
-    if (!str) return '';
-    return str
-      .toString()
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+// ---- Date / Time ----
+export function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'N/A';
+  const adj = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  return adj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+export function toInputDateFormat(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  const adj = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  return adj.toISOString().substring(0, 10);
+}
+
+// ---- Text Formatting ----
+export function formatPhoneNumber(value) {
+  if (!value) return '';
+  const digits = value.replace(/[^\d]/g, '');
+  if (digits.length < 4) return digits;
+  if (digits.length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+}
+export function formatProperCase(name) {
+  if (!name || typeof name !== 'string') return '';
+  let processed = name.trim();
+  if (processed.includes(',')) {
+    const parts = processed.split(',').map((p) => p.trim());
+    processed = `${parts[1] || ''} ${parts[0] || ''}`.trim();
   }
+  return processed
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+export function formatPersonName(name) {
+  if (!name || typeof name !== 'string') return '';
+  const trimmed = name.trim();
+  if (!trimmed) return '';
+  if (trimmed.includes(',')) return trimmed;
+  const parts = trimmed.split(/\s+/);
+  if (parts.length < 2) return trimmed;
+  const last = parts[parts.length - 1];
+  const firstMiddle = parts.slice(0, -1).join(' ');
+  return `${last}, ${firstMiddle}`;
+}
 
-  /**
-   * Securely sets the inner HTML of an element using the DOMParser API to mitigate XSS risks.
-   * @param {HTMLElement} element - The target element to set content on
-   * @param {string} htmlString - The HTML string to safely render
-   * @returns {void}
-   */
-  function setSanitizedInnerHTML(element, htmlString) {
-    if (!element || typeof htmlString !== 'string') return;
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, 'text/html');
-
-    element.innerHTML = '';
-    Array.from(doc.body.childNodes).forEach((node) => {
-      element.appendChild(node);
-    });
-  }
-
-  /**
-   * Safely encodes a value for use in URLs to prevent URL injection attacks.
-   * @param {string} value - The value to encode for URL usage
-   * @returns {string} - The URL-encoded value
-   */
-  function encodeURL(value) {
-    if (typeof value !== 'string' && typeof value !== 'number') return '';
-    return encodeURIComponent(String(value));
-  }
-
-  /**
-   * Safely sanitizes HTML content and returns it as a string.
-   * @param {string} htmlString - The HTML string to sanitize
-   * @returns {string} - The sanitized HTML string
-   */
-  function sanitizeHTML(htmlString) {
-    if (typeof htmlString !== 'string') return '';
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, 'text/html');
-
-    return doc.body.innerHTML;
-  }
-
-  // ========================================================================
-  // DATE AND TIME FORMATTING UTILITIES
-  // ========================================================================
-
-  /**
-   * Formats a date string (e.g., ISO format) into a user-friendly MM/DD/YYYY format.
-   * Includes a timezone offset correction to prevent date changes.
-   * @param {string} dateString The date string to format.
-   * @returns {string} The formatted date, or "N/A" if the input is invalid.
-   */
-  function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'N/A';
-
-    const adjustedDate = new Date(
-      date.getTime() + date.getTimezoneOffset() * 60000,
-    );
-    return adjustedDate.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-  }
-
-  /**
-   * Formats a date string into the YYYY-MM-DD format required by HTML <input type="date"> elements.
-   * @param {string} dateString The date string to format.
-   * @returns {string} The date in YYYY-MM-DD format, or an empty string if invalid.
-   */
-  function toInputDateFormat(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
-
-    const adjustedDate = new Date(
-      date.getTime() + date.getTimezoneOffset() * 60000,
-    );
-    return adjustedDate.toISOString().substring(0, 10);
-  }
-
-  // ========================================================================
-  // TEXT FORMATTING UTILITIES
-  // ========================================================================
-
-  /**
-   * Formats a string of numbers into a standard (XXX) XXX-XXXX phone number format.
-   * @param {string} value The raw phone number string.
-   * @returns {string} The formatted phone number.
-   */
-  function formatPhoneNumber(value) {
-    if (!value) return '';
-    const phoneNumber = value.replace(/[^\d]/g, '');
-    const phoneNumberLength = phoneNumber.length;
-    if (phoneNumberLength < 4) return phoneNumber;
-    if (phoneNumberLength < 7)
-      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
-  }
-
-  /**
-   * Converts a name string into proper "Firstname Lastname" case.
-   * It can handle inputs like "LASTNAME, FIRSTNAME" or "JOHN DOE".
-   * @param {string} name The name string to format.
-   * @returns {string} The name in proper case.
-   */
-  function formatProperCase(name) {
-    if (!name || typeof name !== 'string') return '';
-    let processedName = name.trim();
-
-    // Handle "Last, First" format
-    if (processedName.includes(',')) {
-      const parts = processedName.split(',').map((p) => p.trim());
-      processedName = `${parts[1] || ''} ${parts[0] || ''}`.trim();
-    }
-
-    // Capitalize each word
-    return processedName
-      .toLowerCase()
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-
-  /**
-   * Formats a name into "Lastname, Firstname" format for display.
-   * @param {string} name The name string to format.
-   * @returns {string} The name in "Lastname, Firstname" format.
-   */
-  function formatPersonName(name) {
-    if (!name || typeof name !== 'string') return '';
-    const trimmedName = name.trim();
-    if (!trimmedName) return '';
-
-    // If name is already in "Last, First" format, return it as-is
-    if (trimmedName.includes(',')) {
-      return trimmedName;
-    }
-
-    const nameParts = trimmedName.split(/\s+/);
-    if (nameParts.length < 2) return trimmedName;
-
-    const lastName = nameParts[nameParts.length - 1];
-    const firstMiddleNames = nameParts.slice(0, -1).join(' ');
-    return `${lastName}, ${firstMiddleNames}`;
-  }
-
-  // ========================================================================
-  // VALIDATION UTILITIES
-  // ========================================================================
-
-  /**
-   * Collection of reusable validation functions for forms.
-   * Each validator returns an object with { isValid, message, sanitizedValue }.
-   */
-  const Validators = {
-    required:
-      (message = 'This field is required.') =>
-      (value) => ({
-        isValid: value != null && value.toString().trim() !== '',
+// ---- Validation ----
+export const Validators = {
+  required:
+    (message = 'This field is required.') =>
+    (value) => ({
+      isValid: value != null && value.toString().trim() !== '',
+      message,
+      sanitizedValue: value != null ? value.toString().trim() : '',
+    }),
+  email:
+    (message = 'Please enter a valid email address.') =>
+    (value) => ({
+      isValid: !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
+      message,
+      sanitizedValue: value ? value.toString().trim().toLowerCase() : '',
+    }),
+  phone:
+    (message = 'Please enter a valid phone number.') =>
+    (value) => {
+      const cleaned = value ? value.replace(/\D/g, '') : '';
+      return {
+        isValid: !value || /(\d{10,})/.test(cleaned),
         message,
-        sanitizedValue: value != null ? value.toString().trim() : '',
-      }),
-
-    email:
-      (message = 'Please enter a valid email address.') =>
-      (value) => ({
-        isValid: !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()),
-        message,
-        sanitizedValue: value ? value.toString().trim().toLowerCase() : '',
-      }),
-
-    phone:
-      (message = 'Please enter a valid phone number.') =>
-      (value) => {
-        const cleaned = value ? value.replace(/\D/g, '') : '';
-        return {
-          isValid: !value || /^\d{10,}$/.test(cleaned),
-          message,
-          sanitizedValue: cleaned,
-        };
-      },
-
-    mcn:
-      (message = 'Please enter a valid Master Case Number.') =>
-      (value) => {
-        const cleaned = value ? value.toString().trim().toUpperCase() : '';
-        return {
-          isValid: !value || /^[A-Z0-9\-_]{3,}$/.test(cleaned),
-          message,
-          sanitizedValue: cleaned,
-        };
-      },
-
-    minLength:
-      (length, message = `Must be at least ${length} characters.`) =>
-      (value) => ({
-        isValid: !value || value.trim().length >= length,
-        message,
-        sanitizedValue: value.trim(),
-      }),
-
-    maxLength:
-      (length, message = `Must be no more than ${length} characters.`) =>
-      (value) => ({
-        isValid: !value || value.trim().length <= length,
-        message,
-        sanitizedValue: value.trim(),
-      }),
-  };
-
-  // ========================================================================
-  // GENERIC DATA UTILITIES
-  // ========================================================================
-
-  /**
-   * Calculates the next available sequential ID from an array of items.
-   * @param {object[]} items An array of objects, each with an 'id' property.
-   * @returns {number} The next highest ID.
-   */
-  function getNextId(items) {
-    if (!items || items.length === 0) return 1;
-    return Math.max(1, ...items.map((item) => item.id || 0)) + 1;
-  }
-
-  /**
-   * Search service wrapper for Fuse.js
-   */
-  class NightingaleSearchService {
-    constructor(data, options = {}) {
-      if (typeof Fuse === 'undefined') {
-        this.fuse = null;
-        return;
-      }
-
-      const defaultOptions = {
-        includeScore: false,
-        threshold: 0.3,
-        ignoreLocation: true,
-        minMatchCharLength: 1,
-        shouldSort: true,
-        ...options,
+        sanitizedValue: cleaned,
       };
+    },
+  mcn:
+    (message = 'Please enter a valid Master Case Number.') =>
+    (value) => {
+      const cleaned = value ? value.toString().trim().toUpperCase() : '';
+      return {
+        isValid: !value || /^[A-Z0-9\-_]{3,}$/.test(cleaned),
+        message,
+        sanitizedValue: cleaned,
+      };
+    },
+  minLength:
+    (len, message = `Must be at least ${len} characters.`) =>
+    (value) => ({
+      isValid: !value || value.trim().length >= len,
+      message,
+      sanitizedValue: value.trim(),
+    }),
+  maxLength:
+    (len, message = `Must be no more than ${len} characters.`) =>
+    (value) => ({
+      isValid: !value || value.trim().length <= len,
+      message,
+      sanitizedValue: value.trim(),
+    }),
+};
 
-      try {
-        this.fuse = new Fuse(data, defaultOptions);
-        this.data = data;
-        this.options = defaultOptions;
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('core:search');
-        logger?.warn('Search service init failed', { error: error.message });
-        this.fuse = null;
-      }
-    }
+// ---- Generic Data Utilities ----
+export function getNextId(items) {
+  if (!items || items.length === 0) return 1;
+  return Math.max(1, ...items.map((i) => i.id || 0)) + 1;
+}
 
-    search(query) {
-      if (!this.fuse || !query || typeof query !== 'string') {
-        return [];
-      }
-
-      try {
-        const results = this.fuse.search(query.trim());
-        return results.map((result) => result.item || result);
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('core:search');
-        logger?.debug('Search query failed', { error: error.message, query });
-        return [];
-      }
-    }
-
-    setData(newData) {
-      if (!Array.isArray(newData)) {
-        return;
-      }
-
-      try {
-        this.data = newData;
-        if (this.fuse) {
-          this.fuse.setCollection(newData);
-        }
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('core:search');
-        logger?.debug('Search data update failed', { error: error.message });
-      }
-    }
-
-    isReady() {
-      return this.fuse !== null && typeof Fuse !== 'undefined';
+// ---- Search Service (legacy-compatible, uses global Fuse if present) ----
+class SearchServiceWrapper {
+  constructor(data = [], options = {}) {
+    const FuseRef =
+      (typeof globalThis !== 'undefined' && globalThis.Fuse) || null;
+    const defaultOptions = {
+      includeScore: false,
+      threshold: 0.3,
+      ignoreLocation: true,
+      minMatchCharLength: 1,
+      shouldSort: true,
+      ...options,
+    };
+    this.options = defaultOptions;
+    this.data = Array.isArray(data) ? data : [];
+    try {
+      this.fuse = FuseRef ? new FuseRef(this.data, this.options) : null;
+    } catch (_) {
+      this.fuse = null;
     }
   }
-
-  // ========================================================================
-  // SERVICE INITIALIZATION AND EXPORT
-  // ========================================================================
-
-  // Create service object
-  const NightingaleCoreUtilities = {
-    // Security functions
-    sanitize,
-    setSanitizedInnerHTML,
-    encodeURL,
-    sanitizeHTML,
-
-    // Date and time formatting
-    formatDate,
-    toInputDateFormat,
-
-    // Text formatting
-    formatPhoneNumber,
-    formatProperCase,
-    formatPersonName,
-
-    // Validation
-    Validators,
-
-    // Generic data utilities
-    getNextId,
-
-    // Search service
-    SearchService: NightingaleSearchService,
-
-    // Metadata
-    version: '2.0.0',
-    name: 'NightingaleCoreUtilities',
-  };
-
-  // Export to global scope
-  if (typeof window !== 'undefined') {
-    window.NightingaleCoreUtilities = NightingaleCoreUtilities;
-    window.NightingaleSearchService = NightingaleSearchService;
-
-    // Register with service registry if available
-    if (
-      window.NightingaleServices &&
-      window.NightingaleServices.registerService
-    ) {
-      window.NightingaleServices.registerService(
-        'coreUtilities',
-        NightingaleCoreUtilities,
-        'core',
-      );
+  search(query) {
+    if (!this.fuse || !query || typeof query !== 'string') return [];
+    try {
+      return this.fuse.search(query.trim()).map((r) => r.item || r);
+    } catch {
+      return [];
     }
-
-    // Legacy global functions for backward compatibility
-    window.sanitize = sanitize;
-    window.setSanitizedInnerHTML = setSanitizedInnerHTML;
-    window.encodeURL = encodeURL;
-    window.sanitizeHTML = sanitizeHTML;
-    window.formatDate = formatDate;
-    window.toInputDateFormat = toInputDateFormat;
-    window.formatPhoneNumber = formatPhoneNumber;
-    window.formatProperCase = formatProperCase;
-    window.formatPersonName = formatPersonName;
-    window.Validators = Validators;
-    window.getNextId = getNextId;
   }
+  setData(newData) {
+    if (!Array.isArray(newData)) return;
+    this.data = newData;
+    if (this.fuse && this.fuse.setCollection) this.fuse.setCollection(newData);
+  }
+  isReady() {
+    return !!this.fuse;
+  }
+}
 
-  // Return service for module systems
-  return NightingaleCoreUtilities;
-})(typeof window !== 'undefined' ? window : this);
+// ---- Aggregate Export Object ----
+const NightingaleCoreUtilities = {
+  sanitize,
+  setSanitizedInnerHTML,
+  encodeURL,
+  sanitizeHTML,
+  formatDate,
+  toInputDateFormat,
+  formatPhoneNumber,
+  formatProperCase,
+  formatPersonName,
+  Validators,
+  getNextId,
+  SearchService: SearchServiceWrapper,
+  registerComponent,
+  getComponent,
+  listComponents,
+  version: '3.0.0-esm',
+};
 
-// ES6 Module Export
-export default (typeof window !== 'undefined' &&
-  window.NightingaleCoreUtilities) ||
-  (typeof global !== 'undefined' ? global.NightingaleCoreUtilities : null);
+export default NightingaleCoreUtilities;
+
+// ---- Backward Compatibility Globals ----
+if (typeof window !== 'undefined') {
+  window.NightingaleCoreUtilities = NightingaleCoreUtilities;
+  window.NightingaleSearchService = SearchServiceWrapper;
+  window.sanitize = sanitize;
+  window.setSanitizedInnerHTML = setSanitizedInnerHTML;
+  window.encodeURL = encodeURL;
+  window.sanitizeHTML = sanitizeHTML;
+  window.formatDate = formatDate;
+  window.toInputDateFormat = toInputDateFormat;
+  window.formatPhoneNumber = formatPhoneNumber;
+  window.formatProperCase = formatProperCase;
+  window.formatPersonName = formatPersonName;
+  window.Validators = Validators;
+  window.getNextId = getNextId;
+}

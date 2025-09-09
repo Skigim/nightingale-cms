@@ -3,11 +3,13 @@
  *
  * Business component for displaying and managing detailed case information.
  * Provides case editing, notes management, financial tracking, and status updates.
+ * Migrated to ES module component registry.
  *
  * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
+import { registerComponent } from '../../services/core';
 
 /**
  * CaseDetailsView Component
@@ -321,17 +323,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 
 // Self-registration for both module and script loading
 if (typeof window !== 'undefined') {
-  // Register globally for backward compatibility
-  window.CaseDetailsView = CaseDetailsView;
-
-  // Register with NightingaleBusiness registry if available
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'CaseDetailsView',
-      CaseDetailsView,
-      'case-management',
-    );
-  }
+  window.CaseDetailsView = CaseDetailsView; // legacy global
+  registerComponent('business', 'CaseDetailsView', CaseDetailsView);
 }
 
 // Export for ES6 module compatibility

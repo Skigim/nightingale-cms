@@ -15,6 +15,7 @@ import CasesTab from './CasesTab.js';
 import PeopleTab from './PeopleTab.js';
 import OrganizationsTab from './OrganizationsTab.js';
 import EligibilityTab from './EligibilityTab.js';
+import { registerComponent } from '../../services/core';
 // Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
 
 /**
@@ -315,17 +316,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 
 // Self-registration for both module and script loading
 if (typeof window !== 'undefined') {
-  // Register globally for backward compatibility
-  window.NightingaleCMSApp = NightingaleCMSApp;
-
-  // Register with NightingaleBusiness registry if available
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'NightingaleCMSApp',
-      NightingaleCMSApp,
-      'application',
-    );
-  }
+  window.NightingaleCMSApp = NightingaleCMSApp; // legacy global
+  registerComponent('business', 'NightingaleCMSApp', NightingaleCMSApp);
 }
 
 // Export for ES6 module compatibility

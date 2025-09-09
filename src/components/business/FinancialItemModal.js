@@ -3,9 +3,11 @@
  *
  * Handles creation and editing of financial items (resources, income, expenses)
  * with validation, owner assignment, and verification tracking.
+ * Migrated to ES module component registry.
  *
  * @component FinancialItemModal
  */
+import { registerComponent } from '../../services/core';
 
 function FinancialItemModal({
   isOpen,
@@ -528,14 +530,8 @@ function FinancialItemModal({
 
 // Register component globally and with NightingaleBusiness registry
 if (typeof window !== 'undefined') {
-  window.FinancialItemModal = FinancialItemModal;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'FinancialItemModal',
-      FinancialItemModal,
-    );
-  }
+  window.FinancialItemModal = FinancialItemModal; // legacy global
+  registerComponent('business', 'FinancialItemModal', FinancialItemModal);
 }
 
 // Export for ES6 module compatibility

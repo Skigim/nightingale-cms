@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import { registerComponent } from '../../services/core';
 
 function PersonDetailsView(props) {
   if (!window || !window.React) return null; // safety fallback per project pattern
@@ -82,13 +83,8 @@ function PersonDetailsView(props) {
 
 // Self-registration (business layer)
 if (typeof window !== 'undefined') {
-  window.PersonDetailsView = PersonDetailsView;
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'PersonDetailsView',
-      PersonDetailsView,
-    );
-  }
+  window.PersonDetailsView = PersonDetailsView; // legacy global
+  registerComponent('business', 'PersonDetailsView', PersonDetailsView);
 }
 
 export default PersonDetailsView;

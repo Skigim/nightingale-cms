@@ -1,18 +1,13 @@
 /**
  * Nightingale CMS - Dashboard Tab Component
  *
- * This component provides the main dashboard interface for the Nightingale CMS,
- * showing system statistics, case information, and quick action buttons.
- *
- * Features:
- * - Real-time statistics display (total cases, active cases, VR requests)
- * - Responsive stat cards with icon indicators
- * - Quick action buttons for common tasks
- * - Welcome message and system overview
+ * Provides the main dashboard interface showing system statistics
+ * and quick actions. Migrated to ES module registry pattern.
  *
  * @param {Object} props.fullData - Complete application data for statistics calculation
  * @returns {React.Element} Dashboard tab component
  */
+import { registerComponent } from '../../services/core';
 function DashboardTab({ fullData }) {
   // Hooks and React-related variables must be declared at the top level.
   // All hooks must be called at the top level of the component.
@@ -208,21 +203,8 @@ DashboardTab.propTypes = {
 
 // Register with business component system
 if (typeof window !== 'undefined') {
-  window.DashboardTab = DashboardTab;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'DashboardTab',
-      DashboardTab,
-      'dashboard',
-      [],
-    );
-  }
-
-  // Legacy registration for backward compatibility
-  if (typeof window.Nightingale !== 'undefined') {
-    window.Nightingale.registerComponent('DashboardTab', DashboardTab);
-  }
+  window.DashboardTab = DashboardTab; // legacy global
+  registerComponent('business', 'DashboardTab', DashboardTab);
 }
 
 // Export for ES6 module compatibility

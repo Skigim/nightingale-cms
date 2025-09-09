@@ -5,7 +5,9 @@
  *
  * Modal for creating and editing person entries in the Nightingale CMS.
  * Utilizes StepperModal for multi-step workflow with proper validation.
+ * Migrated to ES module component registry.
  */
+import { registerComponent } from '../../services/core';
 function PersonCreationModal({
   isOpen = false,
   onClose = () => {},
@@ -1094,15 +1096,8 @@ function PersonCreationModal({
 
 // Register with the business component system
 if (typeof window !== 'undefined') {
-  window.PersonCreationModal = PersonCreationModal;
-
-  // Register with Business component library
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'PersonCreationModal',
-      PersonCreationModal,
-    );
-  }
+  window.PersonCreationModal = PersonCreationModal; // legacy global
+  registerComponent('business', 'PersonCreationModal', PersonCreationModal);
 }
 
 // Export for ES6 modules

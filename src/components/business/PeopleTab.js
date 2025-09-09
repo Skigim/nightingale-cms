@@ -1,22 +1,7 @@
+import { registerComponent } from '../../services/core';
 /**
  * Nightingale CMS - People Tab Component
- *
- * Extracted from main CMS application (now in index.html) using TabBase.js factory pattern
- * Manages people listing, search, and details view navigation
- *
- * Features:
- * - People search and filtering
- * - Person creation and editing via modals
- * - Person details view integration
- * - DataTable integration with sorting and actions
- * - Multi-tier component registry fallbacks
- *
- * @param {Object} props.fullData - Complete application data
- * @param {Function} props.onUpdateData - Data update callback
- * @param {Object} props.fileService - File service for persistence
- * @param {Function} props.onViewModeChange - View mode change callback
- * @param {Function} props.onBackToList - Back to list callback registration
- * @returns {React.Element} People tab component
+ * (ESM refactor: uses registerComponent from core service)
  */
 
 /**
@@ -412,21 +397,8 @@ PeopleTab.propTypes = {
 
 // Register with the business component registry
 if (typeof window !== 'undefined') {
-  window.PeopleTab = PeopleTab;
-
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'PeopleTab',
-      PeopleTab,
-      'people-management',
-      ['TabBase', 'DataTable', 'SearchBar', 'TabHeader'],
-    );
-  }
-
-  // Legacy registration for backward compatibility
-  if (typeof window.Nightingale !== 'undefined') {
-    window.Nightingale.registerComponent('PeopleTab', PeopleTab);
-  }
+  window.PeopleTab = PeopleTab; // legacy global
+  registerComponent('business', 'PeopleTab', PeopleTab);
 }
 
 // Export for ES6 module compatibility

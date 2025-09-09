@@ -5,7 +5,9 @@
  *
  * Modal for creating and editing organization entries in the Nightingale CMS.
  * Utilizes StepperModal for multi-step workflow with proper validation.
+ * Migrated to ES module component registry.
  */
+import { registerComponent } from '../../services/core';
 function OrganizationModal({
   isOpen = false,
   onClose = () => {},
@@ -1039,15 +1041,8 @@ function OrganizationModal({
 
 // Register with the business component system
 if (typeof window !== 'undefined') {
-  window.OrganizationModal = OrganizationModal;
-
-  // Register with Business component library
-  if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'OrganizationModal',
-      OrganizationModal,
-    );
-  }
+  window.OrganizationModal = OrganizationModal; // legacy global
+  registerComponent('business', 'OrganizationModal', OrganizationModal);
 }
 
 // Export for ES6 modules
