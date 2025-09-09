@@ -54,7 +54,7 @@ function CardStub({ children }) {
 window.NightingaleUI.registerComponent('Card', CardStub);
 
 // Import PeopleTab after stubbing modal
-import PeopleTab from '../../src/components/business/PeopleTab.js';
+import PeopleTab from '../../src/components/business/PeopleTab.jsx';
 
 const PEOPLE = [
   { id: 'p1', name: 'Alice Johnson', email: 'alice@example.com' },

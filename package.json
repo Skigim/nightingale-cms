@@ -11,9 +11,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.js",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix",
-    "lint:report": "eslint src/**/*.js --format=json --output-file=lint-report.json",
+    "lint": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\"",
+    "lint:fix": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\" --fix",
+    "lint:report": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\" --format=json --output-file=lint-report.json",
     "audit": "npm audit && npm run lint",
     "audit:security": "npm audit --audit-level=moderate",
     "format": "prettier --write \"**/*.{js,jsx,json,css,md,html}\"",
@@ -39,6 +39,7 @@
     "url": "https://github.com/your-org/nightingale-cms/issues"
   },
   "homepage": "https://github.com/your-org/nightingale-cms#readme",
+  "type": "module",
   "devDependencies": {
     "@faker-js/faker": "^9.0.0",
     "@babel/core": "^7.22.0",
@@ -81,7 +82,7 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "prettier --write",
-      "eslint --fix"
+      "eslint --config .eslintrc.cjs --fix"
     ],
     "*.{json,md,html,css}": [
       "prettier --write"

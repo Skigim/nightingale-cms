@@ -18,10 +18,10 @@ module.exports = {
   },
   plugins: ['react', 'react-hooks'],
   rules: {
-    'react/react-in-jsx-scope': 'off', // Not needed with React 17+
+    'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'warn',
     'no-unused-vars': 'warn',
-    'no-console': 'off', // Allow console for debugging
+    'no-console': 'off',
     'prefer-const': 'error',
     'no-var': 'error',
   },
@@ -33,7 +33,7 @@ module.exports = {
   globals: {
     React: 'readonly',
     ReactDOM: 'readonly',
-    _: 'readonly', // Lodash (still referenced in focus manager debounce)
+    _: 'readonly',
     window: 'writable',
   },
 };

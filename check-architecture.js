@@ -44,7 +44,7 @@ function checkFile(filePath) {
 
   if (isUIComponent && !isBusiness) {
     // Check UI components for business logic violations
-    BUSINESS_LOGIC_PATTERNS.forEach((pattern, index) => {
+    BUSINESS_LOGIC_PATTERNS.forEach((pattern) => {
       const matches = content.match(pattern);
       if (matches) {
         violations.push({

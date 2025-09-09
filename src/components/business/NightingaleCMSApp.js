@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import DashboardTab from './DashboardTab.js';
 import CasesTab from './CasesTab.js';
-import PeopleTab from './PeopleTab.js';
+import PeopleTab from './PeopleTab.jsx';
 import OrganizationsTab from './OrganizationsTab.js';
 import EligibilityTab from './EligibilityTab.js';
 import { registerComponent, getComponent } from '../../services/registry';
@@ -203,25 +203,26 @@ function NightingaleCMSApp() {
     setFullData(data);
   }, []);
 
-  // Render active tab using direct component references to avoid invalid hook context issues
+  // Render active tab using lookup mapping (JSX friendly)
   const renderActiveTab = () => {
-    const props = tabProps[activeTab] || {};
-    switch (activeTab) {
-      case 'dashboard':
-        return <DashboardTab {...props} />;
-      case 'cases':
-        return <CasesTab {...props} />;
-      case 'people':
-        return <PeopleTab {...props} />;
-      case 'organizations':
-        return <OrganizationsTab {...props} />;
-      case 'eligibility':
-        return <EligibilityTab {...props} />;
-      default:
-        return (
-          <div className="p-4 text-center text-gray-400">Select a tab</div>
-        );
+    const tabComponents = {
+      dashboard: DashboardTab,
+      cases: CasesTab,
+      people: PeopleTab,
+      organizations: OrganizationsTab,
+      eligibility: EligibilityTab,
+    };
+    const TabComponent = tabComponents[activeTab];
+    const props = tabProps[activeTab];
+    if (TabComponent && props) {
+      // Using React.createElement to avoid potential JSX parse edge in dynamic component
+      return React.createElement(TabComponent, { ...props });
     }
+    return React.createElement(
+      'div',
+      { className: 'p-4 text-center text-gray-400' },
+      `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} component not loaded`,
+    );
   };
 
   // React safety check for render
@@ -231,61 +232,72 @@ function NightingaleCMSApp() {
 
   // Show loading screen while services are initializing
   if (serviceStatus.isLoading) {
-    return (
-      <div
-        className="h-screen w-screen flex items-center justify-center bg-gray-900 text-white"
-        style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
-      >
-        <div className="text-center space-y-4">
-          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
-          <h2 className="text-xl font-semibold">
-            Initializing Nightingale CMS
-          </h2>
-          <p className="text-gray-400">Loading services and file system...</p>
-        </div>
-      </div>
+    return React.createElement(
+      'div',
+      {
+        className:
+          'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
+        style: { fontFamily: 'Inter, system-ui, sans-serif' },
+      },
+      React.createElement(
+        'div',
+        { className: 'text-center space-y-4' },
+        React.createElement('div', {
+          className:
+            'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
+        }),
+        React.createElement(
+          'h2',
+          { className: 'text-xl font-semibold' },
+          'Initializing Nightingale CMS',
+        ),
+        React.createElement(
+          'p',
+          { className: 'text-gray-400' },
+          'Loading services and file system...',
+        ),
+      ),
     );
   }
 
-  return (
-    <div className="h-screen w-screen flex">
-      {components.Sidebar && (
-        <components.Sidebar
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onSettingsClick={() => setIsSettingsOpen(true)}
-          caseViewMode={caseViewMode}
-          onCaseBackToList={() => {
-            if (caseBackFunction) {
-              caseBackFunction();
-            }
-          }}
-        />
-      )}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {components.Header && (
-          <components.Header
-            fileStatus={fileStatus}
-            autosaveStatus={autosaveStatus}
-            onSettingsClick={() => setIsSettingsOpen(true)}
-            onManualSave={handleManualSave}
-          />
-        )}
-        <main className="flex-1 overflow-auto p-6 bg-gray-900">
-          {renderActiveTab()}
-        </main>
-      </div>
-      {components.SettingsModal && (
-        <components.SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          fileService={fileService}
-          onDataLoaded={handleDataLoaded}
-          fileStatus={fileStatus}
-          onFileStatusChange={setFileStatus}
-        />
-      )}
-    </div>
+  return React.createElement(
+    'div',
+    { className: 'h-screen w-screen flex' },
+    components.Sidebar &&
+      React.createElement(components.Sidebar, {
+        activeTab,
+        onTabChange: setActiveTab,
+        onSettingsClick: () => setIsSettingsOpen(true),
+        caseViewMode,
+        onCaseBackToList: () => {
+          if (caseBackFunction) caseBackFunction();
+        },
+      }),
+    React.createElement(
+      'div',
+      { className: 'flex-1 flex flex-col overflow-hidden' },
+      components.Header &&
+        React.createElement(components.Header, {
+          fileStatus,
+          autosaveStatus,
+          onSettingsClick: () => setIsSettingsOpen(true),
+          onManualSave: handleManualSave,
+        }),
+      React.createElement(
+        'main',
+        { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
+        renderActiveTab(),
+      ),
+    ),
+    components.SettingsModal &&
+      React.createElement(components.SettingsModal, {
+        isOpen: isSettingsOpen,
+        onClose: () => setIsSettingsOpen(false),
+        fileService,
+        onDataLoaded: handleDataLoaded,
+        fileStatus,
+        onFileStatusChange: setFileStatus,
+      }),
   );
 }
 
