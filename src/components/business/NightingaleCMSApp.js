@@ -9,6 +9,14 @@
  * @author Nightingale CMS Team
  */
 
+// Direct ES module imports for primary tab components (eliminates reliance on global registry lookups)
+import DashboardTab from './DashboardTab.js';
+import CasesTab from './CasesTab.js';
+import PeopleTab from './PeopleTab.js';
+import OrganizationsTab from './OrganizationsTab.js';
+import EligibilityTab from './EligibilityTab.js';
+// Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
+
 /**
  * NightingaleCMSApp Component
  * Main application component with global state management
@@ -57,7 +65,7 @@ function NightingaleCMSApp() {
   const fileService = autosaveFileService; // For components that expect fileService
   const [servicesReady, setServicesReady] = useState(false);
 
-  // Memoize component resolution - prevents expensive registry lookups on every render
+  // Memoize non-tab components (tabs imported directly above)
   const components = useMemo(
     () => ({
       Sidebar:
@@ -66,14 +74,9 @@ function NightingaleCMSApp() {
       SettingsModal:
         window.SettingsModal ||
         window.NightingaleBusiness?.getComponent?.('SettingsModal'),
-      DashboardTab: window.DashboardTab,
-      CasesTab: window.CasesTab,
-      PeopleTab: window.PeopleTab,
-      OrganizationsTab: window.OrganizationsTab,
-      EligibilityTab: window.EligibilityTab,
     }),
     [],
-  ); // Empty deps - component registry doesn't change during app lifecycle
+  );
 
   // Memoize tab props to prevent unnecessary re-renders of heavy tab components
   const tabProps = useMemo(
@@ -200,23 +203,27 @@ function NightingaleCMSApp() {
     setFullData(data);
   }, []);
 
-  // Render tab content based on active tab - optimized with memoized props
-  const renderTabContent = () => {
-    const TabComponent =
-      components[
-        `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}Tab`
-      ];
-    const props = tabProps[activeTab];
-
-    if (TabComponent && props) {
-      return e(TabComponent, props);
+  // Render active tab using direct component references to avoid invalid hook context issues
+  const renderActiveTab = () => {
+    const props = tabProps[activeTab] || {};
+    switch (activeTab) {
+      case 'dashboard':
+        return e(DashboardTab, props);
+      case 'cases':
+        return e(CasesTab, props);
+      case 'people':
+        return e(PeopleTab, props);
+      case 'organizations':
+        return e(OrganizationsTab, props);
+      case 'eligibility':
+        return e(EligibilityTab, props);
+      default:
+        return e(
+          'div',
+          { className: 'p-4 text-center text-gray-400' },
+          'Select a tab',
+        );
     }
-
-    return e(
-      'div',
-      { className: 'p-4 text-center text-gray-400' },
-      `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} component not loaded`,
-    );
   };
 
   // React safety check for render
@@ -282,7 +289,7 @@ function NightingaleCMSApp() {
       e(
         'main',
         { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
-        renderTabContent(),
+        renderActiveTab(),
       ),
     ),
     // Settings Modal
