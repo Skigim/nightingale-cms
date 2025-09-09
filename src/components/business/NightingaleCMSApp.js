@@ -45,8 +45,8 @@ function NightingaleCMSApp() {
   // const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
 
   // Autosave & File service state (combined)
-  const [autosaveFileService, setAutosaveFileService] = useState(null);
-  const [autosaveStatus, setAutosaveStatus] = useState({
+  const [autosaveFileService] = useState(null); // legacy service placeholder
+  const [autosaveStatus] = useState({
     status: 'disconnected',
     message: 'Service not initialized',
   });
@@ -66,7 +66,6 @@ function NightingaleCMSApp() {
 
   // Backward compatibility aliases
   const fileService = autosaveFileService; // For components that expect fileService
-  const [servicesReady, setServicesReady] = useState(false);
 
   // Memoize non-tab components (tabs imported directly above)
   const components = useMemo(
@@ -119,68 +118,19 @@ function NightingaleCMSApp() {
   // Memoize service status to optimize conditional rendering
   const serviceStatus = useMemo(
     () => ({
-      isReady: servicesReady && !!fileService,
+      isReady: !!fileService,
       hasAutosave: !!autosaveFileService,
       canSave: !!fileService?.saveData,
-      isLoading: !servicesReady || !fileService,
+      isLoading: false, // legacy loading removed
     }),
-    [servicesReady, fileService, autosaveFileService],
+    [fileService, autosaveFileService],
   );
 
   // Toast function - now guaranteed to work by main.js setup
   const showToast = window.showToast;
 
-  // Initialize combined autosave & file service when services are ready
-  useEffect(() => {
-    const handleServicesReady = () => {
-      if (typeof window.AutosaveFileService !== 'undefined') {
-        // Use the clean factory method for React integration
-        const service = window.AutosaveFileService.createForReact({
-          tabId: `cms-react-tab-${Date.now()}`,
-          errorCallback: showToast,
-          sanitizeFn:
-            typeof window.sanitize !== 'undefined'
-              ? window.sanitize
-              : (str) => str,
-
-          // Autosave configuration
-          enabled: true,
-          saveInterval: 120000, // 2 minutes
-          debounceDelay: 5000, // 5 seconds
-          maxRetries: 3,
-
-          // React integration - use ref for live data access
-          getFullData: () => {
-            return fullDataRef.current;
-          },
-
-          // Status updates
-          onStatusChange: (status) => {
-            setAutosaveStatus(status);
-          },
-        });
-        setAutosaveFileService(service);
-        setServicesReady(true);
-      } else {
-        setTimeout(handleServicesReady, 1000);
-      }
-    };
-
-    // Listen for services ready event
-    window.addEventListener('nightingale:services:ready', handleServicesReady);
-
-    // Also check if already ready
-    if (typeof window.AutosaveFileService !== 'undefined') {
-      handleServicesReady();
-    }
-
-    return () => {
-      window.removeEventListener(
-        'nightingale:services:ready',
-        handleServicesReady,
-      );
-    };
-  }, [showToast]);
+  // (Legacy services ready listener removed) Autosave/file service will now be
+  // initialized elsewhere; component renders immediately.
 
   // Handle manual save
   const handleManualSave = async () => {
@@ -228,36 +178,6 @@ function NightingaleCMSApp() {
   // React safety check for render
   if (!window.React) {
     return null;
-  }
-
-  // Show loading screen while services are initializing
-  if (serviceStatus.isLoading) {
-    return React.createElement(
-      'div',
-      {
-        className:
-          'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
-        style: { fontFamily: 'Inter, system-ui, sans-serif' },
-      },
-      React.createElement(
-        'div',
-        { className: 'text-center space-y-4' },
-        React.createElement('div', {
-          className:
-            'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
-        }),
-        React.createElement(
-          'h2',
-          { className: 'text-xl font-semibold' },
-          'Initializing Nightingale CMS',
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-gray-400' },
-          'Loading services and file system...',
-        ),
-      ),
-    );
   }
 
   return React.createElement(
