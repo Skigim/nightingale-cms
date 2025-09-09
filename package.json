@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npx serve . --port=3000",
     "dev": "vite",
-    "build": "node build-bundle.js",
+    "build": "vite build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
