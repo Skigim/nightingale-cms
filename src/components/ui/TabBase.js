@@ -8,7 +8,6 @@ import { registerComponent } from '../../services/core';
  * 3. Multi-tier component registry fallbacks
  * 4. Standardized data handling and error boundaries
  *
- * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
@@ -215,44 +214,16 @@ FallbackTabHeader.propTypes = {
  * @returns {Function} React component function
  */
 function getRegistryComponent(componentName, fallbackComponent) {
-  // Tier 1: Business registry with nested components access
-  if (window.NightingaleBusiness?.components?.[componentName]) {
-    return window.NightingaleBusiness.components[componentName];
-  }
-
-  // Tier 2: Business registry direct access
-  if (window.NightingaleBusiness?.[componentName]) {
-    return window.NightingaleBusiness[componentName];
-  }
-
-  // Tier 3: UI registry with nested components access
-  if (window.NightingaleUI?.components?.[componentName]) {
-    return window.NightingaleUI.components[componentName];
-  }
-
-  // Tier 4: UI registry direct access
-  if (window.NightingaleUI?.[componentName]) {
-    return window.NightingaleUI[componentName];
-  }
-
-  // Tier 5: Global window access
-  if (window[componentName]) {
-    return window[componentName];
-  }
-
-  // Tier 6: Provided fallback component
-  if (fallbackComponent) {
-    return fallbackComponent;
-  }
-
-  // Tier 7: Error state component
+  if (window[componentName]) return window[componentName];
+  // If an explicit null is passed, treat as "no fallback" and return null
+  if (fallbackComponent === null) return null;
+  if (fallbackComponent !== undefined) return fallbackComponent;
+  // Only emit a visible error component when no explicit null/override provided
   return function ComponentNotFound() {
     const e = window.React.createElement;
     return e(
       'div',
-      {
-        className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
-      },
+      { className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700' },
       `Component "${componentName}" not found in registry`,
     );
   };
@@ -498,40 +469,6 @@ function createBusinessComponent(config) {
  * Provides global access for component composition
  */
 if (typeof window !== 'undefined') {
-  // Register factory function
-  window.createBusinessComponent = createBusinessComponent;
-
-  // Register helper functions
-  window.getRegistryComponent = getRegistryComponent;
-  window.resolveComponents = resolveComponents;
-
-  // Register layout helpers
-  window.SearchSection = SearchSection;
-  window.ContentSection = ContentSection;
-
-  // Register fallback components
-  window.FallbackModal = FallbackModal;
-  window.FallbackButton = FallbackButton;
-  window.FallbackSearchBar = FallbackSearchBar;
-
-  // Register with NightingaleUI if available
-  if (window.NightingaleUI) {
-    if (!window.NightingaleUI.components) {
-      window.NightingaleUI.components = {};
-    }
-
-    window.NightingaleUI.components.createBusinessComponent =
-      createBusinessComponent;
-    window.NightingaleUI.components.getRegistryComponent = getRegistryComponent;
-    window.NightingaleUI.components.resolveComponents = resolveComponents;
-    window.NightingaleUI.components.SearchSection = SearchSection;
-    window.NightingaleUI.components.ContentSection = ContentSection;
-    window.NightingaleUI.components.FallbackModal = FallbackModal;
-    window.NightingaleUI.components.FallbackButton = FallbackButton;
-    window.NightingaleUI.components.FallbackSearchBar = FallbackSearchBar;
-    window.NightingaleUI.components.FallbackTabHeader = FallbackTabHeader;
-  }
-  // New registry (ESM) for key helpers
   registerComponent('ui', 'SearchSection', SearchSection);
   registerComponent('ui', 'ContentSection', ContentSection);
 }

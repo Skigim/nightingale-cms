@@ -6,7 +6,6 @@
  *
  * Note: This is a class component as Error Boundaries require class components in React.
  *
- * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
@@ -119,7 +118,7 @@ if (typeof window !== 'undefined') {
   // Register globally for backward compatibility
   window.ErrorBoundary = ErrorBoundary;
 
-  // Register with NightingaleUI registry if available
+  // Register component in UI registry (handled elsewhere)
   // New registry (ESM)
   registerComponent('ui', 'ErrorBoundary', ErrorBoundary);
 }

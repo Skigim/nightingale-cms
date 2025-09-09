@@ -528,7 +528,7 @@ function FinancialItemModal({
   });
 }
 
-// Register component globally and with NightingaleBusiness registry
+// Register component globally (legacy global retained for backward compatibility)
 if (typeof window !== 'undefined') {
   window.FinancialItemModal = FinancialItemModal; // legacy global
   registerComponent('business', 'FinancialItemModal', FinancialItemModal);

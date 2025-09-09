@@ -5,7 +5,6 @@
  * Provides case editing, notes management, financial tracking, and status updates.
  * Migrated to ES module component registry.
  *
- * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
@@ -58,15 +57,9 @@ function CaseDetailsView({
   // const organization = caseData?.organizationId ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0')) : null;
 
   // Get component dependencies
-  const CaseCreationModal =
-    window.CaseCreationModal ||
-    window.NightingaleBusiness?.getComponent?.('CaseCreationModal');
-  const FinancialManagementSection =
-    window.FinancialManagementSection ||
-    window.NightingaleBusiness?.getComponent?.('FinancialManagementSection');
-  const NotesModal =
-    window.NotesModal ||
-    window.NightingaleBusiness?.getComponent?.('NotesModal');
+  const CaseCreationModal = window.CaseCreationModal;
+  const FinancialManagementSection = window.FinancialManagementSection;
+  const NotesModal = window.NotesModal;
 
   // Update case field helper
   const updateCaseField = (field, value) => {

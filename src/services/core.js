@@ -219,19 +219,4 @@ const NightingaleCoreUtilities = {
 
 export default NightingaleCoreUtilities;
 
-// ---- Backward Compatibility Globals ----
-if (typeof window !== 'undefined') {
-  window.NightingaleCoreUtilities = NightingaleCoreUtilities;
-  window.NightingaleSearchService = SearchServiceWrapper;
-  window.sanitize = sanitize;
-  window.setSanitizedInnerHTML = setSanitizedInnerHTML;
-  window.encodeURL = encodeURL;
-  window.sanitizeHTML = sanitizeHTML;
-  window.formatDate = formatDate;
-  window.toInputDateFormat = toInputDateFormat;
-  window.formatPhoneNumber = formatPhoneNumber;
-  window.formatProperCase = formatProperCase;
-  window.formatPersonName = formatPersonName;
-  window.Validators = Validators;
-  window.getNextId = getNextId;
-}
+// Legacy global exposure removed; consumers must import from ES modules.

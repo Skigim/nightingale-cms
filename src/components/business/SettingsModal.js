@@ -4,7 +4,6 @@
  * Business component for application settings, file system connection, and data management.
  * Migrated to ES module component registry.
  *
- * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
  */

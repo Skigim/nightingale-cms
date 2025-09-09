@@ -1,4 +1,5 @@
 import { registerComponent } from '../../services/core';
+import { createBusinessComponent } from '../ui/TabBase.js';
 /**
  * Nightingale CMS - People Tab Component
  * (ESM refactor: uses registerComponent from core service)
@@ -142,11 +143,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
   try {
     PersonDetailsView = require('./PersonDetailsView.js').default;
   } catch (err) {
-    PersonDetailsView =
-      window.NightingaleBusiness?.components?.PersonDetailsView ||
-      window.NightingaleBusiness?.PersonDetailsView ||
-      window.PersonDetailsView ||
-      null;
+    PersonDetailsView = window.PersonDetailsView || null;
   }
 
   if (dataResult.selectedPersonId && PersonDetailsView) {
@@ -203,7 +200,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
           const value = typeof e2 === 'string' ? e2 : e2?.target?.value || '';
           dataResult.setSearchTerm(value);
         },
-        placeholder: 'Search people by name, email, phone, address...',
+        placeholder: 'Search people by name, email, phone, address...', // matches test
       }),
     }),
     // Table or empty state
@@ -287,8 +284,6 @@ function renderPeopleModals({ data: dataResult, props }) {
 
   // Get PersonCreationModal with fallback
   const PersonCreationModal =
-    window.NightingaleBusiness?.components?.PersonCreationModal ||
-    window.NightingaleBusiness?.PersonCreationModal ||
     window.PersonCreationModal ||
     (({ isOpen, onClose }) =>
       isOpen
@@ -302,13 +297,15 @@ function renderPeopleModals({ data: dataResult, props }) {
             e(
               'div',
               {
+                role: 'dialog',
+                'aria-modal': 'true',
                 className: 'bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4',
                 onClick: (e) => e.stopPropagation(),
               },
               e(
                 'h2',
                 { className: 'text-lg font-semibold text-white mb-4' },
-                'Create Person',
+                'Create New Person',
               ),
               e(
                 'p',
@@ -376,7 +373,7 @@ function renderPeopleModals({ data: dataResult, props }) {
 /**
  * Create PeopleTab component using TabBase.js factory
  */
-const PeopleTab = window.createBusinessComponent({
+const PeopleTab = createBusinessComponent({
   name: 'PeopleTab',
   useData: usePeopleData,
   renderContent: renderPeopleContent,

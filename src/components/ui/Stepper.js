@@ -5,7 +5,6 @@ import { registerComponent } from '../../services/core';
  * Generic UI component for displaying step-by-step progress with interactive navigation.
  * Provides visual progress indication and clickable step navigation.
  *
- * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
@@ -210,7 +209,7 @@ if (typeof window !== 'undefined') {
   // Register globally for backward compatibility
   window.Stepper = Stepper;
 
-  // Register with NightingaleUI registry if available
+  // Register component in UI registry (handled elsewhere)
   // New registry (ESM)
   registerComponent('ui', 'Stepper', Stepper);
 }

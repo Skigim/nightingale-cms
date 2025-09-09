@@ -98,7 +98,7 @@ export default TabHeader;
 if (typeof window !== 'undefined') {
   window.TabHeader = TabHeader;
 
-  // Register with NightingaleUI if available
+  // Register component in UI registry (handled externally)
   // New registry (ESM)
   registerComponent('ui', 'TabHeader', TabHeader);
 }

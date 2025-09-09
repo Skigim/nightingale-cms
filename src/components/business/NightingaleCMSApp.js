@@ -4,7 +4,6 @@
  * Root business component for the Nightingale CMS application.
  * Manages global state, services, and orchestrates all other components.
  *
- * @namespace NightingaleBusiness
  * @version 1.0.0
  * @author Nightingale CMS Team
  */

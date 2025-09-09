@@ -1,6 +1,7 @@
 // OrganizationsTab.js
 // Migrated to ES module component registry.
 import { registerComponent } from '../../services/core';
+import { createBusinessComponent } from '../ui/TabBase.js';
 
 /**
  * Data management hook for Organizations Tab
@@ -449,33 +450,19 @@ function renderOrganizationsModals({ components, data, props }) {
  * OrganizationsTab using createBusinessComponent factory
  * Standardized Tab component following the factory architecture pattern
  */
-const OrganizationsTab = window.createBusinessComponent
-  ? window.createBusinessComponent({
-      name: 'OrganizationsTab',
-      useData: useOrganizationsData,
-      renderContent: renderOrganizationsContent,
-      renderModals: renderOrganizationsModals,
-      defaultProps: {
-        fullData: { organizations: [] },
-        onUpdateData: () => {},
-        fileService: null,
-        onViewModeChange: () => {},
-        onBackToList: () => {},
-      },
-    })
-  : function OrganizationsTabFallback() {
-      const e = window.React?.createElement;
-      return e
-        ? e(
-            'div',
-            {
-              className:
-                'p-4 bg-red-50 border border-red-200 rounded text-red-700',
-            },
-            'createBusinessComponent factory not available. Please ensure TabBase.js is loaded.',
-          )
-        : null;
-    };
+const OrganizationsTab = createBusinessComponent({
+  name: 'OrganizationsTab',
+  useData: useOrganizationsData,
+  renderContent: renderOrganizationsContent,
+  renderModals: renderOrganizationsModals,
+  defaultProps: {
+    fullData: { organizations: [] },
+    onUpdateData: () => {},
+    fileService: null,
+    onViewModeChange: () => {},
+    onBackToList: () => {},
+  },
+});
 
 // PropTypes validation
 OrganizationsTab.propTypes = {

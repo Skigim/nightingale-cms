@@ -1,4 +1,5 @@
 import { registerComponent } from '../../services/core';
+import { createBusinessComponent } from '../ui/TabBase.js';
 /**
  * Nightingale CMS - Cases Tab Component
  *
@@ -134,8 +135,6 @@ function renderCasesContent({ components, data: dataResult, props }) {
   if (dataResult.viewMode === 'details' && dataResult.detailsCaseId) {
     // Use CaseDetailsView component with fallback
     const CaseDetailsView =
-      window.NightingaleBusiness?.components?.CaseDetailsView ||
-      window.NightingaleBusiness?.CaseDetailsView ||
       window.CaseDetailsView ||
       (({ caseId }) =>
         e(
@@ -310,8 +309,6 @@ function renderCasesModals({ data: dataResult, props }) {
 
   // Get CaseCreationModal with fallback
   const CaseCreationModal =
-    window.NightingaleBusiness?.components?.CaseCreationModal ||
-    window.NightingaleBusiness?.CaseCreationModal ||
     window.CaseCreationModal ||
     (({ isOpen, onClose }) =>
       isOpen
@@ -408,7 +405,7 @@ function renderCasesModals({ data: dataResult, props }) {
 /**
  * Create CasesTab component using TabBase.js factory
  */
-const CasesTab = window.createBusinessComponent({
+const CasesTab = createBusinessComponent({
   name: 'CasesTab',
   useData: useCasesData,
   renderContent: renderCasesContent,

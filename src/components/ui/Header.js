@@ -5,7 +5,6 @@ import { registerComponent } from '../../services/core';
  * Generic UI component for application header with status indicators, save controls, and settings access.
  * Provides file connection status, autosave status, and manual save functionality.
  *
- * @namespace NightingaleUI
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
@@ -221,7 +220,7 @@ if (typeof window !== 'undefined') {
   // Register globally for backward compatibility
   window.Header = Header;
 
-  // Register with NightingaleUI registry if available
+  // Register component in UI registry (handled elsewhere)
   // New registry (ESM)
   registerComponent('ui', 'Header', Header);
 }
