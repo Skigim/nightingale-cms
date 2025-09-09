@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { registerComponent } from '../../services/core';
 /**
  * Nightingale Button Component
  *
@@ -349,37 +350,15 @@ if (typeof window !== 'undefined') {
   window.ButtonIcons = ButtonIcons;
 
   // Register with component system
-  if (window.NightingaleComponentLibrary) {
-    window.NightingaleComponentLibrary.registerComponent('Button', Button);
-    window.NightingaleComponentLibrary.registerComponent(
-      'PrimaryButton',
-      PrimaryButton,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'SecondaryButton',
-      SecondaryButton,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'DangerButton',
-      DangerButton,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'SuccessButton',
-      SuccessButton,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'OutlineButton',
-      OutlineButton,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'GhostButton',
-      GhostButton,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'LinkButton',
-      LinkButton,
-    );
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'Button', Button);
+  registerComponent('ui', 'PrimaryButton', PrimaryButton);
+  registerComponent('ui', 'SecondaryButton', SecondaryButton);
+  registerComponent('ui', 'DangerButton', DangerButton);
+  registerComponent('ui', 'SuccessButton', SuccessButton);
+  registerComponent('ui', 'OutlineButton', OutlineButton);
+  registerComponent('ui', 'GhostButton', GhostButton);
+  registerComponent('ui', 'LinkButton', LinkButton);
 }
 
 // Export for module systems

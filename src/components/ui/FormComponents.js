@@ -1,4 +1,5 @@
 // FormComponents - uses global window.React
+import { registerComponent } from '../../services/core';
 // Uses global window.dateUtils, window.toInputDateFormat, window.Validators
 
 /**
@@ -418,23 +419,13 @@ if (typeof window !== 'undefined') {
   window.createValidator = createValidator;
 
   // Register with component system
-  if (window.NightingaleComponentLibrary) {
-    window.NightingaleComponentLibrary.registerComponent(
-      'FormField',
-      FormField,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'TextInput',
-      TextInput,
-    );
-    window.NightingaleComponentLibrary.registerComponent('Select', Select);
-    window.NightingaleComponentLibrary.registerComponent(
-      'DateInput',
-      DateInput,
-    );
-    window.NightingaleComponentLibrary.registerComponent('Textarea', Textarea);
-    window.NightingaleComponentLibrary.registerComponent('Checkbox', Checkbox);
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'FormField', FormField);
+  registerComponent('ui', 'TextInput', TextInput);
+  registerComponent('ui', 'Select', Select);
+  registerComponent('ui', 'DateInput', DateInput);
+  registerComponent('ui', 'Textarea', Textarea);
+  registerComponent('ui', 'Checkbox', Checkbox);
 }
 
 // ES6 Module Export

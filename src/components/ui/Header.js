@@ -1,3 +1,4 @@
+import { registerComponent } from '../../services/core';
 /**
  * Header.js - Application header UI component
  *
@@ -221,9 +222,8 @@ if (typeof window !== 'undefined') {
   window.Header = Header;
 
   // Register with NightingaleUI registry if available
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('Header', Header, 'layout');
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'Header', Header);
 }
 
 // Export for ES6 module compatibility

@@ -1,3 +1,4 @@
+import { registerComponent } from '../../services/core';
 /**
  * DataTable Component
  * A comprehensive table component with sorting, pagination, and customizable styling
@@ -576,9 +577,8 @@ if (typeof window !== 'undefined') {
   window.DataTable = DataTable;
 
   // Register with the UI component registry when available
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('DataTable', DataTable, 'data');
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'DataTable', DataTable);
 }
 
 // ES6 Module Export

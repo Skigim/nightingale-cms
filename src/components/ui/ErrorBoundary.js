@@ -18,6 +18,7 @@
  * @class ErrorBoundary
  * @extends React.Component
  */
+import { registerComponent } from '../../services/core';
 class ErrorBoundary extends window.React.Component {
   constructor(props) {
     super(props);
@@ -119,13 +120,8 @@ if (typeof window !== 'undefined') {
   window.ErrorBoundary = ErrorBoundary;
 
   // Register with NightingaleUI registry if available
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent(
-      'ErrorBoundary',
-      ErrorBoundary,
-      'core',
-    );
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'ErrorBoundary', ErrorBoundary);
 }
 
 // Export for ES6 module compatibility

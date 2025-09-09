@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { registerComponent } from '../../services/core';
 // StepperModal component - uses global window.React
 // Uses global window.Modal and window.FormComponents
 
@@ -196,6 +197,8 @@ function StepperModal({
 // Make StepperModal available globally
 if (typeof window !== 'undefined') {
   window.StepperModal = StepperModal;
+  // New registry (ESM)
+  registerComponent('ui', 'StepperModal', StepperModal);
 }
 
 // ES6 Module Export

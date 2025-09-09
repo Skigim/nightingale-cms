@@ -1,4 +1,5 @@
 // App/js/components/ui/TabHeader.js
+import { registerComponent } from '../../services/core';
 /**
  * TabHeader - Reusable header component for tab interfaces
  *
@@ -98,7 +99,6 @@ if (typeof window !== 'undefined') {
   window.TabHeader = TabHeader;
 
   // Register with NightingaleUI if available
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('TabHeader', TabHeader);
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'TabHeader', TabHeader);
 }

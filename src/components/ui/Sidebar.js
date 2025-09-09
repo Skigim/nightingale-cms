@@ -1,3 +1,4 @@
+import { registerComponent } from '../../services/core';
 /**
  * Sidebar.js - Navigation sidebar UI component
  *
@@ -232,9 +233,8 @@ if (typeof window !== 'undefined') {
   window.Sidebar = Sidebar;
 
   // Register with NightingaleUI registry if available
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('Sidebar', Sidebar, 'layout');
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'Sidebar', Sidebar);
 }
 
 // Export for ES6 module compatibility

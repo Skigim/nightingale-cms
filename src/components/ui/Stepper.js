@@ -1,3 +1,4 @@
+import { registerComponent } from '../../services/core';
 /**
  * Stepper.js - Step indicator UI component
  *
@@ -210,9 +211,8 @@ if (typeof window !== 'undefined') {
   window.Stepper = Stepper;
 
   // Register with NightingaleUI registry if available
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('Stepper', Stepper, 'core');
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'Stepper', Stepper);
 }
 
 // Export for ES6 module compatibility

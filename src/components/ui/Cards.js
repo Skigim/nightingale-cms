@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { registerComponent } from '../../services/core';
 /**
  * Nightingale Component Library - Cards
  * Layer: UI (Generic)
@@ -243,14 +244,13 @@ if (typeof window !== 'undefined') {
   window.Cards = Cards;
 
   // Register with UI component library
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('Card', Card);
-    window.NightingaleUI.registerComponent('CardGrid', CardGrid);
-    window.NightingaleUI.registerComponent('CardList', CardList);
-    window.NightingaleUI.registerComponent('CardField', CardField);
-    window.NightingaleUI.registerComponent('CardActions', CardActions);
-    window.NightingaleUI.registerComponent('Cards', Cards);
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'Card', Card);
+  registerComponent('ui', 'CardGrid', CardGrid);
+  registerComponent('ui', 'CardList', CardList);
+  registerComponent('ui', 'CardField', CardField);
+  registerComponent('ui', 'CardActions', CardActions);
+  registerComponent('ui', 'Cards', Cards);
 }
 
 // Export for ES6 modules

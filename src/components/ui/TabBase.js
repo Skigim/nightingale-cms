@@ -1,3 +1,4 @@
+import { registerComponent } from '../../services/core';
 /**
  * TabBase.js - Factory for creating standardized business-layer Tab components
  *
@@ -530,6 +531,9 @@ if (typeof window !== 'undefined') {
     window.NightingaleUI.components.FallbackSearchBar = FallbackSearchBar;
     window.NightingaleUI.components.FallbackTabHeader = FallbackTabHeader;
   }
+  // New registry (ESM) for key helpers
+  registerComponent('ui', 'SearchSection', SearchSection);
+  registerComponent('ui', 'ContentSection', ContentSection);
 }
 
 // Export for ES6 module compatibility

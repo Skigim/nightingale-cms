@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { registerComponent } from '../../services/core';
 /**
  * Nightingale Component Library - Modal System
  *
@@ -329,17 +330,10 @@ if (typeof window !== 'undefined') {
   window.showModalToast = showModalToast;
 
   // Register with component system
-  if (window.NightingaleComponentLibrary) {
-    window.NightingaleComponentLibrary.registerComponent('Modal', Modal);
-    window.NightingaleComponentLibrary.registerComponent(
-      'ConfirmationModal',
-      ConfirmationModal,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'FormModal',
-      FormModal,
-    );
-  }
+  // New registry (ESM)
+  registerComponent('ui', 'Modal', Modal);
+  registerComponent('ui', 'ConfirmationModal', ConfirmationModal);
+  registerComponent('ui', 'FormModal', FormModal);
 }
 
 // ES6 Module Export

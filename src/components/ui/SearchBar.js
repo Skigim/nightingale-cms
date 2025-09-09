@@ -1,4 +1,5 @@
 // SearchBar component - uses global window.React
+import { registerComponent } from '../../services/core';
 // Uses global window.NightingaleSearchService
 
 /**
@@ -447,6 +448,8 @@ function SearchBar({
 // Make available globally
 if (typeof window !== 'undefined') {
   window.SearchBar = SearchBar;
+  // New registry (ESM)
+  registerComponent('ui', 'SearchBar', SearchBar);
 }
 
 // Export for module systems

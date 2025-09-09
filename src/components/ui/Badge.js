@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { registerComponent } from '../../services/core';
 /**
  * Nightingale Component Library - Badge System
  *
@@ -282,22 +283,12 @@ if (typeof window !== 'undefined') {
   window.StatusBadge = Badge;
 
   // Register with component system
-  if (window.NightingaleComponentLibrary) {
-    window.NightingaleComponentLibrary.registerComponent('Badge', Badge);
-    window.NightingaleComponentLibrary.registerComponent('StatusBadge', Badge); // Alias
-    window.NightingaleComponentLibrary.registerComponent(
-      'ProgressBadge',
-      ProgressBadge,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'CountBadge',
-      CountBadge,
-    );
-    window.NightingaleComponentLibrary.registerComponent(
-      'MultiBadge',
-      MultiBadge,
-    );
-  }
+  // New registry registrations (ESM)
+  registerComponent('ui', 'Badge', Badge);
+  registerComponent('ui', 'StatusBadge', Badge); // alias
+  registerComponent('ui', 'ProgressBadge', ProgressBadge);
+  registerComponent('ui', 'CountBadge', CountBadge);
+  registerComponent('ui', 'MultiBadge', MultiBadge);
 }
 
 // ES6 Module Export
