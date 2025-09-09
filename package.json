@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "npx serve . --port=3000",
-    "dev": "npx live-server . --port=3000 --open=index.html",
+    "dev": "vite",
     "build": "node build-bundle.js",
     "test": "jest",
     "test:watch": "jest --watch",
