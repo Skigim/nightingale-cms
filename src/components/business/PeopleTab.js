@@ -31,13 +31,15 @@ function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editPersonId, setEditPersonId] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'details'
-  const [detailsPersonId, setDetailsPersonId] = useState(null);
+  const [viewMode, setViewMode] = useState('list'); // legacy (kept for backward compatibility)
+  const [detailsPersonId, setDetailsPersonId] = useState(null); // legacy
+  const [selectedPersonId, setSelectedPersonId] = useState(null); // new details view integration
 
   // Back to list function that can be called externally
   const backToList = useCallback(() => {
-    setViewMode('list');
-    setDetailsPersonId(null);
+    setViewMode('list'); // legacy reset
+    setDetailsPersonId(null); // legacy reset
+    setSelectedPersonId(null);
     onViewModeChange?.('list');
   }, [onViewModeChange]);
 
@@ -93,6 +95,13 @@ function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
     setIsEditModalOpen(true);
   };
 
+  // New handlers for details integration
+  const handleViewDetails = (person) => {
+    if (!person) return;
+    setSelectedPersonId(person.id);
+  };
+  const handleBackToList = () => backToList();
+
   const formatDate = (dateString) => {
     return window.dateUtils?.format?.(dateString) || dateString;
   };
@@ -110,13 +119,17 @@ function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
     setIsEditModalOpen,
     editPersonId,
     setEditPersonId,
-    viewMode,
-    setViewMode,
-    detailsPersonId,
-    setDetailsPersonId,
+    viewMode, // legacy
+    setViewMode, // legacy
+    detailsPersonId, // legacy
+    setDetailsPersonId, // legacy
+    selectedPersonId,
+    setSelectedPersonId,
     // Functions
     backToList,
     handlePersonClick,
+    handleViewDetails,
+    handleBackToList,
     formatDate,
   };
 }
@@ -129,29 +142,24 @@ function renderPeopleContent({ components, data: dataResult, props }) {
   const e = window.React.createElement;
   const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } =
     components;
-
-  // Conditional rendering for details view
-  if (dataResult.viewMode === 'details' && dataResult.detailsPersonId) {
-    // Use PersonDetailsView component with fallback
-    const PersonDetailsView =
+  // Import PersonDetailsView directly if available via module system; fallback registry
+  let PersonDetailsView = null;
+  try {
+    PersonDetailsView = require('./PersonDetailsView.js').default;
+  } catch (err) {
+    PersonDetailsView =
       window.NightingaleBusiness?.components?.PersonDetailsView ||
       window.NightingaleBusiness?.PersonDetailsView ||
       window.PersonDetailsView ||
-      (({ personId }) =>
-        e(
-          'div',
-          {
-            className:
-              'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700',
-          },
-          `PersonDetailsView component not available. Person ID: ${personId}`,
-        ));
+      null;
+  }
 
+  if (dataResult.selectedPersonId && PersonDetailsView) {
     return e(PersonDetailsView, {
-      personId: dataResult.detailsPersonId,
+      personId: dataResult.selectedPersonId,
       fullData: props.fullData,
+      onBackToList: dataResult.handleBackToList,
       onUpdateData: props.onUpdateData,
-      onBackToList: dataResult.backToList,
     });
   }
 
@@ -247,7 +255,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
             },
           },
         ],
-        onRowClick: dataResult.handlePersonClick,
+        onRowClick: dataResult.handleViewDetails,
         className: 'w-full',
         emptyMessage: 'No people found',
       }),

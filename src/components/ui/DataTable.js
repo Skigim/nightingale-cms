@@ -426,7 +426,8 @@ const DataTable = ({
                 className: `${styles.row} ${styles.rowHover} ${isEven ? styles.evenRow : ''} ${
                   onRowClick ? 'cursor-pointer' : ''
                 } ${isSelected ? 'bg-blue-900 bg-opacity-25' : ''}`,
-                onClick: onRowClick ? () => onRowClick(row, index) : undefined,
+                onClick: onRowClick ? () => onRowClick(row) : undefined,
+                style: onRowClick ? { cursor: 'pointer' } : undefined,
               },
               // Selection column
               selectable &&
