@@ -22,7 +22,7 @@
     templateContent,
     activeCase,
     fullData,
-    customReplacements = {}
+    customReplacements = {},
   ) {
     // Input validation
     if (!templateContent || typeof templateContent !== 'string') {
@@ -101,23 +101,23 @@
       // Financial placeholders - map to actual case financial data
       TotalIncome: formatFinancialValue(
         activeCase?.finances?.income?.total,
-        '[TOTAL INCOME]'
+        '[TOTAL INCOME]',
       ),
       EmploymentIncome: formatFinancialValue(
         activeCase?.finances?.income?.employment,
-        '[EMPLOYMENT INCOME]'
+        '[EMPLOYMENT INCOME]',
       ),
       DisabilityIncome: formatFinancialValue(
         activeCase?.finances?.income?.disability,
-        '[DISABILITY INCOME]'
+        '[DISABILITY INCOME]',
       ),
       TotalExpenses: formatFinancialValue(
         activeCase?.finances?.expenses?.total,
-        '[TOTAL EXPENSES]'
+        '[TOTAL EXPENSES]',
       ),
       HousingCost: formatFinancialValue(
         activeCase?.finances?.expenses?.housing,
-        '[HOUSING COST]'
+        '[HOUSING COST]',
       ),
 
       // Legacy financial placeholders (for backward compatibility)
@@ -224,10 +224,10 @@
 
     const uniquePlaceholders = [...new Set(foundPlaceholders)];
     const validPlaceholders = uniquePlaceholders.filter((p) =>
-      allAvailableKeys.includes(p)
+      allAvailableKeys.includes(p),
     );
     const invalidPlaceholders = uniquePlaceholders.filter(
-      (p) => !allAvailableKeys.includes(p)
+      (p) => !allAvailableKeys.includes(p),
     );
 
     return {
@@ -316,7 +316,7 @@
             isResolved: !value.startsWith('[') || !value.endsWith(']'),
           };
         });
-      }
+      },
     );
 
     return debug;

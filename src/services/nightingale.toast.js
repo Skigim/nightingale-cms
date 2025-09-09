@@ -110,7 +110,7 @@ class ToastQueue {
       message,
       type,
       toastDuration,
-      toastData
+      toastData,
     );
 
     // Add to container
@@ -177,7 +177,7 @@ class ToastQueue {
               this.remove(toastData);
             }
           },
-          Math.max(remainingTime, 100)
+          Math.max(remainingTime, 100),
         ); // Minimum 100ms
       }
     });
@@ -214,7 +214,7 @@ class ToastQueue {
           toastData.element.parentNode.removeChild(toastData.element);
         }
       },
-      { once: true }
+      { once: true },
     );
 
     // Fallback removal in case transitionend doesn't fire
@@ -413,9 +413,9 @@ if (typeof window !== 'undefined') {
       window.showToast = showToast;
     }
   };
-  
+
   ensureToastFunction();
-  
+
   // Always set convenience functions
   window.showSuccessToast = showSuccessToast;
   window.showErrorToast = showErrorToast;

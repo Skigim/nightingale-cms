@@ -25,7 +25,7 @@ function EligibilityTab() {
     e(
       'h2',
       { className: 'text-2xl font-bold text-white' },
-      'Eligibility Management'
+      'Eligibility Management',
     ),
     e(
       'div',
@@ -33,9 +33,9 @@ function EligibilityTab() {
       e(
         'p',
         { className: 'text-gray-400' },
-        'Eligibility functionality will be implemented here...'
-      )
-    )
+        'Eligibility functionality will be implemented here...',
+      ),
+    ),
   );
 }
 
@@ -53,7 +53,7 @@ if (typeof window !== 'undefined') {
       'EligibilityTab',
       EligibilityTab,
       'eligibility',
-      []
+      [],
     );
   }
 

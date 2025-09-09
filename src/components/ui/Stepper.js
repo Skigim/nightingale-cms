@@ -88,8 +88,8 @@ function Stepper({
           e(
             'span',
             { className: 'text-sm text-gray-400' },
-            `${Math.round(((currentStep + 1) / steps.length) * 100)}%`
-          )
+            `${Math.round(((currentStep + 1) / steps.length) * 100)}%`,
+          ),
         ),
         e(
           'div',
@@ -100,8 +100,8 @@ function Stepper({
             style: {
               width: `${((currentStep + 1) / steps.length) * 100}%`,
             },
-          })
-        )
+          }),
+        ),
       ),
 
     // Steps
@@ -126,7 +126,7 @@ function Stepper({
               clickable ? 'button' : 'div',
               {
                 className: `relative z-10 w-10 h-10 rounded-full border-2 flex items-center justify-center font-medium text-sm transition-all duration-200 ${getStepColor(
-                  status
+                  status,
                 )} ${clickable ? 'hover:scale-105 cursor-pointer' : ''}`,
                 onClick: clickable ? () => onStepClick(index) : undefined,
                 disabled: !clickable,
@@ -145,9 +145,9 @@ function Stepper({
                       strokeLinejoin: 'round',
                       strokeWidth: 2,
                       d: 'M5 13l4 4L19 7',
-                    })
+                    }),
                   )
-                : e('span', null, index + 1)
+                : e('span', null, index + 1),
             ),
 
             // Step label
@@ -165,19 +165,19 @@ function Stepper({
                         : 'text-gray-400'
                   }`,
                 },
-                step.title
+                step.title,
               ),
               step.description &&
                 e(
                   'div',
                   { className: 'text-xs text-gray-500 mt-1' },
-                  step.description
-                )
-            )
-          )
+                  step.description,
+                ),
+            ),
+          ),
         );
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -188,7 +188,7 @@ if (typeof window !== 'undefined' && window.PropTypes) {
       window.PropTypes.shape({
         title: window.PropTypes.string.isRequired,
         description: window.PropTypes.string,
-      })
+      }),
     ).isRequired,
     currentStep: window.PropTypes.number.isRequired,
     onStepClick: window.PropTypes.func,

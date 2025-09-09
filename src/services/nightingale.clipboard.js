@@ -125,7 +125,7 @@
       if (typeof _ !== 'undefined' && _.debounce) {
         return _.debounce(
           (text, options) => this.copyText(text, options),
-          debounceMs
+          debounceMs,
         );
       } else {
         // Simple debounce fallback if Lodash is not available
@@ -134,7 +134,7 @@
           clearTimeout(timeoutId);
           timeoutId = setTimeout(
             () => this.copyText(text, options),
-            debounceMs
+            debounceMs,
           );
         };
       }
@@ -170,7 +170,7 @@
     static async copyFinancialItem(
       financialItem,
       template = 'summary',
-      options = {}
+      options = {},
     ) {
       if (!financialItem) {
         return this.copyText('', {
@@ -330,7 +330,7 @@
       window.NightingaleServices.registerService(
         'clipboard',
         NightingaleClipboard,
-        'core'
+        'core',
       );
     }
 

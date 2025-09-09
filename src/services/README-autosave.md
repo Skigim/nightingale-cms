@@ -2,7 +2,8 @@
 
 ## Overview
 
-Intelligent automatic saving for the Nightingale CMS with enhanced permission awareness, multi-tab coordination, and production-grade error handling.
+Intelligent automatic saving for the Nightingale CMS with enhanced permission awareness, multi-tab
+coordination, and production-grade error handling.
 
 ## Key Features
 
@@ -76,7 +77,10 @@ const handleDataUpdate = useCallback((newData, changeType) => {
 // Add autosave indicator to your header
 {
   autosaveStatus && (
-    <div className="flex items-center space-x-1" title={autosaveStatus.message}>
+    <div
+      className="flex items-center space-x-1"
+      title={autosaveStatus.message}
+    >
       <svg
         className={`h-3 w-3 ${
           autosaveStatus.status === 'saving'
@@ -177,9 +181,7 @@ function createFinancialItem(itemData, handleDataUpdate) {
   const updatedData = {
     ...fullData,
     cases: fullData.cases.map((c) =>
-      c.id === caseId
-        ? { ...c, financials: { ...c.financials, [type]: [...items, newItem] } }
-        : c
+      c.id === caseId ? { ...c, financials: { ...c.financials, [type]: [...items, newItem] } } : c,
     ),
   };
 
@@ -210,30 +212,21 @@ const handleManualSave = async () => {
   <h3>Autosave Settings</h3>
 
   {/* Status display */}
-  <div>
-    Status: {autosaveService?.state?.isEnabled ? 'Enabled' : 'Disabled'}
-  </div>
+  <div>Status: {autosaveService?.state?.isEnabled ? 'Enabled' : 'Disabled'}</div>
   <div>Last Save: {new Date(stats.lastSuccessfulSave).toLocaleString()}</div>
-  <div>
-    Success Rate: {Math.round((stats.successfulSaves / stats.totalSaves) * 100)}
-    %
-  </div>
+  <div>Success Rate: {Math.round((stats.successfulSaves / stats.totalSaves) * 100)}%</div>
 
   {/* Configuration controls */}
   <input
     type="checkbox"
     checked={config.enabled}
-    onChange={(e) =>
-      autosaveService.updateConfig({ enabled: e.target.checked })
-    }
+    onChange={(e) => autosaveService.updateConfig({ enabled: e.target.checked })}
   />
 
   <input
     type="number"
     value={config.saveInterval / 1000}
-    onChange={(e) =>
-      autosaveService.updateConfig({ saveInterval: e.target.value * 1000 })
-    }
+    onChange={(e) => autosaveService.updateConfig({ saveInterval: e.target.value * 1000 })}
   />
 </div>
 ```

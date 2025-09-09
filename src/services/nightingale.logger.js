@@ -269,7 +269,7 @@
             if (window.NightingaleAutoSave?.storeHandle) {
               await window.NightingaleAutoSave.storeHandle(
                 'logsDirectory',
-                logsHandle
+                logsHandle,
               );
             }
           }
@@ -406,7 +406,7 @@
             const rows = entries
               .map(
                 (e) =>
-                  `${e.capturedAt},${e.level},${e.namespace || ''},"${(e.message || '').replace(/"/g, '""')}","${JSON.stringify(e.data || '').replace(/"/g, '""')}"`
+                  `${e.capturedAt},${e.level},${e.namespace || ''},"${(e.message || '').replace(/"/g, '""')}","${JSON.stringify(e.data || '').replace(/"/g, '""')}"`,
               )
               .join('\n');
             return headers + rows;
@@ -415,7 +415,7 @@
             return entries
               .map(
                 (e) =>
-                  `[${e.capturedAt}] ${e.level.toUpperCase()} ${e.namespace || 'unknown'} - ${e.message} ${e.data ? JSON.stringify(e.data) : ''}`
+                  `[${e.capturedAt}] ${e.level.toUpperCase()} ${e.namespace || 'unknown'} - ${e.message} ${e.data ? JSON.stringify(e.data) : ''}`,
               )
               .join('\n');
           default:
@@ -466,11 +466,11 @@
         entry.meta.memory = {
           used:
             Math.round(
-              (performance.memory.usedJSHeapSize / 1024 / 1024) * 100
+              (performance.memory.usedJSHeapSize / 1024 / 1024) * 100,
             ) / 100, // MB
           total:
             Math.round(
-              (performance.memory.totalJSHeapSize / 1024 / 1024) * 100
+              (performance.memory.totalJSHeapSize / 1024 / 1024) * 100,
             ) / 100,
         };
       }
@@ -533,7 +533,7 @@
     removeTransport(id) {
       const before = activeConfig.transports.length;
       activeConfig.transports = activeConfig.transports.filter(
-        (t) => t.id !== id
+        (t) => t.id !== id,
       );
       return before !== activeConfig.transports.length;
     },
@@ -592,7 +592,7 @@
       }
       this.addTransport(this.transports.memory(500));
       this.addTransport(
-        this.transports.file({ minLevel: 'error', ...fileOptions })
+        this.transports.file({ minLevel: 'error', ...fileOptions }),
       );
       this.addEnricher(this.enrichers.session());
       this.addEnricher(this.enrichers.performance());
@@ -602,7 +602,7 @@
     // Export recent logs for debugging
     exportLogs(format = 'json') {
       const memoryTransport = activeConfig.transports.find(
-        (t) => t.id === 'memory'
+        (t) => t.id === 'memory',
       );
       if (memoryTransport && memoryTransport.export) {
         return memoryTransport.export(format);
@@ -622,7 +622,7 @@
         window.NightingaleServices.registerService(
           'logger',
           NightingaleLogger,
-          'core'
+          'core',
         );
       } catch (_) {
         /* swallow */

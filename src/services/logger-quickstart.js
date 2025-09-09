@@ -211,11 +211,11 @@ if (typeof window !== 'undefined' && window.NightingaleLogger) {
     window.NightingaleLogger.enrichers.context(() => ({
       page: window.location.pathname,
       user: 'anonymous', // Replace with actual user context when available
-    }))
+    })),
   );
 
   console.log(
-    '🌟 Nightingale Logger initialized - "The darkness holds no secrets now"'
+    '🌟 Nightingale Logger initialized - "The darkness holds no secrets now"',
   );
 }
 

@@ -104,7 +104,7 @@
       activeCase,
       fullData,
       selectedFinancialItems = [],
-      options = {}
+      options = {},
     ) {
       try {
         if (!template || !template.content) {
@@ -139,7 +139,7 @@
               template.content,
               activeCase,
               fullData,
-              itemPlaceholders
+              itemPlaceholders,
             );
           });
 
@@ -150,7 +150,7 @@
             template.content,
             activeCase,
             fullData,
-            additionalPlaceholders
+            additionalPlaceholders,
           );
         }
 
@@ -184,7 +184,7 @@
       fullData,
       selectedFinancialItems = [],
       existingContent = '',
-      options = {}
+      options = {},
     ) {
       try {
         const { separator = '\n\n' } = options;
@@ -194,7 +194,7 @@
           activeCase,
           fullData,
           selectedFinancialItems,
-          options
+          options,
         );
 
         if (!result.success) {
@@ -234,7 +234,7 @@
       activeCase,
       fullData,
       selectedFinancialItemIds = [],
-      options = {}
+      options = {},
     ) {
       const {
         saveToFile = true,
@@ -300,7 +300,7 @@
         // Update financial item statuses if requested
         if (updateItemStatus && selectedFinancialItemIds.length > 0) {
           const caseToUpdate = newData.cases?.find(
-            (c) => c.id === activeCase.id
+            (c) => c.id === activeCase.id,
           );
           if (caseToUpdate && caseToUpdate.financials) {
             const allFinancials = [
@@ -311,7 +311,7 @@
 
             selectedFinancialItemIds.forEach((itemId) => {
               const itemToUpdate = allFinancials.find(
-                (item) => item.id === itemId
+                (item) => item.id === itemId,
               );
               if (itemToUpdate) {
                 itemToUpdate.verificationStatus = 'VR Pending';
@@ -329,26 +329,26 @@
               requestId: newVrRequest.id,
               caseId: activeCase.id,
               mcn: activeCase.mcn,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'VR Request created but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
             this._showToast(
               `VR Request #${newVrRequest.id} created and synced with CMS.`,
-              'success'
+              'success',
             );
           }
         } else if (showToast && this.toastService) {
           this._showToast(
             `VR Request #${newVrRequest.id} created successfully!`,
-            'success'
+            'success',
           );
         }
 
@@ -359,7 +359,7 @@
         };
       } catch (error) {
         const logger = window.NightingaleLogger?.get(
-          'documents:createVrRequest'
+          'documents:createVrRequest',
         );
         logger?.error('VR request creation failed', { error: error.message });
         return {
@@ -396,7 +396,7 @@
 
         // Find and update request
         const requestIndex = newData.vrRequests.findIndex(
-          (r) => r.id === requestId
+          (r) => r.id === requestId,
         );
         if (requestIndex === -1) {
           return {
@@ -427,26 +427,26 @@
             {
               requestId: requestId,
               newStatus: newStatus,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'VR Request updated but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
             this._showToast(
               `VR Request #${requestId} status updated to ${newStatus}.`,
-              'success'
+              'success',
             );
           }
         } else if (showToast && this.toastService) {
           this._showToast(
             `VR Request #${requestId} status updated to ${newStatus}.`,
-            'success'
+            'success',
           );
         }
 
@@ -457,7 +457,7 @@
         };
       } catch (error) {
         const logger = window.NightingaleLogger?.get(
-          'documents:updateVrStatus'
+          'documents:updateVrStatus',
         );
         logger?.error('VR status update failed', { error: error.message });
         return {
@@ -493,7 +493,7 @@
 
         // Remove request
         newData.vrRequests = newData.vrRequests.filter(
-          (r) => r.id !== requestId
+          (r) => r.id !== requestId,
         );
 
         // Save to file if requested
@@ -503,26 +503,26 @@
             'vr_request_deleted',
             {
               requestId: requestId,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'VR Request deleted but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
             this._showToast(
               `VR Request #${requestId} deleted and synced with CMS.`,
-              'success'
+              'success',
             );
           }
         } else if (showToast && this.toastService) {
           this._showToast(
             `VR Request #${requestId} deleted successfully.`,
-            'success'
+            'success',
           );
         }
 
@@ -532,7 +532,7 @@
         };
       } catch (error) {
         const logger = window.NightingaleLogger?.get(
-          'documents:deleteVrRequest'
+          'documents:deleteVrRequest',
         );
         logger?.error('VR request deletion failed', { error: error.message });
         return {

@@ -48,7 +48,7 @@ function FormField({
           className: 'block text-sm font-medium text-gray-300',
         },
         label,
-        required && e('span', { className: 'text-red-400 ml-1' }, '*')
+        required && e('span', { className: 'text-red-400 ml-1' }, '*'),
       ),
 
     // Input wrapper with error styling
@@ -64,7 +64,7 @@ function FormField({
             'aria-invalid': hasError ? 'true' : undefined,
             'aria-describedby': hasError ? `${fieldId}-error` : undefined,
           })
-        : children
+        : children,
     ),
 
     // Error message(s)
@@ -78,11 +78,11 @@ function FormField({
         },
         Array.isArray(error)
           ? error.map((err, index) => e('div', { key: index }, err))
-          : error
+          : error,
       ),
 
     // Hint text
-    hint && e('p', { className: 'text-gray-500 text-sm' }, hint)
+    hint && e('p', { className: 'text-gray-500 text-sm' }, hint),
   );
 }
 
@@ -219,9 +219,9 @@ function Select({
           key: option.value,
           value: option.value,
         },
-        option.label || option.value
-      )
-    )
+        option.label || option.value,
+      ),
+    ),
   );
 }
 
@@ -382,7 +382,7 @@ function Checkbox({
         .trim(),
       ...props,
     }),
-    label && e('span', { className: 'ml-3 text-gray-300' }, label)
+    label && e('span', { className: 'ml-3 text-gray-300' }, label),
   );
 }
 
@@ -421,16 +421,16 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleComponentLibrary) {
     window.NightingaleComponentLibrary.registerComponent(
       'FormField',
-      FormField
+      FormField,
     );
     window.NightingaleComponentLibrary.registerComponent(
       'TextInput',
-      TextInput
+      TextInput,
     );
     window.NightingaleComponentLibrary.registerComponent('Select', Select);
     window.NightingaleComponentLibrary.registerComponent(
       'DateInput',
-      DateInput
+      DateInput,
     );
     window.NightingaleComponentLibrary.registerComponent('Textarea', Textarea);
     window.NightingaleComponentLibrary.registerComponent('Checkbox', Checkbox);

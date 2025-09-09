@@ -48,7 +48,7 @@ function AvsImportModal({
       'Trust Account',
       'Joint Account',
     ],
-    []
+    [],
   );
 
   /**
@@ -65,7 +65,7 @@ function AvsImportModal({
           (existingItem) =>
             existingItem.accountNumber === account.accountNumber &&
             existingItem.location?.toLowerCase() ===
-              account.location?.toLowerCase()
+              account.location?.toLowerCase(),
         );
 
         return {
@@ -78,7 +78,7 @@ function AvsImportModal({
         };
       });
     },
-    [masterCaseId]
+    [masterCaseId],
   );
 
   /**
@@ -104,7 +104,7 @@ function AvsImportModal({
 
       if (!parsedAccounts || parsedAccounts.length === 0) {
         setError(
-          'No valid account data found. Please check the AVS data format.'
+          'No valid account data found. Please check the AVS data format.',
         );
         setPreviewItems([]);
         return;
@@ -113,7 +113,7 @@ function AvsImportModal({
       // Compare with existing resources
       const comparisonResults = compareWithExistingResources(
         parsedAccounts,
-        existingResources
+        existingResources,
       );
 
       setPreviewItems(comparisonResults);
@@ -125,7 +125,7 @@ function AvsImportModal({
       setSelectedItems(new Set(newItemIds));
     } catch (err) {
       setError(
-        'Failed to parse AVS data. Please check the format and try again.'
+        'Failed to parse AVS data. Please check the format and try again.',
       );
       setPreviewItems([]);
     } finally {
@@ -147,7 +147,7 @@ function AvsImportModal({
       event.preventDefault();
 
       const itemsToImport = previewItems.filter((item) =>
-        selectedItems.has(item.id)
+        selectedItems.has(item.id),
       );
 
       if (itemsToImport.length === 0) {
@@ -160,7 +160,7 @@ function AvsImportModal({
       onImport(itemsToImport);
       onClose();
     },
-    [previewItems, selectedItems, onImport, onClose]
+    [previewItems, selectedItems, onImport, onClose],
   );
 
   /**
@@ -211,7 +211,7 @@ function AvsImportModal({
   const selectedCount = selectedItems.size;
   const newItemsCount = previewItems.filter((item) => item.isNew).length;
   const duplicateItemsCount = previewItems.filter(
-    (item) => item.isDuplicate
+    (item) => item.isDuplicate,
   ).length;
 
   return e(
@@ -240,13 +240,13 @@ function AvsImportModal({
           e(
             'h4',
             { className: 'text-sm font-medium text-blue-400 mb-2' },
-            'Instructions'
+            'Instructions',
           ),
           e(
             'p',
             { className: 'text-sm text-gray-300' },
-            'Paste your raw AVS data below. The system will parse account information and compare it with existing financial resources to identify new items and potential duplicates.'
-          )
+            'Paste your raw AVS data below. The system will parse account information and compare it with existing financial resources to identify new items and potential duplicates.',
+          ),
         ),
 
         e(
@@ -265,7 +265,7 @@ function AvsImportModal({
             rows: 8,
             className: 'font-mono text-sm',
             'aria-describedby': 'avs-data-hint',
-          })
+          }),
         ),
 
         e(
@@ -281,9 +281,9 @@ function AvsImportModal({
               loading: isLoading,
               icon: 'search',
             },
-            'Parse & Compare Data'
-          )
-        )
+            'Parse & Compare Data',
+          ),
+        ),
       ),
 
       // Error display for parsing/import errors
@@ -298,8 +298,8 @@ function AvsImportModal({
           e(
             'div',
             { className: 'flex' },
-            e('div', { className: 'text-sm text-red-700' }, error)
-          )
+            e('div', { className: 'text-sm text-red-700' }, error),
+          ),
         ),
 
       // Preview section
@@ -314,13 +314,13 @@ function AvsImportModal({
             e(
               'h4',
               { className: 'text-lg font-medium text-gray-100' },
-              'Import Preview'
+              'Import Preview',
             ),
             e(
               'div',
               { className: 'text-sm text-gray-400' },
-              `${selectedCount} of ${totalItems} selected | ${newItemsCount} new | ${duplicateItemsCount} duplicates`
-            )
+              `${selectedCount} of ${totalItems} selected | ${newItemsCount} new | ${duplicateItemsCount} duplicates`,
+            ),
           ),
 
           // Select all toggle
@@ -339,8 +339,8 @@ function AvsImportModal({
               e(
                 'label',
                 { className: 'text-sm font-medium text-gray-300' },
-                'Select All'
-              )
+                'Select All',
+              ),
             ),
 
           // Preview list
@@ -358,8 +358,8 @@ function AvsImportModal({
                 className: 'bg-red-900 border border-red-700 rounded-md p-3',
                 role: 'alert',
               },
-              e('div', { className: 'text-sm text-red-300' }, error)
-            )
+              e('div', { className: 'text-sm text-red-300' }, error),
+            ),
         ),
 
       // Footer with action buttons
@@ -375,16 +375,16 @@ function AvsImportModal({
             onClick: onClose,
             variant: 'secondary',
           },
-          'Cancel'
+          'Cancel',
         ),
 
         previewItems.length > 0 &&
           e(ImportButton, {
             disabled: selectedCount === 0,
             selectedCount,
-          })
-      )
-    )
+          }),
+      ),
+    ),
   );
 }
 
@@ -413,7 +413,7 @@ function ImportButton({ disabled, selectedCount }) {
       variant: 'primary',
       icon: selectedCount > 0 ? 'download' : 'check',
     },
-    buttonText
+    buttonText,
   );
 }
 
@@ -440,8 +440,8 @@ function PreviewList({ items, selectedItems, onToggleItem }) {
         item,
         isSelected: selectedItems.has(item.id),
         onToggle: () => onToggleItem(item.id),
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -469,7 +469,7 @@ function PreviewItem({ item, isSelected, onToggle }) {
           className:
             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900 text-green-300 border border-green-700',
         },
-        'New'
+        'New',
       )
     : e(
         'span',
@@ -477,7 +477,7 @@ function PreviewItem({ item, isSelected, onToggle }) {
           className:
             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-900 text-yellow-300 border border-yellow-700',
         },
-        'Update'
+        'Update',
       );
 
   return e(
@@ -517,22 +517,22 @@ function PreviewItem({ item, isSelected, onToggle }) {
         e(
           'span',
           { className: 'font-medium text-white' },
-          `${item.type} - ${item.location}`
+          `${item.type} - ${item.location}`,
         ),
-        statusIndicator
+        statusIndicator,
       ),
       e(
         'div',
         { className: 'text-sm text-gray-300' },
-        `Owner: ${item.owner || 'Unknown'} | Account: ***${item.accountNumber || 'Unknown'} | Balance: ${formattedValue}`
+        `Owner: ${item.owner || 'Unknown'} | Account: ***${item.accountNumber || 'Unknown'} | Balance: ${formattedValue}`,
       ),
       item.source &&
         e(
           'div',
           { className: 'text-xs text-gray-400 mt-1' },
-          `Source: ${item.source}`
-        )
-    )
+          `Source: ${item.source}`,
+        ),
+    ),
   );
 }
 
@@ -544,7 +544,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
       'AvsImportModal',
-      AvsImportModal
+      AvsImportModal,
     );
   }
 }

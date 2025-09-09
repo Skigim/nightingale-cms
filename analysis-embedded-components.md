@@ -2,13 +2,16 @@
 
 ## 📋 Executive Summary
 
-This analysis examines embedded React components that were previously in `src/pages/NightingaleCMS-React.html` (now consolidated into `index.html`) to create a comprehensive extraction plan following the TabBase.js factory pattern. The goal is to migrate embedded components to separate files using the standardized business component architecture.
+This analysis examines embedded React components that were previously in
+`src/pages/NightingaleCMS-React.html` (now consolidated into `index.html`) to create a comprehensive
+extraction plan following the TabBase.js factory pattern. The goal is to migrate embedded components
+to separate files using the standardized business component architecture.
 
 ## 🔍 Embedded Component Inventory
 
 ### **Primary Extraction Targets**
 
-1. **CasesTab** 
+1. **CasesTab**
    - **Location**: Lines 1106-1354 (248 lines)
    - **Complexity**: High - Full CRUD interface with details view
    - **Dependencies**: CaseDetailsView, DataTable, SearchBar, Modal components
@@ -16,7 +19,7 @@ This analysis examines embedded React components that were previously in `src/pa
    - **Priority**: 🔴 HIGH
 
 2. **PeopleTab**
-   - **Location**: Lines 1355-1779 (424 lines) 
+   - **Location**: Lines 1355-1779 (424 lines)
    - **Complexity**: High - Full CRUD interface with details view
    - **Dependencies**: PersonDetailsView, DataTable, SearchBar, Modal components
    - **State Management**: Complex (search, modals, view modes)
@@ -56,20 +59,21 @@ This analysis examines embedded React components that were previously in `src/pa
 
 ## 📊 Complexity Analysis
 
-| Component | Lines | React Hooks | External Dependencies | Extraction Difficulty |
-|-----------|-------|-------------|----------------------|---------------------|
-| **CasesTab** | 248 | useState (5), useMemo (1), useEffect (1) | CaseDetailsView, DataTable, SearchBar | High |
-| **PeopleTab** | 424 | useState (5), useMemo (1), useEffect (1) | PersonDetailsView, DataTable, SearchBar | High |
-| **CaseDetailsView** | 224 | useState (15+), useMemo (5+), useEffect (3+) | Multiple modals, financial components | Very High |
-| **Sidebar** | 317 | Minimal | Tab state management | Medium |
-| **EligibilityTab** | 11 | None | None | Very Low |
-| **SettingsModal** | 167 | useState (2) | FileService, Toast | Medium |
+| Component           | Lines | React Hooks                                  | External Dependencies                   | Extraction Difficulty |
+| ------------------- | ----- | -------------------------------------------- | --------------------------------------- | --------------------- |
+| **CasesTab**        | 248   | useState (5), useMemo (1), useEffect (1)     | CaseDetailsView, DataTable, SearchBar   | High                  |
+| **PeopleTab**       | 424   | useState (5), useMemo (1), useEffect (1)     | PersonDetailsView, DataTable, SearchBar | High                  |
+| **CaseDetailsView** | 224   | useState (15+), useMemo (5+), useEffect (3+) | Multiple modals, financial components   | Very High             |
+| **Sidebar**         | 317   | Minimal                                      | Tab state management                    | Medium                |
+| **EligibilityTab**  | 11    | None                                         | None                                    | Very Low              |
+| **SettingsModal**   | 167   | useState (2)                                 | FileService, Toast                      | Medium                |
 
 ## 🎯 Extraction Strategy
 
 ### **Phase 2: TabBase.js Factory Implementation**
 
 #### **2.1 CasesTab Extraction**
+
 ```javascript
 // Target: src/components/business/CasesTab.js
 // Pattern: TabBase.js factory with useData hook
@@ -82,6 +86,7 @@ This analysis examines embedded React components that were previously in `src/pa
 ```
 
 **Extraction Pattern:**
+
 - Use `createBusinessComponent` factory from TabBase.js
 - Create `useCasesData` hook for data management
 - Implement `renderContent` function for main interface
@@ -89,8 +94,9 @@ This analysis examines embedded React components that were previously in `src/pa
 - Add registry fallbacks for all UI components
 
 #### **2.2 PeopleTab Extraction**
+
 ```javascript
-// Target: src/components/business/PeopleTab.js  
+// Target: src/components/business/PeopleTab.js
 // Pattern: Similar to CasesTab with person-specific logic
 // Key Features:
 // - Person search and filtering
@@ -100,12 +106,14 @@ This analysis examines embedded React components that were previously in `src/pa
 ```
 
 **Extraction Pattern:**
+
 - Mirror CasesTab structure with person-specific logic
 - Use `usePeopleData` hook for data management
 - Implement person-specific filtering and search
 - Add person details view integration
 
 #### **2.3 DashboardTab Enhancement**
+
 ```javascript
 // Target: src/components/business/DashboardTab.js (Already exists)
 // Pattern: Enhance with TabBase.js safety patterns
@@ -113,6 +121,7 @@ This analysis examines embedded React components that were previously in `src/pa
 ```
 
 **Enhancement Plan:**
+
 - Add TabBase.js registry access patterns
 - Implement comprehensive fallback strategies
 - Add error boundaries and loading states
@@ -121,6 +130,7 @@ This analysis examines embedded React components that were previously in `src/pa
 ### **Phase 4: Additional Component Extraction**
 
 #### **4.1 CaseDetailsView Extraction**
+
 ```javascript
 // Target: src/components/business/CaseDetailsView.js
 // Pattern: Complex business component (not TabBase.js factory)
@@ -128,12 +138,14 @@ This analysis examines embedded React components that were previously in `src/pa
 ```
 
 **Extraction Challenges:**
+
 - Multiple edit modes and sections
 - Complex financial management integration
 - Multiple modal dependencies
 - Extensive state management
 
 #### **4.2 Supporting Component Extraction**
+
 - **Sidebar**: Extract navigation logic to separate component
 - **SettingsModal**: Extract to modals directory
 - **EligibilityTab**: Simple extraction using TabBase.js
@@ -150,10 +162,7 @@ if (typeof window !== 'undefined') {
   window.ComponentName = ComponentName;
 
   if (window.NightingaleBusiness) {
-    window.NightingaleBusiness.registerComponent(
-      'ComponentName',
-      ComponentName
-    );
+    window.NightingaleBusiness.registerComponent('ComponentName', ComponentName);
   }
 }
 ```
@@ -169,20 +178,24 @@ const ComponentTab = createBusinessComponent({
   renderContent: renderComponentContent,
   renderActions: renderComponentActions,
   renderModals: renderComponentModals,
-  defaultProps: { /* default props */ }
+  defaultProps: {
+    /* default props */
+  },
 });
 ```
 
 ### **Dependency Analysis**
 
 **Critical Dependencies:**
+
 - DataTable component (UI layer)
-- SearchBar component (UI layer)  
+- SearchBar component (UI layer)
 - Modal components (UI layer)
 - Button components (UI layer)
 - Form components (UI layer)
 
 **Business Dependencies:**
+
 - FileService for data operations
 - Toast notifications for user feedback
 - Data management utilities
@@ -191,12 +204,15 @@ const ComponentTab = createBusinessComponent({
 ## 🚨 Risk Assessment
 
 ### **High Risk Items**
-1. **State Management Complexity**: CasesTab and PeopleTab have complex state with multiple modals and view modes
+
+1. **State Management Complexity**: CasesTab and PeopleTab have complex state with multiple modals
+   and view modes
 2. **Component Dependencies**: Heavy reliance on UI component registry
 3. **Data Flow**: Complex parent-child communication patterns
 4. **Testing Complexity**: Multiple interaction patterns to validate
 
 ### **Mitigation Strategies**
+
 1. **Incremental Extraction**: Extract one component at a time with validation
 2. **Fallback Testing**: Verify all registry fallbacks work correctly
 3. **State Preservation**: Ensure extracted components maintain exact functionality
@@ -206,21 +222,24 @@ const ComponentTab = createBusinessComponent({
 
 ### Phase 2 & 4 Extraction Summary ✅
 
-| Component | Original Lines | Location | Status | New File |
-|-----------|---------------|----------|---------|----------|
-| **CasesTab** | 248 lines | Lines 1106-1354 | ✅ EXTRACTED | `src/components/business/CasesTab.js` |
-| **PeopleTab** | 424 lines | Lines 1355-1779 | ✅ EXTRACTED | `src/components/business/PeopleTab.js` |
-| **EligibilityTab** | 11 lines | Lines 1780-1791 | ✅ EXTRACTED | `src/components/business/EligibilityTab.js` |
-| **DashboardTab** | N/A | Already separate | ✅ ENHANCED | `src/components/business/DashboardTab.js` |
-| **CaseDetailsView** | 224 lines | Lines 881-1105 | 🟡 PARTIAL | Remains embedded (complex dependency) |
+| Component           | Original Lines | Location         | Status       | New File                                    |
+| ------------------- | -------------- | ---------------- | ------------ | ------------------------------------------- |
+| **CasesTab**        | 248 lines      | Lines 1106-1354  | ✅ EXTRACTED | `src/components/business/CasesTab.js`       |
+| **PeopleTab**       | 424 lines      | Lines 1355-1779  | ✅ EXTRACTED | `src/components/business/PeopleTab.js`      |
+| **EligibilityTab**  | 11 lines       | Lines 1780-1791  | ✅ EXTRACTED | `src/components/business/EligibilityTab.js` |
+| **DashboardTab**    | N/A            | Already separate | ✅ ENHANCED  | `src/components/business/DashboardTab.js`   |
+| **CaseDetailsView** | 224 lines      | Lines 881-1105   | 🟡 PARTIAL   | Remains embedded (complex dependency)       |
 
 ### File Size Impact:
+
 - **Original HTML**: 2,454 lines
 - **Final HTML**: 1,768 lines
 - **Total Reduction**: 686 lines (28% smaller!)
 
 ### Components Successfully Migrated:
-1. **CasesTab**: Full TabBase.js factory implementation with data hooks, modals, and registry patterns
+
+1. **CasesTab**: Full TabBase.js factory implementation with data hooks, modals, and registry
+   patterns
 2. **PeopleTab**: Full TabBase.js factory implementation with person management and details view
 3. **EligibilityTab**: Simple component with proper registration patterns
 4. **DashboardTab**: Enhanced with registry patterns and React safety
@@ -228,6 +247,7 @@ const ComponentTab = createBusinessComponent({
 ## 📋 Extraction Checklist
 
 ### **Pre-Extraction (Phase 1)**
+
 - [x] Component inventory complete
 - [x] Dependency analysis complete
 - [x] TabBase.js factory pattern understood
@@ -235,6 +255,7 @@ const ComponentTab = createBusinessComponent({
 - [ ] Browser testing environment prepared
 
 ### **Phase 2: Tab Component Extraction**
+
 - [ ] **CasesTab**: Extract to separate file using TabBase.js
 - [ ] **PeopleTab**: Extract to separate file using TabBase.js
 - [ ] **DashboardTab**: Enhance with registry patterns
@@ -242,6 +263,7 @@ const ComponentTab = createBusinessComponent({
 - [ ] **Validation**: Test all tab switching and functionality
 
 ### **Phase 3: Validation & Testing**
+
 - [ ] Browser testing of extracted tabs
 - [ ] Console error validation
 - [ ] Component registry testing
@@ -249,6 +271,7 @@ const ComponentTab = createBusinessComponent({
 - [ ] Tab switching functionality
 
 ### **Phase 4: Additional Extractions**
+
 - [ ] **CaseDetailsView**: Extract complex component
 - [ ] **Supporting Components**: Extract remaining embedded components
 - [ ] **Final Cleanup**: Remove extracted code from HTML
@@ -273,4 +296,6 @@ const ComponentTab = createBusinessComponent({
 
 ---
 
-**Note**: This analysis provides the foundation for systematic component extraction following the autonomous workflow defined in `Docs/agentic_prompt.md`. Each extraction should be validated before proceeding to ensure system stability.
+**Note**: This analysis provides the foundation for systematic component extraction following the
+autonomous workflow defined in `Docs/agentic_prompt.md`. Each extraction should be validated before
+proceeding to ensure system stability.

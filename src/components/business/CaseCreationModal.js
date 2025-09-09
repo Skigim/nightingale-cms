@@ -43,7 +43,7 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
         onChange: (e) =>
           updateField('mcn', e.target.value.replace(/[^0-9]/g, '')),
         placeholder: 'Enter MCN',
-      })
+      }),
     ),
     e(
       'div',
@@ -58,7 +58,7 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
         e(window.DateInput, {
           value: caseData.applicationDate,
           onChange: (e) => updateField('applicationDate', e.target.value),
-        })
+        }),
       ),
       e(
         window.FormField,
@@ -75,8 +75,8 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
             { value: 'Waiver', label: 'Waiver' },
             { value: 'SIMP', label: 'SIMP' },
           ],
-        })
-      )
+        }),
+      ),
     ),
     e(
       'div',
@@ -96,7 +96,7 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
             { value: 'No', label: 'No' },
           ],
           placeholder: 'Select...',
-        })
+        }),
       ),
       e(
         window.FormField,
@@ -108,9 +108,9 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
             { value: 'No', label: 'No' },
             { value: 'Yes', label: 'Yes' },
           ],
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 }
 
@@ -130,22 +130,22 @@ function ClientSelectionStep({
 
   // Find selected client and spouse names
   const selectedClient = fullData?.people?.find(
-    (p) => String(p.id) === String(caseData.personId)
+    (p) => String(p.id) === String(caseData.personId),
   );
   const selectedSpouse = fullData?.people?.find(
-    (p) => String(p.id) === String(caseData.spouseId)
+    (p) => String(p.id) === String(caseData.spouseId),
   );
 
   // Filter out client and spouse from rep options
   const repOptions = (fullData?.people || []).filter(
     (p) =>
       String(p.id) !== String(caseData.personId) &&
-      String(p.id) !== String(caseData.spouseId)
+      String(p.id) !== String(caseData.spouseId),
   );
 
   // Find selected representative name
   const selectedRep = repOptions.find(
-    (r) => String(r.id) === String(caseData.authorizedReps[0])
+    (r) => String(r.id) === String(caseData.authorizedReps[0]),
   );
 
   // Initialize search values when selections exist
@@ -211,7 +211,7 @@ function ClientSelectionStep({
   // Prepare people data for search
   const peopleData = fullData?.people || [];
   const spouseOptions = peopleData.filter(
-    (p) => String(p.id) !== String(caseData.personId)
+    (p) => String(p.id) !== String(caseData.personId),
   );
 
   return e(
@@ -241,10 +241,10 @@ function ClientSelectionStep({
           return e(
             'div',
             { className: 'flex justify-between items-center' },
-            e('span', { className: 'font-medium' }, person.name)
+            e('span', { className: 'font-medium' }, person.name),
           );
         },
-      })
+      }),
     ),
     caseData.caseType === 'SIMP' &&
       e(
@@ -271,10 +271,10 @@ function ClientSelectionStep({
             return e(
               'div',
               { className: 'flex justify-between items-center' },
-              e('span', { className: 'font-medium' }, person.name)
+              e('span', { className: 'font-medium' }, person.name),
             );
           },
-        })
+        }),
       ),
     e(
       window.FormField,
@@ -296,11 +296,11 @@ function ClientSelectionStep({
           return e(
             'div',
             { className: 'flex justify-between items-center' },
-            e('span', { className: 'font-medium' }, person.name)
+            e('span', { className: 'font-medium' }, person.name),
           );
         },
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -323,7 +323,7 @@ function CaseDetailsStep({
   useEffect(() => {
     if (caseData.personId && fullData?.people) {
       const selectedPerson = fullData.people.find(
-        (p) => String(p.id) === String(caseData.personId)
+        (p) => String(p.id) === String(caseData.personId),
       );
 
       if (selectedPerson && selectedPerson.livingArrangement) {
@@ -353,7 +353,7 @@ function CaseDetailsStep({
   let locationFields = null;
   if (caseData.livingArrangement === 'Apartment/House') {
     const selectedPerson = fullData?.people?.find(
-      (p) => String(p.id) === String(caseData.personId)
+      (p) => String(p.id) === String(caseData.personId),
     );
 
     locationFields = e(
@@ -362,7 +362,7 @@ function CaseDetailsStep({
       e(
         'h4',
         { className: 'text-lg font-semibold text-white' },
-        'Address Information'
+        'Address Information',
       ),
       selectedPerson
         ? e(
@@ -371,7 +371,7 @@ function CaseDetailsStep({
             e(
               'div',
               { className: 'text-sm text-blue-400 mb-3' },
-              'Editing address for: ' + selectedPerson.name
+              'Editing address for: ' + selectedPerson.name,
             ),
             e(
               window.FormField,
@@ -384,7 +384,7 @@ function CaseDetailsStep({
                 value: selectedPerson.address?.street || '',
                 onChange: (e) => updatePersonAddress('street', e.target.value),
                 placeholder: '123 Main Street',
-              })
+              }),
             ),
             e(
               'div',
@@ -396,7 +396,7 @@ function CaseDetailsStep({
                   value: selectedPerson.address?.city || '',
                   onChange: (e) => updatePersonAddress('city', e.target.value),
                   placeholder: 'Springfield',
-                })
+                }),
               ),
               e(
                 window.FormField,
@@ -421,8 +421,8 @@ function CaseDetailsStep({
                     { value: 'OH', label: 'Ohio' },
                     { value: 'WI', label: 'Wisconsin' },
                   ],
-                })
-              )
+                }),
+              ),
             ),
             e(
               window.FormField,
@@ -436,14 +436,14 @@ function CaseDetailsStep({
                 onChange: (e) => updatePersonAddress('zip', e.target.value),
                 placeholder: '62701',
                 maxLength: 10,
-              })
-            )
+              }),
+            ),
           )
         : e(
             'div',
             { className: 'text-sm text-yellow-400' },
-            'Please select a person first to edit address information.'
-          )
+            'Please select a person first to edit address information.',
+          ),
     );
   } else if (
     caseData.livingArrangement === 'Assisted Living' ||
@@ -455,7 +455,7 @@ function CaseDetailsStep({
       e(
         'h4',
         { className: 'text-lg font-semibold text-white' },
-        'Facility Information'
+        'Facility Information',
       ),
       e(
         window.FormField,
@@ -469,8 +469,8 @@ function CaseDetailsStep({
           onChange: (e) => updateField('organizationId', e.target.value),
           options: organizationOptions,
           placeholder: 'Select a facility...',
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -483,7 +483,7 @@ function CaseDetailsStep({
       e(
         'h4',
         { className: 'text-lg font-semibold text-white' },
-        'Living Arrangement'
+        'Living Arrangement',
       ),
       e(
         window.FormField,
@@ -502,7 +502,7 @@ function CaseDetailsStep({
             { value: 'Other', label: 'Other' },
           ],
           placeholder: 'Select living arrangement...',
-        })
+        }),
       ),
       (caseData.livingArrangement === 'Apartment/House' ||
         caseData.livingArrangement === 'Assisted Living' ||
@@ -526,7 +526,7 @@ function CaseDetailsStep({
                 { value: 'No', label: 'No' },
                 { value: 'Yes', label: 'Yes' },
               ],
-            })
+            }),
           ),
           (caseData.livingArrangement === 'Assisted Living' ||
             caseData.livingArrangement === 'Nursing Home') &&
@@ -539,11 +539,11 @@ function CaseDetailsStep({
               e(window.DateInput, {
                 value: caseData.admissionDate,
                 onChange: (e) => updateField('admissionDate', e.target.value),
-              })
-            )
-        )
+              }),
+            ),
+        ),
     ),
-    locationFields
+    locationFields,
   );
 }
 
@@ -558,12 +558,12 @@ function ReviewStep({ fullData, caseData }) {
       e(
         'dd',
         { className: 'mt-1 text-md text-white' },
-        value || e('span', { className: 'text-gray-500' }, 'Not provided')
-      )
+        value || e('span', { className: 'text-gray-500' }, 'Not provided'),
+      ),
     );
 
   const clientName = fullData?.people.find(
-    (p) => String(p.id) === String(caseData.personId)
+    (p) => String(p.id) === String(caseData.personId),
   )?.name;
   const spouseName =
     caseData.caseType === 'SIMP'
@@ -571,12 +571,12 @@ function ReviewStep({ fullData, caseData }) {
           ?.name
       : null;
   const orgName = fullData?.organizations.find(
-    (o) => String(o.id) === String(caseData.organizationId)
+    (o) => String(o.id) === String(caseData.organizationId),
   )?.name;
   const repNames = caseData.authorizedReps
     .map(
       (repId) =>
-        fullData?.people.find((r) => String(r.id) === String(repId))?.name
+        fullData?.people.find((r) => String(r.id) === String(repId))?.name,
     )
     .join(', ');
 
@@ -586,7 +586,7 @@ function ReviewStep({ fullData, caseData }) {
     e(
       'h3',
       { className: 'text-xl font-bold text-white' },
-      'Review Case Details'
+      'Review Case Details',
     ),
     e(
       'dl',
@@ -634,7 +634,7 @@ function ReviewStep({ fullData, caseData }) {
         clientName &&
         (() => {
           const selectedPerson = fullData?.people.find(
-            (p) => String(p.id) === String(caseData.personId)
+            (p) => String(p.id) === String(caseData.personId),
           );
           if (selectedPerson?.address) {
             const addressParts = [
@@ -653,8 +653,8 @@ function ReviewStep({ fullData, caseData }) {
           return null;
         })(),
       orgName && e(SummaryItem, { label: 'Facility', value: orgName }),
-      e(SummaryItem, { label: 'Description', value: caseData.description })
-    )
+      e(SummaryItem, { label: 'Description', value: caseData.description }),
+    ),
   );
 }
 
@@ -813,7 +813,7 @@ function CaseCreationModal({
         return {};
       }
     },
-    [editCaseId, filteredStepsConfig, caseData, fullData]
+    [editCaseId, filteredStepsConfig, caseData, fullData],
   );
 
   useEffect(() => {
@@ -855,7 +855,7 @@ function CaseCreationModal({
       setCurrentStep,
       setValidationErrors,
       showToast,
-    ]
+    ],
   );
 
   const handleComplete = async () => {
@@ -902,7 +902,7 @@ function CaseCreationModal({
                   createdDate: caseItem.createdDate,
                   id: caseItem.id, // Keep the original ID
                 }
-              : caseItem
+              : caseItem,
           ),
         };
         resultCase = updatedData.cases.find((c) => c.id === editCaseId);
@@ -928,7 +928,7 @@ function CaseCreationModal({
       // update the person's record with the new living arrangement info
       if (caseData.personId && updatedData?.people) {
         const personIndex = updatedData.people.findIndex(
-          (p) => String(p.id) === String(caseData.personId)
+          (p) => String(p.id) === String(caseData.personId),
         );
 
         if (personIndex !== -1) {
@@ -972,7 +972,7 @@ function CaseCreationModal({
       fullData?.people
     ) {
       const personIndex = fullData.people.findIndex(
-        (p) => String(p.id) === String(caseData.personId)
+        (p) => String(p.id) === String(caseData.personId),
       );
 
       if (personIndex !== -1) {
@@ -996,7 +996,7 @@ function CaseCreationModal({
     if (!caseData.personId || !fullData?.people) return;
 
     const personIndex = fullData.people.findIndex(
-      (p) => String(p.id) === String(caseData.personId)
+      (p) => String(p.id) === String(caseData.personId),
     );
 
     if (personIndex !== -1) {
@@ -1034,7 +1034,7 @@ function CaseCreationModal({
       return e(
         'div',
         { className: 'p-4 text-center text-gray-500' },
-        'Step configuration not found'
+        'Step configuration not found',
       );
     }
 
@@ -1069,7 +1069,7 @@ function CaseCreationModal({
             },
             icon: 'view',
           },
-          'View Full Case'
+          'View Full Case',
         ),
         e(
           'div',
@@ -1079,7 +1079,7 @@ function CaseCreationModal({
             {
               onClick: onClose,
             },
-            'Cancel'
+            'Cancel',
           ),
           e(
             window.PrimaryButton,
@@ -1087,9 +1087,9 @@ function CaseCreationModal({
               onClick: handleComplete,
               disabled: !hasChanges,
             },
-            hasChanges ? 'Save Changes' : 'No Changes'
-          )
-        )
+            hasChanges ? 'Save Changes' : 'No Changes',
+          ),
+        ),
       )
     : null;
 
@@ -1111,7 +1111,7 @@ function CaseCreationModal({
       isCompleteDisabled: isLoading || (editCaseId && !hasChanges),
       customFooterContent: editModeFooter,
     },
-    renderStepContent()
+    renderStepContent(),
   );
 }
 
@@ -1142,7 +1142,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleComponentLibrary) {
     window.NightingaleComponentLibrary.registerComponent(
       'CaseCreationModal',
-      CaseCreationModal
+      CaseCreationModal,
     );
   }
 }

@@ -79,8 +79,8 @@ function Sidebar({
       e(
         'h1',
         { className: 'text-blue-400 font-bold text-sm text-center' },
-        'CMS'
-      )
+        'CMS',
+      ),
     ),
     e(
       'nav',
@@ -114,7 +114,7 @@ function Sidebar({
                 strokeLinecap: 'round',
                 strokeLinejoin: 'round',
                 d: 'M10 19l-7-7m0 0l7-7m-7 7h18',
-              })
+              }),
             ),
             // Tooltip
             e(
@@ -123,8 +123,8 @@ function Sidebar({
                 className:
                   'absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50',
               },
-              'Back to Cases List'
-            )
+              'Back to Cases List',
+            ),
           );
         }
 
@@ -154,7 +154,7 @@ function Sidebar({
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
               d: tab.icon,
-            })
+            }),
           ),
           // Tooltip
           e(
@@ -163,10 +163,10 @@ function Sidebar({
               className:
                 'absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50',
             },
-            tab.label
-          )
+            tab.label,
+          ),
         );
-      })
+      }),
     ),
     // Settings button
     onSettingsClick &&
@@ -199,7 +199,7 @@ function Sidebar({
               strokeLinecap: 'round',
               strokeLinejoin: 'round',
               d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-            })
+            }),
           ),
           // Tooltip
           e(
@@ -208,10 +208,10 @@ function Sidebar({
               className:
                 'absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50',
             },
-            'Settings'
-          )
-        )
-      )
+            'Settings',
+          ),
+        ),
+      ),
   );
 }
 

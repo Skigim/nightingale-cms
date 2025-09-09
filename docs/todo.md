@@ -5,7 +5,8 @@
 ### Testing Infrastructure
 
 - [ ] **Implement Jest test suite** - Add tests for UI components (Button, Modal, SearchBar)
-- [ ] **Add React Testing Library tests** - Test business components (CaseCreationModal, PersonCreationModal)
+- [ ] **Add React Testing Library tests** - Test business components (CaseCreationModal,
+      PersonCreationModal)
 - [ ] **Component integration tests** - Test component interactions and data flow
 - [ ] **Service layer tests** - Test core utilities, data management, and file operations
 

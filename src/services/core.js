@@ -93,7 +93,7 @@
     if (isNaN(date.getTime())) return 'N/A';
 
     const adjustedDate = new Date(
-      date.getTime() + date.getTimezoneOffset() * 60000
+      date.getTime() + date.getTimezoneOffset() * 60000,
     );
     return adjustedDate.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -113,7 +113,7 @@
     if (isNaN(date.getTime())) return '';
 
     const adjustedDate = new Date(
-      date.getTime() + date.getTimezoneOffset() * 60000
+      date.getTime() + date.getTimezoneOffset() * 60000,
     );
     return adjustedDate.toISOString().substring(0, 10);
   }
@@ -376,7 +376,7 @@
       window.NightingaleServices.registerService(
         'coreUtilities',
         NightingaleCoreUtilities,
-        'core'
+        'core',
       );
     }
 

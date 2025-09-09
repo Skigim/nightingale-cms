@@ -208,7 +208,7 @@
    */
   function scrollToSection(
     sectionSelector = '[data-section="notes"]',
-    options = {}
+    options = {},
   ) {
     const defaultOptions = {
       behavior: 'smooth',
@@ -338,7 +338,7 @@
       window.NightingaleServices.registerService(
         'uiUtilities',
         NightingaleUIUtilities,
-        'ui'
+        'ui',
       );
     }
 

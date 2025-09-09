@@ -56,18 +56,18 @@ function TabHeader({
             strokeLinejoin: 'round',
             strokeWidth: 2,
             d: icon.d,
-          })
+          }),
         ),
       // Title and count section
       e(
         'div',
         { className: 'flex flex-col' },
         e('span', { className: 'font-bold text-white text-lg' }, title),
-        count && e('span', { className: 'text-sm text-gray-400' }, count)
-      )
+        count && e('span', { className: 'text-sm text-gray-400' }, count),
+      ),
     ),
     // Right side: Actions section
-    actions && e('div', { className: 'flex items-center space-x-2' }, actions)
+    actions && e('div', { className: 'flex items-center space-x-2' }, actions),
   );
 }
 

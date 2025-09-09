@@ -144,7 +144,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
             className:
               'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700',
           },
-          `PersonDetailsView component not available. Person ID: ${personId}`
+          `PersonDetailsView component not available. Person ID: ${personId}`,
         ));
 
     return e(PersonDetailsView, {
@@ -175,7 +175,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
             'bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
           onClick: () => dataResult.setIsCreateModalOpen(true),
         },
-        'New Person'
+        'New Person',
       ),
     }),
 
@@ -207,7 +207,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
               e(
                 'span',
                 { className: 'font-medium text-white' },
-                value || 'N/A'
+                value || 'N/A',
               ),
           },
           {
@@ -251,7 +251,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
         className: 'w-full',
         emptyMessage: 'No people found',
       }),
-    })
+    }),
   );
 }
 
@@ -285,12 +285,12 @@ function renderPeopleModals({ data: dataResult, props }) {
               e(
                 'h2',
                 { className: 'text-lg font-semibold text-white mb-4' },
-                'Create Person'
+                'Create Person',
               ),
               e(
                 'p',
                 { className: 'text-gray-400 mb-4' },
-                'PersonCreationModal component not available'
+                'PersonCreationModal component not available',
               ),
               e(
                 'button',
@@ -299,9 +299,9 @@ function renderPeopleModals({ data: dataResult, props }) {
                     'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
                   onClick: onClose,
                 },
-                'Close'
-              )
-            )
+                'Close',
+              ),
+            ),
           )
         : null);
 
@@ -336,7 +336,7 @@ function renderPeopleModals({ data: dataResult, props }) {
           const updatedData = {
             ...props.fullData,
             people: props.fullData.people.map((p) =>
-              p.id === updatedPerson.id ? updatedPerson : p
+              p.id === updatedPerson.id ? updatedPerson : p,
             ),
           };
           props.onUpdateData(updatedData);
@@ -346,7 +346,7 @@ function renderPeopleModals({ data: dataResult, props }) {
         editPersonId: dataResult.editPersonId,
         fullData: props.fullData,
         fileService: props.fileService,
-      })
+      }),
   );
 }
 
@@ -381,7 +381,7 @@ if (typeof window !== 'undefined') {
       'PeopleTab',
       PeopleTab,
       'people-management',
-      ['TabBase', 'DataTable', 'SearchBar', 'TabHeader']
+      ['TabBase', 'DataTable', 'SearchBar', 'TabHeader'],
     );
   }
 

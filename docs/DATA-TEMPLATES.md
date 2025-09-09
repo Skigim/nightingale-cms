@@ -1,6 +1,7 @@
 # Nightingale CMS Data Templates
 
-This document contains the data structure templates for the Nightingale CMS system. These templates define the expected format and fields for each entity type in the system.
+This document contains the data structure templates for the Nightingale CMS system. These templates
+define the expected format and fields for each entity type in the system.
 
 ## Overview
 
@@ -392,7 +393,8 @@ Complete organization record structure:
 
 The system maintains backward compatibility with legacy data formats:
 
-- **Financial Items**: Both `"type"`/`"value"` (legacy) and `"description"`/`"amount"` (current) are supported
+- **Financial Items**: Both `"type"`/`"value"` (legacy) and `"description"`/`"amount"` (current) are
+  supported
 - **Addresses**: Both string format and object format are accepted
 - **IDs**: Numeric IDs are automatically converted to string format with prefixes
 
@@ -420,7 +422,8 @@ For complete working examples, see the sample data in `nightingale-data.json` wh
 - Associated person and organization records
 - Complete workflow documentation from application to employment
 
-This template structure ensures consistent data format across the Nightingale CMS system and provides clear guidance for developers working with the data layer.
+This template structure ensures consistent data format across the Nightingale CMS system and
+provides clear guidance for developers working with the data layer.
 
 ## Migration Notes
 
@@ -438,7 +441,8 @@ This template structure ensures consistent data format across the Nightingale CM
 
 ### Person-to-Person Relationship Modeling
 
-The current JSON structure has poor support for relationships between people. The `relationship` field is ambiguous (spouse of WHO?).
+The current JSON structure has poor support for relationships between people. The `relationship`
+field is ambiguous (spouse of WHO?).
 
 **Current Problem:**
 
@@ -449,8 +453,7 @@ The current JSON structure has poor support for relationships between people. Th
 }
 ```
 
-**SQLite Solution:**
-Create a dedicated relationships table to properly link people:
+**SQLite Solution:** Create a dedicated relationships table to properly link people:
 
 ```sql
 CREATE TABLE person_relationships (

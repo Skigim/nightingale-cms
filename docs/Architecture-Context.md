@@ -2,7 +2,8 @@
 
 ## Current Implementation Status (August 2025)
 
-This document provides an up-to-date view of the Nightingale CMS architecture, reflecting the current ES6 module system, two-layer component architecture, and modern React implementation.
+This document provides an up-to-date view of the Nightingale CMS architecture, reflecting the
+current ES6 module system, two-layer component architecture, and modern React implementation.
 
 ---
 
@@ -316,4 +317,5 @@ The Nightingale CMS has evolved into a **production-ready** case management syst
 
 ---
 
-_Document last updated: August 30, 2025 - Reflects current ES6 module system and complete feature implementation_
+_Document last updated: August 30, 2025 - Reflects current ES6 module system and complete feature
+implementation_

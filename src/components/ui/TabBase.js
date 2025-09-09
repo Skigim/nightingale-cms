@@ -47,11 +47,11 @@ function FallbackModal({ isOpen, onClose, title, children }) {
             onClick: onClose,
             className: 'text-gray-400 hover:text-gray-600',
           },
-          '×'
-        )
+          '×',
+        ),
       ),
-      e('div', null, children)
-    )
+      e('div', null, children),
+    ),
   );
 }
 
@@ -104,7 +104,7 @@ function FallbackButton({
       onClick: disabled ? undefined : onClick,
       disabled,
     },
-    children
+    children,
   );
 }
 
@@ -181,18 +181,18 @@ function FallbackTabHeader({ title, count, icon, actions, className = '' }) {
             className:
               'w-8 h-8 bg-blue-400 rounded text-white flex items-center justify-center text-xs font-bold',
           },
-          title.charAt(0).toUpperCase()
+          title.charAt(0).toUpperCase(),
         ),
       // Title and count section
       e(
         'div',
         { className: 'flex flex-col' },
         e('span', { className: 'font-bold text-white text-lg' }, title),
-        count && e('span', { className: 'text-sm text-gray-400' }, count)
-      )
+        count && e('span', { className: 'text-sm text-gray-400' }, count),
+      ),
     ),
     // Right side: Actions section
-    actions && e('div', { className: 'flex items-center space-x-2' }, actions)
+    actions && e('div', { className: 'flex items-center space-x-2' }, actions),
   );
 }
 
@@ -252,7 +252,7 @@ function getRegistryComponent(componentName, fallbackComponent) {
       {
         className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
       },
-      `Component "${componentName}" not found in registry`
+      `Component "${componentName}" not found in registry`,
     );
   };
 }
@@ -279,7 +279,7 @@ function SearchSection({ searchBar, className = '' }) {
     {
       className: `bg-gray-800 rounded-lg p-4 border border-gray-700 ${className}`,
     },
-    searchBar
+    searchBar,
   );
 }
 
@@ -313,7 +313,7 @@ function ContentSection({ children, variant = 'table', className = '' }) {
     {
       className: `rounded-lg shadow ${variantClass} ${className}`,
     },
-    children
+    children,
   );
 }
 
@@ -400,13 +400,13 @@ function createBusinessComponent(config) {
 
   if (!useData || typeof useData !== 'function') {
     throw new Error(
-      `createBusinessComponent "${name}" requires a useData hook function`
+      `createBusinessComponent "${name}" requires a useData hook function`,
     );
   }
 
   if (!renderContent || typeof renderContent !== 'function') {
     throw new Error(
-      `createBusinessComponent "${name}" requires a renderContent function`
+      `createBusinessComponent "${name}" requires a renderContent function`,
     );
   }
 
@@ -430,7 +430,7 @@ function createBusinessComponent(config) {
       return e(
         'div',
         { className: 'flex items-center justify-center p-8' },
-        e('div', { className: 'text-gray-600' }, 'Loading...')
+        e('div', { className: 'text-gray-600' }, 'Loading...'),
       );
     }
 
@@ -440,7 +440,7 @@ function createBusinessComponent(config) {
         {
           className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
         },
-        `Error in ${name}: ${dataResult.error.message || 'Unknown error'}`
+        `Error in ${name}: ${dataResult.error.message || 'Unknown error'}`,
       );
     }
 
@@ -467,21 +467,21 @@ function createBusinessComponent(config) {
 
         // Render modals if provided
         renderModals &&
-          renderModals({ components, data: dataResult, props: finalProps })
+          renderModals({ components, data: dataResult, props: finalProps }),
       );
     } catch (renderError) {
       const logger = window.NightingaleLogger?.get('ui:tabRender');
-      logger?.error('Tab render failed', { 
-        error: renderError.message, 
+      logger?.error('Tab render failed', {
+        error: renderError.message,
         tabName: name,
-        stack: renderError.stack 
+        stack: renderError.stack,
       });
       return e(
         'div',
         {
           className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
         },
-        `Render error in ${name}: ${renderError.message}`
+        `Render error in ${name}: ${renderError.message}`,
       );
     }
   }

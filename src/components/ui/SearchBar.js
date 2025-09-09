@@ -137,7 +137,7 @@ function SearchBar({
         onResultSelect(result);
       }
     },
-    [onResultSelect]
+    [onResultSelect],
   );
 
   // Handle input focus
@@ -284,10 +284,10 @@ function SearchBar({
             }
           },
         },
-        displayText
+        displayText,
       );
     },
-    [highlightedIndex, usingKeyboardNav, handleResultSelect]
+    [highlightedIndex, usingKeyboardNav, handleResultSelect],
   );
 
   return e(
@@ -318,8 +318,8 @@ function SearchBar({
               strokeLinejoin: 'round',
               strokeWidth: 2,
               d: 'm21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
-            })
-          )
+            }),
+          ),
         ),
 
       // Input field
@@ -367,9 +367,9 @@ function SearchBar({
               strokeLinejoin: 'round',
               strokeWidth: 2,
               d: 'M6 18L18 6M6 6l12 12',
-            })
-          )
-        )
+            }),
+          ),
+        ),
     ),
 
     // Dropdown results (only when showDropdown is enabled)
@@ -434,13 +434,13 @@ function SearchBar({
                   }
                 },
               },
-              content
+              content,
             );
           }
 
           return content;
-        })
-      )
+        }),
+      ),
   );
 }
 

@@ -61,12 +61,12 @@ class ErrorBoundary extends window.React.Component {
           e(
             'h1',
             { className: 'text-3xl font-bold mb-4' },
-            'Something went wrong'
+            'Something went wrong',
           ),
           e(
             'p',
             { className: 'text-gray-300 mb-6' },
-            "The application encountered an error and couldn't recover."
+            "The application encountered an error and couldn't recover.",
           ),
           e(
             'button',
@@ -75,7 +75,7 @@ class ErrorBoundary extends window.React.Component {
                 'bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-medium',
               onClick: () => window.location.reload(),
             },
-            'Reload Application'
+            'Reload Application',
           ),
           this.state.error &&
             e(
@@ -84,7 +84,7 @@ class ErrorBoundary extends window.React.Component {
               e(
                 'summary',
                 { className: 'cursor-pointer text-gray-400' },
-                'Technical Details'
+                'Technical Details',
               ),
               e(
                 'pre',
@@ -94,10 +94,10 @@ class ErrorBoundary extends window.React.Component {
                 },
                 this.state.error.toString() +
                   '\n' +
-                  (this.state.errorInfo?.componentStack || '')
-              )
-            )
-        )
+                  (this.state.errorInfo?.componentStack || ''),
+              ),
+            ),
+        ),
       );
     }
 
@@ -123,7 +123,7 @@ if (typeof window !== 'undefined') {
     window.NightingaleUI.registerComponent(
       'ErrorBoundary',
       ErrorBoundary,
-      'core'
+      'core',
     );
   }
 }

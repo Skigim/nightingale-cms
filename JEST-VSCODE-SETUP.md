@@ -2,7 +2,8 @@
 
 ## Issue Resolution ✅
 
-I've fixed the Jest VS Code extension error by simplifying the configuration and moving Jest settings to package.json.
+I've fixed the Jest VS Code extension error by simplifying the configuration and moving Jest
+settings to package.json.
 
 ## What I've Fixed
 

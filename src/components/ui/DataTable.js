@@ -70,7 +70,7 @@ const DataTable = ({
           const value = row[col.field];
           if (value == null) return false;
           return String(value).toLowerCase().includes(searchLower);
-        })
+        }),
       );
     }
 
@@ -128,7 +128,7 @@ const DataTable = ({
         setSortDirection('asc');
       }
     },
-    [sortField]
+    [sortField],
   );
 
   const handlePageChange = useCallbackHook((event, newPage) => {
@@ -155,7 +155,7 @@ const DataTable = ({
 
       onSelectionChange(newSelection);
     },
-    [selectable, selectedRows, onSelectionChange]
+    [selectable, selectedRows, onSelectionChange],
   );
 
   const handleSelectAll = useCallbackHook(
@@ -164,17 +164,17 @@ const DataTable = ({
 
       if (isSelected) {
         const allIds = paginatedData.map(
-          (row) => row.id || row._id || JSON.stringify(row)
+          (row) => row.id || row._id || JSON.stringify(row),
         );
         onSelectionChange([...new Set([...selectedRows, ...allIds])]);
       } else {
         const pageIds = paginatedData.map(
-          (row) => row.id || row._id || JSON.stringify(row)
+          (row) => row.id || row._id || JSON.stringify(row),
         );
         onSelectionChange(selectedRows.filter((id) => !pageIds.includes(id)));
       }
     },
-    [selectable, selectedRows, onSelectionChange, paginatedData]
+    [selectable, selectedRows, onSelectionChange, paginatedData],
   );
 
   // Style variants
@@ -272,11 +272,11 @@ const DataTable = ({
               className: 'opacity-75',
               fill: 'currentColor',
               d: 'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z',
-            })
+            }),
           ),
-          e('span', { className: styles.cell }, 'Loading...')
-        )
-      )
+          e('span', { className: styles.cell }, 'Loading...'),
+        ),
+      ),
     );
   }
 
@@ -304,7 +304,7 @@ const DataTable = ({
             strokeLinejoin: 'round',
             strokeWidth: 2,
             d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-          })
+          }),
         ),
         e(
           'p',
@@ -313,9 +313,9 @@ const DataTable = ({
           },
           activeSearchTerm
             ? `No results found for "${activeSearchTerm}"`
-            : emptyMessage
-        )
-      )
+            : emptyMessage,
+        ),
+      ),
     );
   }
 
@@ -358,7 +358,7 @@ const DataTable = ({
                     onChange: (e) => handleSelectAll(e.target.checked),
                     className:
                       'h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500 focus:ring-2',
-                  })
+                  }),
                 ),
               // Data columns
               processedColumns.map((col) =>
@@ -393,10 +393,10 @@ const DataTable = ({
                           strokeLinecap: 'round',
                           strokeLinejoin: 'round',
                           d: 'M5 15l7-7 7 7',
-                        })
-                      )
-                  )
-                )
+                        }),
+                      ),
+                  ),
+                ),
               ),
               // Actions column
               rowActions.length > 0 &&
@@ -405,9 +405,9 @@ const DataTable = ({
                   {
                     className: `${styles.headerCell} ${densityStyles.headerPadding}`,
                   },
-                  'Actions'
-                )
-            )
+                  'Actions',
+                ),
+            ),
           ),
         // Body
         e(
@@ -442,7 +442,7 @@ const DataTable = ({
                     },
                     className:
                       'h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500 focus:ring-2',
-                  })
+                  }),
                 ),
               // Data columns
               processedColumns.map((col) =>
@@ -465,8 +465,8 @@ const DataTable = ({
                         }
                         return col.render(row[col.field], row, index);
                       })()
-                    : row[col.field]
-                )
+                    : row[col.field],
+                ),
               ),
               // Actions column
               rowActions.length > 0 &&
@@ -492,15 +492,15 @@ const DataTable = ({
                             'p-2 text-blue-400 hover:text-blue-300 hover:bg-gray-700 rounded-lg transition-all duration-200',
                           title: action.label,
                         },
-                        action.icon || action.label
-                      )
-                    )
-                  )
-                )
+                        action.icon || action.label,
+                      ),
+                    ),
+                  ),
+                ),
             );
-          })
-        )
-      )
+          }),
+        ),
+      ),
     ),
     // Pagination
     paginated &&
@@ -522,9 +522,9 @@ const DataTable = ({
                 'ml-2 bg-gray-600 text-white border-gray-500 rounded px-2 py-1 text-sm',
             },
             [10, 25, 50, 100].map((option) =>
-              e('option', { key: option, value: option }, option)
-            )
-          )
+              e('option', { key: option, value: option }, option),
+            ),
+          ),
         ),
         e(
           'div',
@@ -532,7 +532,7 @@ const DataTable = ({
           e(
             'span',
             { className: 'text-sm text-gray-300' },
-            `${currentPage * rowsPerPage + 1}-${Math.min((currentPage + 1) * rowsPerPage, processedData.length)} of ${processedData.length}`
+            `${currentPage * rowsPerPage + 1}-${Math.min((currentPage + 1) * rowsPerPage, processedData.length)} of ${processedData.length}`,
           ),
           e(
             'div',
@@ -545,12 +545,12 @@ const DataTable = ({
                 className:
                   'px-2 py-1 text-sm bg-gray-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500',
               },
-              '‹'
+              '‹',
             ),
             e(
               'span',
               { className: 'text-sm text-gray-300' },
-              `${currentPage + 1} of ${Math.ceil(processedData.length / rowsPerPage)}`
+              `${currentPage + 1} of ${Math.ceil(processedData.length / rowsPerPage)}`,
             ),
             e(
               'button',
@@ -562,11 +562,11 @@ const DataTable = ({
                 className:
                   'px-2 py-1 text-sm bg-gray-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-500',
               },
-              '›'
-            )
-          )
-        )
-      )
+              '›',
+            ),
+          ),
+        ),
+      ),
   );
 };
 

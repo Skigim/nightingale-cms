@@ -30,7 +30,7 @@ function DashboardTab({ fullData }) {
 
     const activeCases =
       fullData.cases?.filter(
-        (c) => c.status !== 'Closed' && c.status !== 'Denied'
+        (c) => c.status !== 'Closed' && c.status !== 'Denied',
       ).length || 0;
     const pendingVr =
       fullData.vrRequests?.filter((vr) => vr.status === 'Pending').length || 0;
@@ -60,13 +60,13 @@ function DashboardTab({ fullData }) {
       e(
         'h2',
         { className: 'text-3xl font-bold text-blue-300 mb-2' },
-        'Welcome to Nightingale CMS'
+        'Welcome to Nightingale CMS',
       ),
       e(
         'p',
         { className: 'text-gray-400 text-lg' },
-        'Case Management System - Cases & Eligibility Focus'
-      )
+        'Case Management System - Cases & Eligibility Focus',
+      ),
     ),
     e(
       'div',
@@ -115,9 +115,13 @@ function DashboardTab({ fullData }) {
               e(
                 'p',
                 { className: 'text-gray-400 text-sm font-medium' },
-                stat.label
+                stat.label,
               ),
-              e('p', { className: 'text-3xl font-bold text-white' }, stat.value)
+              e(
+                'p',
+                { className: 'text-3xl font-bold text-white' },
+                stat.value,
+              ),
             ),
             e(
               'div',
@@ -135,12 +139,12 @@ function DashboardTab({ fullData }) {
                   strokeLinecap: 'round',
                   strokeLinejoin: 'round',
                   d: stat.icon,
-                })
-              )
-            )
-          )
-        )
-      )
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
     e(
       'div',
@@ -148,7 +152,7 @@ function DashboardTab({ fullData }) {
       e(
         'h3',
         { className: 'text-lg font-semibold text-white mb-4' },
-        'Quick Actions'
+        'Quick Actions',
       ),
       e(
         'div',
@@ -179,7 +183,7 @@ function DashboardTab({ fullData }) {
                     window.NightingaleToast.showInfoToast
                   ) {
                     window.NightingaleToast.showInfoToast(
-                      'Case creation coming soon!'
+                      'Case creation coming soon!',
                     );
                   }
                 } else if (action.action === 'searchCases') {
@@ -189,11 +193,11 @@ function DashboardTab({ fullData }) {
               },
             },
             e('h4', { className: 'font-medium text-white mb-1' }, action.label),
-            e('p', { className: 'text-sm text-gray-400' }, action.description)
-          )
-        )
-      )
-    )
+            e('p', { className: 'text-sm text-gray-400' }, action.description),
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -211,7 +215,7 @@ if (typeof window !== 'undefined') {
       'DashboardTab',
       DashboardTab,
       'dashboard',
-      []
+      [],
     );
   }
 

@@ -21,7 +21,7 @@ function parseAvsAccountBlock(block, knownAccountTypes) {
 
   // Sort known types by length, descending, to match longer phrases first (e.g., "Checking Account" before "Checking").
   const sortedAccountTypes = [...knownAccountTypes].sort(
-    (a, b) => b.length - a.length
+    (a, b) => b.length - a.length,
   );
 
   for (const type of sortedAccountTypes) {
@@ -47,7 +47,7 @@ function parseAvsAccountBlock(block, knownAccountTypes) {
   const accountNumberMatch = bankLine.match(/ - \((\d+)\)/);
 
   const balanceLine = lines.find((l) =>
-    l.toLowerCase().includes('balance as of')
+    l.toLowerCase().includes('balance as of'),
   );
   const balanceMatch = balanceLine
     ? balanceLine.match(/Balance as of .* - (.*)/)

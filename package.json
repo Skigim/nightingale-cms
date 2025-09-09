@@ -69,12 +69,19 @@
     "npm": ">=8.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["prettier --write", "eslint --fix"],
-    "*.{json,md,html,css}": ["prettier --write"]
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,html,css}": [
+      "prettier --write"
+    ]
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.js"
+    ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     },
@@ -99,8 +106,21 @@
     "transform": {
       "^.+\\.(js|jsx)$": "babel-jest"
     },
-    "moduleFileExtensions": ["js", "jsx", "json"],
-    "testPathIgnorePatterns": ["/node_modules/", "/build/", "/docs/"]
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/build/",
+      "/docs/"
+    ]
   },
-  "browserslist": ["> 1%", "last 2 versions", "not dead", "not ie 11"]
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }

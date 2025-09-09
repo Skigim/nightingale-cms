@@ -624,7 +624,7 @@ function generateCase(index, people, organizations) {
     for (let i = 0; i < numReps; i++) {
       const repPerson = people.find(
         (p) =>
-          p.relationship === 'attorney' || p.relationship === 'representative'
+          p.relationship === 'attorney' || p.relationship === 'representative',
       );
       if (repPerson) {
         caseData.authorizedReps.push({
@@ -666,21 +666,21 @@ function generateCase(index, people, organizations) {
     const numResources = randomInt(0, 3);
     for (let i = 0; i < numResources; i++) {
       caseData.financials.resources.push(
-        generateFinancialItem('resources', 'resource', i + 1)
+        generateFinancialItem('resources', 'resource', i + 1),
       );
     }
 
     const numIncome = randomInt(1, 2);
     for (let i = 0; i < numIncome; i++) {
       caseData.financials.income.push(
-        generateFinancialItem('income', 'income', i + 1)
+        generateFinancialItem('income', 'income', i + 1),
       );
     }
 
     const numExpenses = randomInt(1, 4);
     for (let i = 0; i < numExpenses; i++) {
       caseData.financials.expenses.push(
-        generateFinancialItem('expenses', 'expense', i + 1)
+        generateFinancialItem('expenses', 'expense', i + 1),
       );
     }
   }
@@ -769,7 +769,7 @@ function generateCase(index, people, organizations) {
 
 function generateData(counts) {
   console.log(
-    `Generating ${counts.cases} cases, ${counts.people} people, ${counts.organizations} organizations...`
+    `Generating ${counts.cases} cases, ${counts.people} people, ${counts.organizations} organizations...`,
   );
 
   const data = {
@@ -823,7 +823,7 @@ function main() {
     __dirname,
     '..',
     'Data',
-    'nightingale-data-generated.json'
+    'nightingale-data-generated.json',
   );
 
   // Ensure Data directory exists
@@ -841,7 +841,7 @@ function main() {
   console.log(`- People: ${data.people.length}`);
   console.log(`- Organizations: ${data.organizations.length}`);
   console.log(
-    `\nFile size: ${(fs.statSync(outputPath).size / 1024).toFixed(1)} KB`
+    `\nFile size: ${(fs.statSync(outputPath).size / 1024).toFixed(1)} KB`,
   );
 }
 

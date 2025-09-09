@@ -1,6 +1,6 @@
 /**
  * Fuse.js ES6 Module Wrapper
- * 
+ *
  * This module provides ES6 import/export compatibility for Fuse.js
  * by dynamically loading the UMD build and exposing it as an ES6 module.
  */
@@ -24,7 +24,7 @@ async function loadFuse() {
     const script = document.createElement('script');
     script.src = './src/assets/fuse.min.js';
     script.type = 'text/javascript';
-    
+
     script.onload = () => {
       if (window.Fuse) {
         Fuse = window.Fuse;
@@ -33,11 +33,11 @@ async function loadFuse() {
         reject(new Error('Fuse.js loaded but not available on window object'));
       }
     };
-    
+
     script.onerror = () => {
       reject(new Error('Failed to load Fuse.js script'));
     };
-    
+
     document.head.appendChild(script);
   });
 }

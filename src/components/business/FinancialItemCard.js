@@ -103,7 +103,7 @@ function FinancialItemCard({
         onDelete(item);
       }
     },
-    [confirmingDelete, onDeleteCancel, onDelete, item]
+    [confirmingDelete, onDeleteCancel, onDelete, item],
   );
 
   // Handle delete confirmation
@@ -112,7 +112,7 @@ function FinancialItemCard({
       e.stopPropagation();
       onDeleteConfirm(item);
     },
-    [onDeleteConfirm, item]
+    [onDeleteConfirm, item],
   );
 
   // Card content for preview display
@@ -133,14 +133,14 @@ function FinancialItemCard({
           e(
             'h6',
             { className: 'font-medium text-gray-200 text-sm' },
-            item.description || item.type || 'Untitled Item'
-          )
+            item.description || item.type || 'Untitled Item',
+          ),
         ),
         e(
           'div',
           { className: 'text-gray-200 font-medium text-sm ml-3' },
-          getDisplayAmount
-        )
+          getDisplayAmount,
+        ),
       ),
 
       // Second row: Institution (if available)
@@ -156,7 +156,7 @@ function FinancialItemCard({
           ? e(
               'div',
               { className: 'text-xs text-gray-400' },
-              formatAccountNumber(item.accountNumber)
+              formatAccountNumber(item.accountNumber),
             )
           : e('div'), // Empty div to maintain flex layout
         // Badge - right side
@@ -164,7 +164,7 @@ function FinancialItemCard({
           status: getVerificationStatus.text,
           variant: 'verification',
           size: 'sm',
-        })
+        }),
       ),
 
       // Action buttons (only shown when confirming delete)
@@ -189,8 +189,8 @@ function FinancialItemCard({
             size: 'sm',
             onClick: handleDeleteClick,
             children: '✗',
-          })
-        )
+          }),
+        ),
     );
   }, [
     item,
@@ -217,7 +217,7 @@ function FinancialItemCard({
       ].join(' '),
       onClick: () => onEdit(item),
     },
-    cardContent
+    cardContent,
   );
 }
 
@@ -255,8 +255,8 @@ function FinancialItemList({
           className:
             'bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-md',
         },
-        'Add'
-      )
+        'Add',
+      ),
     ),
 
     // Items list
@@ -264,7 +264,7 @@ function FinancialItemList({
       ? e(
           'p',
           { className: 'text-gray-500 text-sm text-center py-4' },
-          `No ${itemType || 'financial'} items`
+          `No ${itemType || 'financial'} items`,
         )
       : e(
           'div',
@@ -281,9 +281,9 @@ function FinancialItemList({
               confirmingDelete: confirmingDelete === item.id,
               interactive,
               showActions,
-            })
-          )
-        )
+            }),
+          ),
+        ),
   );
 }
 
@@ -328,8 +328,8 @@ function FinancialItemGrid({
           className:
             'bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-md',
         },
-        'Add'
-      )
+        'Add',
+      ),
     ),
 
     // Items grid
@@ -337,7 +337,7 @@ function FinancialItemGrid({
       ? e(
           'p',
           { className: 'text-gray-500 text-sm text-center py-8' },
-          `No ${itemType || 'financial'} items`
+          `No ${itemType || 'financial'} items`,
         )
       : e(
           'div',
@@ -354,9 +354,9 @@ function FinancialItemGrid({
               confirmingDelete: confirmingDelete === item.id,
               interactive,
               showActions,
-            })
-          )
-        )
+            }),
+          ),
+        ),
   );
 }
 
@@ -372,19 +372,19 @@ if (typeof window !== 'undefined') {
       'FinancialItemCard',
       FinancialItemCard,
       'financial',
-      ['Cards', 'Badge', 'Button']
+      ['Cards', 'Badge', 'Button'],
     );
     window.NightingaleBusiness.registerComponent(
       'FinancialItemList',
       FinancialItemList,
       'financial',
-      ['FinancialItemCard']
+      ['FinancialItemCard'],
     );
     window.NightingaleBusiness.registerComponent(
       'FinancialItemGrid',
       FinancialItemGrid,
       'financial',
-      ['FinancialItemCard']
+      ['FinancialItemCard'],
     );
   }
 }

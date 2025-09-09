@@ -103,7 +103,7 @@ function Badge({
       className: finalClassName,
       title: status, // Tooltip for accessibility
     },
-    status
+    status,
   );
 }
 
@@ -166,7 +166,7 @@ function ProgressBadge({
         .trim(),
       title: `${current} of ${total} complete (${percentage}%)`,
     },
-    displayText
+    displayText,
   );
 }
 
@@ -212,7 +212,7 @@ function CountBadge({
         .trim(),
       title: `${count} items`,
     },
-    displayCount
+    displayCount,
   );
 }
 
@@ -256,8 +256,8 @@ function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
       e(Badge, {
         key: badgeProps.key || index,
         ...badgeProps,
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -287,15 +287,15 @@ if (typeof window !== 'undefined') {
     window.NightingaleComponentLibrary.registerComponent('StatusBadge', Badge); // Alias
     window.NightingaleComponentLibrary.registerComponent(
       'ProgressBadge',
-      ProgressBadge
+      ProgressBadge,
     );
     window.NightingaleComponentLibrary.registerComponent(
       'CountBadge',
-      CountBadge
+      CountBadge,
     );
     window.NightingaleComponentLibrary.registerComponent(
       'MultiBadge',
-      MultiBadge
+      MultiBadge,
     );
   }
 }

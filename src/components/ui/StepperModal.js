@@ -44,7 +44,7 @@ function StepperModal({
           newStep,
           {
             onFocused: () => {},
-          }
+          },
         );
       }, 50);
     }
@@ -80,7 +80,7 @@ function StepperModal({
               className:
                 'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50',
             },
-            'Back'
+            'Back',
           ),
           // Next/Complete Button
           e(
@@ -94,8 +94,8 @@ function StepperModal({
                   : 'bg-blue-600 hover:bg-blue-700'
               }`,
             },
-            isLastStep ? completButtonText : 'Next'
-          )
+            isLastStep ? completButtonText : 'Next',
+          ),
         )
       : null);
 
@@ -154,7 +154,7 @@ function StepperModal({
                         : 'bg-gray-600 text-gray-300'
                   }`,
                 },
-                isCompleted ? '✓' : index + 1
+                isCompleted ? '✓' : index + 1,
               ),
               // Step Title/Description
               e(
@@ -167,13 +167,17 @@ function StepperModal({
                       isActive ? 'text-blue-300' : 'text-white'
                     }`,
                   },
-                  step.title
+                  step.title,
                 ),
-                e('p', { className: 'text-sm text-gray-400' }, step.description)
-              )
+                e(
+                  'p',
+                  { className: 'text-sm text-gray-400' },
+                  step.description,
+                ),
+              ),
             );
-          })
-        )
+          }),
+        ),
       ),
       // Step Content
       e(
@@ -183,9 +187,9 @@ function StepperModal({
           className: 'w-3/4 p-4 border-l border-gray-700',
           'data-step-content': true,
         },
-        children
-      )
-    )
+        children,
+      ),
+    ),
   );
 }
 

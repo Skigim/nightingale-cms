@@ -1,6 +1,7 @@
 # Nightingale CMS – Copilot Core Instructions (Concise)
 
-Strict, minimal rule set Copilot must follow. Omit anything not required. Prefer correctness, safety, repeatable patterns.
+Strict, minimal rule set Copilot must follow. Omit anything not required. Prefer correctness,
+safety, repeatable patterns.
 
 ## 1. Project Snapshot
 
@@ -12,7 +13,8 @@ Testing: Jest + React Testing Library (jsdom)
 
 ## 2. Non‑Negotiable Rules
 
-1. Every React component: define `const e = window.React.createElement;` inside the function (never at file or global scope).
+1. Every React component: define `const e = window.React.createElement;` inside the function (never
+   at file or global scope).
 2. No global alias like `window.e`.
 3. UI layer = presentational only (no domain logic, no data mutation).
 4. Business layer composes UI components + domain rules only.
@@ -26,11 +28,13 @@ Testing: Jest + React Testing Library (jsdom)
 ## 3. Component Layering
 
 Folders (current pattern name mapping may vary in repo):  
-`components/ui/` → generic building blocks (Button, Modal, DataTable, SearchBar, Badge, Form inputs, Stepper).  
+`components/ui/` → generic building blocks (Button, Modal, DataTable, SearchBar, Badge, Form inputs,
+Stepper).  
 `components/business/` → workflows (CaseCreationModal, PersonCreationModal, CaseDetailsView, etc.).
 
 UI components: accept data via props; no service calls, no file I/O, no domain validation.  
-Business components: may call services, apply validation, orchestrate modals, mutate data (through services / callbacks).
+Business components: may call services, apply validation, orchestrate modals, mutate data (through
+services / callbacks).
 
 ## 4. Self‑Registration Pattern
 
@@ -68,7 +72,8 @@ function ExampleComponent(props) {
 ## 6. Error Handling & Fallbacks
 
 - Wrap major view roots with `ErrorBoundary` (class component allowed).
-- Services or async calls: `try/catch` → log via `window.NightingaleLogger?.get(...).error(...)` and user feedback via `window.showToast(msg,'error')`.
+- Services or async calls: `try/catch` → log via `window.NightingaleLogger?.get(...).error(...)` and
+  user feedback via `window.showToast(msg,'error')`.
 - Defensive: null / undefined guards around external data before mapping.
 
 ## 7. Data & Validation
@@ -88,19 +93,23 @@ function ExampleComponent(props) {
 
 Format: `<type>(<scope>): <short>`  
 Types: `feat|fix|refactor|test|docs|chore|style`  
-Common scopes: `ui`, `business`, `services`, `tests`, `config`, `data`, `modals`, `components`, `deps`.  
+Common scopes: `ui`, `business`, `services`, `tests`, `config`, `data`, `modals`, `components`,
+`deps`.  
 Examples:  
 `feat(ui): add outline variant to Button`  
 `fix(services): handle null ID in migration`  
 `test(tests): add Modal accessibility tests`
 
-No fluff, no status phrases, no “successfully”, no outcome commentary. Body only when needed for context / breaking change note.
+No fluff, no status phrases, no “successfully”, no outcome commentary. Body only when needed for
+context / breaking change note.
 
 ## 10. Performance & Accessibility
 
-- Use `useMemo`/`useCallback` only for measurable benefit (filtering large arrays, stable handlers passed deep).
+- Use `useMemo`/`useCallback` only for measurable benefit (filtering large arrays, stable handlers
+  passed deep).
 - Avoid O(n) recomputation in render; pre-compute via memo.
-- Add `aria-*` attrs to interactive / modal components; ensure focus trap or at minimum initial focus + ESC close.
+- Add `aria-*` attrs to interactive / modal components; ensure focus trap or at minimum initial
+  focus + ESC close.
 - Provide keyboard activation for custom interactive elements.
 
 ## 11. Forbidden / Anti‑Patterns
@@ -116,8 +125,10 @@ No fluff, no status phrases, no “successfully”, no outcome commentary. Body 
 ## 12. When Unsure
 
 Prefer: minimal, defensive, composable.  
-If a requirement conflicts, default to preserving existing public API and patterns above. Surface ambiguity rather than guessing.
+If a requirement conflicts, default to preserving existing public API and patterns above. Surface
+ambiguity rather than guessing.
 
 ---
 
-This concise file replaces the expansive version. Add extended rationale or examples in separate docs; keep this core under ~150 lines.
+This concise file replaces the expansive version. Add extended rationale or examples in separate
+docs; keep this core under ~150 lines.

@@ -215,7 +215,7 @@
       window.NightingaleServices.registerService(
         'cmsUtilities',
         NightingaleCMSUtilities,
-        'business'
+        'business',
       );
     }
 

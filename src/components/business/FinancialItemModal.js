@@ -134,7 +134,7 @@ function FinancialItemModal({
     if (isEditing) {
       // Update existing item
       updatedFinancials[itemType] = updatedFinancials[itemType].map((item) =>
-        item.id === itemData.id ? itemData : item
+        item.id === itemData.id ? itemData : item,
       );
     } else {
       // Add new item
@@ -147,7 +147,7 @@ function FinancialItemModal({
     };
 
     const updatedCases = fullData.cases.map((c) =>
-      c.id === caseData.id ? updatedCase : c
+      c.id === caseData.id ? updatedCase : c,
     );
 
     onUpdateData({ ...fullData, cases: updatedCases });
@@ -172,7 +172,7 @@ function FinancialItemModal({
     } else {
       showToast(
         `${itemType} item ${isEditing ? 'updated' : 'saved'} successfully.`,
-        'success'
+        'success',
       );
       onClose();
     }
@@ -208,7 +208,7 @@ function FinancialItemModal({
         className:
           'px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg',
       },
-      'Cancel'
+      'Cancel',
     ),
     e(
       'button',
@@ -217,8 +217,8 @@ function FinancialItemModal({
         className:
           'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg',
       },
-      isEditing ? 'Update Item' : 'Save Item'
-    )
+      isEditing ? 'Update Item' : 'Save Item',
+    ),
   );
 
   return e(window.Modal, {
@@ -250,7 +250,7 @@ function FinancialItemModal({
               {
                 className: 'block text-sm font-medium text-gray-400 mb-2',
               },
-              'Item Name *'
+              'Item Name *',
             ),
             e('input', {
               type: 'text',
@@ -265,8 +265,8 @@ function FinancialItemModal({
               e(
                 'p',
                 { className: 'text-red-400 text-sm mt-1' },
-                errors.description
-              )
+                errors.description,
+              ),
           ),
 
           // Location/Institution
@@ -278,7 +278,7 @@ function FinancialItemModal({
               {
                 className: 'block text-sm font-medium text-gray-400 mb-2',
               },
-              'Location/Institution'
+              'Location/Institution',
             ),
             e('input', {
               type: 'text',
@@ -287,8 +287,8 @@ function FinancialItemModal({
               placeholder: placeholders.location,
               className:
                 'w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white',
-            })
-          )
+            }),
+          ),
         ),
 
         // Row 2: Account Number, Amount, and Frequency (conditional)
@@ -316,7 +316,7 @@ function FinancialItemModal({
                 {
                   className: 'block text-sm font-medium text-gray-400 mb-2',
                 },
-                'Account Number'
+                'Account Number',
               ),
               e('input', {
                 type: 'text',
@@ -326,7 +326,7 @@ function FinancialItemModal({
                 placeholder: 'Last 4 digits: 1234',
                 className:
                   'w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white',
-              })
+              }),
             ),
 
           // Amount
@@ -338,7 +338,7 @@ function FinancialItemModal({
               {
                 className: 'block text-sm font-medium text-gray-400 mb-2',
               },
-              'Amount'
+              'Amount',
             ),
             e('input', {
               type: 'number',
@@ -351,7 +351,7 @@ function FinancialItemModal({
               }`,
             }),
             errors.amount &&
-              e('p', { className: 'text-red-400 text-sm mt-1' }, errors.amount)
+              e('p', { className: 'text-red-400 text-sm mt-1' }, errors.amount),
           ),
 
           // Frequency (for income/expenses)
@@ -364,7 +364,7 @@ function FinancialItemModal({
                 {
                   className: 'block text-sm font-medium text-gray-400 mb-2',
                 },
-                'Freq'
+                'Freq',
               ),
               e(
                 'select',
@@ -378,9 +378,9 @@ function FinancialItemModal({
                 e('option', { value: 'yearly' }, '/yr'),
                 e('option', { value: 'weekly' }, '/wk'),
                 e('option', { value: 'daily' }, '/day'),
-                e('option', { value: 'one-time' }, '1x')
-              )
-            )
+                e('option', { value: 'one-time' }, '1x'),
+              ),
+            ),
         ),
 
         // Row 3: Verification Status and Verification Source (conditional)
@@ -397,7 +397,7 @@ function FinancialItemModal({
               {
                 className: 'block text-sm font-medium text-gray-400 mb-2',
               },
-              'Verification Status'
+              'Verification Status',
             ),
             e(
               'select',
@@ -411,8 +411,8 @@ function FinancialItemModal({
               e('option', { value: 'Needs VR' }, 'Needs VR'),
               e('option', { value: 'VR Pending' }, 'VR Pending'),
               e('option', { value: 'AVS Pending' }, 'AVS Pending'),
-              e('option', { value: 'Verified' }, 'Verified')
-            )
+              e('option', { value: 'Verified' }, 'Verified'),
+            ),
           ),
 
           // Verification Source (conditional)
@@ -424,7 +424,7 @@ function FinancialItemModal({
               {
                 className: 'block text-sm font-medium text-gray-400 mb-2',
               },
-              'Verification Source'
+              'Verification Source',
             ),
             e('input', {
               type: 'text',
@@ -443,9 +443,9 @@ function FinancialItemModal({
               e(
                 'p',
                 { className: 'text-red-400 text-sm mt-1' },
-                errors.verificationSource
-              )
-          )
+                errors.verificationSource,
+              ),
+          ),
         ),
 
         // Additional fields for specific types
@@ -463,7 +463,7 @@ function FinancialItemModal({
                 {
                   className: 'block text-sm font-medium text-gray-400 mb-2',
                 },
-                'Owner'
+                'Owner',
               ),
               e(
                 'select',
@@ -475,10 +475,10 @@ function FinancialItemModal({
                 },
                 e('option', { value: 'applicant' }, 'Applicant'),
                 e('option', { value: 'spouse' }, 'Spouse'),
-                e('option', { value: 'joint' }, 'Joint')
-              )
+                e('option', { value: 'joint' }, 'Joint'),
+              ),
             ),
-            e('div', {}) // Empty div to maintain grid
+            e('div', {}), // Empty div to maintain grid
           ),
 
         // Notes (full width)
@@ -488,7 +488,7 @@ function FinancialItemModal({
           e(
             'label',
             { className: 'block text-sm font-medium text-gray-400 mb-2' },
-            'Item Notes'
+            'Item Notes',
           ),
           e('textarea', {
             value: formData.notes,
@@ -497,7 +497,7 @@ function FinancialItemModal({
             rows: 3,
             className:
               'w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white',
-          })
+          }),
         ),
 
         // Add Another (for new items only)
@@ -517,11 +517,11 @@ function FinancialItemModal({
               e(
                 'span',
                 { className: 'text-gray-300' },
-                'Add another item after saving'
-              )
-            )
-          )
-      )
+                'Add another item after saving',
+              ),
+            ),
+          ),
+      ),
     ),
   });
 }
@@ -533,7 +533,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
       'FinancialItemModal',
-      FinancialItemModal
+      FinancialItemModal,
     );
   }
 }

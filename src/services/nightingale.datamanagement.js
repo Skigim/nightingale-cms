@@ -463,7 +463,7 @@
     ) {
       window.NightingaleServices.registerService(
         'dataManagement',
-        NightingaleDataManagement
+        NightingaleDataManagement,
       );
     }
   }

@@ -105,19 +105,19 @@ function Card({
             e(
               'h3',
               { className: 'text-lg font-semibold text-white mb-1' },
-              title
+              title,
             ),
-          subtitle && e('p', { className: 'text-sm text-gray-400' }, subtitle)
+          subtitle && e('p', { className: 'text-sm text-gray-400' }, subtitle),
         ),
         headerActions &&
           e(
             'div',
             { className: 'flex items-center space-x-2 ml-4' },
-            headerActions
-          )
+            headerActions,
+          ),
       ),
     // Card Content
-    children && e('div', { className: 'text-gray-300' }, children)
+    children && e('div', { className: 'text-gray-300' }, children),
   );
 }
 
@@ -198,7 +198,7 @@ function CardField({ label, value, className = '' }) {
     'div',
     { className: `mb-2 ${className}` },
     e('dt', { className: 'text-sm font-medium text-gray-400' }, label),
-    e('dd', { className: 'text-sm text-white mt-1' }, value)
+    e('dd', { className: 'text-sm text-white mt-1' }, value),
   );
 }
 
@@ -220,7 +220,7 @@ function CardActions({ children, align = 'right', className = '' }) {
     {
       className: `flex items-center mt-4 pt-3 border-t border-gray-700 ${alignClasses[align]} ${className}`,
     },
-    children
+    children,
   );
 }
 

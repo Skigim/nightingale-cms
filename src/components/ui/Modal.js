@@ -61,7 +61,7 @@ function Modal({
       } else {
         // Fallback focus management
         const focusableElements = modalRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
         );
         if (focusableElements.length > 0) {
           focusableElements[0].focus();
@@ -112,7 +112,7 @@ function Modal({
                 id: 'modal-title',
                 className: 'text-lg font-semibold text-white',
               },
-              title
+              title,
             ),
             showCloseButton &&
               e(
@@ -135,9 +135,9 @@ function Modal({
                     strokeLinejoin: 'round',
                     strokeWidth: 2,
                     d: 'M6 18L18 6M6 6l12 12',
-                  })
-                )
-              )
+                  }),
+                ),
+              ),
           ),
 
         // Body
@@ -151,10 +151,10 @@ function Modal({
               className:
                 'flex justify-end space-x-3 p-6 border-t border-gray-700',
             },
-            footerContent
-          )
-      )
-    )
+            footerContent,
+          ),
+      ),
+    ),
   );
 }
 
@@ -207,7 +207,7 @@ function ConfirmationModal({
         className:
           'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
       },
-      cancelText
+      cancelText,
     ),
     e(
       'button',
@@ -215,8 +215,8 @@ function ConfirmationModal({
         onClick: onConfirm,
         className: getButtonClasses(),
       },
-      confirmText
-    )
+      confirmText,
+    ),
   );
 
   return e(
@@ -228,7 +228,7 @@ function ConfirmationModal({
       size: 'small',
       footerContent,
     },
-    e('p', { className: 'text-gray-300' }, message)
+    e('p', { className: 'text-gray-300' }, message),
   );
 }
 
@@ -278,7 +278,7 @@ function FormModal({
         className:
           'px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white rounded-lg transition-colors',
       },
-      cancelText
+      cancelText,
     ),
     e(
       'button',
@@ -288,8 +288,8 @@ function FormModal({
         className:
           'px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors',
       },
-      isSubmitting ? 'Saving...' : submitText
-    )
+      isSubmitting ? 'Saving...' : submitText,
+    ),
   );
 
   return e(
@@ -300,7 +300,7 @@ function FormModal({
       title,
       footerContent,
     },
-    e('form', { onSubmit: handleSubmit }, children)
+    e('form', { onSubmit: handleSubmit }, children),
   );
 }
 
@@ -333,11 +333,11 @@ if (typeof window !== 'undefined') {
     window.NightingaleComponentLibrary.registerComponent('Modal', Modal);
     window.NightingaleComponentLibrary.registerComponent(
       'ConfirmationModal',
-      ConfirmationModal
+      ConfirmationModal,
     );
     window.NightingaleComponentLibrary.registerComponent(
       'FormModal',
-      FormModal
+      FormModal,
     );
   }
 }

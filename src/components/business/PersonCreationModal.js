@@ -49,7 +49,7 @@ function PersonCreationModal({
   const [currentStep, setCurrentStep] = useState(0);
   const [personData, setPersonData] = useState(getInitialPersonData());
   const [originalPersonData, setOriginalPersonData] = useState(
-    getInitialPersonData()
+    getInitialPersonData(),
   );
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -68,7 +68,7 @@ function PersonCreationModal({
             if (addressParts.length >= 3) {
               const [street, city, stateZip] = addressParts;
               const stateZipMatch = stateZip.match(
-                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/
+                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/,
               );
               if (stateZipMatch) {
                 addressData = {
@@ -101,7 +101,7 @@ function PersonCreationModal({
             if (mailingParts.length >= 3) {
               const [street, city, stateZip] = mailingParts;
               const stateZipMatch = stateZip.match(
-                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/
+                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/,
               );
               if (stateZipMatch) {
                 mailingAddressData = {
@@ -175,7 +175,7 @@ function PersonCreationModal({
         description: 'Confirm information and create person',
       },
     ],
-    []
+    [],
   );
 
   // Create filtered steps config for edit mode (removes Review step)
@@ -262,7 +262,7 @@ function PersonCreationModal({
         return {};
       }
     },
-    [personData]
+    [personData],
   ); // Handle step change with validation
   const handleStepChange = useCallback(
     (newStep) => {
@@ -281,7 +281,7 @@ function PersonCreationModal({
           setValidationErrors(stepErrors);
           window.showToast?.(
             'Please fix validation errors before continuing',
-            'error'
+            'error',
           );
           return;
         }
@@ -290,7 +290,7 @@ function PersonCreationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editPersonId]
+    [currentStep, validateStep, editPersonId],
   );
 
   // Handle form data updates
@@ -328,7 +328,7 @@ function PersonCreationModal({
         });
       }
     },
-    [validationErrors]
+    [validationErrors],
   );
 
   // Handle mailing address sync
@@ -355,7 +355,7 @@ function PersonCreationModal({
     }
     const finalErrors = allStepErrors.reduce(
       (acc, stepErrors) => ({ ...acc, ...stepErrors }),
-      {}
+      {},
     );
 
     if (Object.keys(finalErrors).length > 0) {
@@ -378,7 +378,7 @@ function PersonCreationModal({
         const connected = await fileService.connect();
         if (!connected) {
           throw new Error(
-            'Cannot save without folder access. Please click "Connect to Data Folder" in the header first.'
+            'Cannot save without folder access. Please click "Connect to Data Folder" in the header first.',
           );
         }
       }
@@ -436,7 +436,7 @@ function PersonCreationModal({
                   // Don't change the original creation date
                   createdAt: person.createdAt,
                 }
-              : person
+              : person,
           ),
         };
         successMessage = 'Person updated successfully';
@@ -515,7 +515,7 @@ function PersonCreationModal({
       return e(
         'div',
         { className: 'p-4 text-red-600' },
-        'Form components not loaded. Please ensure FormComponents.js is loaded.'
+        'Form components not loaded. Please ensure FormComponents.js is loaded.',
       );
     }
 
@@ -536,7 +536,7 @@ function PersonCreationModal({
               onChange: (e) => updatePersonData('name', e.target.value),
               placeholder: 'Enter full name',
               required: true,
-            })
+            }),
           ),
           e(
             FormField,
@@ -549,7 +549,7 @@ function PersonCreationModal({
               value: personData.dateOfBirth,
               onChange: (e) => updatePersonData('dateOfBirth', e.target.value),
               required: true,
-            })
+            }),
           ),
           e(
             FormField,
@@ -563,8 +563,8 @@ function PersonCreationModal({
               onChange: (e) => updatePersonData('ssn', e.target.value),
               placeholder: '***-**-****',
               maxLength: 11,
-            })
-          )
+            }),
+          ),
         );
 
       case 1: // Contact Information
@@ -582,7 +582,7 @@ function PersonCreationModal({
               onChange: (e) => updatePersonData('phone', e.target.value),
               placeholder: '(402) 555-0123',
               type: 'tel',
-            })
+            }),
           ),
           e(
             FormField,
@@ -595,12 +595,12 @@ function PersonCreationModal({
               onChange: (e) => updatePersonData('email', e.target.value),
               placeholder: 'person@example.com',
               type: 'email',
-            })
+            }),
           ),
           e(
             'h4',
             { className: 'font-medium text-gray-300 mt-6 mb-3' },
-            'Physical Address'
+            'Physical Address',
           ),
           e(
             FormField,
@@ -615,7 +615,7 @@ function PersonCreationModal({
                 updatePersonData('address.street', e.target.value),
               placeholder: '123 Main Street',
               required: true,
-            })
+            }),
           ),
           e(
             'div',
@@ -633,7 +633,7 @@ function PersonCreationModal({
                   updatePersonData('address.city', e.target.value),
                 placeholder: 'Lincoln',
                 required: true,
-              })
+              }),
             ),
             e(
               FormField,
@@ -699,8 +699,8 @@ function PersonCreationModal({
                   { value: 'WY', label: 'Wyoming' },
                 ],
                 required: true,
-              })
-            )
+              }),
+            ),
           ),
           e(
             FormField,
@@ -715,7 +715,7 @@ function PersonCreationModal({
               placeholder: '68501',
               maxLength: 10,
               required: true,
-            })
+            }),
           ),
           e(
             'div',
@@ -723,13 +723,13 @@ function PersonCreationModal({
             e(
               'h4',
               { className: 'font-medium text-gray-300' },
-              'Mailing Address'
+              'Mailing Address',
             ),
             e(Checkbox, {
               checked: personData.mailingAddress.sameAsPhysical,
               onChange: handleMailingAddressSync,
               label: 'Same as physical address',
-            })
+            }),
           ),
           !personData.mailingAddress.sameAsPhysical &&
             e(
@@ -743,7 +743,7 @@ function PersonCreationModal({
                   onChange: (e) =>
                     updatePersonData('mailingAddress.street', e.target.value),
                   placeholder: '123 Main Street',
-                })
+                }),
               ),
               e(
                 'div',
@@ -756,7 +756,7 @@ function PersonCreationModal({
                     onChange: (e) =>
                       updatePersonData('mailingAddress.city', e.target.value),
                     placeholder: 'Lincoln',
-                  })
+                  }),
                 ),
                 e(
                   FormField,
@@ -818,8 +818,8 @@ function PersonCreationModal({
                       { value: 'WI', label: 'Wisconsin' },
                       { value: 'WY', label: 'Wyoming' },
                     ],
-                  })
-                )
+                  }),
+                ),
               ),
               e(
                 FormField,
@@ -830,9 +830,9 @@ function PersonCreationModal({
                     updatePersonData('mailingAddress.zip', e.target.value),
                   placeholder: '68501',
                   maxLength: 10,
-                })
-              )
-            )
+                }),
+              ),
+            ),
         );
 
       case 2: {
@@ -875,7 +875,7 @@ function PersonCreationModal({
               onChange: (e) =>
                 updatePersonData('livingArrangement', e.target.value),
               options: livingArrangementOptions,
-            })
+            }),
           ),
           e(
             FormField,
@@ -888,8 +888,8 @@ function PersonCreationModal({
               onChange: (e) =>
                 updatePersonData('organizationId', e.target.value),
               options: organizationOptions,
-            })
-          )
+            }),
+          ),
         );
       }
 
@@ -900,7 +900,7 @@ function PersonCreationModal({
           return e(
             'div',
             { className: 'p-4 text-red-600' },
-            'Error: Person data not available. Please go back and fill out the form.'
+            'Error: Person data not available. Please go back and fill out the form.',
           );
         }
 
@@ -911,7 +911,7 @@ function PersonCreationModal({
           cases: [],
         };
         const selectedOrg = safeFullData.organizations?.find(
-          (org) => org.id === personData.organizationId
+          (org) => org.id === personData.organizationId,
         );
 
         return e(
@@ -920,7 +920,7 @@ function PersonCreationModal({
           e(
             'h4',
             { className: 'font-medium text-gray-200 mb-4' },
-            'Review Person Information'
+            'Review Person Information',
           ),
 
           // Basic Information
@@ -930,7 +930,7 @@ function PersonCreationModal({
             e(
               'h5',
               { className: 'font-medium text-gray-200 mb-3' },
-              'Basic Information'
+              'Basic Information',
             ),
             e(
               'div',
@@ -943,10 +943,10 @@ function PersonCreationModal({
                   personData.dateOfBirth
                     ? new Date(personData.dateOfBirth).toLocaleDateString()
                     : 'Not provided'
-                }`
+                }`,
               ),
-              e('div', null, `SSN: ${personData.ssn || 'Not provided'}`)
-            )
+              e('div', null, `SSN: ${personData.ssn || 'Not provided'}`),
+            ),
           ),
 
           // Contact Information
@@ -956,7 +956,7 @@ function PersonCreationModal({
             e(
               'h5',
               { className: 'font-medium text-gray-200 mb-3' },
-              'Contact Information'
+              'Contact Information',
             ),
             e(
               'div',
@@ -978,9 +978,9 @@ function PersonCreationModal({
                     ]
                       .filter(Boolean)
                       .join(', ')}`
-                  : 'Address: Not provided'
-              )
-            )
+                  : 'Address: Not provided',
+              ),
+            ),
           ),
 
           // Additional Details
@@ -990,7 +990,7 @@ function PersonCreationModal({
             e(
               'h5',
               { className: 'font-medium text-gray-200 mb-3' },
-              'Additional Details'
+              'Additional Details',
             ),
             e(
               'div',
@@ -998,10 +998,10 @@ function PersonCreationModal({
               e(
                 'div',
                 null,
-                `Living Arrangement: ${personData.livingArrangement || 'Not specified'}`
+                `Living Arrangement: ${personData.livingArrangement || 'Not specified'}`,
               ),
-              e('div', null, `Organization: ${selectedOrg?.name || 'None'}`)
-            )
+              e('div', null, `Organization: ${selectedOrg?.name || 'None'}`),
+            ),
           ),
 
           Object.keys(validationErrors).length > 0 &&
@@ -1011,7 +1011,7 @@ function PersonCreationModal({
               e(
                 'h5',
                 { className: 'font-medium text-red-200 mb-2' },
-                'Please fix the following errors:'
+                'Please fix the following errors:',
               ),
               e(
                 'ul',
@@ -1020,10 +1020,10 @@ function PersonCreationModal({
                     'list-disc list-inside text-sm text-red-300 space-y-1',
                 },
                 ...Object.entries(validationErrors).map(([field, error]) =>
-                  e('li', { key: field }, `${field}: ${error}`)
-                )
-              )
-            )
+                  e('li', { key: field }, `${field}: ${error}`),
+                ),
+              ),
+            ),
         );
       }
 
@@ -1055,7 +1055,7 @@ function PersonCreationModal({
           {
             onClick: onClose,
           },
-          'Cancel'
+          'Cancel',
         ),
         e(
           window.PrimaryButton,
@@ -1064,8 +1064,8 @@ function PersonCreationModal({
             disabled: isLoading || !hasChanges,
             loading: isLoading,
           },
-          isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'
-        )
+          isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes',
+        ),
       )
     : null;
 
@@ -1088,7 +1088,7 @@ function PersonCreationModal({
       isCompleteDisabled: isLoading || (editPersonId && !hasChanges),
       customFooterContent: editModeFooter,
     },
-    renderStepContent()
+    renderStepContent(),
   );
 }
 
@@ -1100,7 +1100,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
       'PersonCreationModal',
-      PersonCreationModal
+      PersonCreationModal,
     );
   }
 }

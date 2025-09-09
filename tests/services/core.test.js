@@ -12,7 +12,7 @@ describe('NightingaleCoreUtilities', () => {
       const input = '<script>alert("xss")</script>';
       const result = NightingaleCoreUtilities.sanitize(input);
       expect(result).toBe(
-        '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;'
+        '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;',
       );
     });
 
@@ -24,10 +24,10 @@ describe('NightingaleCoreUtilities', () => {
 
     test('encodeURL properly encodes values', () => {
       expect(NightingaleCoreUtilities.encodeURL('hello world')).toBe(
-        'hello%20world'
+        'hello%20world',
       );
       expect(NightingaleCoreUtilities.encodeURL('test@example.com')).toBe(
-        'test%40example.com'
+        'test%40example.com',
       );
       expect(NightingaleCoreUtilities.encodeURL(123)).toBe('123');
     });
@@ -42,7 +42,7 @@ describe('NightingaleCoreUtilities', () => {
   describe('Date Formatting', () => {
     test('formatDate converts ISO date to MM/DD/YYYY', () => {
       const result = NightingaleCoreUtilities.formatDate(
-        '2025-08-30T10:30:00.000Z'
+        '2025-08-30T10:30:00.000Z',
       );
       expect(result).toMatch(/^\d{2}\/\d{2}\/\d{4}$/);
     });
@@ -55,7 +55,7 @@ describe('NightingaleCoreUtilities', () => {
 
     test('toInputDateFormat converts to YYYY-MM-DD', () => {
       const result = NightingaleCoreUtilities.toInputDateFormat(
-        '2025-08-30T10:30:00.000Z'
+        '2025-08-30T10:30:00.000Z',
       );
       expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
@@ -70,23 +70,23 @@ describe('NightingaleCoreUtilities', () => {
   describe('Text Formatting', () => {
     test('formatPhoneNumber formats 10-digit numbers', () => {
       expect(NightingaleCoreUtilities.formatPhoneNumber('1234567890')).toBe(
-        '(123) 456-7890'
+        '(123) 456-7890',
       );
       expect(NightingaleCoreUtilities.formatPhoneNumber('123-456-7890')).toBe(
-        '(123) 456-7890'
+        '(123) 456-7890',
       );
       expect(NightingaleCoreUtilities.formatPhoneNumber('(123) 456-7890')).toBe(
-        '(123) 456-7890'
+        '(123) 456-7890',
       );
     });
 
     test('formatPhoneNumber handles partial numbers', () => {
       expect(NightingaleCoreUtilities.formatPhoneNumber('123')).toBe('123');
       expect(NightingaleCoreUtilities.formatPhoneNumber('1234')).toBe(
-        '(123) 4'
+        '(123) 4',
       );
       expect(NightingaleCoreUtilities.formatPhoneNumber('1234567')).toBe(
-        '(123) 456-7'
+        '(123) 456-7',
       );
     });
 
@@ -97,13 +97,13 @@ describe('NightingaleCoreUtilities', () => {
 
     test('formatProperCase converts names to proper case', () => {
       expect(NightingaleCoreUtilities.formatProperCase('JOHN DOE')).toBe(
-        'John Doe'
+        'John Doe',
       );
       expect(NightingaleCoreUtilities.formatProperCase('doe, john')).toBe(
-        'John Doe'
+        'John Doe',
       );
       expect(
-        NightingaleCoreUtilities.formatProperCase('SMITH, JANE MARIE')
+        NightingaleCoreUtilities.formatProperCase('SMITH, JANE MARIE'),
       ).toBe('Jane Marie Smith');
     });
 
@@ -115,13 +115,13 @@ describe('NightingaleCoreUtilities', () => {
 
     test('formatPersonName converts to Last, First format', () => {
       expect(NightingaleCoreUtilities.formatPersonName('John Doe')).toBe(
-        'Doe, John'
+        'Doe, John',
       );
       expect(
-        NightingaleCoreUtilities.formatPersonName('Jane Marie Smith')
+        NightingaleCoreUtilities.formatPersonName('Jane Marie Smith'),
       ).toBe('Smith, Jane Marie');
       expect(NightingaleCoreUtilities.formatPersonName('Doe, John')).toBe(
-        'Doe, John'
+        'Doe, John',
       ); // Already formatted
     });
   });

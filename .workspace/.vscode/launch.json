@@ -6,12 +6,7 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/live-server",
-      "args": [
-        "App",
-        "--port=3000",
-        "--open=index.html",
-        "--no-browser"
-      ],
+      "args": ["App", "--port=3000", "--open=index.html", "--no-browser"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },

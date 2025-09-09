@@ -64,7 +64,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
       window.NightingaleDataManagement.updateCaseInCollection(
         fullData.cases,
         caseData.id,
-        updatedCase
+        updatedCase,
       );
 
     onUpdateData({ ...fullData, cases: updatedCases });
@@ -85,7 +85,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
 
   const updateFinancialItem = (type, itemId) => {
     setEditingItem(
-      caseData.financials[type].find((item) => item.id === itemId)
+      caseData.financials[type].find((item) => item.id === itemId),
     );
     setModalItemType(type);
     setIsFinancialModalOpen(true);
@@ -117,14 +117,14 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
       window.NightingaleDataManagement.updateCaseInCollection(
         fullData.cases,
         caseData.id,
-        updatedCase
+        updatedCase,
       );
     onUpdateData({ ...fullData, cases: updatedCases });
 
     // Show success notification
     if (window.NightingaleToast && window.NightingaleToast.showSuccessToast) {
       window.NightingaleToast.showSuccessToast(
-        `Successfully imported ${transformedItems.length} financial item${transformedItems.length !== 1 ? 's' : ''} from AVS`
+        `Successfully imported ${transformedItems.length} financial item${transformedItems.length !== 1 ? 's' : ''} from AVS`,
       );
     }
 
@@ -155,7 +155,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
               className:
                 'bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded-md',
             },
-            'Add'
+            'Add',
           ),
           // AVS Import button - only show for resources
           type === 'resources' &&
@@ -168,9 +168,9 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
                 title: 'Import financial data from AVS',
               },
               e('span', {}, '🔄'),
-              e('span', {}, 'Import AVS')
-            )
-        )
+              e('span', {}, 'Import AVS'),
+            ),
+        ),
       ),
 
       // Items List - Using FinancialItemCard Component
@@ -181,7 +181,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
           ? e(
               'p',
               { className: 'text-gray-500 text-sm text-center py-4' },
-              `No ${type} items`
+              `No ${type} items`,
             )
           : displayItems.map((item) =>
               e(window.FinancialItemCard, {
@@ -195,8 +195,8 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
                 onDelete: () => confirmDelete(type, item),
                 onDeleteConfirm: () => handleDeleteConfirm(type, item.id),
                 onDeleteCancel: handleDeleteCancel,
-              })
-            )
+              }),
+            ),
       ),
 
       // Show More/Less Button
@@ -210,8 +210,8 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
           },
           isExpanded
             ? `Show Less (${items.length - 3} hidden)`
-            : `Show More (${items.length - 3} more)`
-        )
+            : `Show More (${items.length - 3} more)`,
+        ),
     );
   };
 
@@ -246,7 +246,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
           'div',
           {},
           e('h4', { className: 'text-lg font-semibold text-blue-400' }, title),
-          e('p', { className: 'text-sm text-gray-400' }, `${totalItems} items`)
+          e('p', { className: 'text-sm text-gray-400' }, `${totalItems} items`),
         ),
         e(
           'svg',
@@ -261,8 +261,8 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
             strokeLinejoin: 'round',
             strokeWidth: 2,
             d: 'M19 9l-7 7-7-7',
-          })
-        )
+          }),
+        ),
       ),
       isExpanded &&
         e(
@@ -274,16 +274,16 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
             renderFinancialTable(
               'resources',
               ownerFinancials.resources,
-              'Resources'
+              'Resources',
             ),
             renderFinancialTable('income', ownerFinancials.income, 'Income'),
             renderFinancialTable(
               'expenses',
               ownerFinancials.expenses,
-              'Expenses'
-            )
-          )
-        )
+              'Expenses',
+            ),
+          ),
+        ),
     );
   };
 
@@ -302,18 +302,18 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
             renderSimpAccordionSection(
               'Applicant Financials',
               'applicant',
-              caseData.financials
+              caseData.financials,
             ),
             renderSimpAccordionSection(
               'Joint Financials',
               'joint',
-              caseData.financials
+              caseData.financials,
             ),
             renderSimpAccordionSection(
               'Spouse Financials',
               'spouse',
-              caseData.financials
-            )
+              caseData.financials,
+            ),
           )
         : // Regular Case - Grid Layout
           e(
@@ -322,19 +322,19 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
             renderFinancialTable(
               'resources',
               caseData.financials.resources || [],
-              'Resources'
+              'Resources',
             ),
             renderFinancialTable(
               'income',
               caseData.financials.income || [],
-              'Income'
+              'Income',
             ),
             renderFinancialTable(
               'expenses',
               caseData.financials.expenses || [],
-              'Expenses'
-            )
-          )
+              'Expenses',
+            ),
+          ),
     ),
 
     // Financial Item Modal (from extracted component)
@@ -362,7 +362,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
         masterCaseId: caseData.mcn || caseData.id,
         ownerFilter: 'applicant',
         existingResources: caseData.financials?.resources || [],
-      })
+      }),
   );
 }
 
@@ -373,7 +373,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
       'FinancialManagementSection',
-      FinancialManagementSection
+      FinancialManagementSection,
     );
   }
 }

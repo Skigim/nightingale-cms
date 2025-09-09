@@ -98,16 +98,16 @@ function useOrganizationsData(props) {
     (organization) => {
       const updatedData = { ...fullData };
       updatedData.organizations = updatedData.organizations.filter(
-        (o) => o.id !== organization.id
+        (o) => o.id !== organization.id,
       );
       onUpdateData(updatedData);
       showToast(
         `Organization ${organization.name} deleted successfully`,
-        'success'
+        'success',
       );
       setConfirmingOrganizationDelete(null);
     },
-    [fullData, onUpdateData, showToast]
+    [fullData, onUpdateData, showToast],
   );
 
   const cancelOrganizationDelete = useCallback(() => {
@@ -134,7 +134,7 @@ function useOrganizationsData(props) {
       try {
         const updatedData = { ...fullData };
         const orgIndex = updatedData.organizations.findIndex(
-          (o) => o.id === organization.id
+          (o) => o.id === organization.id,
         );
         if (orgIndex !== -1) {
           updatedData.organizations[orgIndex] = {
@@ -156,7 +156,7 @@ function useOrganizationsData(props) {
         showToast('Error saving organization', 'error');
       }
     },
-    [fullData, fileService, onUpdateData, editValues, showToast]
+    [fullData, fileService, onUpdateData, editValues, showToast],
   );
 
   // Check for React availability
@@ -242,7 +242,7 @@ function renderOrganizationsContent({ components, data }) {
           : e(
               'div',
               { className: 'font-medium text-white' },
-              org?.name || 'N/A'
+              org?.name || 'N/A',
             ),
     },
     {
@@ -274,7 +274,7 @@ function renderOrganizationsContent({ components, data }) {
               { className: 'text-gray-300' },
               org?.type
                 ? org.type.charAt(0).toUpperCase() + org.type.slice(1)
-                : 'N/A'
+                : 'N/A',
             ),
     },
     {
@@ -351,8 +351,8 @@ function renderOrganizationsContent({ components, data }) {
             placeholder:
               'Search organizations by name, type, email, or phone...',
             className: 'w-full',
-          })
-        )
+          }),
+        ),
       ),
     }),
 
@@ -366,7 +366,7 @@ function renderOrganizationsContent({ components, data }) {
         className: 'w-full',
         emptyMessage: 'No organizations found',
       }),
-    })
+    }),
   );
 }
 
@@ -384,7 +384,7 @@ function renderOrganizationsModals({ components, data, props }) {
   // Delete Confirmation Modal
   if (state.confirmingOrganizationDelete) {
     const org = fullData.organizations.find(
-      (o) => o.id === state.confirmingOrganizationDelete
+      (o) => o.id === state.confirmingOrganizationDelete,
     );
 
     modals.push(
@@ -399,7 +399,7 @@ function renderOrganizationsModals({ components, data, props }) {
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'danger',
-      })
+      }),
     );
   }
 
@@ -421,7 +421,7 @@ function renderOrganizationsModals({ components, data, props }) {
           onUpdateData(updatedData);
           state.setIsDetailsModalOpen(false);
         },
-      })
+      }),
     );
   }
 
@@ -438,7 +438,7 @@ function renderOrganizationsModals({ components, data, props }) {
           onUpdateData(newOrganizationData);
           state.setIsCreateModalOpen(false);
         },
-      })
+      }),
     );
   }
 
@@ -472,7 +472,7 @@ const OrganizationsTab = window.createBusinessComponent
               className:
                 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
             },
-            'createBusinessComponent factory not available. Please ensure TabBase.js is loaded.'
+            'createBusinessComponent factory not available. Please ensure TabBase.js is loaded.',
           )
         : null;
     };
@@ -493,7 +493,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
       'OrganizationsTab',
-      OrganizationsTab
+      OrganizationsTab,
     );
   }
 }

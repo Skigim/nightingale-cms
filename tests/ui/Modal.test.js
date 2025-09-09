@@ -24,7 +24,7 @@ describe('Modal Component', () => {
         isOpen: false,
         title: 'Test Modal',
         children: 'Modal content',
-      })
+      }),
     );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -36,7 +36,7 @@ describe('Modal Component', () => {
         isOpen: true,
         title: 'Test Modal',
         children: 'Modal content',
-      })
+      }),
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('Modal Component', () => {
         title: 'Test Modal',
         onClose: handleClose,
         children: 'Modal content',
-      })
+      }),
     );
 
     const closeButton = screen.getByLabelText('Close modal');
@@ -68,7 +68,7 @@ describe('Modal Component', () => {
         title: 'Test Modal',
         showCloseButton: false,
         children: 'Modal content',
-      })
+      }),
     );
 
     expect(screen.queryByLabelText('Close modal')).not.toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('Modal Component', () => {
         title: 'Test Modal',
         footerContent: footerContent,
         children: 'Modal content',
-      })
+      }),
     );
 
     expect(screen.getByText('Footer Button')).toBeInTheDocument();
@@ -96,7 +96,7 @@ describe('Modal Component', () => {
         title: 'Small Modal',
         size: 'small',
         children: 'Content',
-      })
+      }),
     );
 
     let modal = screen.getByRole('dialog').querySelector('div');
@@ -108,7 +108,7 @@ describe('Modal Component', () => {
         title: 'Large Modal',
         size: 'large',
         children: 'Content',
-      })
+      }),
     );
 
     modal = screen.getByRole('dialog').querySelector('div');
@@ -122,7 +122,7 @@ describe('Modal Component', () => {
         title: 'Custom Modal',
         className: 'custom-modal-class',
         children: 'Content',
-      })
+      }),
     );
 
     const modal = screen.getByRole('dialog').querySelector('div');
@@ -134,7 +134,7 @@ describe('Modal Component', () => {
       React.createElement(Modal, {
         isOpen: true,
         children: 'Modal content without title',
-      })
+      }),
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -148,7 +148,7 @@ describe('Modal Component', () => {
         isOpen: true,
         title: 'Accessible Modal',
         children: 'Content',
-      })
+      }),
     );
 
     const dialog = screen.getByRole('dialog');

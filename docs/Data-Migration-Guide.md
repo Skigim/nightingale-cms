@@ -2,7 +2,9 @@
 
 ## Overview
 
-The data migration script (`data-migration.js`) safely migrates legacy Nightingale CMS data to the current format. It handles both individual case records and complete data structures with people, cases, and relationships.
+The data migration script (`data-migration.js`) safely migrates legacy Nightingale CMS data to the
+current format. It handles both individual case records and complete data structures with people,
+cases, and relationships.
 
 ## Features
 

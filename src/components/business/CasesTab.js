@@ -62,7 +62,7 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
       filtered = filtered.filter((caseItem) => {
         const person = window.NightingaleDataManagement?.findPersonById?.(
           fullData.people,
-          caseItem.personId
+          caseItem.personId,
         );
         const personName = person?.name?.toLowerCase() || '';
 
@@ -143,7 +143,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
             className:
               'p-4 bg-yellow-50 border border-yellow-200 rounded text-yellow-700',
           },
-          `CaseDetailsView component not available. Case ID: ${caseId}`
+          `CaseDetailsView component not available. Case ID: ${caseId}`,
         ));
 
     return e(CaseDetailsView, {
@@ -175,7 +175,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
             'bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
           onClick: () => dataResult.setIsCreateModalOpen(true),
         },
-        'New Case'
+        'New Case',
       ),
     }),
 
@@ -207,7 +207,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
               e(
                 'span',
                 { className: 'font-mono text-blue-400' },
-                value || 'N/A'
+                value || 'N/A',
               ),
           },
           {
@@ -217,12 +217,12 @@ function renderCasesContent({ components, data: dataResult, props }) {
             render: (value) => {
               const person = window.NightingaleDataManagement?.findPersonById?.(
                 props.fullData?.people,
-                value
+                value,
               );
               return e(
                 'span',
                 { className: 'font-medium text-white' },
-                person?.name || 'Unknown'
+                person?.name || 'Unknown',
               );
             },
           },
@@ -244,7 +244,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
                 {
                   className: `px-2 py-1 rounded text-xs text-white ${colorClass}`,
                 },
-                value || 'Unknown'
+                value || 'Unknown',
               );
             },
           },
@@ -256,7 +256,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
               e(
                 'span',
                 { className: 'text-gray-300' },
-                dataResult.formatDate(value)
+                dataResult.formatDate(value),
               ),
           },
           {
@@ -275,7 +275,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
                     onClick: (e) =>
                       dataResult.handleOpenCaseDetails(caseItem, e),
                   },
-                  'Details'
+                  'Details',
                 ),
                 e(
                   'button',
@@ -287,8 +287,8 @@ function renderCasesContent({ components, data: dataResult, props }) {
                       dataResult.handleCaseClick(caseItem);
                     },
                   },
-                  'Edit'
-                )
+                  'Edit',
+                ),
               ),
           },
         ],
@@ -296,7 +296,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
         className: 'w-full',
         emptyMessage: 'No cases found',
       }),
-    })
+    }),
   );
 }
 
@@ -330,12 +330,12 @@ function renderCasesModals({ data: dataResult, props }) {
               e(
                 'h2',
                 { className: 'text-lg font-semibold text-white mb-4' },
-                'Create Case'
+                'Create Case',
               ),
               e(
                 'p',
                 { className: 'text-gray-400 mb-4' },
-                'CaseCreationModal component not available'
+                'CaseCreationModal component not available',
               ),
               e(
                 'button',
@@ -344,9 +344,9 @@ function renderCasesModals({ data: dataResult, props }) {
                     'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
                   onClick: onClose,
                 },
-                'Close'
-              )
-            )
+                'Close',
+              ),
+            ),
           )
         : null);
 
@@ -381,7 +381,7 @@ function renderCasesModals({ data: dataResult, props }) {
           const updatedData = {
             ...props.fullData,
             cases: props.fullData.cases.map((c) =>
-              c.id === updatedCase.id ? updatedCase : c
+              c.id === updatedCase.id ? updatedCase : c,
             ),
           };
           props.onUpdateData(updatedData);
@@ -400,7 +400,7 @@ function renderCasesModals({ data: dataResult, props }) {
           dataResult.setViewMode('details');
           props.onViewModeChange?.('details');
         },
-      })
+      }),
   );
 }
 
@@ -435,7 +435,7 @@ if (typeof window !== 'undefined') {
       'CasesTab',
       CasesTab,
       'case-management',
-      ['TabBase', 'DataTable', 'SearchBar', 'TabHeader']
+      ['TabBase', 'DataTable', 'SearchBar', 'TabHeader'],
     );
   }
 

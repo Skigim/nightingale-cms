@@ -114,7 +114,7 @@
       if (!this.isSupported()) {
         this.errorCallback(
           'File System Access API is not supported in this browser.',
-          'error'
+          'error',
         );
         return false;
       }
@@ -210,7 +210,7 @@
       try {
         const fileHandleWrite = await this.directoryHandle.getFileHandle(
           this.fileName,
-          { create: true }
+          { create: true },
         );
         const writable = await fileHandleWrite.createWritable();
         await writable.write(JSON.stringify(data, null, 2));
@@ -222,14 +222,14 @@
           JSON.stringify({
             timestamp: Date.now(),
             tabId: this.tabId,
-          })
+          }),
         );
 
         return true;
       } catch (err) {
         this.errorCallback(
           `Error writing file "${this.fileName}": ${err.message}`,
-          'error'
+          'error',
         );
         return false;
       }
@@ -247,7 +247,7 @@
 
       try {
         const fileHandle = await this.directoryHandle.getFileHandle(
-          this.fileName
+          this.fileName,
         );
         const file = await fileHandle.getFile();
         const contents = await file.text();
@@ -257,7 +257,7 @@
         if (window.NightingaleDataManagement?.normalizeDataMigrations) {
           const migratedData =
             await window.NightingaleDataManagement.normalizeDataMigrations(
-              rawData
+              rawData,
             );
           return migratedData;
         } else {
@@ -269,7 +269,7 @@
         } else {
           this.errorCallback(
             `Error reading file "${this.fileName}": ${err.message}`,
-            'error'
+            'error',
           );
           throw err;
         }
@@ -292,12 +292,12 @@
           if (permission === 'granted') {
             this.updateStatus(
               'connected',
-              'Restored connection to data folder'
+              'Restored connection to data folder',
             );
           } else {
             this.updateStatus(
               'disconnected',
-              'Please reconnect to your data folder'
+              'Please reconnect to your data folder',
             );
           }
 
@@ -543,7 +543,7 @@
           this.state.consecutiveFailures = 0;
           this.updateStatus(
             'saved',
-            `Last saved: ${new Date().toLocaleTimeString()}`
+            `Last saved: ${new Date().toLocaleTimeString()}`,
           );
         } else {
           this.handleSaveFailure('Write operation failed');
@@ -572,7 +572,7 @@
       } else {
         this.updateStatus(
           'retrying',
-          `Retrying save (${this.state.consecutiveFailures}/${this.config.maxRetries})`
+          `Retrying save (${this.state.consecutiveFailures}/${this.config.maxRetries})`,
         );
 
         // Retry after a delay

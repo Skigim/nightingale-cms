@@ -100,7 +100,7 @@ function SettingsModal({
         if (onDataLoaded) onDataLoaded(normalizedData);
         showToast(
           `Data loaded successfully! Found ${normalizedData.cases?.length || 0} cases`,
-          'success'
+          'success',
         );
         onClose();
       } else {
@@ -258,8 +258,8 @@ function SettingsModal({
             className:
               'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
           },
-          'Close'
-        )
+          'Close',
+        ),
       ),
     },
     e(
@@ -273,12 +273,12 @@ function SettingsModal({
         e(
           'h3',
           { className: 'text-lg font-semibold text-white' },
-          'File System Connection'
+          'File System Connection',
         ),
         e(
           'p',
           { className: 'text-gray-400 text-sm' },
-          'Connect to your project directory to load and save case data.'
+          'Connect to your project directory to load and save case data.',
         ),
         e(
           'div',
@@ -294,7 +294,7 @@ function SettingsModal({
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`,
             },
-            isConnecting ? 'Connecting...' : 'Connect to Directory'
+            isConnecting ? 'Connecting...' : 'Connect to Directory',
           ),
           e(
             'div',
@@ -305,9 +305,9 @@ function SettingsModal({
                   : 'bg-red-600 text-red-100'
               }`,
             },
-            fileStatus === 'connected' ? 'Connected' : 'Disconnected'
-          )
-        )
+            fileStatus === 'connected' ? 'Connected' : 'Disconnected',
+          ),
+        ),
       ),
 
       // Data Management
@@ -317,12 +317,12 @@ function SettingsModal({
         e(
           'h3',
           { className: 'text-lg font-semibold text-white' },
-          'Data Management'
+          'Data Management',
         ),
         e(
           'p',
           { className: 'text-gray-400 text-sm' },
-          'Load existing data or create sample data for testing.'
+          'Load existing data or create sample data for testing.',
         ),
         e(
           'div',
@@ -338,7 +338,7 @@ function SettingsModal({
                   : 'bg-green-600 hover:bg-green-700 text-white'
               }`,
             },
-            loadingData ? 'Loading...' : 'Load Data File'
+            loadingData ? 'Loading...' : 'Load Data File',
           ),
           e(
             'button',
@@ -351,9 +351,9 @@ function SettingsModal({
                   : 'bg-orange-600 hover:bg-orange-700 text-white'
               }`,
             },
-            'Create Sample Data'
-          )
-        )
+            'Create Sample Data',
+          ),
+        ),
       ),
 
       // Instructions
@@ -370,21 +370,21 @@ function SettingsModal({
           e(
             'li',
             null,
-            "Click 'Connect to Directory' and select your Nightingale project folder"
+            "Click 'Connect to Directory' and select your Nightingale project folder",
           ),
           e(
             'li',
             null,
-            "Use 'Load Data File' to load existing nightingale-data.json"
+            "Use 'Load Data File' to load existing nightingale-data.json",
           ),
           e(
             'li',
             null,
-            "Or use 'Create Sample Data' to generate test cases for development"
-          )
-        )
-      )
-    )
+            "Or use 'Create Sample Data' to generate test cases for development",
+          ),
+        ),
+      ),
+    ),
   );
 }
 
@@ -414,7 +414,7 @@ if (typeof window !== 'undefined') {
     window.NightingaleBusiness.registerComponent(
       'SettingsModal',
       SettingsModal,
-      'settings'
+      'settings',
     );
   }
 }

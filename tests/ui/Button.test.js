@@ -27,7 +27,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         variant: 'secondary',
         children: 'Secondary Button',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -39,7 +39,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         variant: 'danger',
         children: 'Danger Button',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -52,7 +52,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         onClick: handleClick,
         children: 'Clickable',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -66,7 +66,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         disabled: true,
         children: 'Disabled Button',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -79,7 +79,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         loading: true,
         children: 'Loading Button',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -95,7 +95,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         fullWidth: true,
         children: 'Full Width',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -107,7 +107,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         size: 'sm',
         children: 'Small',
-      })
+      }),
     );
 
     let button = screen.getByRole('button');
@@ -117,7 +117,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         size: 'lg',
         children: 'Large',
-      })
+      }),
     );
 
     button = screen.getByRole('button');
@@ -131,7 +131,7 @@ describe('Button Component', () => {
         disabled: true,
         onClick: handleClick,
         children: 'Disabled',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -147,7 +147,7 @@ describe('Button Component', () => {
         loading: true,
         onClick: handleClick,
         children: 'Loading',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -161,7 +161,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         className: 'custom-class',
         children: 'Custom',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');
@@ -173,7 +173,7 @@ describe('Button Component', () => {
       React.createElement(Button, {
         type: 'submit',
         children: 'Submit',
-      })
+      }),
     );
 
     const button = screen.getByRole('button');

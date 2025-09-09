@@ -72,7 +72,7 @@ function NightingaleCMSApp() {
       OrganizationsTab: window.OrganizationsTab,
       EligibilityTab: window.EligibilityTab,
     }),
-    []
+    [],
   ); // Empty deps - component registry doesn't change during app lifecycle
 
   // Memoize tab props to prevent unnecessary re-renders of heavy tab components
@@ -110,7 +110,7 @@ function NightingaleCMSApp() {
       handleDataUpdate,
       setCaseViewMode,
       setCaseBackFunction,
-    ]
+    ],
   );
 
   // Memoize service status to optimize conditional rendering
@@ -121,7 +121,7 @@ function NightingaleCMSApp() {
       canSave: !!fileService?.saveData,
       isLoading: !servicesReady || !fileService,
     }),
-    [servicesReady, fileService, autosaveFileService]
+    [servicesReady, fileService, autosaveFileService],
   );
 
   // Toast function - now guaranteed to work by main.js setup
@@ -174,7 +174,7 @@ function NightingaleCMSApp() {
     return () => {
       window.removeEventListener(
         'nightingale:services:ready',
-        handleServicesReady
+        handleServicesReady,
       );
     };
   }, [showToast]);
@@ -215,7 +215,7 @@ function NightingaleCMSApp() {
     return e(
       'div',
       { className: 'p-4 text-center text-gray-400' },
-      `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} component not loaded`
+      `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} component not loaded`,
     );
   };
 
@@ -243,14 +243,14 @@ function NightingaleCMSApp() {
         e(
           'h2',
           { className: 'text-xl font-semibold' },
-          'Initializing Nightingale CMS'
+          'Initializing Nightingale CMS',
         ),
         e(
           'p',
           { className: 'text-gray-400' },
-          'Loading services and file system...'
-        )
-      )
+          'Loading services and file system...',
+        ),
+      ),
     );
   }
 
@@ -282,8 +282,8 @@ function NightingaleCMSApp() {
       e(
         'main',
         { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
-        renderTabContent()
-      )
+        renderTabContent(),
+      ),
     ),
     // Settings Modal
     components.SettingsModal &&
@@ -294,7 +294,7 @@ function NightingaleCMSApp() {
         onDataLoaded: handleDataLoaded,
         fileStatus,
         onFileStatusChange: setFileStatus,
-      })
+      }),
   );
 }
 
@@ -316,7 +316,7 @@ if (typeof window !== 'undefined') {
     window.NightingaleBusiness.registerComponent(
       'NightingaleCMSApp',
       NightingaleCMSApp,
-      'application'
+      'application',
     );
   }
 }

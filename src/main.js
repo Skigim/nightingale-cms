@@ -124,9 +124,10 @@ function registerServices() {
   window.sanitize = NightingaleCoreUtilities.sanitize;
   // Ensure showToast is always a function - never overwrite a working function with undefined
   if (!window.showToast || typeof window.showToast !== 'function') {
-    window.showToast = typeof ToastService.showToast === 'function' 
-      ? ToastService.showToast 
-      : ToastService.show || function() {};
+    window.showToast =
+      typeof ToastService.showToast === 'function'
+        ? ToastService.showToast
+        : ToastService.show || function () {};
   }
   window.openVRApp = CMSUtilities.openVRApp;
 
@@ -211,19 +212,19 @@ async function initializeNightingaleCMS() {
     window.dispatchEvent(
       new CustomEvent('nightingale:services:ready', {
         detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
-      })
+      }),
     );
 
     window.dispatchEvent(
       new CustomEvent('nightingale:components:ready', {
         detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
-      })
+      }),
     );
 
     window.dispatchEvent(
       new CustomEvent('nightingale:ready', {
         detail: { timestamp: Date.now(), moduleSystem: 'ES6' },
-      })
+      }),
     );
 
     console.log('🎉 Nightingale CMS - Fully Initialized with ES6 Modules!');
@@ -232,13 +233,15 @@ async function initializeNightingaleCMS() {
 
     // Fallback: try to initialize without external libraries
     console.log(
-      '🔄 Attempting fallback initialization without external libraries...'
+      '🔄 Attempting fallback initialization without external libraries...',
     );
-    
+
     // Initialize logger service even in fallback mode
     NightingaleLogger.setupWithFileLogging(true);
-    console.log('✅ Logger service initialized with file logging (fallback mode)');
-    
+    console.log(
+      '✅ Logger service initialized with file logging (fallback mode)',
+    );
+
     registerServices();
     registerComponents();
 

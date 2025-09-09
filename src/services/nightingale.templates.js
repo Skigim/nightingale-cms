@@ -152,7 +152,7 @@
         const existingTemplate = this.getTemplates(fullData).find(
           (t) =>
             t.name.toLowerCase() === templateData.name.toLowerCase() &&
-            t.id !== excludeId
+            t.id !== excludeId,
         );
         if (existingTemplate) {
           errors.name = 'A template with this name already exists.';
@@ -218,14 +218,14 @@
             'template_created',
             {
               templateName: newTemplate.name,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'Template created but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
@@ -275,7 +275,7 @@
         const validation = this.validateTemplate(
           templateData,
           fullData,
-          templateId
+          templateId,
         );
         if (!validation.isValid) {
           return {
@@ -292,7 +292,7 @@
 
         // Find and update template
         const templateIndex = newData.vrTemplates.findIndex(
-          (t) => t.id === templateId
+          (t) => t.id === templateId,
         );
         if (templateIndex === -1) {
           return {
@@ -317,14 +317,14 @@
             'template_updated',
             {
               templateName: updatedTemplate.name,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'Template updated but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
@@ -376,7 +376,7 @@
 
         // Remove template
         newData.vrTemplates = newData.vrTemplates.filter(
-          (t) => t.id !== templateId
+          (t) => t.id !== templateId,
         );
 
         // Save to file if requested
@@ -386,14 +386,14 @@
             'template_deleted',
             {
               templateName: existingTemplate.name,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'Template deleted but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
@@ -467,7 +467,7 @@
             if (showToast && this.toastService) {
               this._showToast(
                 'Category added but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
@@ -516,7 +516,7 @@
         // Check for templates in this category
         const templatesInCategory = this.getTemplatesByCategory(
           fullData,
-          categoryName
+          categoryName,
         );
 
         if (templatesInCategory.length > 0 && handleTemplates === 'delete') {
@@ -534,7 +534,7 @@
 
         // Remove category
         newData.vrCategories = newData.vrCategories.filter(
-          (cat) => cat !== categoryName
+          (cat) => cat !== categoryName,
         );
 
         // Handle templates in this category
@@ -558,14 +558,14 @@
             'category_removed',
             {
               categoryName: categoryName,
-            }
+            },
           );
 
           if (!success) {
             if (showToast && this.toastService) {
               this._showToast(
                 'Category removed but failed to save to file.',
-                'warning'
+                'warning',
               );
             }
           } else if (showToast && this.toastService) {
@@ -581,7 +581,7 @@
         };
       } catch (error) {
         const logger = window.NightingaleLogger?.get(
-          'templates:removeCategory'
+          'templates:removeCategory',
         );
         logger?.error('Category removal failed', { error: error.message });
         return {
@@ -659,7 +659,7 @@
       const templatesPerCategory = {};
       categories.forEach((cat) => {
         templatesPerCategory[cat] = templates.filter(
-          (t) => t.category === cat
+          (t) => t.category === cat,
         ).length;
       });
 

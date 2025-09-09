@@ -25,7 +25,7 @@ function NotesModal({
   // Look up person name using the helper function
   const person = window.NightingaleDataManagement.findPersonById(
     fullData?.people,
-    caseData?.personId
+    caseData?.personId,
   );
   const clientName = person ? person.name : 'Unknown Client';
   const mcn = caseData?.mcn || 'No MCN';
@@ -56,14 +56,16 @@ function NotesModal({
       { id: 'administrative', name: 'Administrative' },
       { id: 'general', name: 'General' },
     ],
-    []
+    [],
   );
 
   // Initialize notes list
   useEffect(() => {
     if (isOpen && notes) {
       setNotesList(
-        [...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        [...notes].sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp),
+        ),
       );
     }
   }, [isOpen, notes]);
@@ -90,7 +92,7 @@ function NotesModal({
           'view',
           {
             onFocused: () => {},
-          }
+          },
         );
       }, 100);
     }
@@ -144,7 +146,7 @@ function NotesModal({
       if (currentNote) {
         // Update existing note
         updatedNotes = notesList.map((note) =>
-          note.id === currentNote.id ? noteData : note
+          note.id === currentNote.id ? noteData : note,
         );
       } else {
         // Add new note
@@ -161,7 +163,7 @@ function NotesModal({
       // Show success message
       showToast(
         currentNote ? 'Note updated successfully' : 'Note added successfully',
-        'success'
+        'success',
       );
 
       resetForm();
@@ -203,7 +205,7 @@ function NotesModal({
             delay: 200, // Longer delay for SearchBar initialization
             onFocused: () => {},
             onFailed: () => {},
-          }
+          },
         );
       }, 50); // Quick timeout for DOM update
     }
@@ -275,7 +277,7 @@ function NotesModal({
           className:
             'w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 notes-category-search',
           maxResults: 6,
-        })
+        }),
       ),
 
       // Text field (RTF-capable textarea)
@@ -293,8 +295,8 @@ function NotesModal({
           rows: 6,
           className:
             'w-full bg-gray-700 border-gray-600 text-white placeholder-gray-400 resize-vertical',
-        })
-      )
+        }),
+      ),
     );
   };
 
@@ -307,8 +309,8 @@ function NotesModal({
         e(
           'p',
           { className: 'text-sm mt-2' },
-          'Click "Add New Note" to create the first note.'
-        )
+          'Click "Add New Note" to create the first note.',
+        ),
       );
     }
 
@@ -343,9 +345,9 @@ function NotesModal({
                   { className: 'text-xs text-gray-400' },
                   window.dayjs
                     ? window.dayjs(note.timestamp).format('MMM D, YYYY h:mm A')
-                    : new Date(note.timestamp).toLocaleString()
-                )
-              )
+                    : new Date(note.timestamp).toLocaleString(),
+                ),
+              ),
             ),
 
             // Action buttons
@@ -363,18 +365,18 @@ function NotesModal({
                 size: 'sm',
                 onClick: () => handleDelete(note.id),
                 children: 'Delete',
-              })
-            )
+              }),
+            ),
           ),
 
           // Note text
           e(
             'div',
             { className: 'text-gray-200 whitespace-pre-wrap break-words' },
-            note.text
-          )
-        )
-      )
+            note.text,
+          ),
+        ),
+      ),
     );
   };
 
@@ -432,7 +434,7 @@ function NotesModal({
                 delay: 200, // Longer delay for SearchBar initialization
                 onFocused: () => {},
                 onFailed: () => {},
-              }
+              },
             );
           }, 50); // Quick timeout for DOM update
         }
@@ -451,8 +453,8 @@ function NotesModal({
         onClick: action.onClick,
         disabled: action.disabled,
         children: action.label,
-      })
-    )
+      }),
+    ),
   );
 
   return e(
@@ -486,9 +488,9 @@ function NotesModal({
             e(
               'h3',
               { className: 'text-lg font-medium text-white mb-4' },
-              currentNote ? 'Edit Note' : 'Add New Note'
+              currentNote ? 'Edit Note' : 'Add New Note',
             ),
-            renderNoteForm()
+            renderNoteForm(),
           ),
 
         // Notes list section (only show when not in edit mode)
@@ -499,11 +501,11 @@ function NotesModal({
             e(
               'h3',
               { className: 'text-lg font-medium text-white mb-4' },
-              `Existing Notes (${notesList.length})`
+              `Existing Notes (${notesList.length})`,
             ),
-            renderNotesList()
-          )
-      )
+            renderNotesList(),
+          ),
+      ),
     ),
 
     // Delete Confirmation Modal
@@ -526,7 +528,7 @@ function NotesModal({
             variant: 'danger',
             onClick: confirmDelete,
             children: 'Delete Note',
-          })
+          }),
         ),
       },
       e(
@@ -536,10 +538,10 @@ function NotesModal({
         e(
           'p',
           { className: 'text-sm text-gray-400 mt-2' },
-          'This action cannot be undone.'
-        )
-      )
-    )
+          'This action cannot be undone.',
+        ),
+      ),
+    ),
   );
 }
 

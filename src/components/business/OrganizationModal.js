@@ -39,10 +39,10 @@ function OrganizationModal({
   // Component state
   const [currentStep, setCurrentStep] = useState(0);
   const [organizationData, setOrganizationData] = useState(
-    getInitialOrganizationData()
+    getInitialOrganizationData(),
   );
   const [originalOrganizationData, setOriginalOrganizationData] = useState(
-    getInitialOrganizationData()
+    getInitialOrganizationData(),
   );
   const [validationErrors, setValidationErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +51,7 @@ function OrganizationModal({
   useEffect(() => {
     if (editOrganizationId && fullData && fullData.organizations) {
       const existingOrganization = fullData.organizations.find(
-        (org) => org.id === editOrganizationId
+        (org) => org.id === editOrganizationId,
       );
       if (existingOrganization) {
         // Handle address data - could be string or object format
@@ -63,7 +63,7 @@ function OrganizationModal({
             if (addressParts.length >= 3) {
               const [street, city, stateZip] = addressParts;
               const stateZipMatch = stateZip.match(
-                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/
+                /([A-Z]{2})\s+(\d{5}(-\d{4})?)/,
               );
               if (stateZipMatch) {
                 addressData = {
@@ -137,7 +137,7 @@ function OrganizationModal({
         description: 'Confirm information and create organization',
       },
     ],
-    []
+    [],
   );
 
   // Create filtered steps config for edit mode (removes Review step)
@@ -226,7 +226,7 @@ function OrganizationModal({
         return {};
       }
     },
-    [organizationData]
+    [organizationData],
   );
 
   // Handle step change with validation
@@ -247,7 +247,7 @@ function OrganizationModal({
           setValidationErrors(stepErrors);
           window.showToast?.(
             'Please fix validation errors before continuing',
-            'error'
+            'error',
           );
           return;
         }
@@ -256,7 +256,7 @@ function OrganizationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editOrganizationId]
+    [currentStep, validateStep, editOrganizationId],
   );
 
   // Handle form data updates
@@ -285,7 +285,7 @@ function OrganizationModal({
         });
       }
     },
-    [validationErrors]
+    [validationErrors],
   );
 
   // Personnel management functions
@@ -311,7 +311,7 @@ function OrganizationModal({
       setOrganizationData((prev) => ({
         ...prev,
         personnel: prev.personnel.map((person, i) =>
-          i === index ? { ...person, [field]: value } : person
+          i === index ? { ...person, [field]: value } : person,
         ),
       }));
 
@@ -325,7 +325,7 @@ function OrganizationModal({
         });
       }
     },
-    [validationErrors]
+    [validationErrors],
   );
 
   // Handle form submission
@@ -341,7 +341,7 @@ function OrganizationModal({
     }
     const finalErrors = allStepErrors.reduce(
       (acc, stepErrors) => ({ ...acc, ...stepErrors }),
-      {}
+      {},
     );
 
     if (Object.keys(finalErrors).length > 0) {
@@ -401,7 +401,7 @@ function OrganizationModal({
           person.name?.trim() ||
           person.title?.trim() ||
           person.email?.trim() ||
-          person.phone?.trim()
+          person.phone?.trim(),
       );
 
       const organizationToSave = {
@@ -424,14 +424,14 @@ function OrganizationModal({
                   // Don't change the original creation date
                   createdAt: organization.createdAt,
                 }
-              : organization
+              : organization,
           ),
         };
         successMessage = 'Organization updated successfully';
       } else {
         // Create new organization
         const nextOrganizationId = String(
-          safeCurrentData.nextOrganizationId || 1
+          safeCurrentData.nextOrganizationId || 1,
         );
         const newOrganization = {
           ...organizationToSave,
@@ -467,7 +467,7 @@ function OrganizationModal({
       logger?.error('Organization save failed', { error: error.message });
       window.showToast?.(
         'Error saving organization: ' + error.message,
-        'error'
+        'error',
       );
     } finally {
       setIsLoading(false);
@@ -537,7 +537,7 @@ function OrganizationModal({
       { value: 'WI', label: 'Wisconsin' },
       { value: 'WY', label: 'Wyoming' },
     ],
-    []
+    [],
   );
 
   // Render step content
@@ -551,7 +551,7 @@ function OrganizationModal({
       return e(
         'div',
         { className: 'p-4 text-red-600' },
-        'Form components not loaded. Please ensure FormComponents.js is loaded.'
+        'Form components not loaded. Please ensure FormComponents.js is loaded.',
       );
     }
 
@@ -572,7 +572,7 @@ function OrganizationModal({
               onChange: (e) => updateOrganizationData('name', e.target.value),
               placeholder: 'Enter organization name',
               required: true,
-            })
+            }),
           ),
           e(
             FormField,
@@ -587,7 +587,7 @@ function OrganizationModal({
               onChange: (e) => updateOrganizationData('type', e.target.value),
               placeholder: 'Enter organization type',
               required: true,
-            })
+            }),
           ),
           e(
             FormField,
@@ -601,8 +601,8 @@ function OrganizationModal({
               onChange: (e) => updateOrganizationData('phone', e.target.value),
               placeholder: '(402) 555-0123',
               type: 'tel',
-            })
-          )
+            }),
+          ),
         );
 
       case 1: // Contact Information
@@ -620,12 +620,12 @@ function OrganizationModal({
               onChange: (e) => updateOrganizationData('email', e.target.value),
               placeholder: 'info@organization.com',
               type: 'email',
-            })
+            }),
           ),
           e(
             'h4',
             { className: 'font-medium text-gray-300 mt-6 mb-3' },
-            'Address'
+            'Address',
           ),
           e(
             FormField,
@@ -638,7 +638,7 @@ function OrganizationModal({
               onChange: (e) =>
                 updateOrganizationData('address.street', e.target.value),
               placeholder: '123 Main Street',
-            })
+            }),
           ),
           e(
             'div',
@@ -656,7 +656,7 @@ function OrganizationModal({
                   updateOrganizationData('address.city', e.target.value),
                 placeholder: 'Lincoln',
                 required: true,
-              })
+              }),
             ),
             e(
               FormField,
@@ -670,8 +670,8 @@ function OrganizationModal({
                   updateOrganizationData('address.state', e.target.value),
                 options: stateOptions,
                 required: true,
-              })
-            )
+              }),
+            ),
           ),
           e(
             FormField,
@@ -685,7 +685,7 @@ function OrganizationModal({
                 updateOrganizationData('address.zip', e.target.value),
               placeholder: '68501',
               maxLength: 10,
-            })
+            }),
           ),
           e(
             FormField,
@@ -698,8 +698,8 @@ function OrganizationModal({
               onChange: (e) => updateOrganizationData('notes', e.target.value),
               placeholder: 'Enter any additional notes or information...',
               rows: 3,
-            })
-          )
+            }),
+          ),
         );
 
       case 2: // Personnel
@@ -712,15 +712,15 @@ function OrganizationModal({
             e(
               'h4',
               { className: 'font-medium text-gray-300' },
-              'Key Personnel'
+              'Key Personnel',
             ),
             e(
               window.SecondaryButton,
               {
                 onClick: addPersonnel,
               },
-              'Add Person'
-            )
+              'Add Person',
+            ),
           ),
           e(
             'div',
@@ -739,7 +739,7 @@ function OrganizationModal({
                   e(
                     'h5',
                     { className: 'font-medium text-gray-200' },
-                    `Person ${index + 1}`
+                    `Person ${index + 1}`,
                   ),
                   organizationData.personnel.length > 1 &&
                     e(
@@ -748,8 +748,8 @@ function OrganizationModal({
                         onClick: () => removePersonnel(index),
                         size: 'sm',
                       },
-                      'Remove'
-                    )
+                      'Remove',
+                    ),
                 ),
                 e(
                   'div',
@@ -765,7 +765,7 @@ function OrganizationModal({
                       onChange: (e) =>
                         updatePersonnel(index, 'name', e.target.value),
                       placeholder: 'Enter name',
-                    })
+                    }),
                   ),
                   e(
                     FormField,
@@ -778,7 +778,7 @@ function OrganizationModal({
                       onChange: (e) =>
                         updatePersonnel(index, 'title', e.target.value),
                       placeholder: 'Enter title or position',
-                    })
+                    }),
                   ),
                   e(
                     FormField,
@@ -792,7 +792,7 @@ function OrganizationModal({
                         updatePersonnel(index, 'email', e.target.value),
                       placeholder: 'Enter email address',
                       type: 'email',
-                    })
+                    }),
                   ),
                   e(
                     FormField,
@@ -806,12 +806,12 @@ function OrganizationModal({
                         updatePersonnel(index, 'phone', e.target.value),
                       placeholder: '(402) 555-0123',
                       type: 'tel',
-                    })
-                  )
-                )
-              )
-            )
-          )
+                    }),
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
 
       case 3: {
@@ -820,7 +820,7 @@ function OrganizationModal({
           return e(
             'div',
             { className: 'p-4 text-red-600' },
-            'Error: Organization data not available. Please go back and fill out the form.'
+            'Error: Organization data not available. Please go back and fill out the form.',
           );
         }
 
@@ -829,7 +829,7 @@ function OrganizationModal({
             person.name?.trim() ||
             person.title?.trim() ||
             person.email?.trim() ||
-            person.phone?.trim()
+            person.phone?.trim(),
         );
 
         return e(
@@ -838,7 +838,7 @@ function OrganizationModal({
           e(
             'h4',
             { className: 'font-medium text-gray-200 mb-4' },
-            'Review Organization Information'
+            'Review Organization Information',
           ),
 
           // Basic Information
@@ -848,7 +848,7 @@ function OrganizationModal({
             e(
               'h5',
               { className: 'font-medium text-gray-200 mb-3' },
-              'Basic Information'
+              'Basic Information',
             ),
             e(
               'div',
@@ -856,10 +856,14 @@ function OrganizationModal({
               e(
                 'div',
                 null,
-                `Name: ${organizationData.name || 'Not provided'}`
+                `Name: ${organizationData.name || 'Not provided'}`,
               ),
-              e('div', null, `Type: ${organizationData.type || 'Not provided'}`)
-            )
+              e(
+                'div',
+                null,
+                `Type: ${organizationData.type || 'Not provided'}`,
+              ),
+            ),
           ),
 
           // Contact Information
@@ -869,7 +873,7 @@ function OrganizationModal({
             e(
               'h5',
               { className: 'font-medium text-gray-200 mb-3' },
-              'Contact Information'
+              'Contact Information',
             ),
             e(
               'div',
@@ -877,12 +881,12 @@ function OrganizationModal({
               e(
                 'div',
                 null,
-                `Phone: ${organizationData.phone || 'Not provided'}`
+                `Phone: ${organizationData.phone || 'Not provided'}`,
               ),
               e(
                 'div',
                 null,
-                `Email: ${organizationData.email || 'Not provided'}`
+                `Email: ${organizationData.email || 'Not provided'}`,
               ),
               e(
                 'div',
@@ -899,11 +903,11 @@ function OrganizationModal({
                     ]
                       .filter(Boolean)
                       .join(', ')}`
-                  : 'Address: Not provided'
+                  : 'Address: Not provided',
               ),
               organizationData.notes &&
-                e('div', null, `Notes: ${organizationData.notes}`)
-            )
+                e('div', null, `Notes: ${organizationData.notes}`),
+            ),
           ),
 
           // Personnel
@@ -916,7 +920,7 @@ function OrganizationModal({
               e(
                 'h5',
                 { className: 'font-medium text-gray-200 mb-3' },
-                'Key Personnel'
+                'Key Personnel',
               ),
               e(
                 'div',
@@ -931,14 +935,14 @@ function OrganizationModal({
                     e(
                       'div',
                       { className: 'font-medium' },
-                      person.name || 'Unnamed'
+                      person.name || 'Unnamed',
                     ),
                     person.title && e('div', null, `Title: ${person.title}`),
                     person.email && e('div', null, `Email: ${person.email}`),
-                    person.phone && e('div', null, `Phone: ${person.phone}`)
-                  )
-                )
-              )
+                    person.phone && e('div', null, `Phone: ${person.phone}`),
+                  ),
+                ),
+              ),
             ),
 
           Object.keys(validationErrors).length > 0 &&
@@ -948,7 +952,7 @@ function OrganizationModal({
               e(
                 'h5',
                 { className: 'font-medium text-red-200 mb-2' },
-                'Please fix the following errors:'
+                'Please fix the following errors:',
               ),
               e(
                 'ul',
@@ -957,10 +961,10 @@ function OrganizationModal({
                     'list-disc list-inside text-sm text-red-300 space-y-1',
                 },
                 ...Object.entries(validationErrors).map(([field, error]) =>
-                  e('li', { key: field }, `${field}: ${error}`)
-                )
-              )
-            )
+                  e('li', { key: field }, `${field}: ${error}`),
+                ),
+              ),
+            ),
         );
       }
 
@@ -994,7 +998,7 @@ function OrganizationModal({
           {
             onClick: onClose,
           },
-          'Cancel'
+          'Cancel',
         ),
         e(
           window.PrimaryButton,
@@ -1003,8 +1007,8 @@ function OrganizationModal({
             disabled: isLoading || !hasChanges,
             loading: isLoading,
           },
-          isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes'
-        )
+          isLoading ? 'Saving...' : hasChanges ? 'Save Changes' : 'No Changes',
+        ),
       )
     : null;
 
@@ -1029,7 +1033,7 @@ function OrganizationModal({
       isCompleteDisabled: isLoading || (editOrganizationId && !hasChanges),
       customFooterContent: editModeFooter,
     },
-    renderStepContent()
+    renderStepContent(),
   );
 }
 
@@ -1041,7 +1045,7 @@ if (typeof window !== 'undefined') {
   if (window.NightingaleBusiness) {
     window.NightingaleBusiness.registerComponent(
       'OrganizationModal',
-      OrganizationModal
+      OrganizationModal,
     );
   }
 }
