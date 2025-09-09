@@ -7,7 +7,7 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent, getComponent } from '../../services/core';
 
 /**
  * SettingsModal Component
@@ -43,7 +43,7 @@ function SettingsModal({
   }
 
   // Get dependencies
-  const Modal = window.Modal || window.NightingaleUI?.getComponent?.('Modal');
+  const Modal = getComponent('ui', 'Modal') || window.Modal;
   const showToast =
     window.showToast || window.NightingaleToast?.show || function () {};
 

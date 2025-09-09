@@ -33,14 +33,7 @@ module.exports = {
   globals: {
     React: 'readonly',
     ReactDOM: 'readonly',
-    dayjs: 'readonly',
-    _: 'readonly', // Lodash
-    Fuse: 'readonly',
-    // Nightingale globals
+    _: 'readonly', // Lodash (still referenced in focus manager debounce)
     window: 'writable',
-    NightingaleFileService: 'readonly',
-    NightingaleUtils: 'readonly',
-    NightingaleSearch: 'readonly',
-    NightingaleParsers: 'readonly',
   },
 };

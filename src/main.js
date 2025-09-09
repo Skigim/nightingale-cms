@@ -36,7 +36,6 @@ import DataManagementService from './services/nightingale.datamanagement.js';
 // Phase 3: UI Services (depend on core + data)
 import ToastService from './services/nightingale.toast.js';
 import ClipboardService from './services/nightingale.clipboard.js';
-import UIUtilities from './services/ui.js';
 
 // Phase 4: Business Services (depend on all above)
 import CMSUtilities from './services/cms.js';
@@ -109,7 +108,6 @@ function registerServices() {
   // UI Services
   window.NightingaleToast = ToastService;
   window.NightingaleClipboard = ClipboardService;
-  window.NightingaleUIUtilities = UIUtilities;
 
   // Business Services
   window.NightingaleCMSUtilities = CMSUtilities;
