@@ -15,7 +15,7 @@ import CasesTab from './CasesTab.js';
 import PeopleTab from './PeopleTab.js';
 import OrganizationsTab from './OrganizationsTab.js';
 import EligibilityTab from './EligibilityTab.js';
-import { registerComponent } from '../../services/core';
+import { registerComponent, getComponent } from '../../services/core';
 // Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
 
 /**
@@ -69,12 +69,9 @@ function NightingaleCMSApp() {
   // Memoize non-tab components (tabs imported directly above)
   const components = useMemo(
     () => ({
-      Sidebar:
-        window.Sidebar || window.NightingaleUI?.getComponent?.('Sidebar'),
-      Header: window.Header || window.NightingaleUI?.getComponent?.('Header'),
-      SettingsModal:
-        window.SettingsModal ||
-        window.NightingaleBusiness?.getComponent?.('SettingsModal'),
+      Sidebar: getComponent('ui', 'Sidebar'),
+      Header: getComponent('ui', 'Header'),
+      SettingsModal: getComponent('business', 'SettingsModal'),
     }),
     [],
   );
