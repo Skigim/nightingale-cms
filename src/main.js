@@ -15,6 +15,7 @@
 // React and ReactDOM are loaded via CDN in index.html
 // Tailwind CSS is loaded via CDN in index.html
 
+import './index.css';
 // Import Day.js for date management (async loading)
 import dayjsPromise from './assets/dayjs.js';
 
