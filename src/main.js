@@ -16,11 +16,7 @@
 // Tailwind CSS is loaded via CDN in index.html
 
 import './index.css';
-// Import Day.js for date management (async loading)
-import dayjsPromise from './assets/dayjs.js';
-
-// Import Fuse.js for search functionality (async loading)
-import fusePromise from './assets/fuse.js';
+import { dayjs as dayjsLib } from './services/nightingale.dayjs.js';
 
 // ========================================================================
 // NIGHTINGALE SERVICES - Dependency Order Matters!
@@ -188,14 +184,13 @@ async function initializeNightingaleCMS() {
     // Wait for external libraries to load before initializing services
     console.log('📦 Loading external libraries...');
 
-    const [dayjs, Fuse] = await Promise.all([dayjsPromise, fusePromise]);
+    // Make libraries globally available (dayjs already configured via service import)
+    window.dayjs = dayjsLib;
+    // Provide search service globally (Fuse internal)
+    window.NightingaleSearch = window.NightingaleSearch || SearchService;
 
-    // Make libraries globally available
-    window.dayjs = dayjs;
-    window.Fuse = Fuse;
-
-    console.log('✅ Day.js loaded successfully');
-    console.log('✅ Fuse.js loaded successfully');
+    console.log('✅ Day.js (npm) loaded successfully');
+    console.log('✅ Fuse.js (npm) ready via SearchService');
 
     // Initialize logger service first (before other services)
     NightingaleLogger.setupWithFileLogging(true); // Enable console + memory + file transports

@@ -1,20 +1,49 @@
-/**
- * Nightingale Application Suite - Shared Search Service
- *
- * This service has been moved to nightingale.utils.js for better organization.
- * This file is kept for backward compatibility with existing applications.
- */
+// Nightingale Search Service (modernized with fuse.js npm package)
+import Fuse from 'fuse.js';
 
-// The NightingaleSearchService is now available in nightingale.utils.js
-// This file exists only for backward compatibility
+// Default Fuse options (tunable by callers)
+const DEFAULT_OPTIONS = {
+  includeScore: true,
+  threshold: 0.3,
+  ignoreLocation: true,
+  minMatchCharLength: 2,
+  keys: [
+    'name',
+    'email',
+    'phone',
+    'address.street',
+    'address.city',
+    'address.state',
+    'address.zip',
+  ],
+};
 
-// For ES6 modules, we export a placeholder that refers to the main search service
-const SearchService = null; // Will be replaced when integrated with main utils
-
-// Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = SearchService;
+function createIndex(list = [], options = {}) {
+  return new Fuse(list, { ...DEFAULT_OPTIONS, ...options });
 }
 
-// ES6 Module Export
+function search(indexOrList, query, options = {}) {
+  if (!query || !query.trim()) return [];
+  // Accept either a prepared Fuse index or raw list
+  let fuseInstance;
+  if (indexOrList instanceof Fuse) {
+    fuseInstance = indexOrList;
+  } else if (Array.isArray(indexOrList)) {
+    fuseInstance = createIndex(indexOrList, options);
+  } else {
+    return [];
+  }
+  return fuseInstance
+    .search(query)
+    .map((r) => ({ item: r.item, score: r.score }));
+}
+
+const SearchService = { createIndex, search, DEFAULT_OPTIONS };
+
+// Maintain legacy global for backward compatibility
+if (typeof window !== 'undefined') {
+  window.NightingaleSearch = SearchService;
+}
+
+export { createIndex, search, DEFAULT_OPTIONS };
 export default SearchService;
