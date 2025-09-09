@@ -1,5 +1,7 @@
-/* eslint-disable react/prop-types */
+import React, { cloneElement } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+
 /**
  * Nightingale Button Component
  *
@@ -22,9 +24,6 @@ function Button({
   fullWidth = false,
   ...props
 }) {
-  const e = window.React.createElement;
-  const { cloneElement } = window.React;
-
   // Base button classes
   const baseClasses = [
     'inline-flex',
@@ -137,29 +136,28 @@ function Button({
   };
 
   // Loading spinner component
-  const LoadingSpinner = () =>
-    e(
-      'svg',
-      {
-        className: 'animate-spin -ml-1 mr-2 h-4 w-4',
-        xmlns: 'http://www.w3.org/2000/svg',
-        fill: 'none',
-        viewBox: '0 0 24 24',
-      },
-      e('circle', {
-        className: 'opacity-25',
-        cx: '12',
-        cy: '12',
-        r: '10',
-        stroke: 'currentColor',
-        strokeWidth: '4',
-      }),
-      e('path', {
-        className: 'opacity-75',
-        fill: 'currentColor',
-        d: 'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z',
-      }),
-    );
+  const LoadingSpinner = () => (
+    <svg
+      className="animate-spin -ml-1 mr-2 h-4 w-4"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
+  );
 
   // Icon component wrapper
   const IconWrapper = ({ children: iconChildren }) => {
@@ -181,21 +179,21 @@ function Button({
 
     // If it's an SVG path string, create the SVG element
     if (typeof resolvedIcon === 'string') {
-      return e(
-        'svg',
-        {
-          className: iconSizeClasses[size],
-          fill: 'none',
-          stroke: 'currentColor',
-          viewBox: '0 0 24 24',
-          xmlns: 'http://www.w3.org/2000/svg',
-        },
-        e('path', {
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-          strokeWidth: 2,
-          d: resolvedIcon,
-        }),
+      return (
+        <svg
+          className={iconSizeClasses[size]}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={resolvedIcon}
+          />
+        </svg>
       );
     }
 
@@ -228,79 +226,119 @@ function Button({
     }
   };
 
-  return e(
-    'button',
-    {
-      type,
-      className: buttonClasses,
-      onClick: handleClick,
-      disabled: disabled || loading,
-      ...props,
-    },
-    // Loading state
-    loading && e(LoadingSpinner),
+  return (
+    <button
+      type={type}
+      className={buttonClasses}
+      onClick={handleClick}
+      disabled={disabled || loading}
+      {...props}
+    >
+      {/* Loading state */}
+      {loading && <LoadingSpinner />}
 
-    // Icon (left side)
-    iconPosition === 'left' &&
-      !loading &&
-      e(
-        IconWrapper,
-        {
-          position: 'left',
-        },
-        icon,
-      ),
+      {/* Icon (left side) */}
+      {iconPosition === 'left' && !loading && (
+        <IconWrapper position="left">{icon}</IconWrapper>
+      )}
 
-    // Button text/children
-    children,
+      {/* Button text/children */}
+      {children}
 
-    // Icon (right side)
-    iconPosition === 'right' &&
-      !loading &&
-      e(
-        IconWrapper,
-        {
-          position: 'right',
-        },
-        icon,
-      ),
+      {/* Icon (right side) */}
+      {iconPosition === 'right' && !loading && (
+        <IconWrapper position="right">{icon}</IconWrapper>
+      )}
+    </button>
   );
 }
 
+// PropTypes for Button component
+Button.propTypes = {
+  children: PropTypes.node,
+  onClick: PropTypes.func,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
+  variant: PropTypes.oneOf([
+    'primary',
+    'secondary',
+    'danger',
+    'success',
+    'warning',
+    'outline',
+    'ghost',
+    'link',
+  ]),
+  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
+  disabled: PropTypes.bool,
+  loading: PropTypes.bool,
+  icon: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+  iconPosition: PropTypes.oneOf(['left', 'right']),
+  className: PropTypes.string,
+  fullWidth: PropTypes.bool,
+};
+
 // Convenience button variants as separate components
 function PrimaryButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'primary' });
+  return (
+    <Button
+      {...props}
+      variant="primary"
+    />
+  );
 }
 
 function SecondaryButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'secondary' });
+  return (
+    <Button
+      {...props}
+      variant="secondary"
+    />
+  );
 }
 
 function DangerButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'danger' });
+  return (
+    <Button
+      {...props}
+      variant="danger"
+    />
+  );
 }
 
 function SuccessButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'success' });
+  return (
+    <Button
+      {...props}
+      variant="success"
+    />
+  );
 }
 
 function OutlineButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'outline' });
+  return (
+    <Button
+      {...props}
+      variant="outline"
+    />
+  );
 }
 
 function GhostButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'ghost' });
+  return (
+    <Button
+      {...props}
+      variant="ghost"
+    />
+  );
 }
 
 function LinkButton(props) {
-  const e = window.React.createElement;
-  return e(Button, { ...props, variant: 'link' });
+  return (
+    <Button
+      {...props}
+      variant="link"
+    />
+  );
 }
 
 // Icon constants for common use cases
