@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.js';
 /**
@@ -10,8 +11,6 @@ import { createBusinessComponent } from '../ui/TabBase.js';
  * Implements the TabBase.js useData pattern for standardized data handling
  */
 function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
-  const { useState, useEffect, useMemo, useCallback } = window.React;
-
   // State management - all hooks must be called unconditionally
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -136,9 +135,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 function renderPeopleContent({ components, data: dataResult, props }) {
-  const e = window.React.createElement;
   const { SearchBar, SearchSection } = components; // Removed TabHeader & DataTable in MUI migration
-  // Import PersonDetailsView directly if available via module system; fallback registry
   let PersonDetailsView = null;
   try {
     PersonDetailsView = require('./PersonDetailsView.js').default;
@@ -147,98 +144,98 @@ function renderPeopleContent({ components, data: dataResult, props }) {
   }
 
   if (dataResult.selectedPersonId && PersonDetailsView) {
-    return e(PersonDetailsView, {
-      personId: dataResult.selectedPersonId,
-      fullData: props.fullData,
-      onBackToList: dataResult.handleBackToList,
-      onUpdateData: props.onUpdateData,
-    });
+    return (
+      <PersonDetailsView
+        personId={dataResult.selectedPersonId}
+        fullData={props.fullData}
+        onBackToList={dataResult.handleBackToList}
+        onUpdateData={props.onUpdateData}
+      />
+    );
   }
 
-  // Main people list view (MUI implementation)
-  return e(
-    Box,
-    { sx: { width: '100%', display: 'flex', flexDirection: 'column', gap: 3 } },
-    // Header
-    e(
-      Box,
-      {
-        sx: {
+  return (
+    <Box
+      sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
+    >
+      <Box
+        sx={{
           display: 'flex',
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
           gap: 2,
-        },
-      },
-      e(
-        Box,
-        { sx: { display: 'flex', flexDirection: 'column', gap: 0.5 } },
-        e(Typography, { variant: 'h4', component: 'h1' }, 'People'),
-        e(
-          Typography,
-          { variant: 'subtitle1', color: 'text.secondary' },
-          `${dataResult.data.length} ${dataResult.data.length !== 1 ? 'people' : 'person'}`,
-        ),
-      ),
-      e(
-        Button,
-        {
-          variant: 'contained',
-          color: 'primary',
-          onClick: () => dataResult.setIsCreateModalOpen(true),
-          'aria-label': 'New Person', // keep backward compatibility with existing tests
-        },
-        'Add Person',
-      ),
-    ),
-    // Search Section (keep existing SearchBar integration)
-    e(SearchSection, {
-      searchBar: e(SearchBar, {
-        value: dataResult.searchTerm,
-        onChange: (e2) => {
-          const value = typeof e2 === 'string' ? e2 : e2?.target?.value || '';
-          dataResult.setSearchTerm(value);
-        },
-        placeholder: 'Search people by name, email, phone, address...', // matches test
-      }),
-    }),
-    // Table or empty state
-    dataResult.data.length === 0
-      ? e(
-          Paper,
-          { sx: { p: 4, textAlign: 'center' } },
-          e(
-            Typography,
-            { variant: 'body1', color: 'text.secondary' },
-            'No people found',
-          ),
-        )
-      : e(
-          TableContainer,
-          { component: Paper, sx: { maxHeight: 640 } },
-          e(
-            Table,
-            { size: 'small', stickyHeader: true, 'aria-label': 'people table' },
-            e(
-              TableHead,
-              null,
-              e(
-                TableRow,
-                null,
-                ['Name', 'Email', 'Phone', 'Address'].map((header) =>
-                  e(
-                    TableCell,
-                    { key: header, sx: { fontWeight: 600 } },
-                    header,
-                  ),
-                ),
-              ),
-            ),
-            e(
-              TableBody,
-              null,
-              dataResult.data.map((person) => {
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+          >
+            People
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+          >
+            {`${dataResult.data.length} ${dataResult.data.length !== 1 ? 'people' : 'person'}`}
+          </Typography>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => dataResult.setIsCreateModalOpen(true)}
+          aria-label="New Person"
+        >
+          Add Person
+        </Button>
+      </Box>
+      <SearchSection
+        searchBar={
+          <SearchBar
+            value={dataResult.searchTerm}
+            onChange={(e2) => {
+              const value =
+                typeof e2 === 'string' ? e2 : e2?.target?.value || '';
+              dataResult.setSearchTerm(value);
+            }}
+            placeholder="Search people by name, email, phone, address..."
+          />
+        }
+      />
+      {dataResult.data.length === 0 ? (
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+          >
+            No people found
+          </Typography>
+        </Paper>
+      ) : (
+        <TableContainer
+          component={Paper}
+          sx={{ maxHeight: 640 }}
+        >
+          <Table
+            size="small"
+            stickyHeader
+            aria-label="people table"
+          >
+            <TableHead>
+              <TableRow>
+                {['Name', 'Email', 'Phone', 'Address'].map((header) => (
+                  <TableCell
+                    key={header}
+                    sx={{ fontWeight: 600 }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {dataResult.data.map((person) => {
                 let addressText = 'N/A';
                 const value = person.address;
                 if (typeof value === 'string') addressText = value;
@@ -251,27 +248,27 @@ function renderPeopleContent({ components, data: dataResult, props }) {
                   ].filter(Boolean);
                   addressText = parts.length ? parts.join(', ') : 'N/A';
                 }
-                return e(
-                  TableRow,
-                  {
-                    key: person.id,
-                    hover: true,
-                    onClick: () => dataResult.handleViewDetails(person),
-                    sx: { cursor: 'pointer' },
-                  },
-                  e(
-                    TableCell,
-                    { sx: { fontWeight: 500 } },
-                    person.name || 'N/A',
-                  ),
-                  e(TableCell, null, person.email || 'N/A'),
-                  e(TableCell, null, person.phone || 'N/A'),
-                  e(TableCell, null, addressText),
+                return (
+                  <TableRow
+                    key={person.id}
+                    hover
+                    onClick={() => dataResult.handleViewDetails(person)}
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    <TableCell sx={{ fontWeight: 500 }}>
+                      {person.name || 'N/A'}
+                    </TableCell>
+                    <TableCell>{person.email || 'N/A'}</TableCell>
+                    <TableCell>{person.phone || 'N/A'}</TableCell>
+                    <TableCell>{addressText}</TableCell>
+                  </TableRow>
                 );
-              }),
-            ),
-          ),
-        ),
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Box>
   );
 }
 
@@ -280,93 +277,76 @@ function renderPeopleContent({ components, data: dataResult, props }) {
  * Implements the TabBase.js renderModals pattern
  */
 function renderPeopleModals({ data: dataResult, props }) {
-  const e = window.React.createElement;
-
-  // Get PersonCreationModal with fallback
   const PersonCreationModal =
     window.PersonCreationModal ||
     (({ isOpen, onClose }) =>
-      isOpen
-        ? e(
-            'div',
-            {
-              className:
-                'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
-              onClick: onClose,
-            },
-            e(
-              'div',
-              {
-                role: 'dialog',
-                'aria-modal': 'true',
-                className: 'bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4',
-                onClick: (e) => e.stopPropagation(),
-              },
-              e(
-                'h2',
-                { className: 'text-lg font-semibold text-white mb-4' },
-                'Create New Person',
-              ),
-              e(
-                'p',
-                { className: 'text-gray-400 mb-4' },
-                'PersonCreationModal component not available',
-              ),
-              e(
-                'button',
-                {
-                  className:
-                    'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded',
-                  onClick: onClose,
-                },
-                'Close',
-              ),
-            ),
-          )
-        : null);
+      isOpen ? (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={onClose}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-white mb-4">
+              Create New Person
+            </h2>
+            <p className="text-gray-400 mb-4">
+              PersonCreationModal component not available
+            </p>
+            <button
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null);
 
-  return e(
-    'div',
-    null,
-    // Person Creation Modal
-    e(PersonCreationModal, {
-      isOpen: dataResult.isCreateModalOpen,
-      onClose: () => dataResult.setIsCreateModalOpen(false),
-      onPersonCreated: (newPerson) => {
-        const updatedData = {
-          ...props.fullData,
-          people: [...(props.fullData.people || []), newPerson],
-        };
-        props.onUpdateData(updatedData);
-        dataResult.setIsCreateModalOpen(false);
-      },
-      fullData: props.fullData,
-      fileService: props.fileService,
-    }),
-
-    // Person Edit Modal (using same component with edit mode)
-    dataResult.isEditModalOpen &&
-      e(PersonCreationModal, {
-        isOpen: dataResult.isEditModalOpen,
-        onClose: () => {
-          dataResult.setIsEditModalOpen(false);
-          dataResult.setEditPersonId(null);
-        },
-        onPersonCreated: (updatedPerson) => {
+  return (
+    <div>
+      <PersonCreationModal
+        isOpen={dataResult.isCreateModalOpen}
+        onClose={() => dataResult.setIsCreateModalOpen(false)}
+        onPersonCreated={(newPerson) => {
           const updatedData = {
             ...props.fullData,
-            people: props.fullData.people.map((p) =>
-              p.id === updatedPerson.id ? updatedPerson : p,
-            ),
+            people: [...(props.fullData.people || []), newPerson],
           };
           props.onUpdateData(updatedData);
-          dataResult.setIsEditModalOpen(false);
-          dataResult.setEditPersonId(null);
-        },
-        editPersonId: dataResult.editPersonId,
-        fullData: props.fullData,
-        fileService: props.fileService,
-      }),
+          dataResult.setIsCreateModalOpen(false);
+        }}
+        fullData={props.fullData}
+        fileService={props.fileService}
+      />
+      {dataResult.isEditModalOpen && (
+        <PersonCreationModal
+          isOpen={dataResult.isEditModalOpen}
+          onClose={() => {
+            dataResult.setIsEditModalOpen(false);
+            dataResult.setEditPersonId(null);
+          }}
+          onPersonCreated={(updatedPerson) => {
+            const updatedData = {
+              ...props.fullData,
+              people: props.fullData.people.map((p) =>
+                p.id === updatedPerson.id ? updatedPerson : p,
+              ),
+            };
+            props.onUpdateData(updatedData);
+            dataResult.setIsEditModalOpen(false);
+            dataResult.setEditPersonId(null);
+          }}
+          editPersonId={dataResult.editPersonId}
+          fullData={props.fullData}
+          fileService={props.fileService}
+        />
+      )}
+    </div>
   );
 }
 
