@@ -9,7 +9,7 @@
  * @param {Function} props.onUpdateData - Callback to update application data
  * @returns {React.Element} Financial management section component
  */
-import { registerComponent, getComponent } from '../../services/core';
+import { registerComponent, getComponent } from '../../services/registry';
 function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
   const e = window.React.createElement;
   const { useState } = window.React;

@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 
 function PersonDetailsView(props) {
   if (!window || !window.React) return null; // safety fallback per project pattern

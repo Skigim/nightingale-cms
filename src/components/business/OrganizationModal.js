@@ -7,7 +7,7 @@
  * Utilizes StepperModal for multi-step workflow with proper validation.
  * Migrated to ES module component registry.
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 function OrganizationModal({
   isOpen = false,
   onClose = () => {},

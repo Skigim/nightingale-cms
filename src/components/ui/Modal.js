@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 /**
  * Nightingale Component Library - Modal System
  *

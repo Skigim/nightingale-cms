@@ -7,7 +7,7 @@
  * @param {Object} props.fullData - Complete application data for statistics calculation
  * @returns {React.Element} Dashboard tab component
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 function DashboardTab({ fullData }) {
   // Hooks and React-related variables must be declared at the top level.
   // All hooks must be called at the top level of the component.

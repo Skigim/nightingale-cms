@@ -7,7 +7,7 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
-import { registerComponent, getComponent } from '../../services/core';
+import { registerComponent, getComponent } from '../../services/registry';
 
 /**
  * SettingsModal Component

@@ -1,4 +1,4 @@
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 /**
  * DataTable Component
  * A comprehensive table component with sorting, pagination, and customizable styling

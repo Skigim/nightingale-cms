@@ -1,5 +1,5 @@
 // FormComponents - uses global window.React
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 // Uses global window.dateUtils, window.toInputDateFormat, window.Validators
 
 /**

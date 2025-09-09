@@ -17,7 +17,7 @@
  * @class ErrorBoundary
  * @extends React.Component
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 class ErrorBoundary extends window.React.Component {
   constructor(props) {
     super(props);

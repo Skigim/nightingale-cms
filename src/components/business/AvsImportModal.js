@@ -15,7 +15,7 @@
  * @param {Array} props.existingResources - Array of existing financial resources for comparison
  * @returns {React.Element|null} The AVS import modal component
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 function AvsImportModal({
   isOpen,
   onClose,

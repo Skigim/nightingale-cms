@@ -11,7 +11,7 @@
  *
  * @returns {React.Element} Eligibility tab component
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 function EligibilityTab() {
   // Early return pattern for React safety
   if (!window.React) {

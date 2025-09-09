@@ -8,7 +8,7 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 
 /**
  * CaseDetailsView Component

@@ -1,5 +1,5 @@
 // App/js/components/ui/TabHeader.js
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 /**
  * TabHeader - Reusable header component for tab interfaces
  *

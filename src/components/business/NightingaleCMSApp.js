@@ -9,12 +9,19 @@
  */
 
 // Direct ES module imports for primary tab components (eliminates reliance on global registry lookups)
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
 import DashboardTab from './DashboardTab.js';
 import CasesTab from './CasesTab.js';
 import PeopleTab from './PeopleTab.js';
 import OrganizationsTab from './OrganizationsTab.js';
 import EligibilityTab from './EligibilityTab.js';
-import { registerComponent, getComponent } from '../../services/core';
+import { registerComponent, getComponent } from '../../services/registry';
 // Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
 
 /**
@@ -24,10 +31,6 @@ import { registerComponent, getComponent } from '../../services/core';
  * @returns {React.Element} NightingaleCMSApp component
  */
 function NightingaleCMSApp() {
-  const e = window.React?.createElement;
-  const { useState, useEffect, useRef, useMemo, useCallback } =
-    window.React || {};
-
   // Main application state - hooks must be called unconditionally
   const [fullData, setFullData] = useState(null);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -205,20 +208,18 @@ function NightingaleCMSApp() {
     const props = tabProps[activeTab] || {};
     switch (activeTab) {
       case 'dashboard':
-        return e(DashboardTab, props);
+        return <DashboardTab {...props} />;
       case 'cases':
-        return e(CasesTab, props);
+        return <CasesTab {...props} />;
       case 'people':
-        return e(PeopleTab, props);
+        return <PeopleTab {...props} />;
       case 'organizations':
-        return e(OrganizationsTab, props);
+        return <OrganizationsTab {...props} />;
       case 'eligibility':
-        return e(EligibilityTab, props);
+        return <EligibilityTab {...props} />;
       default:
-        return e(
-          'div',
-          { className: 'p-4 text-center text-gray-400' },
-          'Select a tab',
+        return (
+          <div className="p-4 text-center text-gray-400">Select a tab</div>
         );
     }
   };
@@ -230,75 +231,61 @@ function NightingaleCMSApp() {
 
   // Show loading screen while services are initializing
   if (serviceStatus.isLoading) {
-    return e(
-      'div',
-      {
-        className:
-          'h-screen w-screen flex items-center justify-center bg-gray-900 text-white',
-        style: { fontFamily: 'Inter, system-ui, sans-serif' },
-      },
-      e(
-        'div',
-        { className: 'text-center space-y-4' },
-        e('div', {
-          className:
-            'animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto',
-        }),
-        e(
-          'h2',
-          { className: 'text-xl font-semibold' },
-          'Initializing Nightingale CMS',
-        ),
-        e(
-          'p',
-          { className: 'text-gray-400' },
-          'Loading services and file system...',
-        ),
-      ),
+    return (
+      <div
+        className="h-screen w-screen flex items-center justify-center bg-gray-900 text-white"
+        style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+      >
+        <div className="text-center space-y-4">
+          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto" />
+          <h2 className="text-xl font-semibold">
+            Initializing Nightingale CMS
+          </h2>
+          <p className="text-gray-400">Loading services and file system...</p>
+        </div>
+      </div>
     );
   }
 
-  return e(
-    'div',
-    { className: 'h-screen w-screen flex' },
-    components.Sidebar &&
-      e(components.Sidebar, {
-        activeTab,
-        onTabChange: setActiveTab,
-        onSettingsClick: () => setIsSettingsOpen(true),
-        caseViewMode,
-        onCaseBackToList: () => {
-          if (caseBackFunction) {
-            caseBackFunction();
-          }
-        },
-      }),
-    e(
-      'div',
-      { className: 'flex-1 flex flex-col overflow-hidden' },
-      components.Header &&
-        e(components.Header, {
-          fileStatus,
-          autosaveStatus,
-          onSettingsClick: () => setIsSettingsOpen(true),
-          onManualSave: handleManualSave,
-        }),
-      e(
-        'main',
-        { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
-        renderActiveTab(),
-      ),
-    ),
-    // Settings Modal
-    components.SettingsModal &&
-      e(components.SettingsModal, {
-        isOpen: isSettingsOpen,
-        onClose: () => setIsSettingsOpen(false),
-        fileService,
-        onDataLoaded: handleDataLoaded,
-        fileStatus,
-        onFileStatusChange: setFileStatus,
-      }),
+  return (
+    <div className="h-screen w-screen flex">
+      {components.Sidebar && (
+        <components.Sidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onSettingsClick={() => setIsSettingsOpen(true)}
+          caseViewMode={caseViewMode}
+          onCaseBackToList={() => {
+            if (caseBackFunction) {
+              caseBackFunction();
+            }
+          }}
+        />
+      )}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {components.Header && (
+          <components.Header
+            fileStatus={fileStatus}
+            autosaveStatus={autosaveStatus}
+            onSettingsClick={() => setIsSettingsOpen(true)}
+            onManualSave={handleManualSave}
+          />
+        )}
+        <main className="flex-1 overflow-auto p-6 bg-gray-900">
+          {renderActiveTab()}
+        </main>
+      </div>
+      {components.SettingsModal && (
+        <components.SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          fileService={fileService}
+          onDataLoaded={handleDataLoaded}
+          fileStatus={fileStatus}
+          onFileStatusChange={setFileStatus}
+        />
+      )}
+    </div>
   );
 }
 

@@ -6,7 +6,7 @@
  * Full CRUD functionality for case notes with category field and RTF text capabilities
  * Migrated to ES module component registry.
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 
 function NotesModal({
   isOpen,

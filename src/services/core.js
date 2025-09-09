@@ -1,23 +1,6 @@
 // Nightingale Core Utilities - Clean ES Module (v3.0.0-esm)
 // Single authoritative implementation (previous legacy blocks removed)
 
-// ---- Registries ----
-const UIRegistry = Object.create(null);
-const BusinessRegistry = Object.create(null);
-export function registerComponent(registryName, componentName, component) {
-  if (!componentName || typeof componentName !== 'string') return;
-  const target = registryName === 'business' ? BusinessRegistry : UIRegistry;
-  if (component) target[componentName] = component;
-}
-export function getComponent(registryName, componentName) {
-  const target = registryName === 'business' ? BusinessRegistry : UIRegistry;
-  return target[componentName];
-}
-export function listComponents(registryName) {
-  const target = registryName === 'business' ? BusinessRegistry : UIRegistry;
-  return Object.keys(target).sort();
-}
-
 // ---- Security & Sanitization ----
 export function sanitize(str) {
   if (!str) return '';
@@ -211,9 +194,6 @@ const NightingaleCoreUtilities = {
   Validators,
   getNextId,
   SearchService: SearchServiceWrapper,
-  registerComponent,
-  getComponent,
-  listComponents,
   version: '3.0.0-esm',
 };
 

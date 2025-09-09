@@ -9,7 +9,7 @@
  * Preview-style card designed for financial management sections.
  * Migrated to ES module component registry.
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 function FinancialItemCard({
   item,
   itemType,

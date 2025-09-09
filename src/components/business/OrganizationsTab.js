@@ -1,6 +1,6 @@
 // OrganizationsTab.js
 // Migrated to ES module component registry.
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.js';
 
 /**

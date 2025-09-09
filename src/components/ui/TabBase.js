@@ -1,4 +1,4 @@
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 /**
  * TabBase.js - Factory for creating standardized business-layer Tab components
  *

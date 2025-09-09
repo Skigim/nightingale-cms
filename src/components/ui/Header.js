@@ -1,4 +1,4 @@
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 /**
  * Header.js - Application header UI component
  *

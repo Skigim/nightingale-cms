@@ -1,4 +1,4 @@
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 /**
  * Sidebar.js - Navigation sidebar UI component
  *

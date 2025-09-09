@@ -1,5 +1,5 @@
 // SearchBar component - uses global window.React
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 // Uses global window.NightingaleSearchService
 
 /**

@@ -7,7 +7,7 @@
  *
  * @component FinancialItemModal
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 
 function FinancialItemModal({
   isOpen,

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { registerComponent } from '../../services/core';
+import { registerComponent } from '../../services/registry';
 // StepperModal component - uses global window.React
 // Uses global window.Modal and window.FormComponents
 
