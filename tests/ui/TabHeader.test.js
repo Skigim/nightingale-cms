@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import TabHeader from '../../src/components/ui/TabHeader.jsx';
 
@@ -137,8 +137,188 @@ describe('TabHeader Component', () => {
       'p-4',
       'mb-6',
       'flex',
-      'items-center',
-      'justify-between',
+      'flex-col',
+      'space-y-4',
     );
+  });
+
+  describe('Tab Navigation Features', () => {
+    test('renders with tab navigation when tabs provided', () => {
+      const tabs = [
+        { id: 'tab1', label: 'Tab 1', active: true },
+        { id: 'tab2', label: 'Tab 2', active: false },
+        { id: 'tab3', label: 'Tab 3', active: false },
+      ];
+      const onTabChange = jest.fn();
+
+      render(
+        <TabHeader
+          title="Tab Test"
+          tabs={tabs}
+          onTabChange={onTabChange}
+        />,
+      );
+
+      // Check tablist role
+      const tablist = screen.getByRole('tablist');
+      expect(tablist).toBeInTheDocument();
+
+      // Check individual tabs
+      const tabButtons = screen.getAllByRole('tab');
+      expect(tabButtons).toHaveLength(3);
+      
+      // Check active tab has aria-selected
+      expect(tabButtons[0]).toHaveAttribute('aria-selected', 'true');
+      expect(tabButtons[1]).toHaveAttribute('aria-selected', 'false');
+      expect(tabButtons[2]).toHaveAttribute('aria-selected', 'false');
+    });
+
+    test('handles tab click and calls onTabChange', () => {
+      const tabs = [
+        { id: 'tab1', label: 'Tab 1', active: true },
+        { id: 'tab2', label: 'Tab 2', active: false },
+      ];
+      const onTabChange = jest.fn();
+
+      render(
+        <TabHeader
+          title="Tab Test"
+          tabs={tabs}
+          onTabChange={onTabChange}
+        />,
+      );
+
+      const secondTab = screen.getByRole('tab', { name: 'Tab 2' });
+      fireEvent.click(secondTab);
+
+      expect(onTabChange).toHaveBeenCalledWith('tab2');
+    });
+
+    test('handles keyboard navigation with arrow keys', () => {
+      const tabs = [
+        { id: 'tab1', label: 'Tab 1', active: true },
+        { id: 'tab2', label: 'Tab 2', active: false },
+        { id: 'tab3', label: 'Tab 3', active: false },
+      ];
+      const onTabChange = jest.fn();
+
+      render(
+        <TabHeader
+          title="Tab Test"
+          tabs={tabs}
+          onTabChange={onTabChange}
+        />,
+      );
+
+      const firstTab = screen.getByRole('tab', { name: 'Tab 1' });
+      firstTab.focus();
+
+      // Press ArrowRight to move to next tab
+      fireEvent.keyDown(firstTab, { key: 'ArrowRight' });
+      expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Tab 2' }));
+
+      // Press ArrowLeft to move back
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowLeft' });
+      expect(document.activeElement).toBe(firstTab);
+    });
+
+    test('wraps around when navigating past boundaries', () => {
+      const tabs = [
+        { id: 'tab1', label: 'Tab 1', active: true },
+        { id: 'tab2', label: 'Tab 2', active: false },
+      ];
+      const onTabChange = jest.fn();
+
+      render(
+        <TabHeader
+          title="Tab Test"
+          tabs={tabs}
+          onTabChange={onTabChange}
+        />,
+      );
+
+      const firstTab = screen.getByRole('tab', { name: 'Tab 1' });
+      firstTab.focus();
+
+      // Press ArrowLeft on first tab should wrap to last tab
+      fireEvent.keyDown(firstTab, { key: 'ArrowLeft' });
+      expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Tab 2' }));
+
+      // Press ArrowRight on last tab should wrap to first tab
+      fireEvent.keyDown(document.activeElement, { key: 'ArrowRight' });
+      expect(document.activeElement).toBe(firstTab);
+    });
+
+    test('activates tab on Enter and Space keys', () => {
+      const tabs = [
+        { id: 'tab1', label: 'Tab 1', active: true },
+        { id: 'tab2', label: 'Tab 2', active: false },
+      ];
+      const onTabChange = jest.fn();
+
+      render(
+        <TabHeader
+          title="Tab Test"
+          tabs={tabs}
+          onTabChange={onTabChange}
+        />,
+      );
+
+      const secondTab = screen.getByRole('tab', { name: 'Tab 2' });
+      secondTab.focus();
+
+      // Test Enter key
+      fireEvent.keyDown(secondTab, { key: 'Enter' });
+      expect(onTabChange).toHaveBeenCalledWith('tab2');
+
+      onTabChange.mockClear();
+
+      // Test Space key
+      fireEvent.keyDown(secondTab, { key: ' ' });
+      expect(onTabChange).toHaveBeenCalledWith('tab2');
+    });
+  });
+
+  describe('Accessibility', () => {
+    test('has proper ARIA attributes for header section', () => {
+      const { container } = render(
+        <TabHeader title="Accessible Header" />
+      );
+
+      const header = container.firstChild;
+      expect(header).toHaveAttribute('role', 'banner');
+    });
+
+    test('title has proper heading role', () => {
+      render(<TabHeader title="My Header" />);
+      
+      const heading = screen.getByRole('heading', { level: 2 });
+      expect(heading).toHaveTextContent('My Header');
+    });
+
+    test('tabs have proper tabindex management', () => {
+      const tabs = [
+        { id: 'tab1', label: 'Tab 1', active: true },
+        { id: 'tab2', label: 'Tab 2', active: false },
+        { id: 'tab3', label: 'Tab 3', active: false },
+      ];
+
+      render(
+        <TabHeader
+          title="Tab Test"
+          tabs={tabs}
+          onTabChange={jest.fn()}
+        />,
+      );
+
+      const tabButtons = screen.getAllByRole('tab');
+      
+      // Active tab should have tabindex 0
+      expect(tabButtons[0]).toHaveAttribute('tabindex', '0');
+      
+      // Inactive tabs should have tabindex -1
+      expect(tabButtons[1]).toHaveAttribute('tabindex', '-1');
+      expect(tabButtons[2]).toHaveAttribute('tabindex', '-1');
+    });
   });
 });

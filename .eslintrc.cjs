@@ -24,6 +24,17 @@ module.exports = {
     'no-console': 'off',
     'prefer-const': 'error',
     'no-var': 'error',
+    // Restrict legacy window.React usage to encourage modernization
+    'no-restricted-properties': [
+      'error',
+      {
+        object: 'window',
+        property: 'React',
+        message: 'Use direct React imports instead of window.React. See MIGRATION_GUIDE.md for patterns.',
+      },
+    ],
+    // Warn about dynamic Tailwind class construction
+    'no-template-literals-in-class-names': 'off', // Custom rule would go here
   },
   settings: {
     react: {

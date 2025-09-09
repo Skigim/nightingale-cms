@@ -12,6 +12,72 @@ import {
 } from '../../src/components/ui/Badge.jsx';
 
 describe('Badge Component', () => {
+  describe('Variant Mapping', () => {
+    test('applies correct classes for default status variant', () => {
+      render(<Badge status="Active" />);
+      const badge = screen.getByText('Active');
+      expect(badge).toHaveClass('bg-green-600', 'text-green-100');
+    });
+
+    test('applies correct classes for priority variant', () => {
+      render(<Badge status="High" variant="priority" />);
+      const badge = screen.getByText('High');
+      expect(badge).toHaveClass('bg-red-600', 'text-red-100');
+    });
+
+    test('applies correct classes for case-type variant', () => {
+      render(<Badge status="LTC" variant="case-type" />);
+      const badge = screen.getByText('LTC');
+      expect(badge).toHaveClass('bg-blue-600', 'text-blue-100');
+    });
+
+    test('applies correct classes for application variant', () => {
+      render(<Badge status="Application" variant="application" />);
+      const badge = screen.getByText('Application');
+      expect(badge).toHaveClass('bg-blue-600', 'text-blue-100');
+    });
+
+    test('falls back to gray when status not found in variant', () => {
+      render(<Badge status="UnknownStatus" variant="priority" />);
+      const badge = screen.getByText('UnknownStatus');
+      expect(badge).toHaveClass('bg-gray-600', 'text-gray-100');
+    });
+
+    test('falls back to status variant when invalid variant provided', () => {
+      render(<Badge status="Active" variant="invalid-variant" />);
+      const badge = screen.getByText('Active');
+      // Should fallback to status variant
+      expect(badge).toHaveClass('bg-green-600', 'text-green-100');
+    });
+  });
+
+  describe('Size Mapping', () => {
+    test('applies correct classes for small size', () => {
+      render(<Badge status="Test" size="sm" />);
+      const badge = screen.getByText('Test');
+      expect(badge).toHaveClass('px-2', 'py-0.5', 'text-xs');
+    });
+
+    test('applies correct classes for medium size (default)', () => {
+      render(<Badge status="Test" size="md" />);
+      const badge = screen.getByText('Test');
+      expect(badge).toHaveClass('px-2', 'py-1', 'text-xs');
+    });
+
+    test('applies correct classes for large size', () => {
+      render(<Badge status="Test" size="lg" />);
+      const badge = screen.getByText('Test');
+      expect(badge).toHaveClass('px-3', 'py-1', 'text-sm');
+    });
+
+    test('falls back to default size when no size provided', () => {
+      render(<Badge status="Test" />);
+      const badge = screen.getByText('Test');
+      // Should fallback to default (md) size
+      expect(badge).toHaveClass('px-2', 'py-1', 'text-xs');
+    });
+  });
+
   test('renders status badge with text', () => {
     render(<Badge status="Active" />);
 

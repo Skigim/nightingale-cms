@@ -39,7 +39,22 @@ class ErrorBoundary extends Component {
       error: error,
       errorInfo: errorInfo,
     });
-    // (logging removed) hook for future logger integration
+    
+    // Log via Nightingale logger if available
+    try {
+      const logger = window.NightingaleLogger?.get('ErrorBoundary');
+      logger?.error('Error caught by boundary:', error);
+    } catch (logError) {
+      // Silently handle logger errors
+      console.error('Failed to log error:', logError);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    // Reset error state when key prop changes
+    if (this.props.key !== prevProps.key && this.state.hasError) {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+    }
   }
 
   render() {

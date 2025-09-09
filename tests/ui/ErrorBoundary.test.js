@@ -20,15 +20,26 @@ const WorkingComponent = () => <div>Working component</div>;
 describe('ErrorBoundary Component', () => {
   // Suppress console.error for these tests since we're intentionally causing errors
   const originalError = console.error;
+  let mockLogger;
+  
   beforeAll(() => {
     console.error = jest.fn();
+    // Mock the Nightingale logger
+    mockLogger = {
+      error: jest.fn(),
+    };
+    window.NightingaleLogger = {
+      get: jest.fn(() => mockLogger),
+    };
   });
 
   afterAll(() => {
     console.error = originalError;
+    delete window.NightingaleLogger;
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
     // Mock window.location.reload
     Object.defineProperty(window, 'location', {
       value: {
@@ -168,5 +179,64 @@ describe('ErrorBoundary Component', () => {
     // Check for details/summary structure
     const details = screen.getByText('Technical Details');
     expect(details.tagName).toBe('SUMMARY');
+  });
+
+  test('logs error via Nightingale logger when available', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Should log error via NightingaleLogger
+    expect(window.NightingaleLogger.get).toHaveBeenCalledWith('ErrorBoundary');
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Error caught by boundary:',
+      expect.objectContaining({
+        message: 'Test error from ThrowError component',
+      }),
+    );
+  });
+
+  test('handles missing logger gracefully', () => {
+    // Remove logger temporarily
+    const tempLogger = window.NightingaleLogger;
+    delete window.NightingaleLogger;
+
+    expect(() => {
+      render(
+        <ErrorBoundary>
+          <ThrowError shouldThrow={true} />
+        </ErrorBoundary>,
+      );
+    }).not.toThrow();
+
+    // Should still render error UI
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+
+    // Restore logger
+    window.NightingaleLogger = tempLogger;
+  });
+
+  test('resets error state when key prop changes', () => {
+    const { rerender } = render(
+      <ErrorBoundary key="initial">
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Should show error state
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+
+    // Change key prop to reset error boundary
+    rerender(
+      <ErrorBoundary key="reset">
+        <ThrowError shouldThrow={false} />
+      </ErrorBoundary>,
+    );
+
+    // Should now show working component
+    expect(screen.getByText('No error')).toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 });

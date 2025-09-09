@@ -20,6 +20,7 @@ import { registerComponent } from '../../services/registry';
  * @param {string} props.size - Modal size: 'small', 'default', 'large', 'xlarge'
  * @param {boolean} props.showCloseButton - Whether to show the X close button
  * @param {string} props.className - Additional CSS classes
+ * @param {string} props.descriptionId - Optional aria-describedby ID for accessibility
  * @returns {React.Element} Modal component
  */
 function Modal({
@@ -31,6 +32,7 @@ function Modal({
   size = 'default',
   showCloseButton = true,
   className = '',
+  descriptionId,
 }) {
   const modalRef = useRef(null);
 
@@ -78,17 +80,30 @@ function Modal({
     xlarge: 'max-w-6xl',
   };
 
+  // Fallback to default size if invalid size provided
+  const modalSizeClass = sizeClasses[size] || sizeClasses.default;
+
   return (
-    <div className="fixed inset-0 z-50 overflow-auto pointer-events-none">
+    <div 
+      className="fixed inset-0 z-50 overflow-auto pointer-events-auto"
+      onClick={(e) => {
+        // Close on backdrop click if onClose provided
+        if (e.target === e.currentTarget && onClose) {
+          onClose();
+        }
+      }}
+    >
       <div
         className="flex items-center justify-center min-h-screen p-4 pointer-events-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
+        aria-describedby={descriptionId}
       >
         <div
           ref={modalRef}
-          className={`bg-gray-800 rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden pointer-events-auto ${className}`}
+          className={`bg-gray-800 rounded-lg shadow-xl w-full ${modalSizeClass} max-h-[90vh] overflow-hidden pointer-events-auto ${className}`}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {title && (
@@ -148,6 +163,7 @@ Modal.propTypes = {
   size: PropTypes.oneOf(['small', 'default', 'large', 'xlarge']),
   showCloseButton: PropTypes.bool,
   className: PropTypes.string,
+  descriptionId: PropTypes.string,
 };
 
 /**
