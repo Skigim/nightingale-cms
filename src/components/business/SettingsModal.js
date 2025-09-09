@@ -7,6 +7,8 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 
 /**
@@ -30,17 +32,8 @@ function SettingsModal({
   fileStatus,
   onFileStatusChange,
 }) {
-  const e = window.React?.createElement;
-  const { useState } = window.React || {};
-
-  // Component state - must be called unconditionally
   const [isConnecting, setIsConnecting] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-
-  // React safety check
-  if (!window.React) {
-    return null;
-  }
 
   // Get dependencies
   const Modal = getComponent('ui', 'Modal') || window.Modal;
@@ -242,167 +235,113 @@ function SettingsModal({
 
   if (!isOpen) return null;
 
-  return e(
-    Modal,
-    {
-      isOpen,
-      onClose,
-      title: 'Settings & Data Management',
-      footerContent: e(
-        'div',
-        { className: 'flex space-x-3' },
-        e(
-          'button',
-          {
-            onClick: onClose,
-            className:
-              'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
-          },
-          'Close',
-        ),
-      ),
-    },
-    e(
-      'div',
-      { className: 'space-y-6' },
-
-      // File System Connection
-      e(
-        'div',
-        { className: 'space-y-4' },
-        e(
-          'h3',
-          { className: 'text-lg font-semibold text-white' },
-          'File System Connection',
-        ),
-        e(
-          'p',
-          { className: 'text-gray-400 text-sm' },
-          'Connect to your project directory to load and save case data.',
-        ),
-        e(
-          'div',
-          { className: 'flex items-center space-x-4' },
-          e(
-            'button',
-            {
-              onClick: handleConnect,
-              disabled: isConnecting,
-              className: `px-4 py-2 rounded-lg font-medium transition-colors ${
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Settings & Data Management"
+      footerContent={
+        <div className="flex space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      }
+    >
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-white">
+            File System Connection
+          </h3>
+          <p className="text-gray-400 text-sm">
+            Connect to your project directory to load and save case data.
+          </p>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 isConnecting
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`,
-            },
-            isConnecting ? 'Connecting...' : 'Connect to Directory',
-          ),
-          e(
-            'div',
-            {
-              className: `px-3 py-1 rounded-full text-xs font-medium ${
+              }`}
+            >
+              {isConnecting ? 'Connecting...' : 'Connect to Directory'}
+            </button>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
                 fileStatus === 'connected'
                   ? 'bg-green-600 text-green-100'
                   : 'bg-red-600 text-red-100'
-              }`,
-            },
-            fileStatus === 'connected' ? 'Connected' : 'Disconnected',
-          ),
-        ),
-      ),
-
-      // Data Management
-      e(
-        'div',
-        { className: 'space-y-4' },
-        e(
-          'h3',
-          { className: 'text-lg font-semibold text-white' },
-          'Data Management',
-        ),
-        e(
-          'p',
-          { className: 'text-gray-400 text-sm' },
-          'Load existing data or create sample data for testing.',
-        ),
-        e(
-          'div',
-          { className: 'grid grid-cols-1 md:grid-cols-2 gap-3' },
-          e(
-            'button',
-            {
-              onClick: handleLoadData,
-              disabled: loadingData || fileStatus !== 'connected',
-              className: `px-4 py-3 rounded-lg font-medium transition-colors ${
+              }`}
+            >
+              {fileStatus === 'connected' ? 'Connected' : 'Disconnected'}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-white">Data Management</h3>
+          <p className="text-gray-400 text-sm">
+            Load existing data or create sample data for testing.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button
+              onClick={handleLoadData}
+              disabled={loadingData || fileStatus !== 'connected'}
+              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                 loadingData || fileStatus !== 'connected'
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   : 'bg-green-600 hover:bg-green-700 text-white'
-              }`,
-            },
-            loadingData ? 'Loading...' : 'Load Data File',
-          ),
-          e(
-            'button',
-            {
-              onClick: handleCreateSample,
-              disabled: fileStatus !== 'connected',
-              className: `px-4 py-3 rounded-lg font-medium transition-colors ${
+              }`}
+            >
+              {loadingData ? 'Loading...' : 'Load Data File'}
+            </button>
+            <button
+              onClick={handleCreateSample}
+              disabled={fileStatus !== 'connected'}
+              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                 fileStatus !== 'connected'
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   : 'bg-orange-600 hover:bg-orange-700 text-white'
-              }`,
-            },
-            'Create Sample Data',
-          ),
-        ),
-      ),
-
-      // Instructions
-      e(
-        'div',
-        { className: 'space-y-2 p-4 bg-gray-700 rounded-lg' },
-        e('h4', { className: 'font-medium text-white' }, 'Instructions:'),
-        e(
-          'ol',
-          {
-            className:
-              'text-sm text-gray-300 space-y-1 list-decimal list-inside',
-          },
-          e(
-            'li',
-            null,
-            "Click 'Connect to Directory' and select your Nightingale project folder",
-          ),
-          e(
-            'li',
-            null,
-            "Use 'Load Data File' to load existing nightingale-data.json",
-          ),
-          e(
-            'li',
-            null,
-            "Or use 'Create Sample Data' to generate test cases for development",
-          ),
-        ),
-      ),
-    ),
+              }`}
+            >
+              Create Sample Data
+            </button>
+          </div>
+        </div>
+        <div className="space-y-2 p-4 bg-gray-700 rounded-lg">
+          <h4 className="font-medium text-white">Instructions:</h4>
+          <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+            <li>
+              Click &apos;Connect to Directory&apos; and select your Nightingale
+              project folder
+            </li>
+            <li>
+              Use &apos;Load Data File&apos; to load existing
+              nightingale-data.json
+            </li>
+            <li>
+              Or use &apos;Create Sample Data&apos; to generate test cases for
+              development
+            </li>
+          </ol>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
-// PropTypes for validation
-if (typeof window !== 'undefined' && window.PropTypes) {
-  SettingsModal.propTypes = {
-    isOpen: window.PropTypes.bool.isRequired,
-    onClose: window.PropTypes.func.isRequired,
-    fileService: window.PropTypes.object,
-    onDataLoaded: window.PropTypes.func,
-    fileStatus: window.PropTypes.oneOf([
-      'connected',
-      'disconnected',
-      'connecting',
-    ]),
-    onFileStatusChange: window.PropTypes.func,
-  };
-}
+SettingsModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  fileService: PropTypes.object,
+  onDataLoaded: PropTypes.func,
+  fileStatus: PropTypes.oneOf(['connected', 'disconnected', 'connecting']),
+  onFileStatusChange: PropTypes.func,
+};
 
 // Register with business registry (legacy global removed)
 registerComponent('business', 'SettingsModal', SettingsModal);
