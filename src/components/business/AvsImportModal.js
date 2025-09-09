@@ -536,11 +536,8 @@ function PreviewItem({ item, isSelected, onToggle }) {
   );
 }
 
-// Component registration following Nightingale CMS patterns
-if (typeof window !== 'undefined') {
-  window.AvsImportModal = AvsImportModal; // legacy global
-  registerComponent('business', 'AvsImportModal', AvsImportModal);
-}
+// Register with business registry (legacy global removed)
+registerComponent('business', 'AvsImportModal', AvsImportModal);
 
 // ES6 Module Export
 export default AvsImportModal;

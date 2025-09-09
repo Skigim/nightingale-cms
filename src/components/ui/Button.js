@@ -338,28 +338,15 @@ const ButtonIcons = {
 };
 
 // Make available globally
-if (typeof window !== 'undefined') {
-  window.Button = Button;
-  window.PrimaryButton = PrimaryButton;
-  window.SecondaryButton = SecondaryButton;
-  window.DangerButton = DangerButton;
-  window.SuccessButton = SuccessButton;
-  window.OutlineButton = OutlineButton;
-  window.GhostButton = GhostButton;
-  window.LinkButton = LinkButton;
-  window.ButtonIcons = ButtonIcons;
-
-  // Register with component system
-  // New registry (ESM)
-  registerComponent('ui', 'Button', Button);
-  registerComponent('ui', 'PrimaryButton', PrimaryButton);
-  registerComponent('ui', 'SecondaryButton', SecondaryButton);
-  registerComponent('ui', 'DangerButton', DangerButton);
-  registerComponent('ui', 'SuccessButton', SuccessButton);
-  registerComponent('ui', 'OutlineButton', OutlineButton);
-  registerComponent('ui', 'GhostButton', GhostButton);
-  registerComponent('ui', 'LinkButton', LinkButton);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'Button', Button);
+registerComponent('ui', 'PrimaryButton', PrimaryButton);
+registerComponent('ui', 'SecondaryButton', SecondaryButton);
+registerComponent('ui', 'DangerButton', DangerButton);
+registerComponent('ui', 'SuccessButton', SuccessButton);
+registerComponent('ui', 'OutlineButton', OutlineButton);
+registerComponent('ui', 'GhostButton', GhostButton);
+registerComponent('ui', 'LinkButton', LinkButton);
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {

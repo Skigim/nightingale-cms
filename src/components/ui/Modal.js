@@ -323,18 +323,10 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // Make available globally
-if (typeof window !== 'undefined') {
-  window.Modal = Modal;
-  window.ConfirmationModal = ConfirmationModal;
-  window.FormModal = FormModal;
-  window.showModalToast = showModalToast;
-
-  // Register with component system
-  // New registry (ESM)
-  registerComponent('ui', 'Modal', Modal);
-  registerComponent('ui', 'ConfirmationModal', ConfirmationModal);
-  registerComponent('ui', 'FormModal', FormModal);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'Modal', Modal);
+registerComponent('ui', 'ConfirmationModal', ConfirmationModal);
+registerComponent('ui', 'FormModal', FormModal);
 
 // ES6 Module Export
 export default Modal;

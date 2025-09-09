@@ -1039,11 +1039,8 @@ function OrganizationModal({
   );
 }
 
-// Register with the business component system
-if (typeof window !== 'undefined') {
-  window.OrganizationModal = OrganizationModal; // legacy global
-  registerComponent('business', 'OrganizationModal', OrganizationModal);
-}
+// Register with business registry (legacy global removed)
+registerComponent('business', 'OrganizationModal', OrganizationModal);
 
 // Export for ES6 modules
 if (typeof module !== 'undefined' && module.exports) {

@@ -528,11 +528,8 @@ function FinancialItemModal({
   });
 }
 
-// Register component globally (legacy global retained for backward compatibility)
-if (typeof window !== 'undefined') {
-  window.FinancialItemModal = FinancialItemModal; // legacy global
-  registerComponent('business', 'FinancialItemModal', FinancialItemModal);
-}
+// Register with business registry (removed legacy global exposure)
+registerComponent('business', 'FinancialItemModal', FinancialItemModal);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

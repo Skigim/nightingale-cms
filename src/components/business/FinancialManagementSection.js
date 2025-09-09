@@ -9,10 +9,15 @@
  * @param {Function} props.onUpdateData - Callback to update application data
  * @returns {React.Element} Financial management section component
  */
-import { registerComponent } from '../../services/core';
+import { registerComponent, getComponent } from '../../services/core';
 function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
   const e = window.React.createElement;
   const { useState } = window.React;
+
+  // Retrieve business components from registry (eliminate window.* usage)
+  const FinancialItemCard = getComponent('business', 'FinancialItemCard');
+  const FinancialItemModal = getComponent('business', 'FinancialItemModal');
+  const AvsImportModal = getComponent('business', 'AvsImportModal');
 
   const [expandedSections, setExpandedSections] = useState({});
   const [isFinancialModalOpen, setIsFinancialModalOpen] = useState(false);
@@ -176,19 +181,21 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
               { className: 'text-gray-500 text-sm text-center py-4' },
               `No ${type} items`,
             )
-          : displayItems.map((item) =>
-              e(window.FinancialItemCard, {
-                key: item.id,
-                item: item,
-                itemType: type,
-                interactive: true,
-                showActions: true,
-                confirmingDelete: confirmingDelete === item.id,
-                onEdit: () => updateFinancialItem(type, item.id),
-                onDelete: () => confirmDelete(type, item),
-                onDeleteConfirm: () => handleDeleteConfirm(type, item.id),
-                onDeleteCancel: handleDeleteCancel,
-              }),
+          : displayItems.map(
+              (item) =>
+                FinancialItemCard &&
+                e(FinancialItemCard, {
+                  key: item.id,
+                  item: item,
+                  itemType: type,
+                  interactive: true,
+                  showActions: true,
+                  confirmingDelete: confirmingDelete === item.id,
+                  onEdit: () => updateFinancialItem(type, item.id),
+                  onDelete: () => confirmDelete(type, item),
+                  onDeleteConfirm: () => handleDeleteConfirm(type, item.id),
+                  onDeleteCancel: handleDeleteCancel,
+                }),
             ),
       ),
 
@@ -331,8 +338,8 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
     ),
 
     // Financial Item Modal (from extracted component)
-    window.FinancialItemModal &&
-      e(window.FinancialItemModal, {
+    FinancialItemModal &&
+      e(FinancialItemModal, {
         isOpen: isFinancialModalOpen,
         onClose: () => {
           setIsFinancialModalOpen(false);
@@ -347,8 +354,8 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
       }),
 
     // AVS Import Modal
-    window.AvsImportModal &&
-      e(window.AvsImportModal, {
+    AvsImportModal &&
+      e(AvsImportModal, {
         isOpen: isAvsImportOpen,
         onClose: () => setIsAvsImportOpen(false),
         onImport: handleAvsImport,
@@ -360,14 +367,12 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
 }
 
 // Register with business component system
-if (typeof window !== 'undefined') {
-  window.FinancialManagementSection = FinancialManagementSection; // legacy global
-  registerComponent(
-    'business',
-    'FinancialManagementSection',
-    FinancialManagementSection,
-  );
-}
+// Register with business registry (legacy global removal)
+registerComponent(
+  'business',
+  'FinancialManagementSection',
+  FinancialManagementSection,
+);
 
 // ES6 Module Export
 export default FinancialManagementSection;

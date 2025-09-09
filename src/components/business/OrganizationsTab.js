@@ -473,11 +473,8 @@ OrganizationsTab.propTypes = {
   onBackToList: window.PropTypes?.func,
 };
 
-// Register with the business component registry
-if (typeof window !== 'undefined') {
-  window.OrganizationsTab = OrganizationsTab; // legacy global
-  registerComponent('business', 'OrganizationsTab', OrganizationsTab);
-}
+// Register with business registry (legacy global removed)
+registerComponent('business', 'OrganizationsTab', OrganizationsTab);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

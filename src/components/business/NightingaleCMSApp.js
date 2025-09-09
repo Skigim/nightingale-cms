@@ -311,10 +311,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 }
 
 // Self-registration for both module and script loading
-if (typeof window !== 'undefined') {
-  window.NightingaleCMSApp = NightingaleCMSApp; // legacy global
-  registerComponent('business', 'NightingaleCMSApp', NightingaleCMSApp);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'NightingaleCMSApp', NightingaleCMSApp);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

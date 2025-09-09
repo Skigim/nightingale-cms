@@ -235,23 +235,13 @@ const Cards = {
 };
 
 // Register with the UI component system
-if (typeof window !== 'undefined') {
-  window.Card = Card;
-  window.CardGrid = CardGrid;
-  window.CardList = CardList;
-  window.CardField = CardField;
-  window.CardActions = CardActions;
-  window.Cards = Cards;
-
-  // Register with UI component library
-  // New registry (ESM)
-  registerComponent('ui', 'Card', Card);
-  registerComponent('ui', 'CardGrid', CardGrid);
-  registerComponent('ui', 'CardList', CardList);
-  registerComponent('ui', 'CardField', CardField);
-  registerComponent('ui', 'CardActions', CardActions);
-  registerComponent('ui', 'Cards', Cards);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'Card', Card);
+registerComponent('ui', 'CardGrid', CardGrid);
+registerComponent('ui', 'CardList', CardList);
+registerComponent('ui', 'CardField', CardField);
+registerComponent('ui', 'CardActions', CardActions);
+registerComponent('ui', 'Cards', Cards);
 
 // Export for ES6 modules
 if (typeof module !== 'undefined' && module.exports) {

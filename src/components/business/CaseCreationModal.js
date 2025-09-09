@@ -1127,25 +1127,7 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 
-// Make available globally
-if (typeof window !== 'undefined') {
-  window.CaseCreationModal = CaseCreationModal;
-
-  // Also make individual components available for backward compatibility
-  window.BasicInfoStep = BasicInfoStep;
-  window.ClientSelectionStep = ClientSelectionStep;
-  window.CaseDetailsStep = CaseDetailsStep;
-  window.ReviewStep = ReviewStep;
-  window.stepsConfig = stepsConfig;
-
-  // Register with component system
-  if (window.NightingaleComponentLibrary) {
-    window.NightingaleComponentLibrary.registerComponent(
-      'CaseCreationModal',
-      CaseCreationModal,
-    );
-  }
-}
+// Removed global window assignments (modern ES module usage)
 
 // ES6 Module Export
 export default CaseCreationModal;

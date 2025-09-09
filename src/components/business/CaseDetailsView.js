@@ -315,10 +315,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 }
 
 // Self-registration for both module and script loading
-if (typeof window !== 'undefined') {
-  window.CaseDetailsView = CaseDetailsView; // legacy global
-  registerComponent('business', 'CaseDetailsView', CaseDetailsView);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'CaseDetailsView', CaseDetailsView);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

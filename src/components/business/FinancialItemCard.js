@@ -363,15 +363,10 @@ function FinancialItemGrid({
 }
 
 // Register components with the business component system
-if (typeof window !== 'undefined') {
-  window.FinancialItemCard = FinancialItemCard; // legacy globals
-  window.FinancialItemList = FinancialItemList;
-  window.FinancialItemGrid = FinancialItemGrid;
-
-  registerComponent('business', 'FinancialItemCard', FinancialItemCard);
-  registerComponent('business', 'FinancialItemList', FinancialItemList);
-  registerComponent('business', 'FinancialItemGrid', FinancialItemGrid);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'FinancialItemCard', FinancialItemCard);
+registerComponent('business', 'FinancialItemList', FinancialItemList);
+registerComponent('business', 'FinancialItemGrid', FinancialItemGrid);
 
 // Export for ES6 modules
 if (typeof module !== 'undefined' && module.exports) {

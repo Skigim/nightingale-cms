@@ -393,10 +393,8 @@ PeopleTab.propTypes = {
 };
 
 // Register with the business component registry
-if (typeof window !== 'undefined') {
-  window.PeopleTab = PeopleTab; // legacy global
-  registerComponent('business', 'PeopleTab', PeopleTab);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'PeopleTab', PeopleTab);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

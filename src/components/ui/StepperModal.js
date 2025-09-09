@@ -195,11 +195,8 @@ function StepperModal({
 }
 
 // Make StepperModal available globally
-if (typeof window !== 'undefined') {
-  window.StepperModal = StepperModal;
-  // New registry (ESM)
-  registerComponent('ui', 'StepperModal', StepperModal);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'StepperModal', StepperModal);
 
 // ES6 Module Export
 export default StepperModal;

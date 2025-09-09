@@ -409,24 +409,13 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // Make available globally
-if (typeof window !== 'undefined') {
-  window.FormField = FormField;
-  window.TextInput = TextInput;
-  window.Select = Select;
-  window.DateInput = DateInput;
-  window.Textarea = Textarea;
-  window.Checkbox = Checkbox;
-  window.createValidator = createValidator;
-
-  // Register with component system
-  // New registry (ESM)
-  registerComponent('ui', 'FormField', FormField);
-  registerComponent('ui', 'TextInput', TextInput);
-  registerComponent('ui', 'Select', Select);
-  registerComponent('ui', 'DateInput', DateInput);
-  registerComponent('ui', 'Textarea', Textarea);
-  registerComponent('ui', 'Checkbox', Checkbox);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'FormField', FormField);
+registerComponent('ui', 'TextInput', TextInput);
+registerComponent('ui', 'Select', Select);
+registerComponent('ui', 'DateInput', DateInput);
+registerComponent('ui', 'Textarea', Textarea);
+registerComponent('ui', 'Checkbox', Checkbox);
 
 // ES6 Module Export
 export default FormField;

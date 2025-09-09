@@ -446,11 +446,8 @@ function SearchBar({
 }
 
 // Make available globally
-if (typeof window !== 'undefined') {
-  window.SearchBar = SearchBar;
-  // New registry (ESM)
-  registerComponent('ui', 'SearchBar', SearchBar);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'SearchBar', SearchBar);
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {

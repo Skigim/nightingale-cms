@@ -273,23 +273,12 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 // Make available globally
-if (typeof window !== 'undefined') {
-  window.Badge = Badge;
-  window.ProgressBadge = ProgressBadge;
-  window.CountBadge = CountBadge;
-  window.MultiBadge = MultiBadge;
-
-  // For backward compatibility with existing StatusBadge usage
-  window.StatusBadge = Badge;
-
-  // Register with component system
-  // New registry registrations (ESM)
-  registerComponent('ui', 'Badge', Badge);
-  registerComponent('ui', 'StatusBadge', Badge); // alias
-  registerComponent('ui', 'ProgressBadge', ProgressBadge);
-  registerComponent('ui', 'CountBadge', CountBadge);
-  registerComponent('ui', 'MultiBadge', MultiBadge);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'Badge', Badge);
+registerComponent('ui', 'StatusBadge', Badge); // alias
+registerComponent('ui', 'ProgressBadge', ProgressBadge);
+registerComponent('ui', 'CountBadge', CountBadge);
+registerComponent('ui', 'MultiBadge', MultiBadge);
 
 // ES6 Module Export
 export default Badge;

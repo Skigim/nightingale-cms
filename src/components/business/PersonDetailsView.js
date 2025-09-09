@@ -82,9 +82,7 @@ function PersonDetailsView(props) {
 }
 
 // Self-registration (business layer)
-if (typeof window !== 'undefined') {
-  window.PersonDetailsView = PersonDetailsView; // legacy global
-  registerComponent('business', 'PersonDetailsView', PersonDetailsView);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'PersonDetailsView', PersonDetailsView);
 
 export default PersonDetailsView;

@@ -426,7 +426,6 @@ CasesTab.propTypes = {
 
 // Register with the business component registry
 if (typeof window !== 'undefined') {
-  window.CasesTab = CasesTab; // legacy global
   registerComponent('business', 'CasesTab', CasesTab);
 }
 

@@ -548,10 +548,8 @@ function NotesModal({
 }
 
 // Register with Business Components
-if (typeof window !== 'undefined') {
-  window.NotesModal = NotesModal; // legacy global
-  registerComponent('business', 'NotesModal', NotesModal);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'NotesModal', NotesModal);
 
 // ES6 Module Export
 export default NotesModal;

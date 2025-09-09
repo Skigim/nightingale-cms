@@ -404,11 +404,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
   };
 }
 
-// Self-registration for both module and script loading
-if (typeof window !== 'undefined') {
-  window.SettingsModal = SettingsModal; // legacy global
-  registerComponent('business', 'SettingsModal', SettingsModal);
-}
+// Register with business registry (legacy global removed)
+registerComponent('business', 'SettingsModal', SettingsModal);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

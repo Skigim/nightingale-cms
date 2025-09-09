@@ -573,13 +573,8 @@ const DataTable = ({
 };
 
 // Make component available globally and register with UI registry
-if (typeof window !== 'undefined') {
-  window.DataTable = DataTable;
-
-  // Register with the UI component registry when available
-  // New registry (ESM)
-  registerComponent('ui', 'DataTable', DataTable);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'DataTable', DataTable);
 
 // ES6 Module Export
 export default DataTable;

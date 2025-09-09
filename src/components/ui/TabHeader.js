@@ -95,10 +95,5 @@ if (typeof module !== 'undefined' && module.exports) {
 export default TabHeader;
 
 // Global registration for script loading
-if (typeof window !== 'undefined') {
-  window.TabHeader = TabHeader;
-
-  // Register component in UI registry (handled externally)
-  // New registry (ESM)
-  registerComponent('ui', 'TabHeader', TabHeader);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'TabHeader', TabHeader);

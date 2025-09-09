@@ -1095,10 +1095,8 @@ function PersonCreationModal({
 }
 
 // Register with the business component system
-if (typeof window !== 'undefined') {
-  window.PersonCreationModal = PersonCreationModal; // legacy global
-  registerComponent('business', 'PersonCreationModal', PersonCreationModal);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'PersonCreationModal', PersonCreationModal);
 
 // Export for ES6 modules
 if (typeof module !== 'undefined' && module.exports) {

@@ -46,10 +46,8 @@ EligibilityTab.propTypes = {
 };
 
 // Register with the business component registry
-if (typeof window !== 'undefined') {
-  window.EligibilityTab = EligibilityTab; // legacy global
-  registerComponent('business', 'EligibilityTab', EligibilityTab);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'EligibilityTab', EligibilityTab);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

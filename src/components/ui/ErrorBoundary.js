@@ -114,14 +114,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 }
 
 // Self-registration for both module and script loading
-if (typeof window !== 'undefined') {
-  // Register globally for backward compatibility
-  window.ErrorBoundary = ErrorBoundary;
-
-  // Register component in UI registry (handled elsewhere)
-  // New registry (ESM)
-  registerComponent('ui', 'ErrorBoundary', ErrorBoundary);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'ErrorBoundary', ErrorBoundary);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

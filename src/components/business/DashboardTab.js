@@ -202,10 +202,8 @@ DashboardTab.propTypes = {
 };
 
 // Register with business component system
-if (typeof window !== 'undefined') {
-  window.DashboardTab = DashboardTab; // legacy global
-  registerComponent('business', 'DashboardTab', DashboardTab);
-}
+// Register with business registry (legacy global removal)
+registerComponent('business', 'DashboardTab', DashboardTab);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {

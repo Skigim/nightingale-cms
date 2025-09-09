@@ -216,14 +216,8 @@ if (typeof window !== 'undefined' && window.PropTypes) {
 }
 
 // Self-registration for both module and script loading
-if (typeof window !== 'undefined') {
-  // Register globally for backward compatibility
-  window.Header = Header;
-
-  // Register component in UI registry (handled elsewhere)
-  // New registry (ESM)
-  registerComponent('ui', 'Header', Header);
-}
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'Header', Header);
 
 // Export for ES6 module compatibility
 if (typeof module !== 'undefined' && module.exports) {
