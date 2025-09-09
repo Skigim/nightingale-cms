@@ -3,20 +3,20 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 
 // --- Preload UI Components (side-effect imports for registry registration) ---
-import './components/ui/Badge.js';
-import './components/ui/Button.js';
+import './components/ui/Badge.jsx';
+import './components/ui/Button.jsx';
 import './components/ui/Cards.js';
 import './components/ui/DataTable.js';
-import './components/ui/ErrorBoundary.js';
+import './components/ui/ErrorBoundary.jsx';
 import './components/ui/FormComponents.js';
 import './components/ui/Header.js';
-import './components/ui/Modal.js';
+import './components/ui/Modal.jsx';
 import './components/ui/SearchBar.js';
 import './components/ui/Sidebar.js';
 import './components/ui/Stepper.js';
 import './components/ui/StepperModal.js';
 import './components/ui/TabBase.js';
-import './components/ui/TabHeader.js';
+import './components/ui/TabHeader.jsx';
 
 // --- Preload Business Components (tabs, modals, detail views) ---
 import './components/business/SettingsModal.js';
