@@ -1,6 +1,6 @@
-// SearchBar component - uses global window.React
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
-// Uses global window.NightingaleSearchService
 
 /**
  * Nightingale SearchBar Component - Unified Version
@@ -31,21 +31,18 @@ function SearchBar({
   maxResults = 8,
   minQueryLength = 0,
 }) {
-  const e = window.React.createElement;
-
   // State for dropdown functionality (only used when showDropdown=true)
-  const [isDropdownOpen, setIsDropdownOpen] = window.React.useState(false);
-  const [searchResults, setSearchResults] = window.React.useState([]);
-  const [highlightedIndex, setHighlightedIndex] = window.React.useState(-1);
-  const [hasUserInteracted, setHasUserInteracted] =
-    window.React.useState(false);
-  const [usingKeyboardNav, setUsingKeyboardNav] = window.React.useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [usingKeyboardNav, setUsingKeyboardNav] = useState(false);
 
   // Refs
-  const inputRef = window.React.useRef(null);
-  const dropdownRef = window.React.useRef(null);
-  const resultRefs = window.React.useRef([]);
-  const searchServiceRef = window.React.useRef(null);
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const resultRefs = useRef([]);
+  const searchServiceRef = useRef(null);
 
   // Size configurations
   const sizeClasses = {
@@ -64,7 +61,7 @@ function SearchBar({
   const shouldUseDropdown = showDropdown && data.length > 0;
 
   // Memoize search service creation (only if dropdown enabled)
-  const createSearchService = window.React.useCallback(() => {
+  const createSearchService = useCallback(() => {
     if (!shouldUseDropdown) return null;
 
     if (searchKeys.length > 0) {
@@ -81,16 +78,16 @@ function SearchBar({
   }, [shouldUseDropdown, data, searchKeys, fuseOptions]);
 
   // Initialize search service only when dropdown is enabled
-  window.React.useEffect(() => {
-    if (shouldUseDropdown) {
+  useEffect(() => {
+    if (shouldUseDropdown && searchKeys.length > 0) {
       searchServiceRef.current = createSearchService();
     } else {
       searchServiceRef.current = null;
     }
-  }, [shouldUseDropdown, createSearchService]);
+  }, [shouldUseDropdown, data, searchKeys]);
 
   // Handle search when value changes (only for dropdown mode)
-  window.React.useEffect(() => {
+  useEffect(() => {
     if (
       !shouldUseDropdown ||
       !hasUserInteracted ||
@@ -118,17 +115,10 @@ function SearchBar({
       setSearchResults(filtered);
       setIsDropdownOpen(filtered.length > 0);
     }
-  }, [
-    shouldUseDropdown,
-    value,
-    hasUserInteracted,
-    minQueryLength,
-    maxResults,
-    data,
-  ]);
+  }, [shouldUseDropdown, value, hasUserInteracted, minQueryLength, maxResults]);
 
   // Handle result selection (dropdown only)
-  const handleResultSelect = window.React.useCallback(
+  const handleResultSelect = useCallback(
     (result) => {
       setIsDropdownOpen(false);
       setHighlightedIndex(-1);
@@ -237,7 +227,7 @@ function SearchBar({
   };
 
   // Default result renderer (dropdown only)
-  const defaultRenderResult = window.React.useCallback(
+  const defaultRenderResult = useCallback(
     (result, index) => {
       const isHighlighted = index === highlightedIndex;
 
@@ -249,91 +239,81 @@ function SearchBar({
         `${result.mcn || result.masterCaseNumber || ''} ${result.personName || result.name || ''}`.trim() ||
         JSON.stringify(result);
 
-      return e(
-        'div',
-        {
-          key: result.id || index,
-          ref: (el) => {
+      return (
+        <div
+          key={result.id || index}
+          ref={(el) => {
             if (el) {
               resultRefs.current[index] = el;
             }
-          },
-          className: `
+          }}
+          className={`
           p-3 cursor-pointer border-b border-gray-600 last:border-b-0 transition-colors
           ${isHighlighted ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}
         `
             .replace(/\s+/g, ' ')
-            .trim(),
-          style: { pointerEvents: 'auto' },
-          onMouseDown: (e) => {
+            .trim()}
+          style={{ pointerEvents: 'auto' }}
+          onMouseDown={(e) => {
             e.preventDefault(); // Prevent input blur
             e.stopPropagation();
-          },
-          onClick: (e) => {
+          }}
+          onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             handleResultSelect(result);
-          },
-          onMouseEnter: () => {
+          }}
+          onMouseEnter={() => {
             if (!usingKeyboardNav) {
               setHighlightedIndex(index);
             }
-          },
-          onMouseLeave: () => {
+          }}
+          onMouseLeave={() => {
             if (!usingKeyboardNav && highlightedIndex === index) {
               setHighlightedIndex(-1);
             }
-          },
-        },
-        displayText,
+          }}
+        >
+          {displayText}
+        </div>
       );
     },
     [highlightedIndex, usingKeyboardNav, handleResultSelect],
   );
 
-  return e(
-    'div',
-    { className: `relative ${className}` },
-    e(
-      'div',
-      { className: 'relative' },
+  return (
+    <div className={`relative ${className}`}>
+      <div className="relative">
+        {/* Search icon */}
+        {showSearchIcon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg
+              className={`${iconSizes[size]} text-gray-400`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        )}
 
-      // Search icon
-      showSearchIcon &&
-        e(
-          'div',
-          {
-            className:
-              'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none',
-          },
-          e(
-            'svg',
-            {
-              className: `${iconSizes[size]} text-gray-400`,
-              fill: 'none',
-              viewBox: '0 0 24 24',
-              stroke: 'currentColor',
-            },
-            e('path', {
-              strokeLinecap: 'round',
-              strokeLinejoin: 'round',
-              strokeWidth: 2,
-              d: 'm21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
-            }),
-          ),
-        ),
-
-      // Input field
-      e('input', {
-        ref: inputRef,
-        type: 'text',
-        value: value,
-        onChange: onChange,
-        onFocus: handleFocus,
-        onBlur: handleBlur,
-        onKeyDown: handleKeyDown,
-        placeholder: placeholder,
-        className: `
+        {/* Input field */}
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={onChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className={`
           w-full bg-gray-700 border border-gray-600 rounded-lg
           text-white placeholder-gray-400 focus:outline-none
           focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -341,118 +321,124 @@ function SearchBar({
           ${showSearchIcon ? 'pl-10' : ''}
           ${showClearButton && value ? 'pr-10' : ''}
         `
-          .replace(/\s+/g, ' ')
-          .trim(),
-      }),
+            .replace(/\s+/g, ' ')
+            .trim()}
+        />
 
-      // Clear button
-      showClearButton &&
-        value &&
-        e(
-          'button',
-          {
-            type: 'button',
-            onClick: handleClear,
-            className: 'absolute inset-y-0 right-0 pr-3 flex items-center',
-          },
-          e(
-            'svg',
-            {
-              className: `${iconSizes[size]} text-gray-400 hover:text-gray-300`,
-              fill: 'none',
-              viewBox: '0 0 24 24',
-              stroke: 'currentColor',
-            },
-            e('path', {
-              strokeLinecap: 'round',
-              strokeLinejoin: 'round',
-              strokeWidth: 2,
-              d: 'M6 18L18 6M6 6l12 12',
-            }),
-          ),
-        ),
-    ),
+        {/* Clear button */}
+        {showClearButton && value && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+          >
+            <svg
+              className={`${iconSizes[size]} text-gray-400 hover:text-gray-300`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        )}
+      </div>
 
-    // Dropdown results (only when showDropdown is enabled)
-    shouldUseDropdown &&
-      isDropdownOpen &&
-      searchResults.length > 0 &&
-      e(
-        'div',
-        {
-          ref: dropdownRef,
-          className: `
+      {/* Dropdown results (only when showDropdown is enabled) */}
+      {shouldUseDropdown && isDropdownOpen && searchResults.length > 0 && (
+        <div
+          ref={dropdownRef}
+          className={`
           absolute z-50 w-full mt-1 bg-gray-800 border border-gray-600
           rounded-lg shadow-lg max-h-64 overflow-y-auto
         `
             .replace(/\s+/g, ' ')
-            .trim(),
-          onMouseDown: (e) => {
+            .trim()}
+          onMouseDown={(e) => {
             e.preventDefault(); // Prevent any blur
-          },
-        },
-        searchResults.map((result, index) => {
-          const isHighlighted = index === highlightedIndex;
-          const content = renderResult
-            ? renderResult(result, index)
-            : defaultRenderResult(result, index);
+          }}
+        >
+          {searchResults.map((result, index) => {
+            const isHighlighted = index === highlightedIndex;
+            const content = renderResult
+              ? renderResult(result, index)
+              : defaultRenderResult(result, index);
 
-          // If using custom renderer, wrap with click handlers
-          if (renderResult) {
-            return e(
-              'div',
-              {
-                key: result.id || index,
-                ref: (el) => {
-                  if (el) {
-                    resultRefs.current[index] = el;
-                  }
-                },
-                className: `
+            // If using custom renderer, wrap with click handlers
+            if (renderResult) {
+              return (
+                <div
+                  key={result.id || index}
+                  ref={(el) => {
+                    if (el) {
+                      resultRefs.current[index] = el;
+                    }
+                  }}
+                  className={`
                 p-3 cursor-pointer border-b border-gray-600 last:border-b-0 transition-colors
                 ${isHighlighted ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-600'}
               `
-                  .replace(/\s+/g, ' ')
-                  .trim(),
-                style: { pointerEvents: 'auto' },
-                onMouseDown: (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                },
-                onClick: (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleResultSelect(result);
-                },
-                onMouseEnter: () => {
-                  if (!usingKeyboardNav) {
-                    setHighlightedIndex(index);
-                  }
-                },
-                onMouseLeave: () => {
-                  if (!usingKeyboardNav && highlightedIndex === index) {
-                    setHighlightedIndex(-1);
-                  }
-                },
-              },
-              content,
-            );
-          }
+                    .replace(/\s+/g, ' ')
+                    .trim()}
+                  style={{ pointerEvents: 'auto' }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleResultSelect(result);
+                  }}
+                  onMouseEnter={() => {
+                    if (!usingKeyboardNav) {
+                      setHighlightedIndex(index);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (!usingKeyboardNav && highlightedIndex === index) {
+                      setHighlightedIndex(-1);
+                    }
+                  }}
+                >
+                  {content}
+                </div>
+              );
+            }
 
-          return content;
-        }),
-      ),
+            return content;
+          })}
+        </div>
+      )}
+    </div>
   );
 }
 
-// Make available globally
-// Register with UI registry (legacy global removal)
-registerComponent('ui', 'SearchBar', SearchBar);
+SearchBar.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  className: PropTypes.string,
+  showClearButton: PropTypes.bool,
+  onClear: PropTypes.func,
+  showSearchIcon: PropTypes.bool,
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  data: PropTypes.array,
+  searchKeys: PropTypes.array,
+  fuseOptions: PropTypes.object,
+  onResultSelect: PropTypes.func,
+  renderResult: PropTypes.func,
+  showDropdown: PropTypes.bool,
+  maxResults: PropTypes.number,
+  minQueryLength: PropTypes.number,
+};
 
-// Export for module systems
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = SearchBar;
-}
+// Register component
+registerComponent('SearchBar', SearchBar);
 
-// ES6 Module Export
 export default SearchBar;
