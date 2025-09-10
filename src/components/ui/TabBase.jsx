@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
 
 /**
  * TabBase.jsx - Factory for creating standardized business-layer Tab components
@@ -187,10 +187,21 @@ FallbackTabHeader.propTypes = {
  * @returns {Function} React component function
  */
 function getRegistryComponent(componentName, fallbackComponent) {
+  // First try the UI registry
+  const uiComponent = getComponent('ui', componentName);
+  if (uiComponent) return uiComponent;
+
+  // Then try the business registry (for modals and business components)
+  const businessComponent = getComponent('business', componentName);
+  if (businessComponent) return businessComponent;
+
+  // Legacy fallback to window object (for backwards compatibility during transition)
   if (window[componentName]) return window[componentName];
+
   // If an explicit null is passed, treat as "no fallback" and return null
   if (fallbackComponent === null) return null;
   if (fallbackComponent !== undefined) return fallbackComponent;
+
   // Only emit a visible error component when no explicit null/override provided
   return function ComponentNotFound() {
     return (
@@ -304,6 +315,7 @@ function resolveComponents() {
     Checkbox: getRegistryComponent('Checkbox', null),
     // Business Components
     PersonCreationModal: getRegistryComponent('PersonCreationModal', null),
+    CaseCreationModal: getRegistryComponent('CaseCreationModal', null),
     OrganizationModal: getRegistryComponent('OrganizationModal', null),
     NotesModal: getRegistryComponent('NotesModal', null),
   };

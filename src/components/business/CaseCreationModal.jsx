@@ -2,6 +2,7 @@
 // Note: React hooks declared within component functions for purity
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { registerComponent } from '../../services/registry';
 
 // Access utilities from global window (loaded via script tags)
 const getDateUtils = () => window.dateUtils || {};
@@ -1116,7 +1117,8 @@ function CaseCreationModal({
 
 // Export for ES6 modules
 
-// Removed global window assignments (modern ES module usage)
+// Register with business registry
+registerComponent('business', 'CaseCreationModal', CaseCreationModal);
 
 // ES6 Module Export
 export default CaseCreationModal;
