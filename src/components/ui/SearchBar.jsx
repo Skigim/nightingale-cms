@@ -84,7 +84,7 @@ function SearchBar({
     } else {
       searchServiceRef.current = null;
     }
-  }, [shouldUseDropdown, data, searchKeys]);
+  }, [shouldUseDropdown, searchKeys, createSearchService, data]);
 
   // Handle search when value changes (only for dropdown mode)
   useEffect(() => {
@@ -93,8 +93,9 @@ function SearchBar({
       !hasUserInteracted ||
       value.length < minQueryLength
     ) {
-      setSearchResults([]);
-      setIsDropdownOpen(false);
+      // Avoid re-render loops: only update if state isn't already cleared
+      setSearchResults((prev) => (prev.length ? [] : prev));
+      setIsDropdownOpen((prev) => (prev ? false : prev));
       return;
     }
 
@@ -115,7 +116,14 @@ function SearchBar({
       setSearchResults(filtered);
       setIsDropdownOpen(filtered.length > 0);
     }
-  }, [shouldUseDropdown, value, hasUserInteracted, minQueryLength, maxResults]);
+  }, [
+    shouldUseDropdown,
+    value,
+    hasUserInteracted,
+    minQueryLength,
+    maxResults,
+    data,
+  ]);
 
   // Handle result selection (dropdown only)
   const handleResultSelect = useCallback(

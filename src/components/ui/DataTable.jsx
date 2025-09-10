@@ -299,47 +299,6 @@ const DataTable = ({
     return paginatedData.every((row) => isRowSelected(row));
   };
 
-  // Helper function to render sort indicator
-  const renderSortIcon = (field) => {
-    if (!sortField || sortField !== field) {
-      return (
-        <svg
-          className="w-4 h-4 ml-2 opacity-50"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M5 12l5-5 5 5H5z" />
-        </svg>
-      );
-    }
-
-    return sortDirection === 'asc' ? (
-      <svg
-        className="w-4 h-4 ml-2"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fillRule="evenodd"
-          d="M14.707 10.293a1 1 0 010 1.414L10 16.414l-4.707-4.707a1 1 0 111.414-1.414L10 13.586l3.293-3.293a1 1 0 011.414 0z"
-          clipRule="evenodd"
-        />
-      </svg>
-    ) : (
-      <svg
-        className="w-4 h-4 ml-2"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fillRule="evenodd"
-          d="M5.293 9.707a1 1 0 010-1.414L10 3.586l4.707 4.707a1 1 0 01-1.414 1.414L10 6.414 6.707 9.707a1 1 0 01-1.414 0z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  };
-
   // Render cell content
   const renderCell = (row, column, rowIndex) => {
     const value = row[column.field];

@@ -39,7 +39,7 @@ class ErrorBoundary extends Component {
       error: error,
       errorInfo: errorInfo,
     });
-    
+
     // Log via Nightingale logger if available
     try {
       const logger = window.NightingaleLogger?.get('ErrorBoundary');
@@ -52,7 +52,11 @@ class ErrorBoundary extends Component {
 
   componentDidUpdate(prevProps) {
     // Reset error state when key prop changes
-    if (this.props.key !== prevProps.key && this.state.hasError) {
+    // React does not pass 'key' through props; to allow manual resets, use a custom prop like 'boundaryKey'
+    if (
+      this.props.boundaryKey !== prevProps.boundaryKey &&
+      this.state.hasError
+    ) {
       this.setState({ hasError: false, error: null, errorInfo: null });
     }
   }
@@ -98,6 +102,7 @@ class ErrorBoundary extends Component {
 // PropTypes for validation
 ErrorBoundary.propTypes = {
   children: PropTypes.node.isRequired,
+  boundaryKey: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 // Self-registration for both module and script loading

@@ -1,0 +1,1395 @@
+[
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/AvsImportModal.js",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'isOpen' is missing in props validation",
+        "line": 21,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 21,
+        "endColumn": 9,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onClose' is missing in props validation",
+        "line": 22,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 22,
+        "endColumn": 10,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onImport' is missing in props validation",
+        "line": 23,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 23,
+        "endColumn": 11,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'masterCaseId' is missing in props validation",
+        "line": 24,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 24,
+        "endColumn": 15,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'existingResources' is missing in props validation",
+        "line": 25,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 25,
+        "endColumn": 25,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/CaseCreationModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/CaseDetailsView.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/CasesTab.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/DashboardTab.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/EligibilityTab.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/FinancialItemCard.js",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item' is missing in props validation",
+        "line": 15,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 15,
+        "endColumn": 7,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'itemType' is missing in props validation",
+        "line": 16,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 16,
+        "endColumn": 11,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onEdit' is missing in props validation",
+        "line": 17,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 17,
+        "endColumn": 20,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onDelete' is missing in props validation",
+        "line": 18,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 18,
+        "endColumn": 22,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onDeleteConfirm' is missing in props validation",
+        "line": 19,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 19,
+        "endColumn": 29,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onDeleteCancel' is missing in props validation",
+        "line": 20,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 20,
+        "endColumn": 28,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'confirmingDelete' is missing in props validation",
+        "line": 21,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 21,
+        "endColumn": 27,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'showActions' is missing in props validation",
+        "line": 22,
+        "column": 3,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 22,
+        "endColumn": 21,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.verificationStatus' is missing in props validation",
+        "line": 30,
+        "column": 26,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 30,
+        "endColumn": 44,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.verificationSource' is missing in props validation",
+        "line": 46,
+        "column": 39,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 46,
+        "endColumn": 57,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.verificationSource' is missing in props validation",
+        "line": 47,
+        "column": 54,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 47,
+        "endColumn": 72,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.amount' is missing in props validation",
+        "line": 87,
+        "column": 25,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 87,
+        "endColumn": 31,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.value' is missing in props validation",
+        "line": 87,
+        "column": 40,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 87,
+        "endColumn": 45,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.frequency' is missing in props validation",
+        "line": 91,
+        "column": 14,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 91,
+        "endColumn": 23,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.frequency' is missing in props validation",
+        "line": 92,
+        "column": 48,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 92,
+        "endColumn": 57,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.description' is missing in props validation",
+        "line": 138,
+        "column": 18,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 138,
+        "endColumn": 29,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.type' is missing in props validation",
+        "line": 138,
+        "column": 38,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 138,
+        "endColumn": 42,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.location' is missing in props validation",
+        "line": 149,
+        "column": 12,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 149,
+        "endColumn": 20,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.location' is missing in props validation",
+        "line": 150,
+        "column": 63,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 150,
+        "endColumn": 71,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.accountNumber' is missing in props validation",
+        "line": 157,
+        "column": 14,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 157,
+        "endColumn": 27,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'item.accountNumber' is missing in props validation",
+        "line": 161,
+        "column": 40,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 161,
+        "endColumn": 53,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/FinancialItemModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/FinancialManagementSection.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/NightingaleCMSApp.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/NotesModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/OrganizationModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/OrganizationsTab.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/PeopleTab.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/PeopleTab.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/PersonCreationModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/PersonDetailsView.js",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'personId' is missing in props validation",
+        "line": 13,
+        "column": 11,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 13,
+        "endColumn": 19,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'fullData' is missing in props validation",
+        "line": 13,
+        "column": 21,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 13,
+        "endColumn": 29,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'onBackToList' is missing in props validation",
+        "line": 13,
+        "column": 31,
+        "nodeType": "Property",
+        "messageId": "missingPropType",
+        "endLine": 13,
+        "endColumn": 43,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'fullData.people' is missing in props validation",
+        "line": 16,
+        "column": 40,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 16,
+        "endColumn": 46,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "react/prop-types",
+        "severity": 1,
+        "message": "'fullData.people' is missing in props validation",
+        "line": 16,
+        "column": 59,
+        "nodeType": "Identifier",
+        "messageId": "missingPropType",
+        "endLine": 16,
+        "endColumn": 65,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/business/SettingsModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Badge.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Badge.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Button.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Button.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Cards.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Cards.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/DataTable.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/DataTable.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/ErrorBoundary.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/ErrorBoundary.jsx",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'error' is defined but never used.",
+        "line": 31,
+        "column": 35,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 31,
+        "endColumn": 40,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/FormComponents.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/FormComponents.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Header.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Header.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Modal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Modal.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/SearchBar.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/SearchBar.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Sidebar.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Sidebar.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Stepper.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/Stepper.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/StepperModal.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/StepperModal.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/TabBase.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/TabBase.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/TabHeader.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/components/ui/TabHeader.jsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/main.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/cms.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/core.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/logger-quickstart.js",
+    "messages": [],
+    "suppressedMessages": [
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'demonstrateLogging' is defined but never used.",
+        "line": 37,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 37,
+        "endColumn": 28,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'createServiceLoggers' is defined but never used.",
+        "line": 81,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 81,
+        "endColumn": 30,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'beforeAndAfter' is defined but never used.",
+        "line": 94,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 94,
+        "endColumn": 24,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'oldWayBad' is defined but never used.",
+        "line": 98,
+        "column": 12,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 98,
+        "endColumn": 21,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'newWayGood' is defined but never used.",
+        "line": 108,
+        "column": 12,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 108,
+        "endColumn": 22,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'debuggingHelpers' is defined but never used.",
+        "line": 127,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 127,
+        "endColumn": 26,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'serviceWithLogging' is defined but never used.",
+        "line": 158,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 158,
+        "endColumn": 28,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-undef",
+        "severity": 2,
+        "message": "'processData' is not defined.",
+        "line": 167,
+        "column": 24,
+        "nodeType": "Identifier",
+        "messageId": "undef",
+        "endLine": 167,
+        "endColumn": 35,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      },
+      {
+        "ruleId": "no-unused-vars",
+        "severity": 1,
+        "message": "'componentWithLogging' is defined but never used.",
+        "line": 182,
+        "column": 10,
+        "nodeType": "Identifier",
+        "messageId": "unusedVar",
+        "endLine": 182,
+        "endColumn": 30,
+        "suppressions": [{ "kind": "directive", "justification": "" }]
+      }
+    ],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.autosavefile.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.clipboard.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.datamanagement.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.dayjs.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.documentgeneration.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.logger.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.parsers.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.placeholders.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.search.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.templates.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/nightingale.toast.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/registry.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/toast-test.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  },
+  {
+    "filePath": "/workspaces/nightingale-cms/src/services/ui.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": [
+      { "ruleId": "no-extra-semi", "replacedBy": [] },
+      { "ruleId": "no-mixed-spaces-and-tabs", "replacedBy": [] }
+    ]
+  }
+]
