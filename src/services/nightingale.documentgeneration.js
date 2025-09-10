@@ -1,10 +1,11 @@
 /**
  * Nightingale Document Generation Service
  *
- * Extracted from NightingaleCorrespondence.html to provide core document
- * generation functionality for integration into the main CMS.
+ * Provides core document generation functionality for the Nightingale CMS.
+ * Handles VR request creation, template processing, and document compilation
+ * with integration to placeholders, templates, and file services.
  *
- * This service handles:
+ * Features:
  * - VR Request creation and management
  * - Document content generation using templates and placeholders
  * - Financial item processing for verification requests
@@ -12,692 +13,495 @@
  * - VR Request CRUD operations
  * - Status tracking and updates
  *
- * Dependencies:
- * - nightingale.placeholders.js (for placeholder processing)
- * - nightingale.templates.js (for template management)
- * - nightingale.fileservice.js (for persistence)
- * - nightingale.toast.js (for notifications)
- * - nightingale.dayjs.js (for date handling)
- *
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
 
-(function () {
-  'use strict';
+import NightingalePlaceholders from './nightingale.placeholders.js';
+import NightingaleTemplates from './nightingale.templates.js';
+import NightingaleDayJS from './nightingale.dayjs.js';
+import NightingaleToast from './nightingale.toast.js';
+import NightingaleLogger from './nightingale.logger.js';
+
+/**
+ * Document Generation Service
+ */
+class NightingaleDocumentGeneration {
+  constructor() {
+    this.placeholderService = NightingalePlaceholders;
+    this.templateService = NightingaleTemplates;
+    this.dateService = NightingaleDayJS;
+    this.toastService = NightingaleToast;
+    this.logger = NightingaleLogger.get('documentgeneration');
+  }
 
   /**
-   * Document Generation Service
+   * Get all VR requests from data
+   * @param {Object} data - Full nightingale data object
+   * @returns {Array} Array of VR request objects
    */
-  class DocumentGenerationService {
-    constructor() {
-      this.placeholderService = null;
-      this.templateService = null;
-      this.fileService = null;
-      this.toastService = null;
-      this.dateUtils = null;
+  getVRRequests(data) {
+    return data?.vrRequests || [];
+  }
 
-      // Initialize dependencies when available
-      this._initializeDependencies();
-    }
+  /**
+   * Get VR request by ID
+   * @param {Object} data - Full nightingale data object
+   * @param {number} requestId - VR request ID to find
+   * @returns {Object|null} VR request object or null if not found
+   */
+  getVRRequestById(data, requestId) {
+    const requests = this.getVRRequests(data);
+    return requests.find((request) => request.id === requestId) || null;
+  }
 
-    /**
-     * Initialize service dependencies
-     * @private
-     */
-    _initializeDependencies() {
-      if (typeof window !== 'undefined') {
-        // Core services
-        this.placeholderService = window.NightingalePlaceholderService;
-        this.templateService = window.NightingaleTemplateService;
-        this.fileService = window.NightingaleFileService || window.FileService;
-        this.toastService = window.NightingaleToast || window.showToast;
-        this.dateUtils = window.dateUtils || window.dayjs;
+  /**
+   * Create a new VR request
+   * @param {Object} data - Full nightingale data object
+   * @param {Object} requestData - VR request data
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async createVRRequest(data, requestData, options = {}) {
+    const { showToast = true, saveFile = true } = options;
 
-        // Lodash for deep cloning
-        this._ = window._ || window.lodash;
+    try {
+      // Validate request data
+      const validation = this.validateVRRequest(requestData);
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: 'Validation failed',
+          errors: validation.errors,
+        };
       }
-    }
 
-    /**
-     * Get all VR requests from data
-     * @param {Object} data - Full nightingale data object
-     * @returns {Array} Array of VR request objects
-     */
-    getVrRequests(data) {
-      return data?.vrRequests || [];
-    }
+      // Create new data object
+      const newData = this._deepClone(data);
 
-    /**
-     * Get VR request by ID
-     * @param {Object} data - Full nightingale data object
-     * @param {number} requestId - VR request ID to find
-     * @returns {Object|null} VR request object or null if not found
-     */
-    getVrRequestById(data, requestId) {
-      const requests = this.getVrRequests(data);
-      return requests.find((request) => request.id === requestId) || null;
-    }
+      // Initialize VR requests array if it doesn't exist
+      if (!newData.vrRequests) {
+        newData.vrRequests = [];
+      }
 
-    /**
-     * Get VR requests for a specific case
-     * @param {Object} data - Full nightingale data object
-     * @param {number} caseId - Case ID to filter by
-     * @returns {Array} Array of VR requests for the case
-     */
-    getVrRequestsByCase(data, caseId) {
-      const requests = this.getVrRequests(data);
-      return requests.filter((request) => request.caseId === caseId);
-    }
+      // Generate new ID
+      const newId = this._getNextVRRequestId(newData);
 
-    /**
-     * Generate document content using template and financial items
-     * @param {Object} template - Template object with content
-     * @param {Object} activeCase - Active case data
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Array} selectedFinancialItems - Array of selected financial items
-     * @param {Object} options - Options: { additionalPlaceholders: Object }
-     * @returns {Object} Result: { success: boolean, content?: string, error?: string }
-     */
-    generateDocumentContent(
-      template,
-      activeCase,
-      fullData,
-      selectedFinancialItems = [],
-      options = {},
-    ) {
-      try {
-        if (!template || !template.content) {
-          return {
-            success: false,
-            error: 'Template or template content is required',
-          };
-        }
+      // Create new VR request
+      const newRequest = {
+        id: newId,
+        title: requestData.title.trim(),
+        caseId: requestData.caseId,
+        templateId: requestData.templateId,
+        status: 'Draft',
+        createdDate: this.dateService.formatToday(),
+        modifiedDate: this.dateService.formatToday(),
+        content: '',
+        financialItems: requestData.financialItems || [],
+        customReplacements: requestData.customReplacements || {},
+      };
 
-        if (!this.placeholderService) {
-          return {
-            success: false,
-            error: 'Placeholder service not available',
-          };
-        }
-
-        const { additionalPlaceholders = {} } = options;
-        let processedContent = '';
-
-        if (selectedFinancialItems.length > 0) {
-          // Generate content for each selected financial item
-          const contentBlocks = selectedFinancialItems.map((item) => {
-            const itemPlaceholders = {
-              ItemName: item.type || '',
-              Location: item.location || '',
-              AccountNumber: item.accountNumber || '',
-              Value: item.value ? `$${item.value.toFixed(2)}` : '$0.00',
-              ...additionalPlaceholders,
-            };
-
-            return this.placeholderService.processPlaceholders(
+      // Generate content if template is provided
+      if (requestData.templateId) {
+        const template = this.templateService.getTemplateById(data, requestData.templateId);
+        if (template) {
+          const activeCase = this._findCaseById(data, requestData.caseId);
+          if (activeCase) {
+            newRequest.content = this.placeholderService.processPlaceholders(
               template.content,
               activeCase,
-              fullData,
-              itemPlaceholders,
-            );
-          });
-
-          processedContent = contentBlocks.join('\n\n');
-        } else {
-          // Generate general content without specific financial items
-          processedContent = this.placeholderService.processPlaceholders(
-            template.content,
-            activeCase,
-            fullData,
-            additionalPlaceholders,
-          );
-        }
-
-        return {
-          success: true,
-          content: processedContent,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('documents:generate');
-        logger?.error('Document generation failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Generate document content and append to existing content
-     * @param {Object} template - Template object with content
-     * @param {Object} activeCase - Active case data
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Array} selectedFinancialItems - Array of selected financial items
-     * @param {string} existingContent - Existing content to append to
-     * @param {Object} options - Options: { additionalPlaceholders: Object, separator: string }
-     * @returns {Object} Result: { success: boolean, content?: string, itemCount?: number, error?: string }
-     */
-    appendDocumentContent(
-      template,
-      activeCase,
-      fullData,
-      selectedFinancialItems = [],
-      existingContent = '',
-      options = {},
-    ) {
-      try {
-        const { separator = '\n\n' } = options;
-
-        const result = this.generateDocumentContent(
-          template,
-          activeCase,
-          fullData,
-          selectedFinancialItems,
-          options,
-        );
-
-        if (!result.success) {
-          return result;
-        }
-
-        const newContent = existingContent
-          ? `${existingContent}${separator}${result.content}`
-          : result.content;
-
-        return {
-          success: true,
-          content: newContent,
-          itemCount: selectedFinancialItems.length,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('documents:compile');
-        logger?.error('Document compilation failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Create a new VR request
-     * @param {Object} requestData - VR request data
-     * @param {Object} activeCase - Active case data
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Array} selectedFinancialItemIds - Array of selected financial item IDs
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean, updateItemStatus: boolean }
-     * @returns {Promise<Object>} Result: { success: boolean, vrRequest?: Object, data?: Object, error?: string }
-     */
-    async createVrRequest(
-      requestData,
-      activeCase,
-      fullData,
-      selectedFinancialItemIds = [],
-      options = {},
-    ) {
-      const {
-        saveToFile = true,
-        showToast = true,
-        updateItemStatus = true,
-      } = options;
-
-      try {
-        if (!activeCase) {
-          return {
-            success: false,
-            error: 'Active case is required',
-          };
-        }
-
-        if (!requestData.content || !requestData.content.trim()) {
-          return {
-            success: false,
-            error: 'Request content is required',
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Ensure data structures exist
-        newData.vrRequests = newData.vrRequests || [];
-        newData.nextVrRequestId = newData.nextVrRequestId || 1;
-
-        // Get client name
-        const clientName =
-          fullData.people?.find((p) => p.id === activeCase.personId)?.name ||
-          'Unknown';
-
-        // Calculate due date
-        const dueDays = requestData.dueDays || 15;
-        const dueDate = this.dateUtils
-          ? this.dateUtils.addDays(dueDays)
-          : new Date(Date.now() + dueDays * 24 * 60 * 60 * 1000).toISOString();
-
-        // Create new VR request
-        const newVrRequest = {
-          id: newData.nextVrRequestId,
-          caseId: activeCase.id,
-          mcn: activeCase.mcn,
-          clientName: clientName,
-          content: requestData.content.trim(),
-          createdDate: this.dateUtils
-            ? this.dateUtils.now()
-            : new Date().toISOString(),
-          dueDate: dueDate,
-          status: 'Pending',
-          financialItemIds: [...selectedFinancialItemIds],
-          templateId: requestData.templateId || null,
-        };
-
-        // Add the new request
-        newData.vrRequests.push(newVrRequest);
-        newData.nextVrRequestId += 1;
-
-        // Update financial item statuses if requested
-        if (updateItemStatus && selectedFinancialItemIds.length > 0) {
-          const caseToUpdate = newData.cases?.find(
-            (c) => c.id === activeCase.id,
-          );
-          if (caseToUpdate && caseToUpdate.financials) {
-            const allFinancials = [
-              ...(caseToUpdate.financials.resources || []),
-              ...(caseToUpdate.financials.income || []),
-              ...(caseToUpdate.financials.expenses || []),
-            ];
-
-            selectedFinancialItemIds.forEach((itemId) => {
-              const itemToUpdate = allFinancials.find(
-                (item) => item.id === itemId,
-              );
-              if (itemToUpdate) {
-                itemToUpdate.verificationStatus = 'VR Pending';
-              }
-            });
-          }
-        }
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'vr_request_created',
-            {
-              requestId: newVrRequest.id,
-              caseId: activeCase.id,
-              mcn: activeCase.mcn,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'VR Request created but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast(
-              `VR Request #${newVrRequest.id} created and synced with CMS.`,
-              'success',
+              data,
+              requestData.customReplacements
             );
           }
-        } else if (showToast && this.toastService) {
-          this._showToast(
-            `VR Request #${newVrRequest.id} created successfully!`,
-            'success',
-          );
         }
-
-        return {
-          success: true,
-          vrRequest: newVrRequest,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get(
-          'documents:createVrRequest',
-        );
-        logger?.error('VR request creation failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Update VR request status
-     * @param {number} requestId - VR request ID
-     * @param {string} newStatus - New status (Pending, Approved, Rejected, Completed)
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean, notes?: string }
-     * @returns {Promise<Object>} Result: { success: boolean, vrRequest?: Object, data?: Object, error?: string }
-     */
-    async updateVrRequestStatus(requestId, newStatus, fullData, options = {}) {
-      const { saveToFile = true, showToast = true, notes } = options;
-
-      try {
-        const existingRequest = this.getVrRequestById(fullData, requestId);
-        if (!existingRequest) {
-          return {
-            success: false,
-            error: 'VR Request not found',
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Find and update request
-        const requestIndex = newData.vrRequests.findIndex(
-          (r) => r.id === requestId,
-        );
-        if (requestIndex === -1) {
-          return {
-            success: false,
-            error: 'VR Request not found in data',
-          };
-        }
-
-        const updatedRequest = {
-          ...existingRequest,
-          status: newStatus,
-          lastUpdated: this.dateUtils
-            ? this.dateUtils.now()
-            : new Date().toISOString(),
-        };
-
-        if (notes) {
-          updatedRequest.notes = notes;
-        }
-
-        newData.vrRequests[requestIndex] = updatedRequest;
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'vr_request_updated',
-            {
-              requestId: requestId,
-              newStatus: newStatus,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'VR Request updated but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast(
-              `VR Request #${requestId} status updated to ${newStatus}.`,
-              'success',
-            );
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast(
-            `VR Request #${requestId} status updated to ${newStatus}.`,
-            'success',
-          );
-        }
-
-        return {
-          success: true,
-          vrRequest: updatedRequest,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get(
-          'documents:updateVrStatus',
-        );
-        logger?.error('VR status update failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Delete a VR request
-     * @param {number} requestId - VR request ID
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean }
-     * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
-     */
-    async deleteVrRequest(requestId, fullData, options = {}) {
-      const { saveToFile = true, showToast = true } = options;
-
-      try {
-        const existingRequest = this.getVrRequestById(fullData, requestId);
-        if (!existingRequest) {
-          return {
-            success: false,
-            error: 'VR Request not found',
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Remove request
-        newData.vrRequests = newData.vrRequests.filter(
-          (r) => r.id !== requestId,
-        );
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'vr_request_deleted',
-            {
-              requestId: requestId,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'VR Request deleted but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast(
-              `VR Request #${requestId} deleted and synced with CMS.`,
-              'success',
-            );
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast(
-            `VR Request #${requestId} deleted successfully.`,
-            'success',
-          );
-        }
-
-        return {
-          success: true,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get(
-          'documents:deleteVrRequest',
-        );
-        logger?.error('VR request deletion failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Get all financial items for a case (resources, income, expenses)
-     * @param {Object} caseData - Case data object
-     * @returns {Array} Array of all financial items with source type
-     */
-    getCaseFinancialItems(caseData) {
-      if (!caseData || !caseData.financials) {
-        return [];
       }
 
-      const allItems = [];
+      // Add request to data
+      newData.vrRequests.push(newRequest);
 
-      // Add resources
-      if (caseData.financials.resources) {
-        caseData.financials.resources.forEach((item) => {
-          allItems.push({ ...item, sourceType: 'resources' });
-        });
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
       }
 
-      // Add income
-      if (caseData.financials.income) {
-        caseData.financials.income.forEach((item) => {
-          allItems.push({ ...item, sourceType: 'income' });
-        });
+      // Show success toast
+      if (showToast) {
+        this._showToast('VR Request created successfully.', 'success');
       }
-
-      // Add expenses
-      if (caseData.financials.expenses) {
-        caseData.financials.expenses.forEach((item) => {
-          allItems.push({ ...item, sourceType: 'expenses' });
-        });
-      }
-
-      return allItems;
-    }
-
-    /**
-     * Get financial items by IDs from a case
-     * @param {Object} caseData - Case data object
-     * @param {Array} itemIds - Array of financial item IDs
-     * @returns {Array} Array of financial items matching the IDs
-     */
-    getFinancialItemsByIds(caseData, itemIds) {
-      const allItems = this.getCaseFinancialItems(caseData);
-      return itemIds
-        .map((id) => allItems.find((item) => item.id === id))
-        .filter(Boolean);
-    }
-
-    /**
-     * Save data to file with CMS synchronization
-     * @param {Object} data - Data to save
-     * @param {string} action - Action type for broadcast
-     * @param {Object} metadata - Additional metadata for broadcast
-     * @returns {Promise<boolean>} Success status
-     * @private
-     */
-    async _saveWithSync(data, action, metadata = {}) {
-      try {
-        const success = await this.fileService.writeFile(data);
-
-        if (success) {
-          // Send data integrity broadcast to notify CMS to refresh
-          const integrityChannel = new BroadcastChannel('nightingale_suite');
-          integrityChannel.postMessage({
-            type: 'data_updated',
-            source: 'correspondence',
-            action: action,
-            timestamp: this.dateUtils
-              ? this.dateUtils.now()
-              : new Date().toISOString(),
-            ...metadata,
-          });
-          integrityChannel.close();
-
-          return true;
-        } else {
-          return false;
-        }
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('documents:integrity');
-        logger?.warn('Document integrity signal failed', {
-          error: error.message,
-        });
-        return false;
-      }
-    }
-
-    /**
-     * Show toast notification
-     * @param {string} message - Toast message
-     * @param {string} type - Toast type (success, error, warning, info)
-     * @private
-     */
-    _showToast(message, type = 'info') {
-      if (typeof this.toastService === 'function') {
-        this.toastService(message, type);
-      } else if (
-        this.toastService &&
-        typeof this.toastService.show === 'function'
-      ) {
-        this.toastService.show(message, type);
-      } else {
-        // Fallback when no toast service is available
-      }
-    }
-
-    /**
-     * Get VR request statistics
-     * @param {Object} data - Full nightingale data object
-     * @param {number} caseId - Optional case ID to filter by
-     * @returns {Object} Statistics about VR requests
-     */
-    getVrRequestStats(data, caseId = null) {
-      let requests = this.getVrRequests(data);
-
-      if (caseId) {
-        requests = requests.filter((r) => r.caseId === caseId);
-      }
-
-      const statusCounts = {};
-      requests.forEach((request) => {
-        statusCounts[request.status] = (statusCounts[request.status] || 0) + 1;
-      });
 
       return {
-        total: requests.length,
-        byStatus: statusCounts,
-        pending: statusCounts['Pending'] || 0,
-        approved: statusCounts['Approved'] || 0,
-        rejected: statusCounts['Rejected'] || 0,
-        completed: statusCounts['Completed'] || 0,
+        success: true,
+        data: newData,
+        request: newRequest,
+      };
+    } catch (error) {
+      this.logger.error('VR Request creation failed', { error: error.message });
+      return {
+        success: false,
+        error: error.message,
       };
     }
   }
 
-  // Create and export service instance
-  const documentGenerationService = new DocumentGenerationService();
+  /**
+   * Update an existing VR request
+   * @param {Object} data - Full nightingale data object
+   * @param {number} requestId - ID of VR request to update
+   * @param {Object} requestData - Updated VR request data
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async updateVRRequest(data, requestId, requestData, options = {}) {
+    const { showToast = true, saveFile = true } = options;
 
-  // Export for different environments
-  if (typeof module !== 'undefined' && module.exports) {
-    // Node.js
-    module.exports = documentGenerationService;
-  } else if (typeof window !== 'undefined') {
-    // Browser - register with global namespace
-    window.NightingaleDocumentGenerationService = documentGenerationService;
+    try {
+      // Validate request data
+      const validation = this.validateVRRequest(requestData);
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: 'Validation failed',
+          errors: validation.errors,
+        };
+      }
 
-    // Register with component system if available
-    if (window.NightingaleServices) {
-      window.NightingaleServices.documentGenerationService =
-        documentGenerationService;
+      // Create new data object
+      const newData = this._deepClone(data);
+
+      // Find request to update
+      const requestIndex = newData.vrRequests?.findIndex(
+        (request) => request.id === requestId,
+      );
+
+      if (requestIndex === -1) {
+        return {
+          success: false,
+          error: 'VR Request not found',
+        };
+      }
+
+      // Update request
+      const updatedRequest = {
+        ...newData.vrRequests[requestIndex],
+        title: requestData.title.trim(),
+        caseId: requestData.caseId,
+        templateId: requestData.templateId,
+        modifiedDate: this.dateService.formatToday(),
+        financialItems: requestData.financialItems || [],
+        customReplacements: requestData.customReplacements || {},
+      };
+
+      // Regenerate content if template changed
+      if (requestData.templateId) {
+        const template = this.templateService.getTemplateById(data, requestData.templateId);
+        if (template) {
+          const activeCase = this._findCaseById(data, requestData.caseId);
+          if (activeCase) {
+            updatedRequest.content = this.placeholderService.processPlaceholders(
+              template.content,
+              activeCase,
+              data,
+              requestData.customReplacements
+            );
+          }
+        }
+      }
+
+      newData.vrRequests[requestIndex] = updatedRequest;
+
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
+      }
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('VR Request updated successfully.', 'success');
+      }
+
+      return {
+        success: true,
+        data: newData,
+        request: updatedRequest,
+      };
+    } catch (error) {
+      this.logger.error('VR Request update failed', { error: error.message, requestId });
+      return {
+        success: false,
+        error: error.message,
+      };
     }
   }
-})();
 
-// ES6 Module Export
-export default (typeof window !== 'undefined' &&
-  window.NightingaleDocumentGenerationService) ||
-  null;
+  /**
+   * Delete a VR request
+   * @param {Object} data - Full nightingale data object
+   * @param {number} requestId - ID of VR request to delete
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async deleteVRRequest(data, requestId, options = {}) {
+    const { showToast = true, saveFile = true } = options;
+
+    try {
+      // Create new data object
+      const newData = this._deepClone(data);
+
+      // Find request to delete
+      const requestIndex = newData.vrRequests?.findIndex(
+        (request) => request.id === requestId,
+      );
+
+      if (requestIndex === -1) {
+        return {
+          success: false,
+          error: 'VR Request not found',
+        };
+      }
+
+      // Get request before deletion
+      const deletedRequest = newData.vrRequests[requestIndex];
+
+      // Remove request
+      newData.vrRequests.splice(requestIndex, 1);
+
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
+      }
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('VR Request deleted successfully.', 'success');
+      }
+
+      return {
+        success: true,
+        data: newData,
+        request: deletedRequest,
+      };
+    } catch (error) {
+      this.logger.error('VR Request deletion failed', { error: error.message, requestId });
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Generate document content for financial items
+   * @param {Object} data - Full nightingale data object
+   * @param {Array} financialItems - Array of financial items
+   * @param {number} templateId - Template ID to use
+   * @param {number} caseId - Case ID for context
+   * @param {Object} customReplacements - Custom placeholder replacements
+   * @returns {string} Generated document content
+   */
+  generateFinancialDocumentContent(data, financialItems, templateId, caseId, customReplacements = {}) {
+    try {
+      const template = this.templateService.getTemplateById(data, templateId);
+      if (!template) {
+        throw new Error('Template not found');
+      }
+
+      const activeCase = this._findCaseById(data, caseId);
+      if (!activeCase) {
+        throw new Error('Case not found');
+      }
+
+      let content = '';
+
+      // Generate content for each financial item
+      financialItems.forEach((item, index) => {
+        // Create custom replacements for this item
+        const itemReplacements = {
+          ItemType: item.type || '',
+          ItemOwner: item.owner || '',
+          ItemLocation: item.location || '',
+          ItemValue: this._formatCurrency(item.value || 0),
+          ItemDescription: item.description || '',
+          ItemNumber: (index + 1).toString(),
+          ...customReplacements,
+        };
+
+        // Process template with item-specific replacements
+        const itemContent = this.placeholderService.processPlaceholders(
+          template.content,
+          activeCase,
+          data,
+          itemReplacements
+        );
+
+        content += itemContent + '\n\n';
+      });
+
+      return content.trim();
+    } catch (error) {
+      this.logger.error('Financial document generation failed', { error: error.message });
+      return '';
+    }
+  }
+
+  /**
+   * Validate VR request data
+   * @param {Object} requestData - VR request data to validate
+   * @returns {Object} Validation result: { isValid: boolean, errors: Object }
+   */
+  validateVRRequest(requestData) {
+    const errors = {};
+
+    // Title validation
+    if (!requestData.title || !requestData.title.trim()) {
+      errors.title = 'Request title is required.';
+    } else if (requestData.title.length < 3) {
+      errors.title = 'Request title must be at least 3 characters.';
+    } else if (requestData.title.length > 200) {
+      errors.title = 'Request title must be no more than 200 characters.';
+    }
+
+    // Case ID validation
+    if (!requestData.caseId) {
+      errors.caseId = 'Case ID is required.';
+    }
+
+    // Template ID validation (optional)
+    if (requestData.templateId && typeof requestData.templateId !== 'number') {
+      errors.templateId = 'Template ID must be a number.';
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  }
+
+  /**
+   * Get the next available VR request ID
+   * @param {Object} data - Full nightingale data object
+   * @returns {number} Next available ID
+   * @private
+   */
+  _getNextVRRequestId(data) {
+    const requests = this.getVRRequests(data);
+    if (requests.length === 0) {
+      return 1;
+    }
+
+    const maxId = Math.max(...requests.map((request) => request.id || 0));
+    return maxId + 1;
+  }
+
+  /**
+   * Find case by ID
+   * @param {Object} data - Full nightingale data object
+   * @param {number} caseId - Case ID to find
+   * @returns {Object|null} Case object or null if not found
+   * @private
+   */
+  _findCaseById(data, caseId) {
+    const cases = data?.cases || [];
+    return cases.find((caseObj) => caseObj.id === caseId) || null;
+  }
+
+  /**
+   * Format currency amount
+   * @param {number|string} amount - Amount to format
+   * @returns {string} Formatted currency
+   * @private
+   */
+  _formatCurrency(amount) {
+    if (amount === null || amount === undefined || amount === '') return '$0.00';
+    
+    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    
+    if (isNaN(numericAmount)) return '$0.00';
+    
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(numericAmount);
+  }
+
+  /**
+   * Deep clone an object
+   * @param {any} obj - Object to clone
+   * @returns {any} Cloned object
+   * @private
+   */
+  _deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (obj instanceof Date) {
+      return new Date(obj.getTime());
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this._deepClone(item));
+    }
+
+    const cloned = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        cloned[key] = this._deepClone(obj[key]);
+      }
+    }
+
+    return cloned;
+  }
+
+  /**
+   * Get file service for data persistence
+   * @returns {Object|null} File service instance
+   * @private
+   */
+  _getFileService() {
+    if (typeof window !== 'undefined') {
+      return window.NightingaleFileService || window.FileService || null;
+    }
+    return null;
+  }
+
+  /**
+   * Show toast notification
+   * @param {string} message - Toast message
+   * @param {string} type - Toast type
+   * @private
+   */
+  _showToast(message, type = 'info') {
+    try {
+      this.toastService.show(message, type);
+    } catch (error) {
+      // Fallback to console if toast service unavailable
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+  }
+}
+
+// Create singleton instance
+const documentGenerationService = new NightingaleDocumentGeneration();
+
+// Backward compatibility - expose to window if available
+if (typeof window !== 'undefined') {
+  window.NightingaleDocumentGenerationService = documentGenerationService;
+  window.NightingaleDocumentGeneration = documentGenerationService;
+
+  // Register with component system if available
+  window.NightingaleServices = window.NightingaleServices || {};
+  window.NightingaleServices.documentGenerationService = documentGenerationService;
+}
+
+// ES6 Module Exports
+export default documentGenerationService;
+export const {
+  getVRRequests,
+  getVRRequestById,
+  createVRRequest,
+  updateVRRequest,
+  deleteVRRequest,
+  generateFinancialDocumentContent,
+  validateVRRequest,
+} = documentGenerationService;
