@@ -19,25 +19,25 @@ import './components/ui/TabBase.jsx';
 import './components/ui/TabHeader.jsx';
 
 // --- Preload Business Components (tabs, modals, detail views) ---
-import './components/business/SettingsModal.js';
-import './components/business/DashboardTab.js';
-import './components/business/CasesTab.js';
+import './components/business/SettingsModal.jsx';
+import './components/business/DashboardTab.jsx';
+import './components/business/CasesTab.jsx';
 import './components/business/PeopleTab.jsx';
-import './components/business/OrganizationsTab.js';
-import './components/business/EligibilityTab.js';
-import './components/business/AvsImportModal.js';
-import './components/business/CaseCreationModal.js';
-import './components/business/CaseDetailsView.js';
-import './components/business/FinancialItemCard.js';
-import './components/business/FinancialItemModal.js';
-import './components/business/FinancialManagementSection.js';
-import './components/business/NotesModal.js';
-import './components/business/OrganizationModal.js';
-import './components/business/PersonCreationModal.js';
-import './components/business/PersonDetailsView.js';
+import './components/business/OrganizationsTab.jsx';
+import './components/business/EligibilityTab.jsx';
+import './components/business/AvsImportModal.jsx';
+import './components/business/CaseCreationModal.jsx';
+import './components/business/CaseDetailsView.jsx';
+import './components/business/FinancialItemCard.jsx';
+import './components/business/FinancialItemModal.jsx';
+import './components/business/FinancialManagementSection.jsx';
+import './components/business/NotesModal.jsx';
+import './components/business/OrganizationModal.jsx';
+import './components/business/PersonCreationModal.jsx';
+import './components/business/PersonDetailsView.jsx';
 
 // Import the root app last so all dependencies are registered
-import NightingaleCMSApp from './components/business/NightingaleCMSApp.js';
+import NightingaleCMSApp from './components/business/NightingaleCMSApp.jsx';
 
 // Minimal bootstrap: render app directly (React already on window via CDN)
 const mount = () => {

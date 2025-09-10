@@ -16,11 +16,11 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import DashboardTab from './DashboardTab.js';
-import CasesTab from './CasesTab.js';
+import DashboardTab from './DashboardTab.jsx';
+import CasesTab from './CasesTab.jsx';
 import PeopleTab from './PeopleTab.jsx';
-import OrganizationsTab from './OrganizationsTab.js';
-import EligibilityTab from './EligibilityTab.js';
+import OrganizationsTab from './OrganizationsTab.jsx';
+import EligibilityTab from './EligibilityTab.jsx';
 import { registerComponent, getComponent } from '../../services/registry';
 // Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
 
