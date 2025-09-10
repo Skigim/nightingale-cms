@@ -295,28 +295,12 @@ function CaseDetailsView({
 }
 
 // PropTypes for validation
-if (typeof window !== 'undefined' && window.PropTypes) {
-  CaseDetailsView.propTypes = {
-    caseId: window.PropTypes.string.isRequired,
-    fullData: window.PropTypes.shape({
-      cases: window.PropTypes.array,
-      people: window.PropTypes.array,
-      organizations: window.PropTypes.array,
-    }).isRequired,
-    onUpdateData: window.PropTypes.func.isRequired,
-    onBackToList: window.PropTypes.func,
-    fileService: window.PropTypes.object,
-  };
-}
 
 // Self-registration for both module and script loading
 // Register with business registry (legacy global removal)
 registerComponent('business', 'CaseDetailsView', CaseDetailsView);
 
 // Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = CaseDetailsView;
-}
 
 // ES6 Module Export
 export default CaseDetailsView;

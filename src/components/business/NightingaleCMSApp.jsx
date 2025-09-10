@@ -218,22 +218,8 @@ function NightingaleCMSApp() {
   );
 }
 
-// PropTypes for validation
-if (typeof window !== 'undefined' && window.PropTypes) {
-  NightingaleCMSApp.propTypes = {
-    // NightingaleCMSApp is the root component and doesn't receive external props
-    // All props are managed internally through state
-  };
-}
-
 // Self-registration for both module and script loading
 // Register with business registry (legacy global removal)
 registerComponent('business', 'NightingaleCMSApp', NightingaleCMSApp);
 
-// Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = NightingaleCMSApp;
-}
-
-// ES6 Module Export
 export default NightingaleCMSApp;

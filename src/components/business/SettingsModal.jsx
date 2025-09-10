@@ -346,10 +346,4 @@ SettingsModal.propTypes = {
 // Register with business registry (legacy global removed)
 registerComponent('business', 'SettingsModal', SettingsModal);
 
-// Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = SettingsModal;
-}
-
-// ES6 Module Export
 export default SettingsModal;

@@ -4,7 +4,7 @@
 import '@testing-library/jest-dom';
 import { render, screen, cleanup } from '@testing-library/react';
 import React from 'react';
-import PersonDetailsView from '../../src/components/business/PersonDetailsView.js';
+import PersonDetailsView from '../../src/components/business/PersonDetailsView.jsx';
 
 // Ensure global React for project pattern
 window.React = React;

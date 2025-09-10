@@ -532,9 +532,6 @@ function FinancialItemModal({
 registerComponent('business', 'FinancialItemModal', FinancialItemModal);
 
 // Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = FinancialItemModal;
-}
 
 // ES6 Module Export
 export default FinancialItemModal;

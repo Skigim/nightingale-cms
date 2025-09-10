@@ -1115,16 +1115,6 @@ function CaseCreationModal({
 }
 
 // Export for ES6 modules
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    CaseCreationModal,
-    BasicInfoStep,
-    ClientSelectionStep,
-    CaseDetailsStep,
-    ReviewStep,
-    stepsConfig,
-  };
-}
 
 // Removed global window assignments (modern ES module usage)
 

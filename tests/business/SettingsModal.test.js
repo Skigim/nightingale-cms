@@ -13,7 +13,7 @@ window.showToast = jest.fn();
 
 // Import Modal first so it registers in the UI registry
 import '../../src/components/ui/Modal.jsx';
-import SettingsModal from '../../src/components/business/SettingsModal.js';
+import SettingsModal from '../../src/components/business/SettingsModal.jsx';
 
 function createFileService({
   connectResult = true,

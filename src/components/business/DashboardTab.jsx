@@ -146,8 +146,4 @@ DashboardTab.propTypes = {
 
 registerComponent('business', 'DashboardTab', DashboardTab);
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = DashboardTab; // CommonJS fallback
-}
-
 export default DashboardTab;

@@ -37,9 +37,6 @@ EligibilityTab.propTypes = {
 registerComponent('business', 'EligibilityTab', EligibilityTab);
 
 // Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = EligibilityTab;
-}
 
 // ES6 Module Export
 export default EligibilityTab;

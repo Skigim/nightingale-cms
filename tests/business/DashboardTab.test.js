@@ -14,7 +14,7 @@ window.NightingaleToast = {
 };
 
 // Import component AFTER globals
-import DashboardTab from '../../src/components/business/DashboardTab.js';
+import DashboardTab from '../../src/components/business/DashboardTab.jsx';
 
 function createFullData() {
   return {

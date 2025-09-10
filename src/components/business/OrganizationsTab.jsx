@@ -469,14 +469,6 @@ OrganizationsTab.propTypes = {
 registerComponent('business', 'OrganizationsTab', OrganizationsTab);
 
 // Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    OrganizationsTab,
-    useOrganizationsData,
-    renderOrganizationsContent,
-    renderOrganizationsModals,
-  };
-}
 
 // ES6 Module Export
 export default OrganizationsTab;

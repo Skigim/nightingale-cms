@@ -369,9 +369,6 @@ registerComponent('business', 'FinancialItemList', FinancialItemList);
 registerComponent('business', 'FinancialItemGrid', FinancialItemGrid);
 
 // Export for ES6 modules
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { FinancialItemCard, FinancialItemList, FinancialItemGrid };
-}
 
 // ES6 Module Export
 export default FinancialItemCard;

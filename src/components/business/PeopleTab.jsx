@@ -311,7 +311,4 @@ PeopleTab.propTypes = {
   onBackToList: window.PropTypes?.func,
 };
 registerComponent('business', 'PeopleTab', PeopleTab);
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = PeopleTab;
-}
 export default PeopleTab;

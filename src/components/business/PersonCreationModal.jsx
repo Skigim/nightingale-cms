@@ -1100,9 +1100,6 @@ function PersonCreationModal({
 registerComponent('business', 'PersonCreationModal', PersonCreationModal);
 
 // Export for ES6 modules
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { PersonCreationModal };
-}
 
 // ES6 Module Export
 export default PersonCreationModal;

@@ -1044,9 +1044,6 @@ function OrganizationModal({
 registerComponent('business', 'OrganizationModal', OrganizationModal);
 
 // Export for ES6 modules
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { OrganizationModal };
-}
 
 // ES6 Module Export
 export default OrganizationModal;
