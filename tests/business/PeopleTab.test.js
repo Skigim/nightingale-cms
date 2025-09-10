@@ -29,7 +29,7 @@ if (!window.NightingaleBusiness) {
 }
 
 // Import factory (TabBase defines createBusinessComponent & fallbacks)
-import '../../src/components/ui/TabBase.js';
+import '../../src/components/ui/TabBase.jsx';
 
 // Stub ONLY the PersonCreationModal for predictable modal content text
 function PersonCreationModalStub({ isOpen }) {
