@@ -6,7 +6,7 @@
  *
  * Features:
  * - AVS bank data parsing with flexible account type recognition
- * - Account number formatting and balance extraction  
+ * - Account number formatting and balance extraction
  * - Robust data validation and error handling
  * - Date formatting integration with NightingaleDayJS
  *
@@ -64,9 +64,9 @@ class NightingaleParsers {
     const ownerList = owners
       .split(';')
       .map((o) => o.trim())
-      .filter(o => o.length > 0)
+      .filter((o) => o.length > 0)
       .join(', ');
-    
+
     const bankLine = lines[1] || '';
     const bankNameMatch = bankLine.match(/([^\n]+) - \(/);
     const accountNumberMatch = bankLine.match(/ - \((\d+)\)/);
@@ -78,7 +78,9 @@ class NightingaleParsers {
       ? balanceLine.match(/Balance as of .* - (.*)/)
       : null;
 
-    let accountNumber = accountNumberMatch ? accountNumberMatch[1].trim() : 'N/A';
+    let accountNumber = accountNumberMatch
+      ? accountNumberMatch[1].trim()
+      : 'N/A';
     if (accountNumber !== 'N/A' && accountNumber.length > 4) {
       accountNumber = accountNumber.slice(-4);
     }
@@ -118,7 +120,7 @@ class NightingaleParsers {
     const accountBlocks = rawInput
       .split(/Account Owner: /)
       .filter((block) => block.trim() !== '');
-    
+
     if (accountBlocks.length === 0) {
       return [];
     }
@@ -127,20 +129,13 @@ class NightingaleParsers {
     const parsedAccounts = accountBlocks
       .map((block) => this.parseAvsAccountBlock(block, knownAccountTypes))
       .filter(Boolean);
-    
+
     return parsedAccounts;
   }
 }
 
 // Create singleton instance
 const parsersInstance = new NightingaleParsers();
-
-// Backward compatibility - expose to window if available
-if (typeof window !== 'undefined') {
-  window.parseAvsAccountBlock = parsersInstance.parseAvsAccountBlock.bind(parsersInstance);
-  window.parseAvsData = parsersInstance.parseAvsData.bind(parsersInstance);
-  window.NightingaleParsers = parsersInstance;
-}
 
 // ES6 Module Exports
 export default parsersInstance;

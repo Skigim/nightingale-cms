@@ -45,12 +45,12 @@ describe('NightingaleTemplates', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock window.BroadcastChannel
     global.BroadcastChannel = jest.fn().mockImplementation(() => ({
       postMessage: jest.fn(),
     }));
-    
+
     // Mock file service
     global.window = {
       ...global.window,
@@ -103,12 +103,18 @@ describe('NightingaleTemplates', () => {
 
   describe('getTemplatesByCategory', () => {
     test('should return templates by category', () => {
-      const result = NightingaleTemplates.getTemplatesByCategory(mockData, 'Legal');
+      const result = NightingaleTemplates.getTemplatesByCategory(
+        mockData,
+        'Legal',
+      );
       expect(result).toEqual([mockData.vrTemplates[0]]);
     });
 
     test('should return empty array for non-existent category', () => {
-      const result = NightingaleTemplates.getTemplatesByCategory(mockData, 'NonExistent');
+      const result = NightingaleTemplates.getTemplatesByCategory(
+        mockData,
+        'NonExistent',
+      );
       expect(result).toEqual([]);
     });
   });
@@ -121,8 +127,11 @@ describe('NightingaleTemplates', () => {
         content: 'This is valid content with enough characters',
       };
 
-      const result = NightingaleTemplates.validateTemplate(templateData, mockData);
-      
+      const result = NightingaleTemplates.validateTemplate(
+        templateData,
+        mockData,
+      );
+
       expect(result.isValid).toBe(true);
       expect(result.errors).toEqual({});
     });
@@ -134,12 +143,17 @@ describe('NightingaleTemplates', () => {
         content: 'Short',
       };
 
-      const result = NightingaleTemplates.validateTemplate(templateData, mockData);
-      
+      const result = NightingaleTemplates.validateTemplate(
+        templateData,
+        mockData,
+      );
+
       expect(result.isValid).toBe(false);
       expect(result.errors.name).toBe('Template name is required.');
       expect(result.errors.category).toBe('Please select a category.');
-      expect(result.errors.content).toBe('Template content must be at least 10 characters.');
+      expect(result.errors.content).toBe(
+        'Template content must be at least 10 characters.',
+      );
     });
 
     test('should detect duplicate names', () => {
@@ -149,10 +163,15 @@ describe('NightingaleTemplates', () => {
         content: 'This is valid content',
       };
 
-      const result = NightingaleTemplates.validateTemplate(templateData, mockData);
-      
+      const result = NightingaleTemplates.validateTemplate(
+        templateData,
+        mockData,
+      );
+
       expect(result.isValid).toBe(false);
-      expect(result.errors.name).toBe('A template with this name already exists.');
+      expect(result.errors.name).toBe(
+        'A template with this name already exists.',
+      );
     });
 
     test('should exclude current template from duplicate check', () => {
@@ -162,8 +181,12 @@ describe('NightingaleTemplates', () => {
         content: 'This is valid content',
       };
 
-      const result = NightingaleTemplates.validateTemplate(templateData, mockData, 1);
-      
+      const result = NightingaleTemplates.validateTemplate(
+        templateData,
+        mockData,
+        1,
+      );
+
       expect(result.isValid).toBe(true);
     });
 
@@ -180,11 +203,21 @@ describe('NightingaleTemplates', () => {
         content: 'Valid content',
       };
 
-      const shortResult = NightingaleTemplates.validateTemplate(shortName, mockData);
-      const longResult = NightingaleTemplates.validateTemplate(longName, mockData);
+      const shortResult = NightingaleTemplates.validateTemplate(
+        shortName,
+        mockData,
+      );
+      const longResult = NightingaleTemplates.validateTemplate(
+        longName,
+        mockData,
+      );
 
-      expect(shortResult.errors.name).toBe('Template name must be at least 3 characters.');
-      expect(longResult.errors.name).toBe('Template name must be no more than 100 characters.');
+      expect(shortResult.errors.name).toBe(
+        'Template name must be at least 3 characters.',
+      );
+      expect(longResult.errors.name).toBe(
+        'Template name must be no more than 100 characters.',
+      );
     });
   });
 
@@ -196,10 +229,14 @@ describe('NightingaleTemplates', () => {
         content: 'This is new template content',
       };
 
-      const result = await NightingaleTemplates.addTemplate(mockData, templateData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.addTemplate(
+        mockData,
+        templateData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrTemplates).toHaveLength(3);
@@ -215,7 +252,10 @@ describe('NightingaleTemplates', () => {
         content: '',
       };
 
-      const result = await NightingaleTemplates.addTemplate(mockData, templateData);
+      const result = await NightingaleTemplates.addTemplate(
+        mockData,
+        templateData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Validation failed');
@@ -225,17 +265,21 @@ describe('NightingaleTemplates', () => {
     test('should handle file save with file service', async () => {
       const mockSave = jest.fn().mockResolvedValue(true);
       global.window.NightingaleFileService.saveFile = mockSave;
-      
+
       const templateData = {
         name: 'New Template',
         category: 'Legal',
         content: 'This is new template content',
       };
 
-      const result = await NightingaleTemplates.addTemplate(mockData, templateData, {
-        showToast: false,
-        saveFile: true,
-      });
+      const result = await NightingaleTemplates.addTemplate(
+        mockData,
+        templateData,
+        {
+          showToast: false,
+          saveFile: true,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(mockSave).toHaveBeenCalled();
@@ -249,10 +293,14 @@ describe('NightingaleTemplates', () => {
         content: 'This is new template content',
       };
 
-      const result = await NightingaleTemplates.addTemplate(emptyData, templateData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.addTemplate(
+        emptyData,
+        templateData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrTemplates).toHaveLength(1);
@@ -268,10 +316,15 @@ describe('NightingaleTemplates', () => {
         content: 'This is updated content',
       };
 
-      const result = await NightingaleTemplates.updateTemplate(mockData, 1, updateData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.updateTemplate(
+        mockData,
+        1,
+        updateData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.template.name).toBe('Updated Template');
@@ -286,7 +339,11 @@ describe('NightingaleTemplates', () => {
         content: 'This is updated content',
       };
 
-      const result = await NightingaleTemplates.updateTemplate(mockData, 999, updateData);
+      const result = await NightingaleTemplates.updateTemplate(
+        mockData,
+        999,
+        updateData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Template not found');
@@ -299,7 +356,11 @@ describe('NightingaleTemplates', () => {
         content: '',
       };
 
-      const result = await NightingaleTemplates.updateTemplate(mockData, 1, updateData);
+      const result = await NightingaleTemplates.updateTemplate(
+        mockData,
+        1,
+        updateData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Validation failed');
@@ -328,10 +389,14 @@ describe('NightingaleTemplates', () => {
 
   describe('addCategory', () => {
     test('should add new category successfully', async () => {
-      const result = await NightingaleTemplates.addCategory(mockData, 'New Category', {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.addCategory(
+        mockData,
+        'New Category',
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrCategories).toContain('New Category');
@@ -339,10 +404,14 @@ describe('NightingaleTemplates', () => {
     });
 
     test('should sort categories alphabetically', async () => {
-      const result = await NightingaleTemplates.addCategory(mockData, 'Alphabetically First', {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.addCategory(
+        mockData,
+        'Alphabetically First',
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrCategories[0]).toBe('Alphabetically First');
@@ -364,10 +433,14 @@ describe('NightingaleTemplates', () => {
 
     test('should handle missing vrCategories array', async () => {
       const emptyData = {};
-      const result = await NightingaleTemplates.addCategory(emptyData, 'New Category', {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.addCategory(
+        emptyData,
+        'New Category',
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrCategories).toEqual(['New Category']);
@@ -376,17 +449,24 @@ describe('NightingaleTemplates', () => {
 
   describe('deleteCategory', () => {
     test('should delete empty category successfully', async () => {
-      const result = await NightingaleTemplates.deleteCategory(mockData, 'Personal', {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.deleteCategory(
+        mockData,
+        'Personal',
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrCategories).not.toContain('Personal');
     });
 
     test('should fail to delete category with templates', async () => {
-      const result = await NightingaleTemplates.deleteCategory(mockData, 'Legal');
+      const result = await NightingaleTemplates.deleteCategory(
+        mockData,
+        'Legal',
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Cannot delete category with 1 templates');
@@ -394,24 +474,33 @@ describe('NightingaleTemplates', () => {
     });
 
     test('should reassign templates when deleting category', async () => {
-      const result = await NightingaleTemplates.deleteCategory(mockData, 'Legal', {
-        showToast: false,
-        saveFile: false,
-        reassignTo: 'Business',
-      });
+      const result = await NightingaleTemplates.deleteCategory(
+        mockData,
+        'Legal',
+        {
+          showToast: false,
+          saveFile: false,
+          reassignTo: 'Business',
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrCategories).not.toContain('Legal');
       expect(result.reassignedTemplates).toBe(1);
-      
+
       // Check that template was reassigned
-      const reassignedTemplate = result.data.vrTemplates.find(t => t.id === 1);
+      const reassignedTemplate = result.data.vrTemplates.find(
+        (t) => t.id === 1,
+      );
       expect(reassignedTemplate.category).toBe('Business');
       expect(reassignedTemplate.modifiedDate).toBe('2024-03-15');
     });
 
     test('should fail for non-existent category', async () => {
-      const result = await NightingaleTemplates.deleteCategory(mockData, 'NonExistent');
+      const result = await NightingaleTemplates.deleteCategory(
+        mockData,
+        'NonExistent',
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Category not found');
@@ -425,13 +514,19 @@ describe('NightingaleTemplates', () => {
     });
 
     test('should search by template name', () => {
-      const result = NightingaleTemplates.searchTemplates(mockData, 'Template 1');
+      const result = NightingaleTemplates.searchTemplates(
+        mockData,
+        'Template 1',
+      );
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(1);
     });
 
     test('should search by template content', () => {
-      const result = NightingaleTemplates.searchTemplates(mockData, 'content 2');
+      const result = NightingaleTemplates.searchTemplates(
+        mockData,
+        'content 2',
+      );
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe(2);
     });
@@ -442,7 +537,10 @@ describe('NightingaleTemplates', () => {
     });
 
     test('should return empty array for no matches', () => {
-      const result = NightingaleTemplates.searchTemplates(mockData, 'nonexistent');
+      const result = NightingaleTemplates.searchTemplates(
+        mockData,
+        'nonexistent',
+      );
       expect(result).toEqual([]);
     });
   });
@@ -497,7 +595,7 @@ describe('NightingaleTemplates', () => {
       const mockFileService = {
         saveFile: jest.fn().mockRejectedValue(new Error('File save failed')),
       };
-      
+
       // Temporarily replace the file service
       const originalFileService = global.window.NightingaleFileService;
       global.window.NightingaleFileService = mockFileService;
@@ -508,11 +606,14 @@ describe('NightingaleTemplates', () => {
         content: 'This is new template content',
       };
 
-      const result = await NightingaleTemplates.addTemplate(mockData, templateData);
+      const result = await NightingaleTemplates.addTemplate(
+        mockData,
+        templateData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('File save failed');
-      
+
       // Restore original file service
       global.window.NightingaleFileService = originalFileService;
     });
@@ -531,27 +632,15 @@ describe('NightingaleTemplates', () => {
       };
 
       // Should not throw error even if toast fails
-      const result = await NightingaleTemplates.addTemplate(mockData, templateData, {
-        saveFile: false,
-      });
+      const result = await NightingaleTemplates.addTemplate(
+        mockData,
+        templateData,
+        {
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
-    });
-  });
-
-  describe('backward compatibility', () => {
-    test('should expose service to window object', () => {
-      // Clean up any existing window properties
-      delete window.NightingaleTemplateService;
-      delete window.NightingaleTemplates;
-
-      // Re-import to trigger window assignment
-      jest.resetModules();
-      require('../../src/services/nightingale.templates.js');
-
-      expect(window.NightingaleTemplateService).toBeDefined();
-      expect(window.NightingaleTemplates).toBeDefined();
-      expect(window.NightingaleServices?.templateService).toBeDefined();
     });
   });
 
@@ -562,10 +651,11 @@ describe('NightingaleTemplates', () => {
       global.BroadcastChannel = jest.fn().mockImplementation(() => ({
         postMessage: mockPostMessage,
       }));
-      
+
       // Create a new service instance to use the mocked BroadcastChannel
-      const service = new (require('../../src/services/nightingale.templates.js').default.constructor)();
-      
+      const service =
+        new (require('../../src/services/nightingale.templates.js').default.constructor)();
+
       const templateData = {
         name: 'New Template',
         category: 'Legal',
@@ -578,7 +668,9 @@ describe('NightingaleTemplates', () => {
       });
 
       // Should have created broadcast channel
-      expect(global.BroadcastChannel).toHaveBeenCalledWith('nightingale-templates');
+      expect(global.BroadcastChannel).toHaveBeenCalledWith(
+        'nightingale-templates',
+      );
     });
   });
 });

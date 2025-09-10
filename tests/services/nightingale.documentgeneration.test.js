@@ -14,7 +14,11 @@ jest.mock('../../src/services/nightingale.placeholders.js', () => ({
 jest.mock('../../src/services/nightingale.templates.js', () => ({
   getTemplateById: jest.fn((data, id) => {
     if (id === 1) {
-      return { id: 1, name: 'Test Template', content: 'Template content for {ItemType}' };
+      return {
+        id: 1,
+        name: 'Test Template',
+        content: 'Template content for {ItemType}',
+      };
     }
     return null;
   }),
@@ -80,7 +84,7 @@ describe('NightingaleDocumentGeneration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock file service
     global.window = {
       ...global.window,
@@ -109,12 +113,18 @@ describe('NightingaleDocumentGeneration', () => {
 
   describe('getVRRequestById', () => {
     test('should return VR request by ID', () => {
-      const result = NightingaleDocumentGeneration.getVRRequestById(mockData, 1);
+      const result = NightingaleDocumentGeneration.getVRRequestById(
+        mockData,
+        1,
+      );
       expect(result).toEqual(mockData.vrRequests[0]);
     });
 
     test('should return null for non-existent ID', () => {
-      const result = NightingaleDocumentGeneration.getVRRequestById(mockData, 999);
+      const result = NightingaleDocumentGeneration.getVRRequestById(
+        mockData,
+        999,
+      );
       expect(result).toBeNull();
     });
   });
@@ -127,8 +137,9 @@ describe('NightingaleDocumentGeneration', () => {
         templateId: 1,
       };
 
-      const result = NightingaleDocumentGeneration.validateVRRequest(requestData);
-      
+      const result =
+        NightingaleDocumentGeneration.validateVRRequest(requestData);
+
       expect(result.isValid).toBe(true);
       expect(result.errors).toEqual({});
     });
@@ -140,8 +151,9 @@ describe('NightingaleDocumentGeneration', () => {
         templateId: 'invalid',
       };
 
-      const result = NightingaleDocumentGeneration.validateVRRequest(requestData);
-      
+      const result =
+        NightingaleDocumentGeneration.validateVRRequest(requestData);
+
       expect(result.isValid).toBe(false);
       expect(result.errors.title).toBe('Request title is required.');
       expect(result.errors.caseId).toBe('Case ID is required.');
@@ -159,11 +171,17 @@ describe('NightingaleDocumentGeneration', () => {
         caseId: 1,
       };
 
-      const shortResult = NightingaleDocumentGeneration.validateVRRequest(shortTitle);
-      const longResult = NightingaleDocumentGeneration.validateVRRequest(longTitle);
+      const shortResult =
+        NightingaleDocumentGeneration.validateVRRequest(shortTitle);
+      const longResult =
+        NightingaleDocumentGeneration.validateVRRequest(longTitle);
 
-      expect(shortResult.errors.title).toBe('Request title must be at least 3 characters.');
-      expect(longResult.errors.title).toBe('Request title must be no more than 200 characters.');
+      expect(shortResult.errors.title).toBe(
+        'Request title must be at least 3 characters.',
+      );
+      expect(longResult.errors.title).toBe(
+        'Request title must be no more than 200 characters.',
+      );
     });
   });
 
@@ -177,10 +195,14 @@ describe('NightingaleDocumentGeneration', () => {
         customReplacements: { CustomValue: 'Test' },
       };
 
-      const result = await NightingaleDocumentGeneration.createVRRequest(mockData, requestData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleDocumentGeneration.createVRRequest(
+        mockData,
+        requestData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrRequests).toHaveLength(3);
@@ -196,7 +218,10 @@ describe('NightingaleDocumentGeneration', () => {
         caseId: null,
       };
 
-      const result = await NightingaleDocumentGeneration.createVRRequest(mockData, requestData);
+      const result = await NightingaleDocumentGeneration.createVRRequest(
+        mockData,
+        requestData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Validation failed');
@@ -210,10 +235,14 @@ describe('NightingaleDocumentGeneration', () => {
         caseId: 1,
       };
 
-      const result = await NightingaleDocumentGeneration.createVRRequest(emptyData, requestData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleDocumentGeneration.createVRRequest(
+        emptyData,
+        requestData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrRequests).toHaveLength(1);
@@ -228,10 +257,14 @@ describe('NightingaleDocumentGeneration', () => {
         customReplacements: { CustomValue: 'Test' },
       };
 
-      const result = await NightingaleDocumentGeneration.createVRRequest(mockData, requestData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleDocumentGeneration.createVRRequest(
+        mockData,
+        requestData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.request.content).toContain('Processed:');
@@ -248,10 +281,15 @@ describe('NightingaleDocumentGeneration', () => {
         customReplacements: {},
       };
 
-      const result = await NightingaleDocumentGeneration.updateVRRequest(mockData, 1, updateData, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleDocumentGeneration.updateVRRequest(
+        mockData,
+        1,
+        updateData,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.request.title).toBe('Updated VR Request');
@@ -265,7 +303,11 @@ describe('NightingaleDocumentGeneration', () => {
         caseId: 2,
       };
 
-      const result = await NightingaleDocumentGeneration.updateVRRequest(mockData, 999, updateData);
+      const result = await NightingaleDocumentGeneration.updateVRRequest(
+        mockData,
+        999,
+        updateData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('VR Request not found');
@@ -277,7 +319,11 @@ describe('NightingaleDocumentGeneration', () => {
         caseId: null,
       };
 
-      const result = await NightingaleDocumentGeneration.updateVRRequest(mockData, 1, updateData);
+      const result = await NightingaleDocumentGeneration.updateVRRequest(
+        mockData,
+        1,
+        updateData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Validation failed');
@@ -286,10 +332,14 @@ describe('NightingaleDocumentGeneration', () => {
 
   describe('deleteVRRequest', () => {
     test('should delete existing VR request successfully', async () => {
-      const result = await NightingaleDocumentGeneration.deleteVRRequest(mockData, 1, {
-        showToast: false,
-        saveFile: false,
-      });
+      const result = await NightingaleDocumentGeneration.deleteVRRequest(
+        mockData,
+        1,
+        {
+          showToast: false,
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.vrRequests).toHaveLength(1);
@@ -297,7 +347,10 @@ describe('NightingaleDocumentGeneration', () => {
     });
 
     test('should fail for non-existent VR request', async () => {
-      const result = await NightingaleDocumentGeneration.deleteVRRequest(mockData, 999);
+      const result = await NightingaleDocumentGeneration.deleteVRRequest(
+        mockData,
+        999,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('VR Request not found');
@@ -323,44 +376,43 @@ describe('NightingaleDocumentGeneration', () => {
         },
       ];
 
-      const result = NightingaleDocumentGeneration.generateFinancialDocumentContent(
-        mockData,
-        financialItems,
-        1,
-        1,
-        { CustomValue: 'Test' }
-      );
+      const result =
+        NightingaleDocumentGeneration.generateFinancialDocumentContent(
+          mockData,
+          financialItems,
+          1,
+          1,
+          { CustomValue: 'Test' },
+        );
 
       expect(result).toContain('Processed:');
       expect(result.length).toBeGreaterThan(0);
     });
 
     test('should handle missing template', () => {
-      const financialItems = [
-        { type: 'Checking Account', value: 1000 },
-      ];
+      const financialItems = [{ type: 'Checking Account', value: 1000 }];
 
-      const result = NightingaleDocumentGeneration.generateFinancialDocumentContent(
-        mockData,
-        financialItems,
-        999, // Non-existent template
-        1
-      );
+      const result =
+        NightingaleDocumentGeneration.generateFinancialDocumentContent(
+          mockData,
+          financialItems,
+          999, // Non-existent template
+          1,
+        );
 
       expect(result).toBe('');
     });
 
     test('should handle missing case', () => {
-      const financialItems = [
-        { type: 'Checking Account', value: 1000 },
-      ];
+      const financialItems = [{ type: 'Checking Account', value: 1000 }];
 
-      const result = NightingaleDocumentGeneration.generateFinancialDocumentContent(
-        mockData,
-        financialItems,
-        1,
-        999 // Non-existent case
-      );
+      const result =
+        NightingaleDocumentGeneration.generateFinancialDocumentContent(
+          mockData,
+          financialItems,
+          1,
+          999, // Non-existent case
+        );
 
       expect(result).toBe('');
     });
@@ -368,13 +420,15 @@ describe('NightingaleDocumentGeneration', () => {
 
   describe('private methods', () => {
     test('_getNextVRRequestId should return correct next ID', () => {
-      const nextId = NightingaleDocumentGeneration._getNextVRRequestId(mockData);
+      const nextId =
+        NightingaleDocumentGeneration._getNextVRRequestId(mockData);
       expect(nextId).toBe(3);
     });
 
     test('_getNextVRRequestId should return 1 for empty requests', () => {
       const emptyData = { vrRequests: [] };
-      const nextId = NightingaleDocumentGeneration._getNextVRRequestId(emptyData);
+      const nextId =
+        NightingaleDocumentGeneration._getNextVRRequestId(emptyData);
       expect(nextId).toBe(1);
     });
 
@@ -384,16 +438,25 @@ describe('NightingaleDocumentGeneration', () => {
     });
 
     test('_findCaseById should return null for non-existent case', () => {
-      const caseObj = NightingaleDocumentGeneration._findCaseById(mockData, 999);
+      const caseObj = NightingaleDocumentGeneration._findCaseById(
+        mockData,
+        999,
+      );
       expect(caseObj).toBeNull();
     });
 
     test('_formatCurrency should format currency correctly', () => {
-      expect(NightingaleDocumentGeneration._formatCurrency(1234.56)).toBe('$1,234.56');
-      expect(NightingaleDocumentGeneration._formatCurrency('1000')).toBe('$1,000.00');
+      expect(NightingaleDocumentGeneration._formatCurrency(1234.56)).toBe(
+        '$1,234.56',
+      );
+      expect(NightingaleDocumentGeneration._formatCurrency('1000')).toBe(
+        '$1,000.00',
+      );
       expect(NightingaleDocumentGeneration._formatCurrency(null)).toBe('$0.00');
       expect(NightingaleDocumentGeneration._formatCurrency('')).toBe('$0.00');
-      expect(NightingaleDocumentGeneration._formatCurrency('invalid')).toBe('$0.00');
+      expect(NightingaleDocumentGeneration._formatCurrency('invalid')).toBe(
+        '$0.00',
+      );
     });
 
     test('_deepClone should clone objects correctly', () => {
@@ -426,7 +489,7 @@ describe('NightingaleDocumentGeneration', () => {
       const mockFileService = {
         saveFile: jest.fn().mockRejectedValue(new Error('File save failed')),
       };
-      
+
       // Temporarily replace the file service
       const originalFileService = global.window.NightingaleFileService;
       global.window.NightingaleFileService = mockFileService;
@@ -436,11 +499,14 @@ describe('NightingaleDocumentGeneration', () => {
         caseId: 1,
       };
 
-      const result = await NightingaleDocumentGeneration.createVRRequest(mockData, requestData);
+      const result = await NightingaleDocumentGeneration.createVRRequest(
+        mockData,
+        requestData,
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('File save failed');
-      
+
       // Restore original file service
       global.window.NightingaleFileService = originalFileService;
     });
@@ -458,27 +524,15 @@ describe('NightingaleDocumentGeneration', () => {
       };
 
       // Should not throw error even if toast fails
-      const result = await NightingaleDocumentGeneration.createVRRequest(mockData, requestData, {
-        saveFile: false,
-      });
+      const result = await NightingaleDocumentGeneration.createVRRequest(
+        mockData,
+        requestData,
+        {
+          saveFile: false,
+        },
+      );
 
       expect(result.success).toBe(true);
-    });
-  });
-
-  describe('backward compatibility', () => {
-    test('should expose service to window object', () => {
-      // Clean up any existing window properties
-      delete window.NightingaleDocumentGenerationService;
-      delete window.NightingaleDocumentGeneration;
-
-      // Re-import to trigger window assignment
-      jest.resetModules();
-      require('../../src/services/nightingale.documentgeneration.js');
-
-      expect(window.NightingaleDocumentGenerationService).toBeDefined();
-      expect(window.NightingaleDocumentGeneration).toBeDefined();
-      expect(window.NightingaleServices?.documentGenerationService).toBeDefined();
     });
   });
 });

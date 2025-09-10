@@ -53,18 +53,4 @@ function testToastSystem() {
   console.groupEnd();
 }
 
-// Export for use in browser console
-if (typeof window !== 'undefined') {
-  window.testToastSystem = testToastSystem;
-
-  // Auto-run test after DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(testToastSystem, 2000); // Wait for other systems to load
-    });
-  } else {
-    setTimeout(testToastSystem, 2000);
-  }
-}
-
 export default testToastSystem;

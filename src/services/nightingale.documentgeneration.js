@@ -507,17 +507,6 @@ class NightingaleDocumentGeneration {
 // Create singleton instance
 const documentGenerationService = new NightingaleDocumentGeneration();
 
-// Backward compatibility - expose to window if available
-if (typeof window !== 'undefined') {
-  window.NightingaleDocumentGenerationService = documentGenerationService;
-  window.NightingaleDocumentGeneration = documentGenerationService;
-
-  // Register with component system if available
-  window.NightingaleServices = window.NightingaleServices || {};
-  window.NightingaleServices.documentGenerationService =
-    documentGenerationService;
-}
-
 // ES6 Module Exports
 export default documentGenerationService;
 export const {

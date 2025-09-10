@@ -614,16 +614,6 @@ class NightingaleTemplates {
 // Create singleton instance
 const templateService = new NightingaleTemplates();
 
-// Backward compatibility - expose to window if available
-if (typeof window !== 'undefined') {
-  window.NightingaleTemplateService = templateService;
-  window.NightingaleTemplates = templateService;
-
-  // Register with component system if available
-  window.NightingaleServices = window.NightingaleServices || {};
-  window.NightingaleServices.templateService = templateService;
-}
-
 // ES6 Module Exports
 export default templateService;
 export const {

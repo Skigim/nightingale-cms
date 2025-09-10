@@ -15,7 +15,11 @@ describe('NightingaleParsers', () => {
   });
 
   describe('parseAvsAccountBlock', () => {
-    const knownAccountTypes = ['Checking Account', 'Savings Account', 'Money Market'];
+    const knownAccountTypes = [
+      'Checking Account',
+      'Savings Account',
+      'Money Market',
+    ];
 
     test('should parse a complete AVS account block correctly', () => {
       const block = `John Doe Checking Account
@@ -23,7 +27,10 @@ First National Bank - (12345678)
 Some other info
 Balance as of 03/14/2024 - $1,234.56`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result).toEqual({
         type: 'Checking',
@@ -41,7 +48,10 @@ Balance as of 03/14/2024 - $1,234.56`;
 Credit Union - (98765432)
 Balance as of 03/14/2024 - $500.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result).toEqual({
         type: 'Savings',
@@ -59,7 +69,10 @@ Balance as of 03/14/2024 - $500.00`;
 Bank Name - (11111111)
 Balance as of 03/14/2024 - $100.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result).toEqual({
         type: 'N/A',
@@ -77,7 +90,10 @@ Balance as of 03/14/2024 - $100.00`;
 Bank Name - (22222222)
 Balance as of 03/14/2024 - -$50.25`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.value).toBe(-50.25);
     });
@@ -87,7 +103,10 @@ Balance as of 03/14/2024 - -$50.25`;
 Bank Name - (33333333)
 Balance as of 03/14/2024 - $1,234,567.89`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.value).toBe(1234567.89);
     });
@@ -97,7 +116,10 @@ Balance as of 03/14/2024 - $1,234,567.89`;
 Bank Name - (44444444)
 Some other info`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.value).toBe(0);
     });
@@ -107,7 +129,10 @@ Some other info`;
 No bank info here
 Balance as of 03/14/2024 - $100.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.location).toBe('N/A');
       expect(result.accountNumber).toBe('N/A');
@@ -118,7 +143,10 @@ Balance as of 03/14/2024 - $100.00`;
 Bank Name - (55555555)
 Balance as of 03/14/2024 - $100.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.type).toBe('Money Market');
       expect(result.owner).toBe('John Doe');
@@ -129,7 +157,10 @@ Balance as of 03/14/2024 - $100.00`;
 Bank Name - (123)
 Balance as of 03/14/2024 - $100.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.accountNumber).toBe('123');
     });
@@ -139,22 +170,36 @@ Balance as of 03/14/2024 - $100.00`;
 Bank Name - (66666666)
 Balance as of 03/14/2024 - $100.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.owner).toBe('John Doe, Jane Smith');
     });
 
     // Edge cases and error handling
     test('should return null for invalid input', () => {
-      expect(NightingaleParsers.parseAvsAccountBlock(null, knownAccountTypes)).toBeNull();
-      expect(NightingaleParsers.parseAvsAccountBlock(undefined, knownAccountTypes)).toBeNull();
-      expect(NightingaleParsers.parseAvsAccountBlock('', knownAccountTypes)).toBeNull();
-      expect(NightingaleParsers.parseAvsAccountBlock(123, knownAccountTypes)).toBeNull();
+      expect(
+        NightingaleParsers.parseAvsAccountBlock(null, knownAccountTypes),
+      ).toBeNull();
+      expect(
+        NightingaleParsers.parseAvsAccountBlock(undefined, knownAccountTypes),
+      ).toBeNull();
+      expect(
+        NightingaleParsers.parseAvsAccountBlock('', knownAccountTypes),
+      ).toBeNull();
+      expect(
+        NightingaleParsers.parseAvsAccountBlock(123, knownAccountTypes),
+      ).toBeNull();
     });
 
     test('should return null for insufficient lines', () => {
       const block = 'Only one line';
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result).toBeNull();
     });
@@ -175,7 +220,10 @@ Balance as of 03/14/2024 - $100.00`;
 Bank Name - (88888888)
 Balance as of 03/14/2024 - Not a number`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsAccountBlock(
+        block,
+        knownAccountTypes,
+      );
 
       expect(result.value).toBe(0);
     });
@@ -194,7 +242,10 @@ Account Owner: Jane Smith Savings Account
 Second Bank - (22222222)
 Balance as of 03/14/2024 - $2,000.00`;
 
-      const result = NightingaleParsers.parseAvsData(rawInput, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsData(
+        rawInput,
+        knownAccountTypes,
+      );
 
       expect(result).toHaveLength(2);
       expect(result[0].owner).toBe('John Doe');
@@ -216,7 +267,10 @@ Account Owner: Jane Smith Savings Account
 Second Bank - (22222222)
 Balance as of 03/14/2024 - $2,000.00`;
 
-      const result = NightingaleParsers.parseAvsData(rawInput, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsData(
+        rawInput,
+        knownAccountTypes,
+      );
 
       expect(result).toHaveLength(2);
       expect(result[0].owner).toBe('John Doe');
@@ -225,7 +279,10 @@ Balance as of 03/14/2024 - $2,000.00`;
 
     test('should return empty array for no account blocks', () => {
       const rawInput = 'Some text without account blocks';
-      const result = NightingaleParsers.parseAvsData(rawInput, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsData(
+        rawInput,
+        knownAccountTypes,
+      );
 
       expect(result).toEqual([]);
     });
@@ -235,7 +292,10 @@ Balance as of 03/14/2024 - $2,000.00`;
 First Bank - (11111111)
 Balance as of 03/14/2024 - $1,000.00`;
 
-      const result = NightingaleParsers.parseAvsData(rawInput, knownAccountTypes);
+      const result = NightingaleParsers.parseAvsData(
+        rawInput,
+        knownAccountTypes,
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].owner).toBe('John Doe');
@@ -243,11 +303,21 @@ Balance as of 03/14/2024 - $1,000.00`;
 
     // Edge cases
     test('should return empty array for invalid input', () => {
-      expect(NightingaleParsers.parseAvsData(null, knownAccountTypes)).toEqual([]);
-      expect(NightingaleParsers.parseAvsData(undefined, knownAccountTypes)).toEqual([]);
-      expect(NightingaleParsers.parseAvsData('', knownAccountTypes)).toEqual([]);
-      expect(NightingaleParsers.parseAvsData('   ', knownAccountTypes)).toEqual([]);
-      expect(NightingaleParsers.parseAvsData(123, knownAccountTypes)).toEqual([]);
+      expect(NightingaleParsers.parseAvsData(null, knownAccountTypes)).toEqual(
+        [],
+      );
+      expect(
+        NightingaleParsers.parseAvsData(undefined, knownAccountTypes),
+      ).toEqual([]);
+      expect(NightingaleParsers.parseAvsData('', knownAccountTypes)).toEqual(
+        [],
+      );
+      expect(NightingaleParsers.parseAvsData('   ', knownAccountTypes)).toEqual(
+        [],
+      );
+      expect(NightingaleParsers.parseAvsData(123, knownAccountTypes)).toEqual(
+        [],
+      );
     });
 
     test('should handle non-array knownAccountTypes', () => {
@@ -262,43 +332,15 @@ Balance as of 03/14/2024 - $100.00`;
     });
   });
 
-  describe('backward compatibility', () => {
-    test('should expose functions to window object', () => {
-      // Clean up any existing window properties
-      delete window.parseAvsAccountBlock;
-      delete window.parseAvsData;
-      delete window.NightingaleParsers;
-
-      // Re-import to trigger window assignment
-      jest.resetModules();
-      require('../../src/services/nightingale.parsers.js');
-
-      expect(typeof window.parseAvsAccountBlock).toBe('function');
-      expect(typeof window.parseAvsData).toBe('function');
-      expect(window.NightingaleParsers).toBeDefined();
-    });
-
-    test('should bind methods correctly for window access', () => {
-      const knownAccountTypes = ['Checking Account'];
-      const block = `John Doe Checking Account
-Bank Name - (12345678)
-Balance as of 03/14/2024 - $100.00`;
-
-      const result = window.parseAvsAccountBlock(block, knownAccountTypes);
-
-      expect(result).not.toBeNull();
-      expect(result.owner).toBe('John Doe');
-      expect(result.type).toBe('Checking');
-    });
-  });
-
   describe('integration', () => {
     test('should integrate with NightingaleDayJS for date formatting', () => {
       const block = `John Doe Checking Account
 Bank Name - (12345678)
 Balance as of 03/14/2024 - $100.00`;
 
-      const result = NightingaleParsers.parseAvsAccountBlock(block, ['Checking Account']);
+      const result = NightingaleParsers.parseAvsAccountBlock(block, [
+        'Checking Account',
+      ]);
 
       expect(result.source).toBe('AVS as of 2024-03-15');
     });

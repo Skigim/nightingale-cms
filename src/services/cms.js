@@ -104,22 +104,31 @@ class NightingaleCMSUtilities {
 
     // Find associated person and organization
     const person = people.find((p) => p.id === caseObject.personId);
-    const organization = organizations.find((o) => o.id === caseObject.organizationId);
+    const organization = organizations.find(
+      (o) => o.id === caseObject.organizationId,
+    );
 
     // Calculate financial totals
     const flatFinancials = this.getFlatFinancials(caseObject);
-    const totalResources = (caseObject.financials?.resources || [])
-      .reduce((sum, item) => sum + (parseFloat(item.value) || 0), 0);
-    const totalIncome = (caseObject.financials?.income || [])
-      .reduce((sum, item) => sum + (parseFloat(item.value) || 0), 0);
-    const totalExpenses = (caseObject.financials?.expenses || [])
-      .reduce((sum, item) => sum + (parseFloat(item.value) || 0), 0);
+    const totalResources = (caseObject.financials?.resources || []).reduce(
+      (sum, item) => sum + (parseFloat(item.value) || 0),
+      0,
+    );
+    const totalIncome = (caseObject.financials?.income || []).reduce(
+      (sum, item) => sum + (parseFloat(item.value) || 0),
+      0,
+    );
+    const totalExpenses = (caseObject.financials?.expenses || []).reduce(
+      (sum, item) => sum + (parseFloat(item.value) || 0),
+      0,
+    );
 
     // Count notes by category
     const noteCategories = this.getUniqueNoteCategories(caseObject);
     const noteCounts = noteCategories.reduce((counts, category) => {
-      counts[category] = (caseObject.notes || [])
-        .filter((note) => note.category === category).length;
+      counts[category] = (caseObject.notes || []).filter(
+        (note) => note.category === category,
+      ).length;
       return counts;
     }, {});
 
@@ -133,22 +142,28 @@ class NightingaleCMSUtilities {
       modifiedDate: caseObject.modifiedDate,
 
       // Associated entities
-      person: person ? {
-        id: person.id,
-        name: person.name,
-        email: person.email,
-        phone: person.phone,
-      } : null,
-      organization: organization ? {
-        id: organization.id,
-        name: organization.name,
-        email: organization.email,
-        phone: organization.phone,
-      } : null,
+      person: person
+        ? {
+            id: person.id,
+            name: person.name,
+            email: person.email,
+            phone: person.phone,
+          }
+        : null,
+      organization: organization
+        ? {
+            id: organization.id,
+            name: organization.name,
+            email: organization.email,
+            phone: organization.phone,
+          }
+        : null,
 
       // Application details
       appDetails: caseObject.appDetails || this.getDefaultAppDetails(),
-      appDateLabel: this.getAppDateLabel(caseObject.appDetails?.applicationType),
+      appDateLabel: this.getAppDateLabel(
+        caseObject.appDetails?.applicationType,
+      ),
 
       // Financial summary
       financials: {
@@ -176,7 +191,9 @@ class NightingaleCMSUtilities {
         lastActivity: caseObject.modifiedDate || caseObject.createdDate,
         hasFinancials: flatFinancials.length > 0,
         hasNotes: (caseObject.notes || []).length > 0,
-        hasAppDetails: !!(caseObject.appDetails && caseObject.appDetails.appDate),
+        hasAppDetails: !!(
+          caseObject.appDetails && caseObject.appDetails.appDate
+        ),
       },
     };
   }
@@ -197,7 +214,7 @@ class NightingaleCMSUtilities {
       const vrWindow = window.open(
         fullUrl,
         'NightingaleVR',
-        'width=1200,height=800,scrollbars=yes,resizable=yes'
+        'width=1200,height=800,scrollbars=yes,resizable=yes',
       );
 
       if (!vrWindow) {
@@ -236,7 +253,7 @@ class NightingaleCMSUtilities {
       // Test financial structure
       const financials = caseObject.financials || {};
       const expectedSections = ['resources', 'income', 'expenses'];
-      
+
       expectedSections.forEach((section) => {
         if (!financials[section]) {
           results.warnings.push(`Missing ${section} section`);
@@ -255,21 +272,27 @@ class NightingaleCMSUtilities {
       flatFinancials.forEach((item, index) => {
         requiredFields.forEach((field) => {
           if (!item[field]) {
-            results.errors.push(`Item ${index + 1}: Missing required field '${field}'`);
+            results.errors.push(
+              `Item ${index + 1}: Missing required field '${field}'`,
+            );
             results.success = false;
           }
         });
 
         recommendedFields.forEach((field) => {
           if (!item[field]) {
-            results.warnings.push(`Item ${index + 1}: Missing recommended field '${field}'`);
+            results.warnings.push(
+              `Item ${index + 1}: Missing recommended field '${field}'`,
+            );
           }
         });
 
         // Test numeric value
         const numericValue = parseFloat(item.value);
         if (isNaN(numericValue)) {
-          results.errors.push(`Item ${index + 1}: Invalid numeric value '${item.value}'`);
+          results.errors.push(
+            `Item ${index + 1}: Invalid numeric value '${item.value}'`,
+          );
           results.success = false;
         }
       });
@@ -283,7 +306,6 @@ class NightingaleCMSUtilities {
         warningCount: results.warnings.length,
         errorCount: results.errors.length,
       };
-
     } catch (error) {
       results.success = false;
       results.errors.push(`Migration test failed: ${error.message}`);
@@ -308,11 +330,15 @@ class NightingaleCMSUtilities {
       !!caseObject.type,
       !!(caseObject.appDetails && caseObject.appDetails.appDate),
       !!(caseObject.appDetails && caseObject.appDetails.applicationType),
-      !!(caseObject.financials && (
-        (caseObject.financials.resources && caseObject.financials.resources.length > 0) ||
-        (caseObject.financials.income && caseObject.financials.income.length > 0) ||
-        (caseObject.financials.expenses && caseObject.financials.expenses.length > 0)
-      )),
+      !!(
+        caseObject.financials &&
+        ((caseObject.financials.resources &&
+          caseObject.financials.resources.length > 0) ||
+          (caseObject.financials.income &&
+            caseObject.financials.income.length > 0) ||
+          (caseObject.financials.expenses &&
+            caseObject.financials.expenses.length > 0))
+      ),
       !!(caseObject.notes && caseObject.notes.length > 0),
     ];
 
@@ -323,24 +349,6 @@ class NightingaleCMSUtilities {
 
 // Create singleton instance
 const cmsUtilities = new NightingaleCMSUtilities();
-
-// Backward compatibility - expose to window if available
-if (typeof window !== 'undefined') {
-  window.NightingaleCMSUtilities = cmsUtilities;
-
-  // Register with service registry if available
-  window.NightingaleServices = window.NightingaleServices || {};
-  window.NightingaleServices.cmsUtilities = cmsUtilities;
-
-  // Legacy global functions for backward compatibility
-  window.getFlatFinancials = cmsUtilities.getFlatFinancials.bind(cmsUtilities);
-  window.getAppDateLabel = cmsUtilities.getAppDateLabel.bind(cmsUtilities);
-  window.getDefaultAppDetails = cmsUtilities.getDefaultAppDetails.bind(cmsUtilities);
-  window.getUniqueNoteCategories = cmsUtilities.getUniqueNoteCategories.bind(cmsUtilities);
-  window.generateCaseSummary = cmsUtilities.generateCaseSummary.bind(cmsUtilities);
-  window.openVRApp = cmsUtilities.openVRApp.bind(cmsUtilities);
-  window.testFinancialMigration = cmsUtilities.testFinancialMigration.bind(cmsUtilities);
-}
 
 // ES6 Module Exports
 export default cmsUtilities;

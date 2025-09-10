@@ -26,9 +26,7 @@ describe('NightingaleCMSUtilities', () => {
         { type: 'Checking', value: 1000, owner: 'John Doe' },
         { type: 'Savings', value: 5000, owner: 'John Doe' },
       ],
-      income: [
-        { type: 'Salary', value: 3000, owner: 'John Doe' },
-      ],
+      income: [{ type: 'Salary', value: 3000, owner: 'John Doe' }],
       expenses: [
         { type: 'Rent', value: 1200, owner: 'John Doe' },
         { type: 'Food', value: 400, owner: 'John Doe' },
@@ -71,7 +69,9 @@ describe('NightingaleCMSUtilities', () => {
 
     test('should return empty array for no financials', () => {
       const caseWithoutFinancials = { id: 1 };
-      const result = NightingaleCMSUtilities.getFlatFinancials(caseWithoutFinancials);
+      const result = NightingaleCMSUtilities.getFlatFinancials(
+        caseWithoutFinancials,
+      );
       expect(result).toEqual([]);
     });
 
@@ -87,7 +87,9 @@ describe('NightingaleCMSUtilities', () => {
           // income and expenses missing
         },
       };
-      const result = NightingaleCMSUtilities.getFlatFinancials(caseWithPartialFinancials);
+      const result = NightingaleCMSUtilities.getFlatFinancials(
+        caseWithPartialFinancials,
+      );
       expect(result).toHaveLength(1);
     });
   });
@@ -112,7 +114,7 @@ describe('NightingaleCMSUtilities', () => {
   describe('getDefaultAppDetails', () => {
     test('should return default application details', () => {
       const result = NightingaleCMSUtilities.getDefaultAppDetails();
-      
+
       expect(result).toEqual({
         appDate: '',
         applicationType: 'Application',
@@ -130,7 +132,7 @@ describe('NightingaleCMSUtilities', () => {
     test('should return new object each time', () => {
       const result1 = NightingaleCMSUtilities.getDefaultAppDetails();
       const result2 = NightingaleCMSUtilities.getDefaultAppDetails();
-      
+
       expect(result1).not.toBe(result2);
       expect(result1).toEqual(result2);
     });
@@ -144,7 +146,8 @@ describe('NightingaleCMSUtilities', () => {
 
     test('should return empty array for no notes', () => {
       const caseWithoutNotes = { id: 1 };
-      const result = NightingaleCMSUtilities.getUniqueNoteCategories(caseWithoutNotes);
+      const result =
+        NightingaleCMSUtilities.getUniqueNoteCategories(caseWithoutNotes);
       expect(result).toEqual([]);
     });
 
@@ -162,15 +165,20 @@ describe('NightingaleCMSUtilities', () => {
           { category: 'Another Valid', content: 'Note 4' },
         ],
       };
-      const result = NightingaleCMSUtilities.getUniqueNoteCategories(caseWithEmptyCategories);
+      const result = NightingaleCMSUtilities.getUniqueNoteCategories(
+        caseWithEmptyCategories,
+      );
       expect(result).toEqual(['Another Valid', 'Valid']);
     });
   });
 
   describe('generateCaseSummary', () => {
     test('should generate comprehensive case summary', () => {
-      const result = NightingaleCMSUtilities.generateCaseSummary(mockCase, mockFullData);
-      
+      const result = NightingaleCMSUtilities.generateCaseSummary(
+        mockCase,
+        mockFullData,
+      );
+
       expect(result.caseId).toBe(1);
       expect(result.caseNumber).toBe('CASE-001');
       expect(result.status).toBe('Active');
@@ -186,7 +194,7 @@ describe('NightingaleCMSUtilities', () => {
 
     test('should handle missing person and organization', () => {
       const result = NightingaleCMSUtilities.generateCaseSummary(mockCase, {});
-      
+
       expect(result.person).toBeNull();
       expect(result.organization).toBeNull();
       expect(result.caseId).toBe(1);
@@ -198,7 +206,10 @@ describe('NightingaleCMSUtilities', () => {
     });
 
     test('should calculate completeness correctly', () => {
-      const result = NightingaleCMSUtilities.generateCaseSummary(mockCase, mockFullData);
+      const result = NightingaleCMSUtilities.generateCaseSummary(
+        mockCase,
+        mockFullData,
+      );
       expect(result.summary.completeness).toBeGreaterThan(0);
       expect(result.summary.hasFinancials).toBe(true);
       expect(result.summary.hasNotes).toBe(true);
@@ -214,29 +225,32 @@ describe('NightingaleCMSUtilities', () => {
 
     test('should open VR app with default URL', () => {
       const result = NightingaleCMSUtilities.openVRApp();
-      
+
       expect(window.open).toHaveBeenCalledWith(
         './nightingale-correspondence.html',
         'NightingaleVR',
-        'width=1200,height=800,scrollbars=yes,resizable=yes'
+        'width=1200,height=800,scrollbars=yes,resizable=yes',
       );
       expect(result).toEqual({ mockWindow: true });
     });
 
     test('should open VR app with custom URL and params', () => {
       const params = { caseId: 123, mode: 'edit' };
-      const result = NightingaleCMSUtilities.openVRApp('/custom-vr.html', params);
-      
+      const result = NightingaleCMSUtilities.openVRApp(
+        '/custom-vr.html',
+        params,
+      );
+
       expect(window.open).toHaveBeenCalledWith(
         '/custom-vr.html?caseId=123&mode=edit',
         'NightingaleVR',
-        'width=1200,height=800,scrollbars=yes,resizable=yes'
+        'width=1200,height=800,scrollbars=yes,resizable=yes',
       );
     });
 
     test('should handle popup blocking', () => {
       global.window.open = jest.fn(() => null);
-      
+
       const result = NightingaleCMSUtilities.openVRApp();
       expect(result).toBeNull();
     });
@@ -245,7 +259,7 @@ describe('NightingaleCMSUtilities', () => {
       global.window.open = jest.fn(() => {
         throw new Error('Open failed');
       });
-      
+
       const result = NightingaleCMSUtilities.openVRApp();
       expect(result).toBeNull();
     });
@@ -254,7 +268,7 @@ describe('NightingaleCMSUtilities', () => {
   describe('testFinancialMigration', () => {
     test('should pass validation for valid financial data', () => {
       const result = NightingaleCMSUtilities.testFinancialMigration(mockCase);
-      
+
       expect(result.success).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.summary.totalItems).toBe(5);
@@ -267,9 +281,11 @@ describe('NightingaleCMSUtilities', () => {
           // income and expenses missing
         },
       };
-      
-      const result = NightingaleCMSUtilities.testFinancialMigration(caseWithMissingSection);
-      
+
+      const result = NightingaleCMSUtilities.testFinancialMigration(
+        caseWithMissingSection,
+      );
+
       expect(result.success).toBe(true);
       expect(result.warnings).toContain('Missing income section');
       expect(result.warnings).toContain('Missing expenses section');
@@ -283,9 +299,11 @@ describe('NightingaleCMSUtilities', () => {
           expenses: [{ type: 'Rent', value: 500 }],
         },
       };
-      
-      const result = NightingaleCMSUtilities.testFinancialMigration(caseWithInvalidStructure);
-      
+
+      const result = NightingaleCMSUtilities.testFinancialMigration(
+        caseWithInvalidStructure,
+      );
+
       expect(result.success).toBe(false);
       expect(result.errors).toContain('resources is not an array');
     });
@@ -301,9 +319,11 @@ describe('NightingaleCMSUtilities', () => {
           expenses: [],
         },
       };
-      
-      const result = NightingaleCMSUtilities.testFinancialMigration(caseWithMissingFields);
-      
+
+      const result = NightingaleCMSUtilities.testFinancialMigration(
+        caseWithMissingFields,
+      );
+
       expect(result.success).toBe(false);
       expect(result.errors).toContain("Item 1: Missing required field 'value'");
       expect(result.errors).toContain("Item 2: Missing required field 'type'");
@@ -312,55 +332,35 @@ describe('NightingaleCMSUtilities', () => {
     test('should detect invalid numeric values', () => {
       const caseWithInvalidValues = {
         financials: {
-          resources: [
-            { type: 'Checking', value: 'not a number' },
-          ],
+          resources: [{ type: 'Checking', value: 'not a number' }],
           income: [],
           expenses: [],
         },
       };
-      
-      const result = NightingaleCMSUtilities.testFinancialMigration(caseWithInvalidValues);
-      
+
+      const result = NightingaleCMSUtilities.testFinancialMigration(
+        caseWithInvalidValues,
+      );
+
       expect(result.success).toBe(false);
-      expect(result.errors).toContain("Item 1: Invalid numeric value 'not a number'");
+      expect(result.errors).toContain(
+        "Item 1: Invalid numeric value 'not a number'",
+      );
     });
 
     test('should return error for null case', () => {
       const result = NightingaleCMSUtilities.testFinancialMigration(null);
-      
+
       expect(result.success).toBe(false);
       expect(result.error).toBe('No case object provided');
-    });
-  });
-
-  describe('backward compatibility', () => {
-    test('should expose service to window object', () => {
-      // Clean up any existing window properties
-      delete window.NightingaleCMSUtilities;
-      delete window.getFlatFinancials;
-
-      // Re-import to trigger window assignment
-      jest.resetModules();
-      require('../../src/services/cms.js');
-
-      expect(window.NightingaleCMSUtilities).toBeDefined();
-      expect(window.NightingaleServices?.cmsUtilities).toBeDefined();
-      expect(typeof window.getFlatFinancials).toBe('function');
-      expect(typeof window.getAppDateLabel).toBe('function');
-      expect(typeof window.generateCaseSummary).toBe('function');
-    });
-
-    test('should bind methods correctly for window access', () => {
-      const result = window.getFlatFinancials(mockCase);
-      expect(result).toHaveLength(5);
     });
   });
 
   describe('private methods', () => {
     test('_calculateCompleteness should return correct percentage', () => {
       // Access private method for testing
-      const completeness = NightingaleCMSUtilities._calculateCompleteness(mockCase);
+      const completeness =
+        NightingaleCMSUtilities._calculateCompleteness(mockCase);
       expect(completeness).toBeGreaterThan(50);
       expect(completeness).toBeLessThanOrEqual(100);
     });

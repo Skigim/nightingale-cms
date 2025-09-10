@@ -31,18 +31,9 @@ describe('NightingalePlaceholders', () => {
       totalIncome: 45000,
     },
     financials: {
-      resources: [
-        { value: 1000 },
-        { value: 2000 },
-      ],
-      income: [
-        { value: 3000 },
-        { value: 1500 },
-      ],
-      expenses: [
-        { value: 500 },
-        { value: 800 },
-      ],
+      resources: [{ value: 1000 }, { value: 2000 }],
+      income: [{ value: 3000 }, { value: 1500 }],
+      expenses: [{ value: 500 }, { value: 800 }],
     },
   };
 
@@ -108,29 +99,33 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
-      expect(result).toBe('Today is 2024-03-15 and formatted as March 15, 2024');
+      expect(result).toBe(
+        'Today is 2024-03-15 and formatted as March 15, 2024',
+      );
     });
 
     test('should process person placeholders', () => {
-      const template = 'Person: {PersonName} ({PersonFirstName} {PersonLastName})';
+      const template =
+        'Person: {PersonName} ({PersonFirstName} {PersonLastName})';
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Person: John Doe (John Doe)');
     });
 
     test('should process formatted person placeholders', () => {
-      const template = 'SSN: {PersonSSNFormatted}, Phone: {PersonPhoneFormatted}';
+      const template =
+        'SSN: {PersonSSNFormatted}, Phone: {PersonPhoneFormatted}';
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('SSN: 123-45-6789, Phone: (555) 123-4567');
@@ -141,7 +136,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Test Organization - EIN: 98-7654321');
@@ -152,7 +147,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Contact: Jane Smith (Administrator)');
@@ -163,18 +158,19 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Case CASE-001 is Active');
     });
 
     test('should process financial placeholders', () => {
-      const template = 'Assets: {TotalAssetsFormatted}, Income: {TotalIncomeFormatted}';
+      const template =
+        'Assets: {TotalAssetsFormatted}, Income: {TotalIncomeFormatted}';
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Assets: $3,000.00, Income: $4,500.00');
@@ -187,7 +183,7 @@ describe('NightingalePlaceholders', () => {
         template,
         mockActiveCase,
         mockFullData,
-        customReplacements
+        customReplacements,
       );
 
       expect(result).toBe('Custom value: Custom Value');
@@ -198,7 +194,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Unknown: {UnknownPlaceholder}');
@@ -210,7 +206,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         caseWithEmptyValues,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Case: ');
@@ -219,12 +215,12 @@ describe('NightingalePlaceholders', () => {
     test('should find organization from person when case organizationId is missing', () => {
       const caseWithoutOrgId = { ...mockActiveCase };
       delete caseWithoutOrgId.organizationId;
-      
+
       const template = '{OrganizationName}';
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         caseWithoutOrgId,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Test Organization');
@@ -236,24 +232,27 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         caseWithMissingPerson,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('');
     });
 
     test('should handle missing organization', () => {
-      const caseWithMissingOrg = { ...mockActiveCase, organizationId: 'missing' };
+      const caseWithMissingOrg = {
+        ...mockActiveCase,
+        organizationId: 'missing',
+      };
       const dataWithoutPerson = {
         ...mockFullData,
         people: [{ ...mockFullData.people[0], organizationId: 'missing' }],
       };
-      
+
       const template = '{OrganizationName}';
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         caseWithMissingOrg,
-        dataWithoutPerson
+        dataWithoutPerson,
       );
 
       expect(result).toBe('');
@@ -283,7 +282,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        dataWithBOM
+        dataWithBOM,
       );
 
       expect(result).toBe('Bob Johnson');
@@ -294,7 +293,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         null,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('');
@@ -305,7 +304,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         null,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Test {PersonName}');
@@ -316,7 +315,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        null
+        null,
       );
 
       expect(result).toBe('Test {PersonName}');
@@ -326,7 +325,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         123,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe(123);
@@ -339,7 +338,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.process(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('Today is 2024-03-15');
@@ -432,9 +431,15 @@ describe('NightingalePlaceholders', () => {
       const caseWithoutFinancials = { ...mockActiveCase };
       delete caseWithoutFinancials.financials;
 
-      expect(NightingalePlaceholders._getTotalAssets(caseWithoutFinancials)).toBe(0);
-      expect(NightingalePlaceholders._getTotalIncome(caseWithoutFinancials)).toBe(0);
-      expect(NightingalePlaceholders._getTotalExpenses(caseWithoutFinancials)).toBe(0);
+      expect(
+        NightingalePlaceholders._getTotalAssets(caseWithoutFinancials),
+      ).toBe(0);
+      expect(
+        NightingalePlaceholders._getTotalIncome(caseWithoutFinancials),
+      ).toBe(0);
+      expect(
+        NightingalePlaceholders._getTotalExpenses(caseWithoutFinancials),
+      ).toBe(0);
     });
 
     test('should handle invalid values in financial arrays', () => {
@@ -447,16 +452,22 @@ describe('NightingalePlaceholders', () => {
         },
       };
 
-      expect(NightingalePlaceholders._getTotalAssets(caseWithInvalidValues)).toBe(100);
-      expect(NightingalePlaceholders._getTotalIncome(caseWithInvalidValues)).toBe(200);
-      expect(NightingalePlaceholders._getTotalExpenses(caseWithInvalidValues)).toBe(300);
+      expect(
+        NightingalePlaceholders._getTotalAssets(caseWithInvalidValues),
+      ).toBe(100);
+      expect(
+        NightingalePlaceholders._getTotalIncome(caseWithInvalidValues),
+      ).toBe(200);
+      expect(
+        NightingalePlaceholders._getTotalExpenses(caseWithInvalidValues),
+      ).toBe(300);
     });
   });
 
   describe('getAvailablePlaceholders', () => {
     test('should return array of available placeholders', () => {
       const placeholders = NightingalePlaceholders.getAvailablePlaceholders();
-      
+
       expect(Array.isArray(placeholders)).toBe(true);
       expect(placeholders.length).toBeGreaterThan(0);
       expect(placeholders).toContain('TodayDate');
@@ -467,41 +478,13 @@ describe('NightingalePlaceholders', () => {
     });
   });
 
-  describe('backward compatibility', () => {
-    test('should expose service to window object', () => {
-      // Clean up any existing window properties
-      delete window.NightingalePlaceholderService;
-      delete window.NightingalePlaceholders;
-      delete window.processPlaceholders;
-
-      // Re-import to trigger window assignment
-      jest.resetModules();
-      require('../../src/services/nightingale.placeholders.js');
-
-      expect(window.NightingalePlaceholderService).toBeDefined();
-      expect(window.NightingalePlaceholders).toBeDefined();
-      expect(typeof window.processPlaceholders).toBe('function');
-    });
-
-    test('should bind processPlaceholders correctly for window access', () => {
-      const template = 'Today is {TodayDate}';
-      const result = window.processPlaceholders(
-        template,
-        mockActiveCase,
-        mockFullData
-      );
-
-      expect(result).toBe('Today is 2024-03-15');
-    });
-  });
-
   describe('integration', () => {
     test('should integrate with NightingaleDayJS for date formatting', () => {
       const template = '{TodayDate} and {TodayLong}';
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toBe('2024-03-15 and March 15, 2024');
@@ -524,7 +507,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       expect(result).toContain('Dear John Doe,');
@@ -540,7 +523,7 @@ describe('NightingalePlaceholders', () => {
       const result = NightingalePlaceholders.processPlaceholders(
         template,
         mockActiveCase,
-        mockFullData
+        mockFullData,
       );
 
       // Should leave nested braces as-is since they're not valid placeholders
@@ -558,7 +541,7 @@ describe('NightingalePlaceholders', () => {
         template,
         mockActiveCase,
         mockFullData,
-        customReplacements
+        customReplacements,
       );
 
       expect(result).toBe('Custom Name Override and Custom Value');

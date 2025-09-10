@@ -55,7 +55,8 @@ describe('UIUtilities', () => {
       });
 
       test('should return null for non-existent container', async () => {
-        const result = await UIUtilities.FocusManager.focusFirst('#non-existent');
+        const result =
+          await UIUtilities.FocusManager.focusFirst('#non-existent');
         expect(result).toBeNull();
       });
 
@@ -67,11 +68,11 @@ describe('UIUtilities', () => {
       test('should accept options object', async () => {
         const container = document.getElementById('test-container');
         const onNoFocusable = jest.fn();
-        
+
         await UIUtilities.FocusManager.focusFirst(container, {
           onNoFocusable,
         });
-        
+
         // Should not throw error
         expect(true).toBe(true);
       });
@@ -107,7 +108,7 @@ describe('UIUtilities', () => {
 
     test('should handle missing notes section', () => {
       document.querySelector('#notes-section').remove();
-      
+
       expect(() => {
         UIUtilities.scrollToNotes();
       }).not.toThrow();
@@ -141,7 +142,7 @@ describe('UIUtilities', () => {
     test('should check for various services', () => {
       global.window.NightingaleFileService = { status: 'ready' };
       global.window.NightingaleToast = { status: 'ready' };
-      
+
       const status = UIUtilities.checkAppStatus();
       expect(typeof status).toBe('object');
       expect(status).toHaveProperty('timestamp');
@@ -166,42 +167,6 @@ describe('UIUtilities', () => {
 
       const info = UIUtilities.debugComponentLibrary();
       expect(info).toBeNull();
-    });
-  });
-
-  describe('backward compatibility', () => {
-    test('should expose service to window object', () => {
-      // Clean up any existing window properties
-      delete window.NightingaleUIUtilities;
-      delete window.NightingaleFocusManager;
-      delete window.scrollToSection;
-
-      // Re-import to trigger window assignment
-      jest.resetModules();
-      require('../../src/services/ui.js');
-
-      expect(window.NightingaleUIUtilities).toBeDefined();
-      expect(window.NightingaleFocusManager).toBeDefined();
-      expect(window.NightingaleServices?.uiUtilities).toBeDefined();
-      expect(typeof window.scrollToSection).toBe('function');
-      expect(typeof window.scrollToNotes).toBe('function');
-      expect(typeof window.testDataIntegrityBroadcast).toBe('function');
-      expect(typeof window.checkAppStatus).toBe('function');
-      expect(typeof window.debugComponentLibrary).toBe('function');
-    });
-
-    test('should have bound methods that execute without error', () => {
-      expect(() => {
-        window.scrollToSection('section-1');
-      }).not.toThrow();
-      
-      expect(() => {
-        window.scrollToNotes();
-      }).not.toThrow();
-      
-      expect(() => {
-        window.checkAppStatus();
-      }).not.toThrow();
     });
   });
 

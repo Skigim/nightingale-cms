@@ -37,10 +37,5 @@ const dateUtils = {
   todayForInput: () => dayjs().format('YYYY-MM-DD'),
 };
 
-// Maintain legacy global for any remaining code paths expecting window.dateUtils
-if (typeof window !== 'undefined') {
-  window.dateUtils = dateUtils;
-}
-
 export { dayjs };
 export default dateUtils;

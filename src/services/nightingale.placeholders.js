@@ -390,18 +390,6 @@ class NightingalePlaceholders {
 // Create singleton instance
 const placeholderService = new NightingalePlaceholders();
 
-// Backward compatibility - expose to window if available
-if (typeof window !== 'undefined') {
-  window.NightingalePlaceholderService = placeholderService;
-  window.NightingalePlaceholders = placeholderService;
-  window.processPlaceholders =
-    placeholderService.processPlaceholders.bind(placeholderService);
-
-  // Secondary registration with services collection
-  window.NightingaleServices = window.NightingaleServices || {};
-  window.NightingaleServices.placeholderService = placeholderService;
-}
-
 // ES6 Module Exports
 export default placeholderService;
 export const { processPlaceholders, getAvailablePlaceholders } =

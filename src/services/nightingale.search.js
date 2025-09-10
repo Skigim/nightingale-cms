@@ -106,10 +106,5 @@ function search(indexOrList, query, options = {}) {
 
 const SearchService = { createIndex, search, DEFAULT_OPTIONS };
 
-// Maintain legacy global for backward compatibility
-if (typeof window !== 'undefined') {
-  window.NightingaleSearch = SearchService;
-}
-
 export { createIndex, search, DEFAULT_OPTIONS };
 export default SearchService;
