@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PersonDetailsView from './PersonDetailsView';
 import { registerComponent } from '../../services/registry';
-import { createBusinessComponent } from '../ui/TabBase.js';
+import { createBusinessComponent } from '../ui/TabBase.jsx';
 /**
  * Nightingale CMS - People Tab Component (JSX)
  */

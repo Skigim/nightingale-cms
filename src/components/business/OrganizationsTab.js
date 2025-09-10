@@ -2,7 +2,7 @@
 // Migrated to ES module component registry.
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { registerComponent } from '../../services/registry';
-import { createBusinessComponent } from '../ui/TabBase.js';
+import { createBusinessComponent } from '../ui/TabBase.jsx';
 
 /**
  * Data management hook for Organizations Tab

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
-import { createBusinessComponent } from '../ui/TabBase.js';
+import { createBusinessComponent } from '../ui/TabBase.jsx';
 /**
  * Nightingale CMS - Cases Tab Component
  *
