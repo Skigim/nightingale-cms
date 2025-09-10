@@ -1,5 +1,7 @@
-/* eslint-disable react/prop-types */
+import React from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+
 /**
  * Nightingale Component Library - Badge System
  *
@@ -24,8 +26,6 @@ function Badge({
   className = '',
   customColors = null,
 }) {
-  const e = window.React.createElement;
-
   if (!status) return null;
 
   // Color mappings for different badge types
@@ -98,15 +98,30 @@ function Badge({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return e(
-    'span',
-    {
-      className: finalClassName,
-      title: status, // Tooltip for accessibility
-    },
-    status,
+  return (
+    <span
+      className={finalClassName}
+      title={status} // Tooltip for accessibility
+    >
+      {status}
+    </span>
   );
 }
+
+// PropTypes for Badge component
+Badge.propTypes = {
+  status: PropTypes.string.isRequired,
+  variant: PropTypes.oneOf([
+    'status',
+    'priority',
+    'verification',
+    'case-type',
+    'application',
+  ]),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  className: PropTypes.string,
+  customColors: PropTypes.object,
+};
 
 /**
  * Progress Badge Component - shows completion percentage
@@ -125,8 +140,6 @@ function ProgressBadge({
   size = 'md',
   showPercentage = true,
 }) {
-  const e = window.React.createElement;
-
   const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
 
   // Color based on completion percentage
@@ -155,21 +168,30 @@ function ProgressBadge({
       ? `${percentage}%`
       : `${current}/${total}`;
 
-  return e(
-    'span',
-    {
-      className: `
+  return (
+    <span
+      className={`
         inline-flex items-center rounded-full font-medium
         ${sizeClasses[size]}
         ${colorClass}
       `
         .replace(/\s+/g, ' ')
-        .trim(),
-      title: `${current} of ${total} complete (${percentage}%)`,
-    },
-    displayText,
+        .trim()}
+      title={`${current} of ${total} complete (${percentage}%)`}
+    >
+      {displayText}
+    </span>
   );
 }
+
+// PropTypes for ProgressBadge
+ProgressBadge.propTypes = {
+  current: PropTypes.number,
+  total: PropTypes.number,
+  label: PropTypes.string,
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  showPercentage: PropTypes.bool,
+};
 
 /**
  * Count Badge Component - shows numeric counts (like notifications)
@@ -186,8 +208,6 @@ function CountBadge({
   max = 99,
   showZero = false,
 }) {
-  const e = window.React.createElement;
-
   if (count === 0 && !showZero) return null;
 
   const colorClasses = {
@@ -200,22 +220,36 @@ function CountBadge({
 
   const displayCount = count > max ? `${max}+` : count.toString();
 
-  return e(
-    'span',
-    {
-      className: `
+  return (
+    <span
+      className={`
         inline-flex items-center justify-center
         min-w-[1.25rem] h-5 px-1
         rounded-full text-xs font-medium
         ${colorClasses[variant]}
       `
         .replace(/\s+/g, ' ')
-        .trim(),
-      title: `${count} items`,
-    },
-    displayCount,
+        .trim()}
+      title={`${count} items`}
+    >
+      {displayCount}
+    </span>
   );
 }
+
+// PropTypes for CountBadge
+CountBadge.propTypes = {
+  count: PropTypes.number,
+  variant: PropTypes.oneOf([
+    'default',
+    'primary',
+    'success',
+    'warning',
+    'danger',
+  ]),
+  max: PropTypes.number,
+  showZero: PropTypes.bool,
+};
 
 /**
  * Multi-Badge Component - displays multiple badges in a row
@@ -226,8 +260,6 @@ function CountBadge({
  * @returns {React.Element} Multi-badge container
  */
 function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
-  const e = window.React.createElement;
-
   if (!badges.length) return null;
 
   const spacingClasses = {
@@ -242,25 +274,32 @@ function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
     truncate: 'flex-nowrap overflow-hidden',
   };
 
-  return e(
-    'div',
-    {
-      className: `
+  return (
+    <div
+      className={`
         flex items-center
         ${spacingClasses[spacing]}
         ${wrapClasses[wrap]}
       `
         .replace(/\s+/g, ' ')
-        .trim(),
-    },
-    badges.map((badgeProps, index) =>
-      e(Badge, {
-        key: badgeProps.key || index,
-        ...badgeProps,
-      }),
-    ),
+        .trim()}
+    >
+      {badges.map((badgeProps, index) => (
+        <Badge
+          key={badgeProps.key || index}
+          {...badgeProps}
+        />
+      ))}
+    </div>
   );
 }
+
+// PropTypes for MultiBadge
+MultiBadge.propTypes = {
+  badges: PropTypes.array,
+  spacing: PropTypes.oneOf(['tight', 'normal', 'loose']),
+  wrap: PropTypes.oneOf(['wrap', 'nowrap', 'truncate']),
+};
 
 // Export components
 if (typeof module !== 'undefined' && module.exports) {

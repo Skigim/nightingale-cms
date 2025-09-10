@@ -325,4 +325,30 @@ const UIUtilities = {
   name: 'UIUtilities',
 };
 
+// Backward compatibility - expose to window if available
+if (typeof window !== 'undefined') {
+  window.NightingaleUIUtilities = UIUtilities;
+  window.NightingaleFocusManager = NightingaleFocusManager;
+
+  // Register with service registry if available
+  window.NightingaleServices = window.NightingaleServices || {};
+  window.NightingaleServices.uiUtilities = UIUtilities;
+
+  // Legacy global functions for backward compatibility
+  window.scrollToSection = scrollToSection;
+  window.scrollToNotes = scrollToNotes;
+  window.testDataIntegrityBroadcast = testDataIntegrityBroadcast;
+  window.checkAppStatus = checkAppStatus;
+  window.debugComponentLibrary = debugComponentLibrary;
+}
+
+// ES6 Module Exports
 export default UIUtilities;
+export {
+  NightingaleFocusManager as FocusManager,
+  scrollToSection,
+  scrollToNotes,
+  testDataIntegrityBroadcast,
+  checkAppStatus,
+  debugComponentLibrary,
+};

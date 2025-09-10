@@ -1,5 +1,7 @@
-/* eslint-disable react/prop-types */
+import React, { useEffect, useRef, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+
 /**
  * Nightingale Component Library - Modal System
  *
@@ -18,6 +20,7 @@ import { registerComponent } from '../../services/registry';
  * @param {string} props.size - Modal size: 'small', 'default', 'large', 'xlarge'
  * @param {boolean} props.showCloseButton - Whether to show the X close button
  * @param {string} props.className - Additional CSS classes
+ * @param {string} props.descriptionId - Optional aria-describedby ID for accessibility
  * @returns {React.Element} Modal component
  */
 function Modal({
@@ -29,11 +32,8 @@ function Modal({
   size = 'default',
   showCloseButton = true,
   className = '',
+  descriptionId,
 }) {
-  const e = window.React.createElement;
-
-  // Use React hooks
-  const { useEffect, useRef } = window.React;
   const modalRef = useRef(null);
 
   // Handle escape key
@@ -80,84 +80,91 @@ function Modal({
     xlarge: 'max-w-6xl',
   };
 
-  return e(
-    'div',
-    {
-      className: 'fixed inset-0 z-50 overflow-auto pointer-events-none',
-    },
-    e(
-      'div',
-      {
-        className:
-          'flex items-center justify-center min-h-screen p-4 pointer-events-none',
-        role: 'dialog',
-        'aria-modal': 'true',
-        'aria-labelledby': title ? 'modal-title' : undefined,
-      },
-      e(
-        'div',
-        {
-          ref: modalRef,
-          className: `bg-gray-800 rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden pointer-events-auto ${className}`,
-        }, // Header
-        title &&
-          e(
-            'div',
-            {
-              className:
-                'flex items-center justify-between p-6 border-b border-gray-700',
-            },
-            e(
-              'h3',
-              {
-                id: 'modal-title',
-                className: 'text-lg font-semibold text-white',
-              },
-              title,
-            ),
-            showCloseButton &&
-              e(
-                'button',
-                {
-                  onClick: onClose,
-                  className: 'text-gray-400 hover:text-white transition-colors',
-                  'aria-label': 'Close modal',
-                },
-                e(
-                  'svg',
-                  {
-                    className: 'w-6 h-6',
-                    fill: 'none',
-                    viewBox: '0 0 24 24',
-                    stroke: 'currentColor',
-                  },
-                  e('path', {
-                    strokeLinecap: 'round',
-                    strokeLinejoin: 'round',
-                    strokeWidth: 2,
-                    d: 'M6 18L18 6M6 6l12 12',
-                  }),
-                ),
-              ),
-          ),
+  // Fallback to default size if invalid size provided
+  const modalSizeClass = sizeClasses[size] || sizeClasses.default;
 
-        // Body
-        e('div', { className: 'p-6 overflow-auto max-h-[60vh]' }, children),
+  return (
+    <div 
+      className="fixed inset-0 z-50 overflow-auto pointer-events-auto"
+      onClick={(e) => {
+        // Close on backdrop click if onClose provided
+        if (e.target === e.currentTarget && onClose) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="flex items-center justify-center min-h-screen p-4 pointer-events-none"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-describedby={descriptionId}
+      >
+        <div
+          ref={modalRef}
+          className={`bg-gray-800 rounded-lg shadow-xl w-full ${modalSizeClass} max-h-[90vh] overflow-hidden pointer-events-auto ${className}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          {title && (
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <h3
+                id="modal-title"
+                className="text-lg font-semibold text-white"
+              >
+                {title}
+              </h3>
+              {showCloseButton && (
+                <button
+                  onClick={onClose}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close modal"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
 
-        // Footer
-        footerContent &&
-          e(
-            'div',
-            {
-              className:
-                'flex justify-end space-x-3 p-6 border-t border-gray-700',
-            },
-            footerContent,
-          ),
-      ),
-    ),
+          {/* Body */}
+          <div className="p-6 overflow-auto max-h-[60vh]">{children}</div>
+
+          {/* Footer */}
+          {footerContent && (
+            <div className="flex justify-end space-x-3 p-6 border-t border-gray-700">
+              {footerContent}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
+
+// PropTypes for Modal component
+Modal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func,
+  title: PropTypes.string,
+  children: PropTypes.node,
+  footerContent: PropTypes.node,
+  size: PropTypes.oneOf(['small', 'default', 'large', 'xlarge']),
+  showCloseButton: PropTypes.bool,
+  className: PropTypes.string,
+  descriptionId: PropTypes.string,
+};
 
 /**
  * Confirmation Modal Component
@@ -182,8 +189,6 @@ function ConfirmationModal({
   cancelText = 'Cancel',
   variant = 'danger',
 }) {
-  const e = window.React.createElement;
-
   const getButtonClasses = () => {
     const baseClasses = 'px-4 py-2 rounded-lg font-medium transition-colors';
     switch (variant) {
@@ -198,40 +203,47 @@ function ConfirmationModal({
     }
   };
 
-  const footerContent = e(
-    window.React.Fragment,
-    {},
-    e(
-      'button',
-      {
-        onClick: onCancel,
-        className:
-          'px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors',
-      },
-      cancelText,
-    ),
-    e(
-      'button',
-      {
-        onClick: onConfirm,
-        className: getButtonClasses(),
-      },
-      confirmText,
-    ),
+  const footerContent = (
+    <Fragment>
+      <button
+        onClick={onCancel}
+        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+      >
+        {cancelText}
+      </button>
+      <button
+        onClick={onConfirm}
+        className={getButtonClasses()}
+      >
+        {confirmText}
+      </button>
+    </Fragment>
   );
 
-  return e(
-    Modal,
-    {
-      isOpen,
-      onClose: onCancel,
-      title,
-      size: 'small',
-      footerContent,
-    },
-    e('p', { className: 'text-gray-300' }, message),
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onCancel}
+      title={title}
+      size="small"
+      footerContent={footerContent}
+    >
+      <p className="text-gray-300">{message}</p>
+    </Modal>
   );
 }
+
+// PropTypes for ConfirmationModal
+ConfirmationModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  message: PropTypes.string,
+  confirmText: PropTypes.string,
+  cancelText: PropTypes.string,
+  variant: PropTypes.oneOf(['danger', 'warning', 'info']),
+};
 
 /**
  * Form Modal Component - integrates with Nightingale validators
@@ -258,8 +270,6 @@ function FormModal({
   isValid = true,
   isSubmitting = false,
 }) {
-  const e = window.React.createElement;
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isValid && !isSubmitting && onSubmit) {
@@ -267,43 +277,50 @@ function FormModal({
     }
   };
 
-  const footerContent = e(
-    window.React.Fragment,
-    {},
-    e(
-      'button',
-      {
-        type: 'button',
-        onClick: onCancel,
-        disabled: isSubmitting,
-        className:
-          'px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white rounded-lg transition-colors',
-      },
-      cancelText,
-    ),
-    e(
-      'button',
-      {
-        type: 'submit',
-        disabled: !isValid || isSubmitting,
-        className:
-          'px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors',
-      },
-      isSubmitting ? 'Saving...' : submitText,
-    ),
+  const footerContent = (
+    <Fragment>
+      <button
+        type="button"
+        onClick={onCancel}
+        disabled={isSubmitting}
+        className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 text-white rounded-lg transition-colors"
+      >
+        {cancelText}
+      </button>
+      <button
+        type="submit"
+        disabled={!isValid || isSubmitting}
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+      >
+        {isSubmitting ? 'Saving...' : submitText}
+      </button>
+    </Fragment>
   );
 
-  return e(
-    Modal,
-    {
-      isOpen,
-      onClose: onCancel,
-      title,
-      footerContent,
-    },
-    e('form', { onSubmit: handleSubmit }, children),
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onCancel}
+      title={title}
+      footerContent={footerContent}
+    >
+      <form onSubmit={handleSubmit}>{children}</form>
+    </Modal>
   );
 }
+
+// PropTypes for FormModal
+FormModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  children: PropTypes.node,
+  submitText: PropTypes.string,
+  cancelText: PropTypes.string,
+  isValid: PropTypes.bool,
+  isSubmitting: PropTypes.bool,
+};
 
 // Show toast notifications using the existing toast system
 function showModalToast(message, type = 'success') {

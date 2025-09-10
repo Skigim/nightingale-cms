@@ -11,6 +11,9 @@ import '@testing-library/jest-dom';
 global.React = require('react');
 global.ReactDOM = require('react-dom');
 
+// Ensure window object exists
+global.window = global.window || {};
+
 // Mock window globals that the components expect
 global.window.React = global.React;
 global.window.ReactDOM = global.ReactDOM;

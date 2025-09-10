@@ -1,727 +1,625 @@
 /**
  * Nightingale Template Management Service
  *
- * Extracted from NightingaleCorrespondence.html to provide core template
- * management functionality for integration into the main CMS.
+ * Provides comprehensive template management functionality for the Nightingale CMS.
+ * Handles template CRUD operations, category management, validation, and search
+ * with integration to file services and toast notifications.
  *
- * This service handles:
- * - Template CRUD operations (Create, Read, Update, Delete)
- * - Category management
- * - Template validation
- * - Duplicate name checking
+ * Features:
+ * - Template CRUD operations with validation
+ * - Category management and organization
+ * - Duplicate name checking and validation
  * - File persistence with immediate sync
- * - BroadcastChannel integration for CMS synchronizat        if (showToast && this.toastService) {
-          this._showToast('Category added successfully.', 'success');
-        }
-
-        return {
-          success: true,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('templates:addCategory');
-        logger?.error('Category addition failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };ata Structure:
- * - Templates: { id, name, category, content }
- * - Categories: Array of strings
+ * - BroadcastChannel integration for CMS synchronization
+ * - Template search and filtering capabilities
  * - Auto-increment ID management
- *
- * Dependencies:
- * - nightingale.fileservice.js (for persistence)
- * - nightingale.toast.js (for notifications)
- * - nightingale.dayjs.js (for timestamps)
- * - lodash (for deep cloning)
- * - BroadcastChannel (for CMS sync)
  *
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
 
-(function () {
-  'use strict';
+import NightingaleDayJS from './nightingale.dayjs.js';
+import NightingaleToast from './nightingale.toast.js';
+import NightingaleLogger from './nightingale.logger.js';
+
+/**
+ * Template Management Service
+ */
+class NightingaleTemplates {
+  constructor() {
+    this.dateService = NightingaleDayJS;
+    this.toastService = NightingaleToast;
+    this.logger = NightingaleLogger.get('templates');
+    
+    // BroadcastChannel for CMS synchronization
+    this.broadcastChannel = null;
+    
+    if (typeof window !== 'undefined' && window.BroadcastChannel) {
+      this.broadcastChannel = new BroadcastChannel('nightingale-templates');
+    }
+  }
 
   /**
-   * Template Management Service
+   * Get all templates from data
+   * @param {Object} data - Full nightingale data object
+   * @returns {Array} Array of template objects
    */
-  class TemplateService {
-    constructor() {
-      this.fileService = null;
-      this.toastService = null;
-      this.dateUtils = null;
+  getTemplates(data) {
+    return data?.vrTemplates || [];
+  }
 
-      // Initialize dependencies when available
-      this._initializeDependencies();
+  /**
+   * Get all categories from data
+   * @param {Object} data - Full nightingale data object
+   * @returns {Array} Array of category strings
+   */
+  getCategories(data) {
+    return data?.vrCategories || [];
+  }
+
+  /**
+   * Get template by ID
+   * @param {Object} data - Full nightingale data object
+   * @param {number} templateId - Template ID to find
+   * @returns {Object|null} Template object or null if not found
+   */
+  getTemplateById(data, templateId) {
+    const templates = this.getTemplates(data);
+    return templates.find((template) => template.id === templateId) || null;
+  }
+
+  /**
+   * Get templates by category
+   * @param {Object} data - Full nightingale data object
+   * @param {string} category - Category to filter by
+   * @returns {Array} Array of templates in the specified category
+   */
+  getTemplatesByCategory(data, category) {
+    const templates = this.getTemplates(data);
+    return templates.filter((template) => template.category === category);
+  }
+
+  /**
+   * Validate template data
+   * @param {Object} templateData - Template data to validate
+   * @param {Object} fullData - Full nightingale data (for duplicate checking)
+   * @param {number|null} excludeId - Template ID to exclude from duplicate check (for editing)
+   * @returns {Object} Validation result: { isValid: boolean, errors: Object }
+   */
+  validateTemplate(templateData, fullData, excludeId = null) {
+    const errors = {};
+
+    // Name validation
+    if (!templateData.name || !templateData.name.trim()) {
+      errors.name = 'Template name is required.';
+    } else if (templateData.name.length < 3) {
+      errors.name = 'Template name must be at least 3 characters.';
+    } else if (templateData.name.length > 100) {
+      errors.name = 'Template name must be no more than 100 characters.';
     }
 
-    /**
-     * Initialize service dependencies
-     * @private
-     */
-    _initializeDependencies() {
-      if (typeof window !== 'undefined') {
-        // File service for persistence
-        this.fileService = window.NightingaleFileService || window.FileService;
+    // Category validation
+    if (!templateData.category) {
+      errors.category = 'Please select a category.';
+    }
 
-        // Toast service for notifications
-        this.toastService = window.NightingaleToast || window.showToast;
+    // Content validation
+    if (!templateData.content || !templateData.content.trim()) {
+      errors.content = 'Template content is required.';
+    } else if (templateData.content.length < 10) {
+      errors.content = 'Template content must be at least 10 characters.';
+    }
 
-        // Date utilities
-        this.dateUtils = window.dateUtils || window.dayjs;
-
-        // Lodash for deep cloning
-        this._ = window._ || window.lodash;
+    // Duplicate name check
+    if (templateData.name && templateData.name.trim()) {
+      const templates = this.getTemplates(fullData);
+      const duplicate = templates.find(
+        (template) =>
+          template.name.toLowerCase() === templateData.name.toLowerCase() &&
+          template.id !== excludeId,
+      );
+      if (duplicate) {
+        errors.name = 'A template with this name already exists.';
       }
     }
 
-    /**
-     * Get all templates from data
-     * @param {Object} data - Full nightingale data object
-     * @returns {Array} Array of template objects
-     */
-    getTemplates(data) {
-      return data?.vrTemplates || [];
-    }
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+    };
+  }
 
-    /**
-     * Get all categories from data
-     * @param {Object} data - Full nightingale data object
-     * @returns {Array} Array of category strings
-     */
-    getCategories(data) {
-      return data?.vrCategories || [];
-    }
+  /**
+   * Add a new template
+   * @param {Object} data - Full nightingale data object
+   * @param {Object} templateData - Template data to add
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async addTemplate(data, templateData, options = {}) {
+    const { showToast = true, saveFile = true } = options;
 
-    /**
-     * Get template by ID
-     * @param {Object} data - Full nightingale data object
-     * @param {number} templateId - Template ID to find
-     * @returns {Object|null} Template object or null if not found
-     */
-    getTemplateById(data, templateId) {
-      const templates = this.getTemplates(data);
-      return templates.find((template) => template.id === templateId) || null;
-    }
-
-    /**
-     * Get templates by category
-     * @param {Object} data - Full nightingale data object
-     * @param {string} category - Category to filter by
-     * @returns {Array} Array of templates in the specified category
-     */
-    getTemplatesByCategory(data, category) {
-      const templates = this.getTemplates(data);
-      return templates.filter((template) => template.category === category);
-    }
-
-    /**
-     * Validate template data
-     * @param {Object} templateData - Template data to validate
-     * @param {Object} fullData - Full nightingale data (for duplicate checking)
-     * @param {number|null} excludeId - Template ID to exclude from duplicate check (for editing)
-     * @returns {Object} Validation result: { isValid: boolean, errors: Object }
-     */
-    validateTemplate(templateData, fullData, excludeId = null) {
-      const errors = {};
-
-      // Name validation
-      if (!templateData.name || !templateData.name.trim()) {
-        errors.name = 'Template name is required.';
-      } else if (templateData.name.length < 3) {
-        errors.name = 'Template name must be at least 3 characters.';
-      } else if (templateData.name.length > 100) {
-        errors.name = 'Template name must be no more than 100 characters.';
+    try {
+      // Validate template data
+      const validation = this.validateTemplate(templateData, data);
+      if (!validation.isValid) {
+        return {
+          success: false,
+          error: 'Validation failed',
+          errors: validation.errors,
+        };
       }
 
-      // Category validation
-      if (!templateData.category) {
-        errors.category = 'Please select a category.';
+      // Create new data object
+      const newData = this._deepClone(data);
+
+      // Initialize templates array if it doesn't exist
+      if (!newData.vrTemplates) {
+        newData.vrTemplates = [];
       }
 
-      // Content validation
-      if (!templateData.content || !templateData.content.trim()) {
-        errors.content = 'Template content is required.';
-      } else if (templateData.content.length < 10) {
-        errors.content = 'Template content must be at least 10 characters.';
+      // Generate new ID
+      const newId = this._getNextTemplateId(newData);
+
+      // Create new template
+      const newTemplate = {
+        id: newId,
+        name: templateData.name.trim(),
+        category: templateData.category,
+        content: templateData.content.trim(),
+        createdDate: this.dateService.formatToday(),
+        modifiedDate: this.dateService.formatToday(),
+      };
+
+      // Add template to data
+      newData.vrTemplates.push(newTemplate);
+
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
       }
 
-      // Duplicate name check
-      if (templateData.name && templateData.name.trim()) {
-        const existingTemplate = this.getTemplates(fullData).find(
-          (t) =>
-            t.name.toLowerCase() === templateData.name.toLowerCase() &&
-            t.id !== excludeId,
-        );
-        if (existingTemplate) {
-          errors.name = 'A template with this name already exists.';
-        }
+      // Broadcast change for CMS sync
+      this._broadcastChange('template-added', newTemplate);
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('Template added successfully.', 'success');
       }
 
       return {
-        isValid: Object.keys(errors).length === 0,
-        errors: errors,
+        success: true,
+        data: newData,
+        template: newTemplate,
+      };
+    } catch (error) {
+      this.logger.error('Template addition failed', { error: error.message });
+      return {
+        success: false,
+        error: error.message,
       };
     }
+  }
 
-    /**
-     * Create a new template
-     * @param {Object} templateData - Template data: { name, category, content }
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean }
-     * @returns {Promise<Object>} Result: { success: boolean, template?: Object, data?: Object, error?: string }
-     */
-    async createTemplate(templateData, fullData, options = {}) {
-      const { saveToFile = true, showToast = true } = options;
+  /**
+   * Update an existing template
+   * @param {Object} data - Full nightingale data object
+   * @param {number} templateId - ID of template to update
+   * @param {Object} templateData - Updated template data
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async updateTemplate(data, templateId, templateData, options = {}) {
+    const { showToast = true, saveFile = true } = options;
 
-      try {
-        // Validate template data
-        const validation = this.validateTemplate(templateData, fullData);
-        if (!validation.isValid) {
-          return {
-            success: false,
-            error: 'Validation failed',
-            validationErrors: validation.errors,
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Ensure vrTemplates array exists
-        newData.vrTemplates = newData.vrTemplates || [];
-
-        // Generate new ID
-        const newId =
-          newData.nextVrTemplateId ||
-          Math.max(...newData.vrTemplates.map((t) => t.id || 0), 0) + 1;
-
-        // Create new template
-        const newTemplate = {
-          id: newId,
-          name: templateData.name.trim(),
-          category: templateData.category,
-          content: templateData.content.trim(),
-        };
-
-        // Add template to data
-        newData.vrTemplates.push(newTemplate);
-        newData.nextVrTemplateId = newId + 1;
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'template_created',
-            {
-              templateName: newTemplate.name,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'Template created but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast('Template created and synced with CMS.', 'success');
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast('Template created successfully.', 'success');
-        }
-
-        return {
-          success: true,
-          template: newTemplate,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('templates:render');
-        logger?.error('Template render failed', { error: error.message });
+    try {
+      // Validate template data (exclude current template from duplicate check)
+      const validation = this.validateTemplate(templateData, data, templateId);
+      if (!validation.isValid) {
         return {
           success: false,
-          error: error.message,
+          error: 'Validation failed',
+          errors: validation.errors,
         };
       }
-    }
 
-    /**
-     * Update an existing template
-     * @param {number} templateId - ID of template to update
-     * @param {Object} templateData - Updated template data: { name, category, content }
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean }
-     * @returns {Promise<Object>} Result: { success: boolean, template?: Object, data?: Object, error?: string }
-     */
-    async updateTemplate(templateId, templateData, fullData, options = {}) {
-      const { saveToFile = true, showToast = true } = options;
+      // Create new data object
+      const newData = this._deepClone(data);
 
-      try {
-        // Find existing template
-        const existingTemplate = this.getTemplateById(fullData, templateId);
-        if (!existingTemplate) {
-          return {
-            success: false,
-            error: 'Template not found',
-          };
-        }
+      // Find template to update
+      const templateIndex = newData.vrTemplates?.findIndex(
+        (template) => template.id === templateId,
+      );
 
-        // Validate template data (excluding current template from duplicate check)
-        const validation = this.validateTemplate(
-          templateData,
-          fullData,
-          templateId,
-        );
-        if (!validation.isValid) {
-          return {
-            success: false,
-            error: 'Validation failed',
-            validationErrors: validation.errors,
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Find and update template
-        const templateIndex = newData.vrTemplates.findIndex(
-          (t) => t.id === templateId,
-        );
-        if (templateIndex === -1) {
-          return {
-            success: false,
-            error: 'Template not found in data',
-          };
-        }
-
-        const updatedTemplate = {
-          ...existingTemplate,
-          name: templateData.name.trim(),
-          category: templateData.category,
-          content: templateData.content.trim(),
-        };
-
-        newData.vrTemplates[templateIndex] = updatedTemplate;
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'template_updated',
-            {
-              templateName: updatedTemplate.name,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'Template updated but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast('Template updated and synced with CMS.', 'success');
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast('Template updated successfully.', 'success');
-        }
-
-        return {
-          success: true,
-          template: updatedTemplate,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('templates:process');
-        logger?.error('Template processing failed', { error: error.message });
+      if (templateIndex === -1) {
         return {
           success: false,
-          error: error.message,
+          error: 'Template not found',
         };
       }
+
+      // Update template
+      const updatedTemplate = {
+        ...newData.vrTemplates[templateIndex],
+        name: templateData.name.trim(),
+        category: templateData.category,
+        content: templateData.content.trim(),
+        modifiedDate: this.dateService.formatToday(),
+      };
+
+      newData.vrTemplates[templateIndex] = updatedTemplate;
+
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
+      }
+
+      // Broadcast change for CMS sync
+      this._broadcastChange('template-updated', updatedTemplate);
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('Template updated successfully.', 'success');
+      }
+
+      return {
+        success: true,
+        data: newData,
+        template: updatedTemplate,
+      };
+    } catch (error) {
+      this.logger.error('Template update failed', { error: error.message, templateId });
+      return {
+        success: false,
+        error: error.message,
+      };
     }
+  }
 
-    /**
-     * Delete a template
-     * @param {number} templateId - ID of template to delete
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean }
-     * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
-     */
-    async deleteTemplate(templateId, fullData, options = {}) {
-      const { saveToFile = true, showToast = true } = options;
+  /**
+   * Delete a template
+   * @param {Object} data - Full nightingale data object
+   * @param {number} templateId - ID of template to delete
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async deleteTemplate(data, templateId, options = {}) {
+    const { showToast = true, saveFile = true } = options;
 
-      try {
-        // Find existing template
-        const existingTemplate = this.getTemplateById(fullData, templateId);
-        if (!existingTemplate) {
-          return {
-            success: false,
-            error: 'Template not found',
-          };
-        }
+    try {
+      // Create new data object
+      const newData = this._deepClone(data);
 
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
+      // Find template to delete
+      const templateIndex = newData.vrTemplates?.findIndex(
+        (template) => template.id === templateId,
+      );
 
-        // Remove template
-        newData.vrTemplates = newData.vrTemplates.filter(
-          (t) => t.id !== templateId,
-        );
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'template_deleted',
-            {
-              templateName: existingTemplate.name,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'Template deleted but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast('Template deleted and synced with CMS.', 'success');
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast('Template deleted successfully.', 'success');
-        }
-
-        return {
-          success: true,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('templates:delete');
-        logger?.error('Template deletion failed', { error: error.message });
+      if (templateIndex === -1) {
         return {
           success: false,
-          error: error.message,
+          error: 'Template not found',
         };
       }
+
+      // Get template before deletion for broadcast
+      const deletedTemplate = newData.vrTemplates[templateIndex];
+
+      // Remove template
+      newData.vrTemplates.splice(templateIndex, 1);
+
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
+      }
+
+      // Broadcast change for CMS sync
+      this._broadcastChange('template-deleted', deletedTemplate);
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('Template deleted successfully.', 'success');
+      }
+
+      return {
+        success: true,
+        data: newData,
+        template: deletedTemplate,
+      };
+    } catch (error) {
+      this.logger.error('Template deletion failed', { error: error.message, templateId });
+      return {
+        success: false,
+        error: error.message,
+      };
     }
+  }
 
-    /**
-     * Add a new category
-     * @param {string} categoryName - Name of the new category
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean }
-     * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
-     */
-    async addCategory(categoryName, fullData, options = {}) {
-      const { saveToFile = true, showToast = true } = options;
+  /**
+   * Add a new category
+   * @param {Object} data - Full nightingale data object
+   * @param {string} categoryName - Name of category to add
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async addCategory(data, categoryName, options = {}) {
+    const { showToast = true, saveFile = true } = options;
 
-      try {
-        if (!categoryName || !categoryName.trim()) {
-          return {
-            success: false,
-            error: 'Please enter a category name.',
-          };
-        }
-
-        const trimmedName = categoryName.trim();
-        const categories = this.getCategories(fullData);
-
-        if (categories.includes(trimmedName)) {
-          return {
-            success: false,
-            error: 'Category already exists.',
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Ensure vrCategories array exists
-        newData.vrCategories = newData.vrCategories || [];
-
-        // Add category and sort
-        newData.vrCategories.push(trimmedName);
-        newData.vrCategories.sort();
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(newData, 'category_added', {
-            categoryName: trimmedName,
-          });
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'Category added but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast('Category added and synced with CMS.', 'success');
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast('Category added successfully.', 'success');
-        }
-
-        return {
-          success: true,
-          data: newData,
-        };
-      } catch (error) {
+    try {
+      // Validate category name
+      if (!categoryName || !categoryName.trim()) {
         return {
           success: false,
-          error: error.message,
+          error: 'Category name is required',
         };
       }
-    }
 
-    /**
-     * Remove a category (and optionally handle templates in that category)
-     * @param {string} categoryName - Name of the category to remove
-     * @param {Object} fullData - Full nightingale data object
-     * @param {Object} options - Options: { saveToFile: boolean, showToast: boolean, handleTemplates: 'delete'|'move' }
-     * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
-     */
-    async removeCategory(categoryName, fullData, options = {}) {
-      const {
-        saveToFile = true,
-        showToast = true,
-        handleTemplates = 'move',
-      } = options;
+      const trimmedName = categoryName.trim();
 
-      try {
-        const categories = this.getCategories(fullData);
-
-        if (!categories.includes(categoryName)) {
-          return {
-            success: false,
-            error: 'Category not found.',
-          };
-        }
-
-        // Check for templates in this category
-        const templatesInCategory = this.getTemplatesByCategory(
-          fullData,
-          categoryName,
-        );
-
-        if (templatesInCategory.length > 0 && handleTemplates === 'delete') {
-          // Delete templates in this category
-          return {
-            success: false,
-            error: `Cannot delete category. ${templatesInCategory.length} template(s) are using this category.`,
-          };
-        }
-
-        // Create new data object
-        const newData = this._
-          ? this._.cloneDeep(fullData)
-          : JSON.parse(JSON.stringify(fullData));
-
-        // Remove category
-        newData.vrCategories = newData.vrCategories.filter(
-          (cat) => cat !== categoryName,
-        );
-
-        // Handle templates in this category
-        if (templatesInCategory.length > 0 && handleTemplates === 'move') {
-          // Move templates to a default category or remove category assignment
-          newData.vrTemplates = newData.vrTemplates.map((template) => {
-            if (template.category === categoryName) {
-              return {
-                ...template,
-                category: newData.vrCategories[0] || '', // Move to first available category or empty
-              };
-            }
-            return template;
-          });
-        }
-
-        // Save to file if requested
-        if (saveToFile && this.fileService) {
-          const success = await this._saveWithSync(
-            newData,
-            'category_removed',
-            {
-              categoryName: categoryName,
-            },
-          );
-
-          if (!success) {
-            if (showToast && this.toastService) {
-              this._showToast(
-                'Category removed but failed to save to file.',
-                'warning',
-              );
-            }
-          } else if (showToast && this.toastService) {
-            this._showToast('Category removed and synced with CMS.', 'success');
-          }
-        } else if (showToast && this.toastService) {
-          this._showToast('Category removed successfully.', 'success');
-        }
-
-        return {
-          success: true,
-          data: newData,
-        };
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get(
-          'templates:removeCategory',
-        );
-        logger?.error('Category removal failed', { error: error.message });
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-    }
-
-    /**
-     * Save data to file with CMS synchronization
-     * @param {Object} data - Data to save
-     * @param {string} action - Action type for broadcast
-     * @param {Object} metadata - Additional metadata for broadcast
-     * @returns {Promise<boolean>} Success status
-     * @private
-     */
-    async _saveWithSync(data, action, metadata = {}) {
-      try {
-        const success = await this.fileService.writeFile(data);
-
-        if (success) {
-          // Send data integrity broadcast to notify CMS to refresh
-          const integrityChannel = new BroadcastChannel('nightingale_suite');
-          integrityChannel.postMessage({
-            type: 'data_updated',
-            source: 'correspondence',
-            action: action,
-            timestamp: this.dateUtils
-              ? this.dateUtils.now()
-              : new Date().toISOString(),
-            ...metadata,
-          });
-          integrityChannel.close();
-
-          return true;
-        } else {
-          return false;
-        }
-      } catch (error) {
-        const logger = window.NightingaleLogger?.get('templates:integrity');
-        logger?.warn('Integrity signal failed', { error: error.message });
-        return false;
-      }
-    }
-
-    /**
-     * Show toast notification
-     * @param {string} message - Toast message
-     * @param {string} type - Toast type (success, error, warning, info)
-     * @private
-     */
-    _showToast(message, type = 'info') {
-      if (typeof this.toastService === 'function') {
-        this.toastService(message, type);
-      } else if (
-        this.toastService &&
-        typeof this.toastService.show === 'function'
-      ) {
-        this.toastService.show(message, type);
-      } else {
-        // Fallback for no toast service available
-      }
-    }
-
-    /**
-     * Get template statistics
-     * @param {Object} data - Full nightingale data object
-     * @returns {Object} Statistics: { totalTemplates, categoriesCount, templatesPerCategory }
-     */
-    getTemplateStats(data) {
-      const templates = this.getTemplates(data);
+      // Check for duplicate
       const categories = this.getCategories(data);
+      if (categories.includes(trimmedName)) {
+        return {
+          success: false,
+          error: 'Category already exists',
+        };
+      }
 
-      const templatesPerCategory = {};
-      categories.forEach((cat) => {
-        templatesPerCategory[cat] = templates.filter(
-          (t) => t.category === cat,
-        ).length;
-      });
+      // Create new data object
+      const newData = this._deepClone(data);
+
+      // Initialize categories array if it doesn't exist
+      if (!newData.vrCategories) {
+        newData.vrCategories = [];
+      }
+
+      // Add category
+      newData.vrCategories.push(trimmedName);
+
+      // Sort categories alphabetically
+      newData.vrCategories.sort();
+
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
+      }
+
+      // Broadcast change for CMS sync
+      this._broadcastChange('category-added', { name: trimmedName });
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('Category added successfully.', 'success');
+      }
 
       return {
-        totalTemplates: templates.length,
-        categoriesCount: categories.length,
-        templatesPerCategory: templatesPerCategory,
+        success: true,
+        data: newData,
+        category: trimmedName,
+      };
+    } catch (error) {
+      this.logger.error('Category addition failed', { error: error.message });
+      return {
+        success: false,
+        error: error.message,
       };
     }
+  }
 
-    /**
-     * Search templates by name or content
-     * @param {Object} data - Full nightingale data object
-     * @param {string} searchTerm - Search term
-     * @param {Object} options - Search options: { searchContent: boolean, category?: string }
-     * @returns {Array} Array of matching templates
-     */
-    searchTemplates(data, searchTerm, options = {}) {
-      const { searchContent = true, category } = options;
-      let templates = this.getTemplates(data);
+  /**
+   * Delete a category
+   * @param {Object} data - Full nightingale data object
+   * @param {string} categoryName - Name of category to delete
+   * @param {Object} options - Options: { showToast?: boolean, saveFile?: boolean, reassignTo?: string }
+   * @returns {Promise<Object>} Result: { success: boolean, data?: Object, error?: string }
+   */
+  async deleteCategory(data, categoryName, options = {}) {
+    const { showToast = true, saveFile = true, reassignTo = null } = options;
 
-      // Filter by category if specified
-      if (category) {
-        templates = templates.filter((t) => t.category === category);
+    try {
+      // Create new data object
+      const newData = this._deepClone(data);
+
+      // Check if category exists
+      const categoryIndex = newData.vrCategories?.indexOf(categoryName);
+      if (categoryIndex === -1) {
+        return {
+          success: false,
+          error: 'Category not found',
+        };
       }
 
-      // Return all if no search term
-      if (!searchTerm || !searchTerm.trim()) {
-        return templates;
+      // Handle templates in this category
+      const templatesInCategory = this.getTemplatesByCategory(newData, categoryName);
+      if (templatesInCategory.length > 0) {
+        if (reassignTo) {
+          // Reassign templates to new category
+          newData.vrTemplates?.forEach((template) => {
+            if (template.category === categoryName) {
+              template.category = reassignTo;
+              template.modifiedDate = this.dateService.formatToday();
+            }
+          });
+        } else {
+          return {
+            success: false,
+            error: `Cannot delete category with ${templatesInCategory.length} templates. Please reassign or delete templates first.`,
+            templatesCount: templatesInCategory.length,
+          };
+        }
       }
 
-      const lowerSearchTerm = searchTerm.toLowerCase();
+      // Remove category
+      newData.vrCategories.splice(categoryIndex, 1);
 
-      return templates.filter((template) => {
-        const nameMatch = template.name.toLowerCase().includes(lowerSearchTerm);
-        const contentMatch =
-          searchContent &&
-          template.content.toLowerCase().includes(lowerSearchTerm);
-        return nameMatch || contentMatch;
-      });
+      // Save file if requested
+      if (saveFile && this._getFileService()) {
+        await this._getFileService().saveFile(newData);
+      }
+
+      // Broadcast change for CMS sync
+      this._broadcastChange('category-deleted', { name: categoryName, reassignTo });
+
+      // Show success toast
+      if (showToast) {
+        this._showToast('Category deleted successfully.', 'success');
+      }
+
+      return {
+        success: true,
+        data: newData,
+        category: categoryName,
+        reassignedTemplates: templatesInCategory.length,
+      };
+    } catch (error) {
+      this.logger.error('Category deletion failed', { error: error.message });
+      return {
+        success: false,
+        error: error.message,
+      };
     }
   }
 
-  // Create and export service instance
-  const templateService = new TemplateService();
+  /**
+   * Search templates by name or content
+   * @param {Object} data - Full nightingale data object
+   * @param {string} searchTerm - Search term
+   * @returns {Array} Array of matching templates
+   */
+  searchTemplates(data, searchTerm) {
+    if (!searchTerm || !searchTerm.trim()) {
+      return this.getTemplates(data);
+    }
 
-  // Export for different environments
-  if (typeof module !== 'undefined' && module.exports) {
-    // Node.js
-    module.exports = templateService;
-  } else if (typeof window !== 'undefined') {
-    // Browser - register with global namespace
-    window.NightingaleTemplateService = templateService;
+    const templates = this.getTemplates(data);
+    const lowerSearchTerm = searchTerm.toLowerCase();
 
-    // Register with component system if available
-    if (window.NightingaleServices) {
-      window.NightingaleServices.templateService = templateService;
+    return templates.filter((template) => {
+      const nameMatch = template.name.toLowerCase().includes(lowerSearchTerm);
+      const contentMatch = template.content.toLowerCase().includes(lowerSearchTerm);
+      return nameMatch || contentMatch;
+    });
+  }
+
+  /**
+   * Get the next available template ID
+   * @param {Object} data - Full nightingale data object
+   * @returns {number} Next available ID
+   * @private
+   */
+  _getNextTemplateId(data) {
+    const templates = this.getTemplates(data);
+    if (templates.length === 0) {
+      return 1;
+    }
+
+    const maxId = Math.max(...templates.map((template) => template.id || 0));
+    return maxId + 1;
+  }
+
+  /**
+   * Deep clone an object
+   * @param {any} obj - Object to clone
+   * @returns {any} Cloned object
+   * @private
+   */
+  _deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (obj instanceof Date) {
+      return new Date(obj.getTime());
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this._deepClone(item));
+    }
+
+    const cloned = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        cloned[key] = this._deepClone(obj[key]);
+      }
+    }
+
+    return cloned;
+  }
+
+  /**
+   * Get file service for data persistence
+   * @returns {Object|null} File service instance
+   * @private
+   */
+  _getFileService() {
+    if (typeof window !== 'undefined') {
+      return window.NightingaleFileService || window.FileService || null;
+    }
+    return null;
+  }
+
+  /**
+   * Show toast notification
+   * @param {string} message - Toast message
+   * @param {string} type - Toast type
+   * @private
+   */
+  _showToast(message, type = 'info') {
+    try {
+      this.toastService.show(message, type);
+    } catch (error) {
+      // Fallback to console if toast service unavailable
+      console.log(`[${type.toUpperCase()}] ${message}`);
     }
   }
-})(typeof self !== 'undefined' ? self : this);
 
-// ES6 Module Export
-export default (typeof window !== 'undefined' &&
-  window.NightingaleTemplateService) ||
-  null;
+  /**
+   * Broadcast change for CMS synchronization
+   * @param {string} action - Action type
+   * @param {Object} data - Change data
+   * @private
+   */
+  _broadcastChange(action, data) {
+    if (this.broadcastChannel) {
+      try {
+        this.broadcastChannel.postMessage({
+          type: 'template-change',
+          action,
+          data,
+          timestamp: Date.now(),
+        });
+      } catch (error) {
+        this.logger.warn('Failed to broadcast template change', { error: error.message });
+      }
+    }
+  }
+}
+
+// Create singleton instance
+const templateService = new NightingaleTemplates();
+
+// Backward compatibility - expose to window if available
+if (typeof window !== 'undefined') {
+  window.NightingaleTemplateService = templateService;
+  window.NightingaleTemplates = templateService;
+
+  // Register with component system if available
+  window.NightingaleServices = window.NightingaleServices || {};
+  window.NightingaleServices.templateService = templateService;
+}
+
+// ES6 Module Exports
+export default templateService;
+export const {
+  getTemplates,
+  getCategories,
+  getTemplateById,
+  getTemplatesByCategory,
+  validateTemplate,
+  addTemplate,
+  updateTemplate,
+  deleteTemplate,
+  addCategory,
+  deleteCategory,
+  searchTemplates,
+} = templateService;

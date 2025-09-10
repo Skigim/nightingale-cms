@@ -9,46 +9,42 @@
  * - Data validation
  * - Legacy data compatibility
  *
- * @namespace NightingaleDataManagement
  * @version 1.0.0
  * @author Nightingale CMS Team
  * @created 2025-08-24
  */
 
-(function (window) {
-  'use strict';
+// ========================================================================
+// UTILITY FUNCTIONS
+// ========================================================================
 
-  // ========================================================================
-  // UTILITY FUNCTIONS
-  // ========================================================================
+/**
+ * Generate secure unique IDs using crypto.randomUUID when available
+ * Falls back to timestamp + crypto random for older browsers
+ *
+ * @param {string} prefix - Prefix for the ID (e.g., 'person', 'org', 'case')
+ * @returns {string} Secure unique ID
+ */
+function generateSecureId(prefix = 'item') {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
 
-  /**
-   * Generate secure unique IDs using crypto.randomUUID when available
-   * Falls back to timestamp + crypto random for older browsers
-   *
-   * @param {string} prefix - Prefix for the ID (e.g., 'person', 'org', 'case')
-   * @returns {string} Secure unique ID
-   */
-  function generateSecureId(prefix = 'item') {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return `${prefix}-${crypto.randomUUID()}`;
-    }
-
-    // Fallback for older browsers using crypto.getRandomValues
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      const array = new Uint32Array(3);
-      crypto.getRandomValues(array);
-      const timestamp = Date.now().toString(36);
-      const randomPart = Array.from(array, (x) => x.toString(36)).join('');
-      return `${prefix}-${timestamp}-${randomPart}`;
-    }
-
-    // Final fallback (should rarely be used in modern browsers)
-    // This fallback is for environments where crypto is not available.
+  // Fallback for older browsers using crypto.getRandomValues
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint32Array(3);
+    crypto.getRandomValues(array);
     const timestamp = Date.now().toString(36);
-    const randomPart = Math.random().toString(36).substr(2, 9);
+    const randomPart = Array.from(array, (x) => x.toString(36)).join('');
     return `${prefix}-${timestamp}-${randomPart}`;
   }
+
+  // Final fallback (should rarely be used in modern browsers)
+  // This fallback is for environments where crypto is not available.
+  const timestamp = Date.now().toString(36);
+  const randomPart = Math.random().toString(36).substr(2, 9);
+  return `${prefix}-${timestamp}-${randomPart}`;
+}
 
   // ========================================================================
   // DATA LOOKUP AND SEARCH FUNCTIONS
@@ -342,28 +338,36 @@
    * @returns {Array} Transformed financial items
    */
   function transformFinancialItems(importedItems) {
-    return importedItems.map((item) => ({
-      id: generateSecureId('financial'),
-      description:
-        item.description ||
-        `${item.type} - ${item.location}` ||
-        item.type ||
-        'Unknown Item',
-      location: item.location || '',
-      accountNumber: item.accountNumber || '',
-      amount: item.amount || item.value || 0,
-      type: item.type || '', // Keep legacy field for AVS compatibility
-      frequency: item.frequency || 'monthly',
-      owner: item.owner || 'applicant',
-      verificationStatus: item.verificationStatus || 'Verified',
-      verificationSource:
-        item.verificationSource || item.source || 'AVS Import',
-      source: item.source || 'AVS Import', // Keep legacy field
-      notes:
-        item.notes ||
-        `Imported from AVS${item.isDuplicate ? ' (Potential Duplicate)' : ''}`,
-      dateAdded: item.dateAdded || new Date().toISOString(),
-    }));
+    return importedItems.map((item) => {
+      // Build description with fallback logic
+      let description = item.description;
+      if (!description && item.type && item.location) {
+        description = `${item.type} - ${item.location}`;
+      } else if (!description && item.type) {
+        description = item.type;
+      } else if (!description) {
+        description = 'Unknown Item';
+      }
+
+      return {
+        id: generateSecureId('financial'),
+        description,
+        location: item.location || '',
+        accountNumber: item.accountNumber || '',
+        amount: item.amount || item.value || 0,
+        type: item.type || '', // Keep legacy field for AVS compatibility
+        frequency: item.frequency || 'monthly',
+        owner: item.owner || 'applicant',
+        verificationStatus: item.verificationStatus || 'Verified',
+        verificationSource:
+          item.verificationSource || item.source || 'AVS Import',
+        source: item.source || 'AVS Import', // Keep legacy field
+        notes:
+          item.notes ||
+          `Imported from AVS${item.isDuplicate ? ' (Potential Duplicate)' : ''}`,
+        dateAdded: item.dateAdded || new Date().toISOString(),
+      };
+    });
   }
 
   // ========================================================================
@@ -377,6 +381,12 @@
    */
   function validateCaseData(caseData) {
     const errors = {};
+
+    if (!caseData) {
+      errors.mcn = 'MCN is required';
+      errors.personId = 'Person selection is required';
+      return errors;
+    }
 
     if (!caseData.mcn) {
       errors.mcn = 'MCN is required';
@@ -397,6 +407,11 @@
   function validatePersonData(personData) {
     const errors = {};
 
+    if (!personData) {
+      errors.name = 'Name is required';
+      return errors;
+    }
+
     if (!personData.name || personData.name.trim() === '') {
       errors.name = 'Name is required';
     }
@@ -412,6 +427,11 @@
   function validateOrganizationData(orgData) {
     const errors = {};
 
+    if (!orgData) {
+      errors.name = 'Organization name is required';
+      return errors;
+    }
+
     if (!orgData.name || orgData.name.trim() === '') {
       errors.name = 'Organization name is required';
     }
@@ -419,60 +439,62 @@
     return errors;
   }
 
-  // ========================================================================
-  // SERVICE INITIALIZATION AND EXPORT
-  // ========================================================================
+// ========================================================================
+// SERVICE INITIALIZATION AND EXPORT
+// ========================================================================
 
-  // Create service object
-  const NightingaleDataManagement = {
-    // Utility functions
-    generateSecureId,
+// Create service object
+const NightingaleDataManagement = {
+  // Utility functions
+  generateSecureId,
 
-    // Data lookup functions
-    findPersonById,
+  // Data lookup functions
+  findPersonById,
 
-    // Migration functions
-    normalizeDataMigrations,
+  // Migration functions
+  normalizeDataMigrations,
 
-    // Collection update functions
-    updateCaseInCollection,
-    updatePersonInCollection,
-    updateOrganizationInCollection,
+  // Collection update functions
+  updateCaseInCollection,
+  updatePersonInCollection,
+  updateOrganizationInCollection,
 
-    // Transformation functions
-    transformFinancialItems,
+  // Transformation functions
+  transformFinancialItems,
 
-    // Validation functions
-    validateCaseData,
-    validatePersonData,
-    validateOrganizationData,
+  // Validation functions
+  validateCaseData,
+  validatePersonData,
+  validateOrganizationData,
 
-    // Metadata
-    version: '1.0.0',
-    name: 'NightingaleDataManagement',
-  };
+  // Metadata
+  version: '1.0.0',
+  name: 'NightingaleDataManagement',
+};
 
-  // Export to global scope
-  if (typeof window !== 'undefined') {
-    window.NightingaleDataManagement = NightingaleDataManagement;
+// Export individual functions for tree-shaking
+export {
+  generateSecureId,
+  findPersonById,
+  normalizeDataMigrations,
+  updateCaseInCollection,
+  updatePersonInCollection,
+  updateOrganizationInCollection,
+  transformFinancialItems,
+  validateCaseData,
+  validatePersonData,
+  validateOrganizationData,
+};
 
-    // Register with service registry if available
-    if (
-      window.NightingaleServices &&
-      window.NightingaleServices.registerService
-    ) {
-      window.NightingaleServices.registerService(
-        'dataManagement',
-        NightingaleDataManagement,
-      );
-    }
+// Default export for backward compatibility
+export default NightingaleDataManagement;
+
+// Maintain backward compatibility with global window access
+if (typeof window !== 'undefined') {
+  window.NightingaleDataManagement = NightingaleDataManagement;
+  
+  // Register with service registry if available
+  if (window.NightingaleServices?.registerService) {
+    window.NightingaleServices.registerService('dataManagement', NightingaleDataManagement);
   }
-
-  // Return service for module systems
-  return NightingaleDataManagement;
-})(typeof window !== 'undefined' ? window : this);
-
-// ES6 Module Export
-export default (typeof window !== 'undefined' &&
-  window.NightingaleDataManagement) ||
-  null;
+}

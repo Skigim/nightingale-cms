@@ -13,17 +13,18 @@ Testing: Jest + React Testing Library (jsdom)
 
 ## 2. Non‑Negotiable Rules
 
-1. Every React component: define `const e = window.React.createElement;` inside the function (never
-   at file or global scope).
-2. No global alias like `window.e`.
-3. UI layer = presentational only (no domain logic, no data mutation).
-4. Business layer composes UI components + domain rules only.
-5. Provide graceful fallback or null if `!window.React`.
-6. No side effects in render; use hooks properly.
-7. All hooks called unconditionally at top level.
-8. Avoid inline styles; use Tailwind utility classes.
-9. Add loading / empty / error states for async or data-driven UI.
-10. Do not introduce new globals—attach only via existing registries.
+1. Modern React components: use JSX syntax with ES6 imports (`import React from 'react'`).
+2. Legacy components: define `const e = window.React.createElement;` inside function (migration pending).
+3. No global alias like `window.e`.
+4. UI layer = presentational only (no domain logic, no data mutation).
+5. Business layer composes UI components + domain rules only.
+6. Provide graceful fallback or null if `!window.React` (legacy components only).
+7. No side effects in render; use hooks properly.
+8. All hooks called unconditionally at top level.
+9. Avoid inline styles; use Tailwind utility classes.
+10. Add loading / empty / error states for async or data-driven UI.
+11. Do not introduce new globals—attach only via existing registries.
+12. Add PropTypes validation for all component props.
 
 ## 3. Component Layering
 
@@ -38,8 +39,20 @@ services / callbacks).
 
 ## 4. Self‑Registration Pattern
 
-Each component file ends with:
+Each modern component file ends with:
 
+```jsx
+import { registerComponent } from '../../services/registry';
+
+// Component definition...
+
+// Registration
+registerComponent('MyComponent', MyComponent);
+
+export default MyComponent;
+```
+
+Legacy components use:
 ```javascript
 if (typeof window !== 'undefined') {
   window.MyComponent = MyComponent; // backward compatibility
@@ -54,6 +67,36 @@ Never register both UI and Business registries—choose the correct one.
 
 ## 5. React Pattern Template
 
+### Modern Pattern (Preferred)
+```jsx
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
+
+function ExampleComponent({ value: initialValue = '', onChange, ...props }) {
+  // Hooks (unconditional)
+  const [value, setValue] = useState(initialValue);
+  const derived = useMemo(() => value.trim(), [value]);
+  const handleChange = useCallback((ev) => {
+    setValue(ev.target.value);
+    onChange?.(ev.target.value);
+  }, [onChange]);
+
+  return (
+    <div className="p-4" {...props}>
+      {derived}
+    </div>
+  );
+}
+
+ExampleComponent.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+};
+
+export default ExampleComponent;
+```
+
+### Legacy Pattern (Migration Pending)
 ```javascript
 function ExampleComponent(props) {
   if (!window.React) return null; // safety

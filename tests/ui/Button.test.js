@@ -4,7 +4,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { Button } from '../../src/components/ui/Button.js';
+import { Button } from '../../src/components/ui/Button.jsx';
 
 describe('Button Component', () => {
   test('renders basic button with text', () => {
