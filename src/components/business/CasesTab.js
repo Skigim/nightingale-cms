@@ -1,3 +1,5 @@
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.js';
 /**
@@ -26,8 +28,6 @@ import { createBusinessComponent } from '../ui/TabBase.js';
  * Implements the TabBase.js useData pattern for standardized data handling
  */
 function useCasesData({ fullData, onViewModeChange, onBackToList }) {
-  const { useState, useEffect, useMemo, useCallback } = window.React;
-
   // State management - all hooks must be called unconditionally
   const [searchTerm, setSearchTerm] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -127,7 +127,7 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
  * Implements the TabBase.js renderContent pattern
  */
 function renderCasesContent({ components, data: dataResult, props }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
   const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } =
     components;
 
@@ -305,7 +305,7 @@ function renderCasesContent({ components, data: dataResult, props }) {
  * Implements the TabBase.js renderModals pattern
  */
 function renderCasesModals({ data: dataResult, props }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   // Get CaseCreationModal with fallback
   const CaseCreationModal =
@@ -417,11 +417,11 @@ const CasesTab = createBusinessComponent({
 
 // PropTypes validation
 CasesTab.propTypes = {
-  fullData: window.PropTypes?.object,
-  onUpdateData: window.PropTypes?.func,
-  fileService: window.PropTypes?.object,
-  onViewModeChange: window.PropTypes?.func,
-  onBackToList: window.PropTypes?.func,
+  fullData: PropTypes.object,
+  onUpdateData: PropTypes.func,
+  fileService: PropTypes.object,
+  onViewModeChange: PropTypes.func,
+  onBackToList: PropTypes.func,
 };
 
 // Register with the business component registry

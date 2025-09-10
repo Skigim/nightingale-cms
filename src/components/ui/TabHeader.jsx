@@ -31,32 +31,40 @@ function TabHeader({
   className = '',
   iconProps = {},
 }) {
-  // Validate required props
+  const handleTabClick = useCallback(
+    (tabId) => {
+      onTabChange?.(tabId);
+    },
+    [onTabChange],
+  );
+
+  const handleTabKeyDown = useCallback(
+    (event, tabId, tabIndex) => {
+      const { key } = event;
+
+      if (key === 'Enter' || key === ' ') {
+        event.preventDefault();
+        onTabChange?.(tabId);
+        return;
+      }
+
+      if (key === 'ArrowLeft' || key === 'ArrowRight') {
+        event.preventDefault();
+        const direction = key === 'ArrowLeft' ? -1 : 1;
+        const nextIndex = (tabIndex + direction + tabs.length) % tabs.length;
+        const nextTabButton = document.querySelector(
+          `[data-tab-index="${nextIndex}"]`,
+        );
+        nextTabButton?.focus();
+      }
+    },
+    [onTabChange, tabs],
+  );
+
+  // Validate required props (after hooks to keep them unconditional)
   if (!title) {
     return null;
   }
-
-  const handleTabClick = useCallback((tabId) => {
-    onTabChange?.(tabId);
-  }, [onTabChange]);
-
-  const handleTabKeyDown = useCallback((event, tabId, tabIndex) => {
-    const { key } = event;
-    
-    if (key === 'Enter' || key === ' ') {
-      event.preventDefault();
-      onTabChange?.(tabId);
-      return;
-    }
-
-    if (key === 'ArrowLeft' || key === 'ArrowRight') {
-      event.preventDefault();
-      const direction = key === 'ArrowLeft' ? -1 : 1;
-      const nextIndex = (tabIndex + direction + tabs.length) % tabs.length;
-      const nextTabButton = document.querySelector(`[data-tab-index="${nextIndex}"]`);
-      nextTabButton?.focus();
-    }
-  }, [onTabChange, tabs]);
 
   return (
     <div
@@ -92,12 +100,17 @@ function TabHeader({
           </div>
         </div>
         {/* Right side: Actions section */}
-        {actions && <div className="flex items-center space-x-2">{actions}</div>}
+        {actions && (
+          <div className="flex items-center space-x-2">{actions}</div>
+        )}
       </div>
 
       {/* Tab navigation section */}
       {tabs && tabs.length > 0 && (
-        <nav role="tablist" className="flex space-x-1 border-b border-gray-700">
+        <nav
+          role="tablist"
+          className="flex space-x-1 border-b border-gray-700"
+        >
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
@@ -130,11 +143,13 @@ TabHeader.propTypes = {
     d: PropTypes.string.isRequired,
   }),
   actions: PropTypes.node,
-  tabs: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-    active: PropTypes.bool.isRequired,
-  })),
+  tabs: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      active: PropTypes.bool.isRequired,
+    }),
+  ),
   onTabChange: PropTypes.func,
   className: PropTypes.string,
   iconProps: PropTypes.object,

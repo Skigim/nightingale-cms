@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 
@@ -195,7 +195,7 @@ function getRegistryComponent(componentName, fallbackComponent) {
   return function ComponentNotFound() {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
-        Component "{componentName}" not found in registry
+        Component &quot;{componentName}&quot; not found in registry
       </div>
     );
   };
@@ -246,7 +246,10 @@ function ContentSection({ children, variant = 'table', className = '' }) {
 
   if (Card) {
     return (
-      <Card variant="default" className={`${variantClass} ${className}`}>
+      <Card
+        variant="default"
+        className={`${variantClass} ${className}`}
+      >
         {children}
       </Card>
     );
@@ -430,8 +433,8 @@ function createBusinessComponent(config) {
  * Register TabBase components with the UI registry
  * Provides global access for component composition
  */
-registerComponent('SearchSection', SearchSection);
-registerComponent('ContentSection', ContentSection);
+registerComponent('ui', 'SearchSection', SearchSection);
+registerComponent('ui', 'ContentSection', ContentSection);
 
 export default createBusinessComponent;
 export {

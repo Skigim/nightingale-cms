@@ -103,7 +103,10 @@ class NightingaleDocumentGeneration {
 
       // Generate content if template is provided
       if (requestData.templateId) {
-        const template = this.templateService.getTemplateById(data, requestData.templateId);
+        const template = this.templateService.getTemplateById(
+          data,
+          requestData.templateId,
+        );
         if (template) {
           const activeCase = this._findCaseById(data, requestData.caseId);
           if (activeCase) {
@@ -111,7 +114,7 @@ class NightingaleDocumentGeneration {
               template.content,
               activeCase,
               data,
-              requestData.customReplacements
+              requestData.customReplacements,
             );
           }
         }
@@ -194,16 +197,20 @@ class NightingaleDocumentGeneration {
 
       // Regenerate content if template changed
       if (requestData.templateId) {
-        const template = this.templateService.getTemplateById(data, requestData.templateId);
+        const template = this.templateService.getTemplateById(
+          data,
+          requestData.templateId,
+        );
         if (template) {
           const activeCase = this._findCaseById(data, requestData.caseId);
           if (activeCase) {
-            updatedRequest.content = this.placeholderService.processPlaceholders(
-              template.content,
-              activeCase,
-              data,
-              requestData.customReplacements
-            );
+            updatedRequest.content =
+              this.placeholderService.processPlaceholders(
+                template.content,
+                activeCase,
+                data,
+                requestData.customReplacements,
+              );
           }
         }
       }
@@ -226,7 +233,10 @@ class NightingaleDocumentGeneration {
         request: updatedRequest,
       };
     } catch (error) {
-      this.logger.error('VR Request update failed', { error: error.message, requestId });
+      this.logger.error('VR Request update failed', {
+        error: error.message,
+        requestId,
+      });
       return {
         success: false,
         error: error.message,
@@ -282,7 +292,10 @@ class NightingaleDocumentGeneration {
         request: deletedRequest,
       };
     } catch (error) {
-      this.logger.error('VR Request deletion failed', { error: error.message, requestId });
+      this.logger.error('VR Request deletion failed', {
+        error: error.message,
+        requestId,
+      });
       return {
         success: false,
         error: error.message,
@@ -299,7 +312,13 @@ class NightingaleDocumentGeneration {
    * @param {Object} customReplacements - Custom placeholder replacements
    * @returns {string} Generated document content
    */
-  generateFinancialDocumentContent(data, financialItems, templateId, caseId, customReplacements = {}) {
+  generateFinancialDocumentContent(
+    data,
+    financialItems,
+    templateId,
+    caseId,
+    customReplacements = {},
+  ) {
     try {
       const template = this.templateService.getTemplateById(data, templateId);
       if (!template) {
@@ -331,7 +350,7 @@ class NightingaleDocumentGeneration {
           template.content,
           activeCase,
           data,
-          itemReplacements
+          itemReplacements,
         );
 
         content += itemContent + '\n\n';
@@ -339,7 +358,9 @@ class NightingaleDocumentGeneration {
 
       return content.trim();
     } catch (error) {
-      this.logger.error('Financial document generation failed', { error: error.message });
+      this.logger.error('Financial document generation failed', {
+        error: error.message,
+      });
       return '';
     }
   }
@@ -412,12 +433,14 @@ class NightingaleDocumentGeneration {
    * @private
    */
   _formatCurrency(amount) {
-    if (amount === null || amount === undefined || amount === '') return '$0.00';
-    
-    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    
+    if (amount === null || amount === undefined || amount === '')
+      return '$0.00';
+
+    const numericAmount =
+      typeof amount === 'string' ? parseFloat(amount) : amount;
+
     if (isNaN(numericAmount)) return '$0.00';
-    
+
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -445,7 +468,7 @@ class NightingaleDocumentGeneration {
 
     const cloned = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.hasOwn(obj, key)) {
         cloned[key] = this._deepClone(obj[key]);
       }
     }
@@ -491,7 +514,8 @@ if (typeof window !== 'undefined') {
 
   // Register with component system if available
   window.NightingaleServices = window.NightingaleServices || {};
-  window.NightingaleServices.documentGenerationService = documentGenerationService;
+  window.NightingaleServices.documentGenerationService =
+    documentGenerationService;
 }
 
 // ES6 Module Exports

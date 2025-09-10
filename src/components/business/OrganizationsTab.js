@@ -1,5 +1,6 @@
 // OrganizationsTab.js
 // Migrated to ES module component registry.
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.js';
 
@@ -15,7 +16,7 @@ function useOrganizationsData(props) {
     onViewModeChange,
     onBackToList,
   } = props;
-  const { useState, useMemo, useEffect, useCallback } = window.React || {};
+  // Hooks from React (unconditional at top of scope)
 
   // Toast function - now guaranteed to work by main.js setup
   const showToast = window.showToast;
@@ -160,15 +161,6 @@ function useOrganizationsData(props) {
     [fullData, fileService, onUpdateData, editValues, showToast],
   );
 
-  // Check for React availability
-  if (!window.React) {
-    return {
-      loading: false,
-      error: { message: 'React not available' },
-      data: [],
-    };
-  }
-
   return {
     loading: false,
     error: null,
@@ -210,7 +202,7 @@ function useOrganizationsData(props) {
  * Render main content for Organizations Tab
  */
 function renderOrganizationsContent({ components, data }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
   const {
     SearchBar,
     DataTable,
@@ -375,7 +367,7 @@ function renderOrganizationsContent({ components, data }) {
  * Render modals for Organizations Tab
  */
 function renderOrganizationsModals({ components, data, props }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
   const { ConfirmationModal, OrganizationModal } = components;
   const { state, handlers } = data;
   const { fullData, fileService, onUpdateData } = props;

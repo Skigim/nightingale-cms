@@ -75,8 +75,8 @@ class NightingalePlaceholders {
     // Get today's date formatted using our date service
     const todayFormatted = this.dateService.formatToday();
     const todayLong = this.dateService.formatDate(
-      this.dateService.now(), 
-      'MMMM D, YYYY'
+      this.dateService.now(),
+      'MMMM D, YYYY',
     );
 
     // Build the comprehensive placeholder mapping
@@ -123,20 +123,25 @@ class NightingalePlaceholders {
       CaseType: activeCase?.type || '',
       CaseStatus: activeCase?.status || '',
       ApplicationDate: activeCase?.appDetails?.appDate || '',
-      ApplicationDateFormatted: this._formatDate(activeCase?.appDetails?.appDate) || '',
+      ApplicationDateFormatted:
+        this._formatDate(activeCase?.appDetails?.appDate) || '',
       ApplicationType: activeCase?.appDetails?.applicationType || '',
       PovertyGuidelines: activeCase?.appDetails?.povertyGuidelines || '',
       HouseholdSize: activeCase?.appDetails?.householdSize || '',
       HouseholdIncome: activeCase?.appDetails?.totalIncome || '',
-      HouseholdIncomeFormatted: this._formatCurrency(activeCase?.appDetails?.totalIncome) || '',
+      HouseholdIncomeFormatted:
+        this._formatCurrency(activeCase?.appDetails?.totalIncome) || '',
 
       // Financial placeholders
       TotalAssets: this._getTotalAssets(activeCase) || '',
-      TotalAssetsFormatted: this._formatCurrency(this._getTotalAssets(activeCase)) || '',
+      TotalAssetsFormatted:
+        this._formatCurrency(this._getTotalAssets(activeCase)) || '',
       TotalIncome: this._getTotalIncome(activeCase) || '',
-      TotalIncomeFormatted: this._formatCurrency(this._getTotalIncome(activeCase)) || '',
+      TotalIncomeFormatted:
+        this._formatCurrency(this._getTotalIncome(activeCase)) || '',
       TotalExpenses: this._getTotalExpenses(activeCase) || '',
-      TotalExpensesFormatted: this._formatCurrency(this._getTotalExpenses(activeCase)) || '',
+      TotalExpensesFormatted:
+        this._formatCurrency(this._getTotalExpenses(activeCase)) || '',
 
       // Custom replacements (override any defaults)
       ...customReplacements,
@@ -144,20 +149,25 @@ class NightingalePlaceholders {
 
     // Replace all placeholders in the template
     let processedContent = templateContent;
-    
+
     // Find all placeholder patterns {PlaceholderName}
     const placeholderRegex = /\{([^}]+)\}/g;
-    
-    processedContent = processedContent.replace(placeholderRegex, (match, placeholderName) => {
-      // Check if we have a replacement for this placeholder
-      if (placeholderMap.hasOwnProperty(placeholderName)) {
-        const replacement = placeholderMap[placeholderName];
-        return replacement !== null && replacement !== undefined ? String(replacement) : '';
-      }
-      
-      // If no replacement found, return the original placeholder
-      return match;
-    });
+
+    processedContent = processedContent.replace(
+      placeholderRegex,
+      (match, placeholderName) => {
+        // Check if we have a replacement for this placeholder
+        if (Object.hasOwn(placeholderMap, placeholderName)) {
+          const replacement = placeholderMap[placeholderName];
+          return replacement !== null && replacement !== undefined
+            ? String(replacement)
+            : '';
+        }
+
+        // If no replacement found, return the original placeholder
+        return match;
+      },
+    );
 
     return processedContent;
   }
@@ -181,14 +191,14 @@ class NightingalePlaceholders {
    */
   _formatSSN(ssn) {
     if (!ssn || typeof ssn !== 'string') return '';
-    
+
     // Remove all non-digits
     const digits = ssn.replace(/\D/g, '');
-    
+
     if (digits.length === 9) {
       return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
     }
-    
+
     return ssn; // Return original if not 9 digits
   }
 
@@ -199,14 +209,14 @@ class NightingalePlaceholders {
    */
   _formatEIN(ein) {
     if (!ein || typeof ein !== 'string') return '';
-    
+
     // Remove all non-digits
     const digits = ein.replace(/\D/g, '');
-    
+
     if (digits.length === 9) {
       return `${digits.slice(0, 2)}-${digits.slice(2)}`;
     }
-    
+
     return ein; // Return original if not 9 digits
   }
 
@@ -217,14 +227,14 @@ class NightingalePlaceholders {
    */
   _formatPhone(phone) {
     if (!phone || typeof phone !== 'string') return '';
-    
+
     // Remove all non-digits
     const digits = phone.replace(/\D/g, '');
-    
+
     if (digits.length === 10) {
       return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
     }
-    
+
     return phone; // Return original if not 10 digits
   }
 
@@ -235,7 +245,7 @@ class NightingalePlaceholders {
    */
   _formatDate(dateString) {
     if (!dateString) return '';
-    
+
     try {
       return this.dateService.formatDate(dateString, 'MMMM D, YYYY');
     } catch (error) {
@@ -250,11 +260,12 @@ class NightingalePlaceholders {
    */
   _formatCurrency(amount) {
     if (amount === null || amount === undefined || amount === '') return '';
-    
-    const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-    
+
+    const numericAmount =
+      typeof amount === 'string' ? parseFloat(amount) : amount;
+
     if (isNaN(numericAmount)) return '';
-    
+
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -268,14 +279,14 @@ class NightingalePlaceholders {
    */
   _formatAddress(entity) {
     if (!entity) return '';
-    
+
     const parts = [];
-    
+
     if (entity.address) parts.push(entity.address);
     if (entity.city) parts.push(entity.city);
     if (entity.state) parts.push(entity.state);
     if (entity.zipCode) parts.push(entity.zipCode);
-    
+
     return parts.join(', ');
   }
 
@@ -286,7 +297,7 @@ class NightingalePlaceholders {
    */
   _getTotalAssets(activeCase) {
     if (!activeCase?.financials?.resources) return 0;
-    
+
     return activeCase.financials.resources.reduce((total, resource) => {
       const value = parseFloat(resource.value) || 0;
       return total + value;
@@ -300,7 +311,7 @@ class NightingalePlaceholders {
    */
   _getTotalIncome(activeCase) {
     if (!activeCase?.financials?.income) return 0;
-    
+
     return activeCase.financials.income.reduce((total, income) => {
       const value = parseFloat(income.value) || 0;
       return total + value;
@@ -314,7 +325,7 @@ class NightingalePlaceholders {
    */
   _getTotalExpenses(activeCase) {
     if (!activeCase?.financials?.expenses) return 0;
-    
+
     return activeCase.financials.expenses.reduce((total, expense) => {
       const value = parseFloat(expense.value) || 0;
       return total + value;
@@ -383,8 +394,9 @@ const placeholderService = new NightingalePlaceholders();
 if (typeof window !== 'undefined') {
   window.NightingalePlaceholderService = placeholderService;
   window.NightingalePlaceholders = placeholderService;
-  window.processPlaceholders = placeholderService.processPlaceholders.bind(placeholderService);
-  
+  window.processPlaceholders =
+    placeholderService.processPlaceholders.bind(placeholderService);
+
   // Secondary registration with services collection
   window.NightingaleServices = window.NightingaleServices || {};
   window.NightingaleServices.placeholderService = placeholderService;
@@ -392,4 +404,5 @@ if (typeof window !== 'undefined') {
 
 // ES6 Module Exports
 export default placeholderService;
-export const { processPlaceholders, getAvailablePlaceholders } = placeholderService;
+export const { processPlaceholders, getAvailablePlaceholders } =
+  placeholderService;

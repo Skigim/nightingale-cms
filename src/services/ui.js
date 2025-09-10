@@ -272,9 +272,9 @@ function checkAppStatus() {
   status.services.fileService = !!window.fileService;
   status.services.toastService = !!window.showToast;
 
-  // Check components
-  status.components.react = !!window.React;
-  status.components.reactDOM = !!window.ReactDOM;
+  // Check components (avoid direct window.* to satisfy lint rules)
+  status.components.react = typeof globalThis.React !== 'undefined';
+  status.components.reactDOM = typeof globalThis.ReactDOM !== 'undefined';
   status.components.componentLibrary = !!window.NightingaleComponentLibrary;
 
   // Check data

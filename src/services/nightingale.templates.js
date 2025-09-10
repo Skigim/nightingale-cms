@@ -30,10 +30,10 @@ class NightingaleTemplates {
     this.dateService = NightingaleDayJS;
     this.toastService = NightingaleToast;
     this.logger = NightingaleLogger.get('templates');
-    
+
     // BroadcastChannel for CMS synchronization
     this.broadcastChannel = null;
-    
+
     if (typeof window !== 'undefined' && window.BroadcastChannel) {
       this.broadcastChannel = new BroadcastChannel('nightingale-templates');
     }
@@ -268,7 +268,10 @@ class NightingaleTemplates {
         template: updatedTemplate,
       };
     } catch (error) {
-      this.logger.error('Template update failed', { error: error.message, templateId });
+      this.logger.error('Template update failed', {
+        error: error.message,
+        templateId,
+      });
       return {
         success: false,
         error: error.message,
@@ -327,7 +330,10 @@ class NightingaleTemplates {
         template: deletedTemplate,
       };
     } catch (error) {
-      this.logger.error('Template deletion failed', { error: error.message, templateId });
+      this.logger.error('Template deletion failed', {
+        error: error.message,
+        templateId,
+      });
       return {
         success: false,
         error: error.message,
@@ -430,7 +436,10 @@ class NightingaleTemplates {
       }
 
       // Handle templates in this category
-      const templatesInCategory = this.getTemplatesByCategory(newData, categoryName);
+      const templatesInCategory = this.getTemplatesByCategory(
+        newData,
+        categoryName,
+      );
       if (templatesInCategory.length > 0) {
         if (reassignTo) {
           // Reassign templates to new category
@@ -458,7 +467,10 @@ class NightingaleTemplates {
       }
 
       // Broadcast change for CMS sync
-      this._broadcastChange('category-deleted', { name: categoryName, reassignTo });
+      this._broadcastChange('category-deleted', {
+        name: categoryName,
+        reassignTo,
+      });
 
       // Show success toast
       if (showToast) {
@@ -496,7 +508,9 @@ class NightingaleTemplates {
 
     return templates.filter((template) => {
       const nameMatch = template.name.toLowerCase().includes(lowerSearchTerm);
-      const contentMatch = template.content.toLowerCase().includes(lowerSearchTerm);
+      const contentMatch = template.content
+        .toLowerCase()
+        .includes(lowerSearchTerm);
       return nameMatch || contentMatch;
     });
   }
@@ -538,7 +552,7 @@ class NightingaleTemplates {
 
     const cloned = {};
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.hasOwn(obj, key)) {
         cloned[key] = this._deepClone(obj[key]);
       }
     }
@@ -589,7 +603,9 @@ class NightingaleTemplates {
           timestamp: Date.now(),
         });
       } catch (error) {
-        this.logger.warn('Failed to broadcast template change', { error: error.message });
+        this.logger.warn('Failed to broadcast template change', {
+          error: error.message,
+        });
       }
     }
   }

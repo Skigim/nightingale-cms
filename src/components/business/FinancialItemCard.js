@@ -9,6 +9,7 @@
  * Preview-style card designed for financial management sections.
  * Migrated to ES module component registry.
  */
+import React, { useMemo, useCallback } from 'react';
 import { registerComponent } from '../../services/registry';
 function FinancialItemCard({
   item,
@@ -20,8 +21,7 @@ function FinancialItemCard({
   confirmingDelete = false,
   showActions = true,
 }) {
-  const e = window.React.createElement;
-  const { useMemo, useCallback } = window.React;
+  const e = React.createElement;
 
   // Get verification status text for Badge component
   const getVerificationStatus = useMemo(() => {
@@ -239,7 +239,7 @@ function FinancialItemList({
   interactive = true,
   showActions = true,
 }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   return e(
     'div',
@@ -306,7 +306,7 @@ function FinancialItemGrid({
   showActions = true,
   columns = 'auto', // 'auto', 1, 2, 3, 4
 }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   // Determine grid columns class
   const getGridClass = () => {

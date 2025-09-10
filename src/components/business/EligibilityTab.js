@@ -11,38 +11,25 @@
  *
  * @returns {React.Element} Eligibility tab component
  */
+import React from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 function EligibilityTab() {
-  // Early return pattern for React safety
-  if (!window.React) {
-    return null;
-  }
-
-  const e = window.React.createElement;
-
-  return e(
-    'div',
-    { className: 'space-y-6' },
-    e(
-      'h2',
-      { className: 'text-2xl font-bold text-white' },
-      'Eligibility Management',
-    ),
-    e(
-      'div',
-      { className: 'bg-gray-800 rounded-lg p-6 border border-gray-700' },
-      e(
-        'p',
-        { className: 'text-gray-400' },
-        'Eligibility functionality will be implemented here...',
-      ),
-    ),
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-white">Eligibility Management</h2>
+      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <p className="text-gray-400">
+          Eligibility functionality will be implemented here...
+        </p>
+      </div>
+    </div>
   );
 }
 
 // PropTypes validation
 EligibilityTab.propTypes = {
-  fullData: window.PropTypes?.object,
+  fullData: PropTypes.object,
 };
 
 // Register with the business component registry

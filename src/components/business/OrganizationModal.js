@@ -7,6 +7,8 @@
  * Utilizes StepperModal for multi-step workflow with proper validation.
  * Migrated to ES module component registry.
  */
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 function OrganizationModal({
   isOpen = false,
@@ -16,8 +18,7 @@ function OrganizationModal({
   fullData = null,
   fileService = null, // File service instance for data operations
 }) {
-  const e = window.React.createElement;
-  const { useState, useEffect, useMemo, useCallback } = window.React;
+  const e = React.createElement;
 
   // Initial organization data structure
   const getInitialOrganizationData = () => {
@@ -1049,3 +1050,12 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // ES6 Module Export
 export default OrganizationModal;
+
+OrganizationModal.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  onOrganizationCreated: PropTypes.func,
+  editOrganizationId: PropTypes.string,
+  fullData: PropTypes.object,
+  fileService: PropTypes.object,
+};

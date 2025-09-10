@@ -6,6 +6,7 @@
  * Full CRUD functionality for case notes with category field and RTF text capabilities
  * Migrated to ES module component registry.
  */
+import React, { useState, useEffect, useMemo } from 'react';
 import { registerComponent } from '../../services/registry';
 
 function NotesModal({
@@ -17,8 +18,7 @@ function NotesModal({
   caseData,
   fullData,
 }) {
-  const e = window.React.createElement;
-  const { useState, useEffect, useMemo } = window.React;
+  const e = React.createElement;
 
   // Get toast function with fallback
   const showToast =
@@ -446,7 +446,7 @@ function NotesModal({
 
   // Create footer content from actions
   const footerContent = e(
-    window.React.Fragment,
+    React.Fragment,
     {},
     ...modalActions.map((action, index) =>
       e(window.Button, {
@@ -460,7 +460,7 @@ function NotesModal({
   );
 
   return e(
-    window.React.Fragment,
+    React.Fragment,
     {},
 
     // Main Notes Modal
@@ -519,7 +519,7 @@ function NotesModal({
         title: 'Confirm Delete',
         size: 'sm',
         footerContent: e(
-          window.React.Fragment,
+          React.Fragment,
           {},
           e(window.Button, {
             variant: 'secondary',

@@ -175,10 +175,7 @@ function NightingaleCMSApp() {
     );
   };
 
-  // React safety check for render
-  if (!window.React) {
-    return null;
-  }
+  // React is imported via ESM; no global safety check needed
 
   return React.createElement(
     'div',

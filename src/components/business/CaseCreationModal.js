@@ -1,5 +1,7 @@
 // CaseCreationModal - uses component-scoped React patterns
 // Note: React hooks declared within component functions for purity
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 
 // Access utilities from global window (loaded via script tags)
 const getDateUtils = () => window.dateUtils || {};
@@ -26,7 +28,7 @@ const getInitialCaseData = () => {
 
 // Step Components - Integrated directly into the modal
 function BasicInfoStep({ caseData, updateField, validationErrors }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   return e(
     'div',
@@ -120,8 +122,7 @@ function ClientSelectionStep({
   updateField,
   validationErrors,
 }) {
-  const e = window.React.createElement;
-  const { useState } = window.React;
+  const e = React.createElement;
 
   // State for search values
   const [clientSearchValue, setClientSearchValue] = useState('');
@@ -149,29 +150,29 @@ function ClientSelectionStep({
   );
 
   // Initialize search values when selections exist
-  window.React.useEffect(() => {
+  useEffect(() => {
     if (selectedClient) {
       setClientSearchValue(selectedClient.name);
     } else {
       setClientSearchValue('');
     }
-  }, [selectedClient?.id]);
+  }, [selectedClient]);
 
-  window.React.useEffect(() => {
+  useEffect(() => {
     if (selectedSpouse) {
       setSpouseSearchValue(selectedSpouse.name);
     } else {
       setSpouseSearchValue('');
     }
-  }, [selectedSpouse?.id]);
+  }, [selectedSpouse]);
 
-  window.React.useEffect(() => {
+  useEffect(() => {
     if (selectedRep) {
       setRepSearchValue(selectedRep.name);
     } else {
       setRepSearchValue('');
     }
-  }, [selectedRep?.id]);
+  }, [selectedRep]);
 
   const handleClientSelect = (person) => {
     updateField('personId', person.id);
@@ -311,8 +312,7 @@ function CaseDetailsStep({
   updatePersonAddress,
   validationErrors,
 }) {
-  const e = window.React.createElement;
-  const { useEffect } = window.React;
+  const e = React.createElement;
 
   const organizationOptions = (fullData?.organizations || []).map((o) => ({
     value: o.id,
@@ -548,7 +548,7 @@ function CaseDetailsStep({
 }
 
 function ReviewStep({ fullData, caseData }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   const SummaryItem = ({ label, value }) =>
     e(
@@ -733,8 +733,7 @@ function CaseCreationModal({
   fileService = null, // File service instance for data operations
   onViewCaseDetails = null, // Callback to switch to case details view
 }) {
-  const e = window.React.createElement;
-  const { useState, useEffect, useMemo, useCallback } = window.React;
+  const e = React.createElement;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [caseData, setCaseData] = useState(getInitialCaseData());
@@ -1131,3 +1130,13 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // ES6 Module Export
 export default CaseCreationModal;
+
+CaseCreationModal.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  onCaseCreated: PropTypes.func,
+  editCaseId: PropTypes.string,
+  fullData: PropTypes.object,
+  fileService: PropTypes.object,
+  onViewCaseDetails: PropTypes.func,
+};

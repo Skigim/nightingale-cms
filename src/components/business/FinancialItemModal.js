@@ -7,6 +7,7 @@
  *
  * @component FinancialItemModal
  */
+import React, { useState, useEffect } from 'react';
 import { registerComponent } from '../../services/registry';
 
 function FinancialItemModal({
@@ -18,8 +19,7 @@ function FinancialItemModal({
   itemType,
   editingItem = null,
 }) {
-  const e = window.React.createElement;
-  const { useState, useEffect } = window.React;
+  const e = React.createElement;
 
   // Toast function - now guaranteed to work by main.js setup
   const showToast = window.showToast;
@@ -201,7 +201,7 @@ function FinancialItemModal({
   const placeholders = getPlaceholders();
 
   const footerContent = e(
-    window.React.Fragment,
+    React.Fragment,
     {},
     e(
       'button',

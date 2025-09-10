@@ -8,6 +8,7 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
+import React, { useState } from 'react';
 import { registerComponent } from '../../services/registry';
 
 /**
@@ -29,17 +30,11 @@ function CaseDetailsView({
   onBackToList,
   fileService,
 }) {
-  const e = window.React?.createElement;
-  const { useState } = window.React || {};
+  const e = React.createElement;
 
   // Component state - must be called unconditionally
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  // React safety check
-  if (!window.React) {
-    return null;
-  }
 
   // Validate required props
   if (!caseId || !fullData || typeof onUpdateData !== 'function') {

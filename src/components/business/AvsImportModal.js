@@ -15,6 +15,7 @@
  * @param {Array} props.existingResources - Array of existing financial resources for comparison
  * @returns {React.Element|null} The AVS import modal component
  */
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { registerComponent } from '../../services/registry';
 function AvsImportModal({
   isOpen,
@@ -23,8 +24,7 @@ function AvsImportModal({
   masterCaseId,
   existingResources = [],
 }) {
-  const e = window.React.createElement;
-  const { useState, useCallback, useMemo, useEffect } = window.React;
+  const e = React.createElement;
 
   // Component state following React purity rules
   const [rawData, setRawData] = useState('');
@@ -395,7 +395,7 @@ function AvsImportModal({
  * @param {number} props.selectedCount - Number of selected items
  */
 function ImportButton({ disabled, selectedCount }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   // Future: This is where useFormStatus would be integrated when available
   // const { pending } = window.ReactDOM.useFormStatus();
@@ -425,7 +425,7 @@ function ImportButton({ disabled, selectedCount }) {
  * @param {Function} props.onToggleItem - Callback for toggling item selection
  */
 function PreviewList({ items, selectedItems, onToggleItem }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   return e(
     'div',
@@ -453,7 +453,7 @@ function PreviewList({ items, selectedItems, onToggleItem }) {
  * @param {Function} props.onToggle - Callback for toggling selection
  */
 function PreviewItem({ item, isSelected, onToggle }) {
-  const e = window.React.createElement;
+  const e = React.createElement;
 
   // Format currency value
   const formattedValue = new Intl.NumberFormat('en-US', {
