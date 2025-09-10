@@ -1,6 +1,6 @@
-// FormComponents - uses global window.React
+import React from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
-// Uses global window.dateUtils, window.toInputDateFormat, window.Validators
 
 /**
  * Nightingale Component Library - Form Components
@@ -30,62 +30,65 @@ function FormField({
   required = false,
   className = '',
 }) {
-  const e = window.React.createElement;
-
   const fieldId = id || `field-${Math.random().toString(36).substr(2, 9)}`;
   const hasError =
     error && (Array.isArray(error) ? error.length > 0 : error.trim() !== '');
 
-  return e(
-    'div',
-    { className: `space-y-2 ${className}` },
+  return (
+    <div className={`space-y-2 ${className}`}>
+      {/* Label */}
+      {label && (
+        <label
+          htmlFor={fieldId}
+          className="block text-sm font-medium text-gray-300"
+        >
+          {label}
+          {required && <span className="text-red-400 ml-1">*</span>}
+        </label>
+      )}
 
-    // Label
-    label &&
-      e(
-        'label',
-        {
-          htmlFor: fieldId,
-          className: 'block text-sm font-medium text-gray-300',
-        },
-        label,
-        required && e('span', { className: 'text-red-400 ml-1' }, '*'),
-      ),
+      {/* Input wrapper with error styling */}
+      <div className={hasError ? 'relative' : ''}>
+        {React.isValidElement(children)
+          ? React.cloneElement(children, {
+              id: fieldId,
+              className: `${children.props.className || ''} ${
+                hasError ? 'border-red-500 focus:ring-red-500' : ''
+              }`.trim(),
+              'aria-invalid': hasError ? 'true' : undefined,
+              'aria-describedby': hasError ? `${fieldId}-error` : undefined,
+            })
+          : children}
+      </div>
 
-    // Input wrapper with error styling
-    e(
-      'div',
-      { className: hasError ? 'relative' : '' },
-      window.React.isValidElement(children)
-        ? window.React.cloneElement(children, {
-            id: fieldId,
-            className: `${children.props.className || ''} ${
-              hasError ? 'border-red-500 focus:ring-red-500' : ''
-            }`.trim(),
-            'aria-invalid': hasError ? 'true' : undefined,
-            'aria-describedby': hasError ? `${fieldId}-error` : undefined,
-          })
-        : children,
-    ),
+      {/* Error message(s) */}
+      {hasError && (
+        <div
+          id={`${fieldId}-error`}
+          className="text-red-400 text-sm"
+          role="alert"
+        >
+          {Array.isArray(error)
+            ? error.map((err, index) => <div key={index}>{err}</div>)
+            : error}
+        </div>
+      )}
 
-    // Error message(s)
-    hasError &&
-      e(
-        'div',
-        {
-          id: `${fieldId}-error`,
-          className: 'text-red-400 text-sm',
-          role: 'alert',
-        },
-        Array.isArray(error)
-          ? error.map((err, index) => e('div', { key: index }, err))
-          : error,
-      ),
-
-    // Hint text
-    hint && e('p', { className: 'text-gray-500 text-sm' }, hint),
+      {/* Hint text */}
+      {hint && <p className="text-gray-500 text-sm">{hint}</p>}
+    </div>
   );
 }
+
+FormField.propTypes = {
+  label: PropTypes.string,
+  id: PropTypes.string,
+  children: PropTypes.node,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
+  hint: PropTypes.string,
+  required: PropTypes.bool,
+  className: PropTypes.string,
+};
 
 /**
  * Text Input Component - integrates with Nightingale validators
@@ -111,9 +114,8 @@ function TextInput({
   formatter = null,
   ...props
 }) {
-  const e = window.React.createElement;
-  const { useState: useStateHook } = window.React;
-  const [, setLocalError] = useStateHook(null);
+  const { useState } = React;
+  const [, setLocalError] = useState(null);
 
   const handleChange = (e) => {
     let newValue = e.target.value;
@@ -161,16 +163,29 @@ function TextInput({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return e('input', {
-    type,
-    value,
-    onChange: handleChange,
-    placeholder,
-    disabled,
-    className: `${baseClasses} ${className}`,
-    ...props,
-  });
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={handleChange}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={`${baseClasses} ${className}`}
+      {...props}
+    />
+  );
 }
+
+TextInput.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  type: PropTypes.oneOf(['text', 'email', 'password', 'tel']),
+  placeholder: PropTypes.string,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+  validator: PropTypes.func,
+  formatter: PropTypes.func,
+};
 
 /**
  * Select Component - consistent dropdown styling
@@ -192,8 +207,6 @@ function Select({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
-
   const baseClasses = `
     w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2
     text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -203,28 +216,47 @@ function Select({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return e(
-    'select',
-    {
-      value,
-      onChange,
-      disabled,
-      className: `${baseClasses} ${className}`,
-      ...props,
-    },
-    placeholder && e('option', { value: '', disabled: true }, placeholder),
-    options.map((option) =>
-      e(
-        'option',
-        {
-          key: option.value,
-          value: option.value,
-        },
-        option.label || option.value,
-      ),
-    ),
+  return (
+    <select
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      className={`${baseClasses} ${className}`}
+      {...props}
+    >
+      {placeholder && (
+        <option
+          value=""
+          disabled
+        >
+          {placeholder}
+        </option>
+      )}
+      {options.map((option) => (
+        <option
+          key={option.value}
+          value={option.value}
+        >
+          {option.label || option.value}
+        </option>
+      ))}
+    </select>
   );
 }
+
+Select.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      label: PropTypes.string,
+    }),
+  ),
+  placeholder: PropTypes.string,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+};
 
 /**
  * Date Input Component - integrates with Nightingale dateUtils
@@ -246,8 +278,6 @@ function DateInput({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
-
   // Convert ISO date to YYYY-MM-DD format for input
   const inputValue = value
     ? typeof window.toInputDateFormat === 'function'
@@ -285,17 +315,28 @@ function DateInput({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return e('input', {
-    type: 'date',
-    value: inputValue,
-    onChange: handleChange,
-    disabled,
-    min,
-    max,
-    className: `${baseClasses} ${className}`,
-    ...props,
-  });
+  return (
+    <input
+      type="date"
+      value={inputValue}
+      onChange={handleChange}
+      disabled={disabled}
+      min={min}
+      max={max}
+      className={`${baseClasses} ${className}`}
+      {...props}
+    />
+  );
 }
+
+DateInput.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  disabled: PropTypes.bool,
+  min: PropTypes.string,
+  max: PropTypes.string,
+  className: PropTypes.string,
+};
 
 /**
  * Textarea Component - consistent multi-line text input
@@ -317,8 +358,6 @@ function Textarea({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
-
   const baseClasses = `
     w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2
     text-white placeholder-gray-400 resize-none
@@ -329,16 +368,27 @@ function Textarea({
     .replace(/\s+/g, ' ')
     .trim();
 
-  return e('textarea', {
-    value,
-    onChange,
-    placeholder,
-    rows,
-    disabled,
-    className: `${baseClasses} ${className}`,
-    ...props,
-  });
+  return (
+    <textarea
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      rows={rows}
+      disabled={disabled}
+      className={`${baseClasses} ${className}`}
+      {...props}
+    />
+  );
 }
+
+Textarea.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  rows: PropTypes.number,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+};
 
 /**
  * Checkbox Component - consistent checkbox styling
@@ -358,34 +408,41 @@ function Checkbox({
   className = '',
   ...props
 }) {
-  const e = window.React.createElement;
-
   const id = props.id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
 
-  return e(
-    'label',
-    {
-      htmlFor: id,
-      className: `flex items-center cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`,
-    },
-    e('input', {
-      type: 'checkbox',
-      id,
-      checked,
-      onChange,
-      disabled,
-      className: `
+  return (
+    <label
+      htmlFor={id}
+      className={`flex items-center cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+    >
+      <input
+        type="checkbox"
+        id={id}
+        checked={checked}
+        onChange={onChange}
+        disabled={disabled}
+        className={`
         h-4 w-4 rounded border-gray-500 text-blue-500
         focus:ring-blue-500/50 focus:ring-2
         disabled:cursor-not-allowed
       `
-        .replace(/\s+/g, ' ')
-        .trim(),
-      ...props,
-    }),
-    label && e('span', { className: 'ml-3 text-gray-300' }, label),
+          .replace(/\s+/g, ' ')
+          .trim()}
+        {...props}
+      />
+      {label && <span className="ml-3 text-gray-300">{label}</span>}
+    </label>
   );
 }
+
+Checkbox.propTypes = {
+  checked: PropTypes.bool,
+  onChange: PropTypes.func,
+  label: PropTypes.string,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
+  id: PropTypes.string,
+};
 
 // Helper function to create common validators
 function createValidator(type, options = {}) {
@@ -395,29 +452,14 @@ function createValidator(type, options = {}) {
   return null;
 }
 
-// Export components
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    FormField,
-    TextInput,
-    Select,
-    DateInput,
-    Textarea,
-    Checkbox,
-    createValidator,
-  };
-}
+// Register components
+registerComponent('FormField', FormField);
+registerComponent('TextInput', TextInput);
+registerComponent('Select', Select);
+registerComponent('DateInput', DateInput);
+registerComponent('Textarea', Textarea);
+registerComponent('Checkbox', Checkbox);
 
-// Make available globally
-// Register with UI registry (legacy global removal)
-registerComponent('ui', 'FormField', FormField);
-registerComponent('ui', 'TextInput', TextInput);
-registerComponent('ui', 'Select', Select);
-registerComponent('ui', 'DateInput', DateInput);
-registerComponent('ui', 'Textarea', Textarea);
-registerComponent('ui', 'Checkbox', Checkbox);
-
-// ES6 Module Export
 export default FormField;
 export {
   FormField,
