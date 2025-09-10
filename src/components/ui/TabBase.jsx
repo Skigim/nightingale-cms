@@ -1,6 +1,9 @@
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+
 /**
- * TabBase.js - Factory for creating standardized business-layer Tab components
+ * TabBase.jsx - Factory for creating standardized business-layer Tab components
  *
  * This factory enforces the OrganizationsTab architectural pattern across all Tab components:
  * 1. Unconditional React hooks (safety compliance)
@@ -17,50 +20,39 @@ import { registerComponent } from '../../services/registry';
  * Provides graceful degradation with basic modal functionality
  */
 function FallbackModal({ isOpen, onClose, title, children }) {
-  const e = window.React.createElement;
-
   if (!isOpen) return null;
 
-  return e(
-    'div',
-    {
-      className: 'fixed inset-0 z-50 flex items-center justify-center',
-      onClick: onClose,
-    },
-    e('div', {
-      className: 'fixed inset-0 bg-black bg-opacity-50',
-    }),
-    e(
-      'div',
-      {
-        className:
-          'relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6',
-        onClick: (e) => e.stopPropagation(),
-      },
-      e(
-        'div',
-        { className: 'flex justify-between items-center mb-4' },
-        e('h2', { className: 'text-lg font-semibold' }, title),
-        e(
-          'button',
-          {
-            onClick: onClose,
-            className: 'text-gray-400 hover:text-gray-600',
-          },
-          '×',
-        ),
-      ),
-      e('div', null, children),
-    ),
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
+    >
+      <div className="fixed inset-0 bg-black bg-opacity-50" />
+      <div
+        className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            ×
+          </button>
+        </div>
+        <div>{children}</div>
+      </div>
+    </div>
   );
 }
 
 // PropTypes for FallbackModal
 FallbackModal.propTypes = {
-  isOpen: window.PropTypes?.bool,
-  onClose: window.PropTypes?.func,
-  title: window.PropTypes?.string,
-  children: window.PropTypes?.node,
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  title: PropTypes.string,
+  children: PropTypes.node,
 };
 
 /**
@@ -75,8 +67,6 @@ function FallbackButton({
   disabled,
   className = '',
 }) {
-  const e = window.React.createElement;
-
   const baseClasses =
     'inline-flex items-center justify-center font-medium rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2';
 
@@ -96,31 +86,25 @@ function FallbackButton({
 
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
 
-  return e(
-    'button',
-    {
-      className:
-        `${baseClasses} ${variantClasses[variant] || variantClasses.primary} ${sizeClasses[size] || sizeClasses.md} ${disabledClasses} ${className}`.trim(),
-      onClick: disabled ? undefined : onClick,
-      disabled,
-    },
-    children,
+  return (
+    <button
+      className={`${baseClasses} ${variantClasses[variant] || variantClasses.primary} ${sizeClasses[size] || sizeClasses.md} ${disabledClasses} ${className}`.trim()}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+    >
+      {children}
+    </button>
   );
 }
 
 // PropTypes for FallbackButton
 FallbackButton.propTypes = {
-  variant: window.PropTypes?.oneOf([
-    'primary',
-    'secondary',
-    'success',
-    'danger',
-  ]),
-  size: window.PropTypes?.oneOf(['sm', 'md', 'lg']),
-  onClick: window.PropTypes?.func,
-  children: window.PropTypes?.node,
-  disabled: window.PropTypes?.bool,
-  className: window.PropTypes?.string,
+  variant: PropTypes.oneOf(['primary', 'secondary', 'success', 'danger']),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  onClick: PropTypes.func,
+  children: PropTypes.node,
+  disabled: PropTypes.bool,
+  className: PropTypes.string,
 };
 
 /**
@@ -133,24 +117,23 @@ function FallbackSearchBar({
   placeholder = 'Search...',
   className = '',
 }) {
-  const e = window.React.createElement;
-
-  return e('input', {
-    type: 'text',
-    value: value || '',
-    onChange: (e) => onChange && onChange(e.target.value),
-    placeholder,
-    className:
-      `w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`.trim(),
-  });
+  return (
+    <input
+      type="text"
+      value={value || ''}
+      onChange={(e) => onChange && onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${className}`.trim()}
+    />
+  );
 }
 
 // PropTypes for FallbackSearchBar
 FallbackSearchBar.propTypes = {
-  value: window.PropTypes?.string,
-  onChange: window.PropTypes?.func,
-  placeholder: window.PropTypes?.string,
-  className: window.PropTypes?.string,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  className: PropTypes.string,
 };
 
 /**
@@ -158,51 +141,41 @@ FallbackSearchBar.propTypes = {
  * Provides basic header functionality
  */
 function FallbackTabHeader({ title, count, icon, actions, className = '' }) {
-  const e = window.React.createElement;
-
   if (!title) {
     return null;
   }
 
-  return e(
-    'div',
-    {
-      className: `bg-gray-800 rounded-lg p-4 mb-6 flex items-center justify-between ${className}`,
-    },
-    // Left side: Icon and title section
-    e(
-      'div',
-      { className: 'flex items-center space-x-4' },
-      // Simple icon fallback
-      icon &&
-        e(
-          'div',
-          {
-            className:
-              'w-8 h-8 bg-blue-400 rounded text-white flex items-center justify-center text-xs font-bold',
-          },
-          title.charAt(0).toUpperCase(),
-        ),
-      // Title and count section
-      e(
-        'div',
-        { className: 'flex flex-col' },
-        e('span', { className: 'font-bold text-white text-lg' }, title),
-        count && e('span', { className: 'text-sm text-gray-400' }, count),
-      ),
-    ),
-    // Right side: Actions section
-    actions && e('div', { className: 'flex items-center space-x-2' }, actions),
+  return (
+    <div
+      className={`bg-gray-800 rounded-lg p-4 mb-6 flex items-center justify-between ${className}`}
+    >
+      {/* Left side: Icon and title section */}
+      <div className="flex items-center space-x-4">
+        {/* Simple icon fallback */}
+        {icon && (
+          <div className="w-8 h-8 bg-blue-400 rounded text-white flex items-center justify-center text-xs font-bold">
+            {title.charAt(0).toUpperCase()}
+          </div>
+        )}
+        {/* Title and count section */}
+        <div className="flex flex-col">
+          <span className="font-bold text-white text-lg">{title}</span>
+          {count && <span className="text-sm text-gray-400">{count}</span>}
+        </div>
+      </div>
+      {/* Right side: Actions section */}
+      {actions && <div className="flex items-center space-x-2">{actions}</div>}
+    </div>
   );
 }
 
 // PropTypes for FallbackTabHeader
 FallbackTabHeader.propTypes = {
-  title: window.PropTypes?.string.isRequired,
-  count: window.PropTypes?.string,
-  icon: window.PropTypes?.object,
-  actions: window.PropTypes?.node,
-  className: window.PropTypes?.string,
+  title: PropTypes.string.isRequired,
+  count: PropTypes.string,
+  icon: PropTypes.object,
+  actions: PropTypes.node,
+  className: PropTypes.string,
 };
 
 /**
@@ -220,11 +193,10 @@ function getRegistryComponent(componentName, fallbackComponent) {
   if (fallbackComponent !== undefined) return fallbackComponent;
   // Only emit a visible error component when no explicit null/override provided
   return function ComponentNotFound() {
-    const e = window.React.createElement;
-    return e(
-      'div',
-      { className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700' },
-      `Component "${componentName}" not found in registry`,
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
+        Component "{componentName}" not found in registry
+      </div>
     );
   };
 }
@@ -234,24 +206,26 @@ function getRegistryComponent(componentName, fallbackComponent) {
  * Provides consistent Card-wrapped search bar for all tabs
  */
 function SearchSection({ searchBar, className = '' }) {
-  const e = window.React.createElement;
   const Card = getRegistryComponent('Card', null);
 
   if (Card) {
-    return e(Card, {
-      variant: 'elevated',
-      className: `bg-gray-800 border-gray-700 ${className}`,
-      children: searchBar,
-    });
+    return (
+      <Card
+        variant="elevated"
+        className={`bg-gray-800 border-gray-700 ${className}`}
+      >
+        {searchBar}
+      </Card>
+    );
   }
 
   // Fallback to div wrapper
-  return e(
-    'div',
-    {
-      className: `bg-gray-800 rounded-lg p-4 border border-gray-700 ${className}`,
-    },
-    searchBar,
+  return (
+    <div
+      className={`bg-gray-800 rounded-lg p-4 border border-gray-700 ${className}`}
+    >
+      {searchBar}
+    </div>
   );
 }
 
@@ -260,7 +234,6 @@ function SearchSection({ searchBar, className = '' }) {
  * Provides consistent Card-wrapped content areas for all tabs
  */
 function ContentSection({ children, variant = 'table', className = '' }) {
-  const e = window.React.createElement;
   const Card = getRegistryComponent('Card', null);
 
   const variantClasses = {
@@ -272,36 +245,32 @@ function ContentSection({ children, variant = 'table', className = '' }) {
   const variantClass = variantClasses[variant] || variantClasses.table;
 
   if (Card) {
-    return e(Card, {
-      variant: 'default',
-      className: `${variantClass} ${className}`,
-      children,
-    });
+    return (
+      <Card variant="default" className={`${variantClass} ${className}`}>
+        {children}
+      </Card>
+    );
   }
 
   // Fallback to div wrapper
-  return e(
-    'div',
-    {
-      className: `rounded-lg shadow ${variantClass} ${className}`,
-    },
-    children,
+  return (
+    <div className={`rounded-lg shadow ${variantClass} ${className}`}>
+      {children}
+    </div>
   );
 }
 
 // PropTypes for layout components
-if (typeof window !== 'undefined' && window.PropTypes) {
-  SearchSection.propTypes = {
-    searchBar: window.PropTypes.node.isRequired,
-    className: window.PropTypes.string,
-  };
+SearchSection.propTypes = {
+  searchBar: PropTypes.node.isRequired,
+  className: PropTypes.string,
+};
 
-  ContentSection.propTypes = {
-    children: window.PropTypes.node.isRequired,
-    variant: window.PropTypes.oneOf(['table', 'form', 'info']),
-    className: window.PropTypes.string,
-  };
-}
+ContentSection.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(['table', 'form', 'info']),
+  className: PropTypes.string,
+};
 
 /**
  * Standardized component registry resolver
@@ -383,8 +352,6 @@ function createBusinessComponent(config) {
   }
 
   function TabComponent(props = {}) {
-    const e = window.React.createElement;
-
     // Merge default props with provided props
     const finalProps = { ...defaultProps, ...props };
 
@@ -399,20 +366,18 @@ function createBusinessComponent(config) {
     // PHASE 3: Early Return Pattern
     // Handle loading and error states immediately after hooks
     if (dataResult.loading) {
-      return e(
-        'div',
-        { className: 'flex items-center justify-center p-8' },
-        e('div', { className: 'text-gray-600' }, 'Loading...'),
+      return (
+        <div className="flex items-center justify-center p-8">
+          <div className="text-gray-600">Loading...</div>
+        </div>
       );
     }
 
     if (dataResult.error) {
-      return e(
-        'div',
-        {
-          className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
-        },
-        `Error in ${name}: ${dataResult.error.message || 'Unknown error'}`,
+      return (
+        <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
+          Error in {name}: {dataResult.error.message || 'Unknown error'}
+        </div>
       );
     }
 
@@ -426,20 +391,19 @@ function createBusinessComponent(config) {
     // PHASE 5: Render Phase
     // Compose the final component structure
     try {
-      return e(
-        'div',
-        { className: 'space-y-6' },
+      return (
+        <div className="space-y-6">
+          {/* Render action buttons if provided */}
+          {renderActions &&
+            renderActions({ components, data: dataResult, props: finalProps })}
 
-        // Render action buttons if provided
-        renderActions &&
-          renderActions({ components, data: dataResult, props: finalProps }),
+          {/* Render main content */}
+          {renderContent({ components, data: dataResult, props: finalProps })}
 
-        // Render main content
-        renderContent({ components, data: dataResult, props: finalProps }),
-
-        // Render modals if provided
-        renderModals &&
-          renderModals({ components, data: dataResult, props: finalProps }),
+          {/* Render modals if provided */}
+          {renderModals &&
+            renderModals({ components, data: dataResult, props: finalProps })}
+        </div>
       );
     } catch (renderError) {
       const logger = window.NightingaleLogger?.get('ui:tabRender');
@@ -448,12 +412,10 @@ function createBusinessComponent(config) {
         tabName: name,
         stack: renderError.stack,
       });
-      return e(
-        'div',
-        {
-          className: 'p-4 bg-red-50 border border-red-200 rounded text-red-700',
-        },
-        `Render error in ${name}: ${renderError.message}`,
+      return (
+        <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
+          Render error in {name}: {renderError.message}
+        </div>
       );
     }
   }
@@ -468,24 +430,9 @@ function createBusinessComponent(config) {
  * Register TabBase components with the UI registry
  * Provides global access for component composition
  */
-if (typeof window !== 'undefined') {
-  registerComponent('ui', 'SearchSection', SearchSection);
-  registerComponent('ui', 'ContentSection', ContentSection);
-}
+registerComponent('SearchSection', SearchSection);
+registerComponent('ContentSection', ContentSection);
 
-// Export for ES6 module compatibility
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    createBusinessComponent,
-    getRegistryComponent,
-    resolveComponents,
-    FallbackModal,
-    FallbackButton,
-    FallbackSearchBar,
-  };
-}
-
-// ES6 export for modern module systems
 export default createBusinessComponent;
 export {
   createBusinessComponent,
