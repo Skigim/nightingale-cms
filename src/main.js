@@ -5,17 +5,17 @@ import './index.css';
 // --- Preload UI Components (side-effect imports for registry registration) ---
 import './components/ui/Badge.jsx';
 import './components/ui/Button.jsx';
-import './components/ui/Cards.js';
-import './components/ui/DataTable.js';
+import './components/ui/Cards.jsx';
+import './components/ui/DataTable.jsx';
 import './components/ui/ErrorBoundary.jsx';
-import './components/ui/FormComponents.js';
-import './components/ui/Header.js';
+import './components/ui/FormComponents.jsx';
+import './components/ui/Header.jsx';
 import './components/ui/Modal.jsx';
-import './components/ui/SearchBar.js';
-import './components/ui/Sidebar.js';
-import './components/ui/Stepper.js';
-import './components/ui/StepperModal.js';
-import './components/ui/TabBase.js';
+import './components/ui/SearchBar.jsx';
+import './components/ui/Sidebar.jsx';
+import './components/ui/Stepper.jsx';
+import './components/ui/StepperModal.jsx';
+import './components/ui/TabBase.jsx';
 import './components/ui/TabHeader.jsx';
 
 // --- Preload Business Components (tabs, modals, detail views) ---
