@@ -186,6 +186,6 @@ Sidebar.propTypes = {
 };
 
 // Register component
-registerComponent('Sidebar', Sidebar);
+registerComponent('ui', 'Sidebar', Sidebar);
 
 export default Sidebar;

@@ -33,7 +33,6 @@ function Stepper({
   showProgress = true,
   isClickable: customIsClickable,
 }) {
-
   // Validate required props
   if (!steps || !Array.isArray(steps)) {
     return null;
@@ -160,8 +159,8 @@ function Stepper({
                       status === 'active'
                         ? 'text-blue-400'
                         : status === 'completed'
-                        ? 'text-green-400'
-                        : 'text-gray-400'
+                          ? 'text-green-400'
+                          : 'text-gray-400'
                     }`}
                   >
                     {step.title}
@@ -197,6 +196,6 @@ Stepper.propTypes = {
 };
 
 // Self-registration for both module and script loading
-registerComponent('Stepper', Stepper);
+registerComponent('ui', 'Stepper', Stepper);
 
 export default Stepper;

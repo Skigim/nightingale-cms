@@ -453,12 +453,12 @@ function createValidator(type, options = {}) {
 }
 
 // Register components
-registerComponent('FormField', FormField);
-registerComponent('TextInput', TextInput);
-registerComponent('Select', Select);
-registerComponent('DateInput', DateInput);
-registerComponent('Textarea', Textarea);
-registerComponent('Checkbox', Checkbox);
+registerComponent('ui', 'FormField', FormField);
+registerComponent('ui', 'TextInput', TextInput);
+registerComponent('ui', 'Select', Select);
+registerComponent('ui', 'DateInput', DateInput);
+registerComponent('ui', 'Textarea', Textarea);
+registerComponent('ui', 'Checkbox', Checkbox);
 
 export default FormField;
 export {

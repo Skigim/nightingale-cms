@@ -204,6 +204,6 @@ Header.propTypes = {
 };
 
 // Register component
-registerComponent('Header', Header);
+registerComponent('ui', 'Header', Header);
 
 export default Header;

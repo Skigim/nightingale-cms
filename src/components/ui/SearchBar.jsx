@@ -447,6 +447,6 @@ SearchBar.propTypes = {
 };
 
 // Register component
-registerComponent('SearchBar', SearchBar);
+registerComponent('ui', 'SearchBar', SearchBar);
 
 export default SearchBar;

@@ -23,7 +23,6 @@ function StepperModal({
   hideNavigation = false, // Whether to hide the Next/Back buttons and use only custom buttons
   customFooterContent = null, // Custom footer content to replace default buttons
 }) {
-
   // Reference to the step content area for focus management
   const stepContentRef = useRef(null);
 
@@ -91,7 +90,8 @@ function StepperModal({
     ) : null);
 
   // We need to get Modal from the global registry since this component depends on it
-  const Modal = window.Modal || (() => <div>Modal component not available</div>);
+  const Modal =
+    window.Modal || (() => <div>Modal component not available</div>);
 
   return (
     <Modal
@@ -124,8 +124,8 @@ function StepperModal({
                     isActive
                       ? 'bg-blue-600/20'
                       : isAccessible
-                      ? 'hover:bg-gray-700'
-                      : 'cursor-not-allowed opacity-50'
+                        ? 'hover:bg-gray-700'
+                        : 'cursor-not-allowed opacity-50'
                   }`}
                 >
                   {/* Step Icon/Number */}
@@ -134,8 +134,8 @@ function StepperModal({
                       isCompleted
                         ? 'bg-green-600 text-white'
                         : isActive
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-600 text-gray-300'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-600 text-gray-300'
                     }`}
                   >
                     {isCompleted ? '✓' : index + 1}
@@ -192,6 +192,6 @@ StepperModal.propTypes = {
 };
 
 // Register with UI registry
-registerComponent('StepperModal', StepperModal);
+registerComponent('ui', 'StepperModal', StepperModal);
 
 export default StepperModal;
