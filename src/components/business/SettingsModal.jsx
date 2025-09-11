@@ -12,6 +12,10 @@ import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
 import { backfillClientNames } from '../../services/dataFixes.js';
+import {
+  detectLegacyProfile,
+  runFullMigration,
+} from '../../services/migration.js';
 
 /**
  * SettingsModal Component
@@ -37,6 +41,12 @@ function SettingsModal({
   const [isConnecting, setIsConnecting] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
   const [isBackfilling, setIsBackfilling] = useState(false);
+  const [isMigrationOpen, setIsMigrationOpen] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [detection, setDetection] = useState(null);
+  const [migrationReport, setMigrationReport] = useState(null);
+  const [migrationError, setMigrationError] = useState(null);
 
   // Get dependencies
   const Modal = getComponent('ui', 'Modal');
@@ -257,10 +267,9 @@ function SettingsModal({
     }
     setIsBackfilling(true);
     try {
+      const currentData = await fileService.readFile();
       const { changed, updatedData, persisted } = await backfillClientNames(
-        typeof onDataLoaded === 'function'
-          ? await fileService.readFile()
-          : await fileService.readFile(),
+        currentData,
         fileService,
         true,
       );
@@ -282,115 +291,292 @@ function SettingsModal({
     }
   };
 
+  const openMigrationModal = async () => {
+    if (!fileService?.readFile) {
+      showToast('File service not available', 'error');
+      return;
+    }
+    if (fileStatus !== 'connected') {
+      showToast('Connect to directory first', 'warning');
+      return;
+    }
+
+    setIsMigrationOpen(true);
+    setIsDetecting(true);
+    setDetection(null);
+    setMigrationReport(null);
+    setMigrationError(null);
+    try {
+      const rawData = await fileService.readFile();
+      if (!rawData || Object.keys(rawData).length === 0) {
+        setDetection({ isLegacy: false, indicators: {}, summary: [] });
+        return;
+      }
+      const det = detectLegacyProfile(rawData);
+      setDetection(det);
+    } catch (err) {
+      setMigrationError('Failed to analyze data');
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
+  const handleRunMigration = async () => {
+    if (!fileService?.writeFile) {
+      showToast('File service not available', 'error');
+      return;
+    }
+    setIsMigrating(true);
+    setMigrationError(null);
+    try {
+      const rawData = await fileService.readFile();
+      const { migratedData, report } = await runFullMigration(rawData, {
+        applyFixes: true,
+      });
+      await fileService.writeFile(migratedData);
+      onDataLoaded?.(migratedData);
+      setMigrationReport(report);
+      showToast('Migration complete', 'success');
+    } catch (err) {
+      setMigrationError('Migration failed');
+      showToast('Migration failed', 'error');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Settings & Data Management"
-      footerContent={
-        <div className="flex space-x-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      }
-    >
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">
-            File System Connection
-          </h3>
-          <p className="text-gray-400 text-sm">
-            Connect to your project directory to load and save case data.
-          </p>
-          <div className="flex items-center space-x-4">
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Settings & Data Management"
+        footerContent={
+          <div className="flex space-x-3">
             <button
-              onClick={handleConnect}
-              disabled={isConnecting}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                isConnecting
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
             >
-              {isConnecting ? 'Connecting...' : 'Connect to Directory'}
+              Close
             </button>
-            <div
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                fileStatus === 'connected'
-                  ? 'bg-green-600 text-green-100'
-                  : 'bg-red-600 text-red-100'
-              }`}
-            >
-              {fileStatus === 'connected' ? 'Connected' : 'Disconnected'}
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">
+              File System Connection
+            </h3>
+            <p className="text-gray-400 text-sm">
+              Connect to your project directory to load and save case data.
+            </p>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={handleConnect}
+                disabled={isConnecting}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isConnecting
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {isConnecting ? 'Connecting...' : 'Connect to Directory'}
+              </button>
+              <div
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  fileStatus === 'connected'
+                    ? 'bg-green-600 text-green-100'
+                    : 'bg-red-600 text-red-100'
+                }`}
+              >
+                {fileStatus === 'connected' ? 'Connected' : 'Disconnected'}
+              </div>
             </div>
           </div>
-        </div>
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-white">Data Management</h3>
-          <p className="text-gray-400 text-sm">
-            Load existing data, create sample data, or run one-time data fixes.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button
-              onClick={handleLoadData}
-              disabled={loadingData || fileStatus !== 'connected'}
-              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                loadingData || fileStatus !== 'connected'
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
-            >
-              {loadingData ? 'Loading...' : 'Load Data File'}
-            </button>
-            <button
-              onClick={handleCreateSample}
-              disabled={fileStatus !== 'connected'}
-              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                fileStatus !== 'connected'
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-orange-600 hover:bg-orange-700 text-white'
-              }`}
-            >
-              Create Sample Data
-            </button>
-            <button
-              onClick={handleBackfillClientNames}
-              disabled={fileStatus !== 'connected' || isBackfilling}
-              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                fileStatus !== 'connected' || isBackfilling
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              }`}
-            >
-              {isBackfilling ? 'Backfilling...' : 'Backfill Client Names'}
-            </button>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">
+              Data Management
+            </h3>
+            <p className="text-gray-400 text-sm">
+              Load existing data, create sample data, or run one-time data
+              fixes.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <button
+                onClick={handleLoadData}
+                disabled={loadingData || fileStatus !== 'connected'}
+                className={`px-4 py-3 rounded-lg font-medium transition-colors ${
+                  loadingData || fileStatus !== 'connected'
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                {loadingData ? 'Loading...' : 'Load Data File'}
+              </button>
+              <button
+                onClick={handleCreateSample}
+                disabled={fileStatus !== 'connected'}
+                className={`px-4 py-3 rounded-lg font-medium transition-colors ${
+                  fileStatus !== 'connected'
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-orange-600 hover:bg-orange-700 text-white'
+                }`}
+              >
+                Create Sample Data
+              </button>
+              <button
+                onClick={handleBackfillClientNames}
+                disabled={fileStatus !== 'connected' || isBackfilling}
+                className={`px-4 py-3 rounded-lg font-medium transition-colors ${
+                  fileStatus !== 'connected' || isBackfilling
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                }`}
+              >
+                {isBackfilling ? 'Backfilling...' : 'Backfill Client Names'}
+              </button>
+              <button
+                onClick={openMigrationModal}
+                disabled={fileStatus !== 'connected'}
+                className={`px-4 py-3 rounded-lg font-medium transition-colors ${
+                  fileStatus !== 'connected'
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+              >
+                Data Migration
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2 p-4 bg-gray-700 rounded-lg">
+            <h4 className="font-medium text-white">Instructions:</h4>
+            <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+              <li>
+                Click &apos;Connect to Directory&apos; and select your
+                Nightingale project folder
+              </li>
+              <li>
+                Use &apos;Load Data File&apos; to load existing
+                nightingale-data.json
+              </li>
+              <li>
+                Or use &apos;Create Sample Data&apos; to generate test cases for
+                development
+              </li>
+            </ol>
           </div>
         </div>
-        <div className="space-y-2 p-4 bg-gray-700 rounded-lg">
-          <h4 className="font-medium text-white">Instructions:</h4>
-          <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
-            <li>
-              Click &apos;Connect to Directory&apos; and select your Nightingale
-              project folder
-            </li>
-            <li>
-              Use &apos;Load Data File&apos; to load existing
-              nightingale-data.json
-            </li>
-            <li>
-              Or use &apos;Create Sample Data&apos; to generate test cases for
-              development
-            </li>
-          </ol>
-        </div>
-      </div>
-    </Modal>
+      </Modal>
+      {Modal && (
+        <Modal
+          isOpen={isMigrationOpen}
+          onClose={() => {
+            setIsMigrationOpen(false);
+            setDetection(null);
+            setMigrationReport(null);
+            setMigrationError(null);
+          }}
+          title="Data Migration"
+          size="large"
+          footerContent={
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setIsMigrationOpen(false);
+                  setDetection(null);
+                  setMigrationReport(null);
+                  setMigrationError(null);
+                }}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleRunMigration}
+                disabled={isDetecting || isMigrating}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isDetecting || isMigrating
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {isMigrating ? 'Migrating...' : 'Run Full Migration'}
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            {isDetecting && (
+              <p className="text-gray-300">
+                Analyzing data for legacy patterns…
+              </p>
+            )}
+            {migrationError && <p className="text-red-400">{migrationError}</p>}
+            {detection && (
+              <div className="space-y-2">
+                <h4 className="text-white font-semibold">Detection Summary</h4>
+                {detection.isLegacy ? (
+                  <ul className="list-disc list-inside text-gray-300">
+                    {(detection.summary || []).length > 0 ? (
+                      detection.summary.map((s, i) => <li key={i}>{s}</li>)
+                    ) : (
+                      <li>No specific indicators listed</li>
+                    )}
+                  </ul>
+                ) : (
+                  <p className="text-gray-300">
+                    No legacy indicators detected.
+                  </p>
+                )}
+              </div>
+            )}
+            {migrationReport && (
+              <div className="space-y-2">
+                <h4 className="text-white font-semibold">Migration Report</h4>
+                <div className="text-gray-300 text-sm space-y-1">
+                  <p>
+                    Cases: {migrationReport.counts?.before?.cases || 0} →{' '}
+                    {migrationReport.counts?.after?.cases || 0}
+                  </p>
+                  <p>
+                    People: {migrationReport.counts?.before?.people || 0} →{' '}
+                    {migrationReport.counts?.after?.people || 0}
+                  </p>
+                  <p>
+                    Organizations:{' '}
+                    {migrationReport.counts?.before?.organizations || 0} →{' '}
+                    {migrationReport.counts?.after?.organizations || 0}
+                  </p>
+                  <p>
+                    Client names added:{' '}
+                    {migrationReport.fixes?.clientNamesAdded || 0}
+                  </p>
+                  {Array.isArray(
+                    migrationReport.warnings?.orphanCasePersonIds,
+                  ) &&
+                    migrationReport.warnings.orphanCasePersonIds.length > 0 && (
+                      <div>
+                        <p className="text-yellow-300">
+                          Orphan case personIds detected (
+                          {migrationReport.warnings.orphanCasePersonIds.length}
+                          ):
+                        </p>
+                        <div className="text-yellow-200 break-words">
+                          {migrationReport.warnings.orphanCasePersonIds.join(
+                            ', ',
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }
 
