@@ -27,3 +27,12 @@ jobs:
 
       - name: Run tests
         run: npm test -- --passWithNoTests
+
+      - name: Build (production)
+        run: npm run build --silent
+
+      - name: Analyze bundle size
+        env:
+          MAX_BUNDLE_KB: '540' # current ~515 KB raw
+          MAX_BUNDLE_GZIP_KB: '165' # current ~158-160 KB
+        run: node scripts/analyze-dist.js
