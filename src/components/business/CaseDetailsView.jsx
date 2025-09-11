@@ -314,7 +314,7 @@ registerComponent('business', 'CaseDetailsView', CaseDetailsView);
 export default CaseDetailsView;
 
 CaseDetailsView.propTypes = {
-  caseId: PropTypes.string.isRequired,
+  caseId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   fullData: PropTypes.object.isRequired,
   onUpdateData: PropTypes.func.isRequired,
   onBackToList: PropTypes.func,

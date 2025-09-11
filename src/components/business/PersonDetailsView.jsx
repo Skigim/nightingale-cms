@@ -2,7 +2,7 @@
 // Displays basic details for a selected person (placeholder version)
 
 import React from 'react';
-/* eslint-disable react/prop-types */
+import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -76,3 +76,18 @@ function PersonDetailsView(props) {
 registerComponent('business', 'PersonDetailsView', PersonDetailsView);
 
 export default PersonDetailsView;
+
+PersonDetailsView.propTypes = {
+  personId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  fullData: PropTypes.shape({
+    people: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        name: PropTypes.string,
+        email: PropTypes.string,
+        phone: PropTypes.string,
+      }),
+    ),
+  }),
+  onBackToList: PropTypes.func,
+};

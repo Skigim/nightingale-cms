@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /**
  * Nightingale Component Library - OrganizationModal
  * Layer: Business (Domain-Specific)
@@ -1041,7 +1040,10 @@ OrganizationModal.propTypes = {
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,
   onOrganizationCreated: PropTypes.func,
-  editOrganizationId: PropTypes.string,
+  editOrganizationId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
   fullData: PropTypes.object,
   fileService: PropTypes.object,
 };

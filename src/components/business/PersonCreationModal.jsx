@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /**
  * Nightingale Component Library - PersonCreationModal
  * Layer: Business (Domain-Specific)

@@ -733,7 +733,6 @@ const stepsConfig = [
   },
 ];
 
-/* eslint-disable react/prop-types */
 /**
  * Nightingale Component Library - CaseCreationModal
  * Layer: Business (Domain-Specific)
@@ -1147,7 +1146,10 @@ CaseCreationModal.propTypes = {
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,
   onCaseCreated: PropTypes.func,
-  editCaseId: PropTypes.string,
+  editCaseId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
   fullData: PropTypes.object,
   fileService: PropTypes.object,
   onViewCaseDetails: PropTypes.func,

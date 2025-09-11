@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /**
  * Nightingale CMS - AVS Data Import Modal
  *
@@ -16,6 +15,7 @@
  * @returns {React.Element|null} The AVS import modal component
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { parseAvsData } from '../../services/nightingale.parsers.js';
 function AvsImportModal({
@@ -531,3 +531,18 @@ registerComponent('business', 'AvsImportModal', AvsImportModal);
 
 // ES6 Module Export
 export default AvsImportModal;
+
+AvsImportModal.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  onImport: PropTypes.func,
+  masterCaseId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  existingResources: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      accountNumber: PropTypes.string,
+      amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      type: PropTypes.string,
+    }),
+  ),
+};
