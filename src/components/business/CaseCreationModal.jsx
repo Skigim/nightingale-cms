@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+import dateUtils from '../../services/nightingale.dayjs.js';
 
-// Access utilities from global window (loaded via script tags)
-const getDateUtils = () => window.dateUtils || {};
+// Access utilities via module import
+const getDateUtils = () => dateUtils || {};
 
 const getInitialCaseData = () => {
   const dateUtils = getDateUtils();
@@ -599,8 +600,8 @@ function ReviewStep({ fullData, caseData }) {
       e(SummaryItem, { label: 'Case Type', value: caseData.caseType }),
       e(SummaryItem, {
         label: 'Application Date',
-        value: window.dateUtils?.format
-          ? window.dateUtils.format(caseData.applicationDate)
+        value: dateUtils?.format
+          ? dateUtils.format(caseData.applicationDate)
           : caseData.applicationDate,
       }),
       e(SummaryItem, {
@@ -627,8 +628,8 @@ function ReviewStep({ fullData, caseData }) {
         caseData.admissionDate &&
         e(SummaryItem, {
           label: 'Admission Date',
-          value: window.dateUtils?.format
-            ? window.dateUtils.format(caseData.admissionDate)
+          value: dateUtils?.format
+            ? dateUtils.format(caseData.admissionDate)
             : caseData.admissionDate,
         }),
       caseData.livingArrangement === 'Apartment/House' &&

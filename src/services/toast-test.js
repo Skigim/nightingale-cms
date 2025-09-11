@@ -1,55 +1,37 @@
 /**
- * Toast System Test
- * Simple test to verify toast functionality
+ * Toast System Test (manual)
  */
+import Toast from './nightingale.toast.js';
 
 function testToastSystem() {
   console.group('🍞 Toast System Test');
 
-  // Test 1: Check if toast functions are available
-  console.log('1. Function availability:');
-  console.log('   window.showToast:', typeof window.showToast);
-  console.log('   window.NightingaleToast:', typeof window.NightingaleToast);
-  console.log(
-    '   window.NightingaleToast.showToast:',
-    typeof window.NightingaleToast?.showToast,
-  );
+  // Ensure initialized
+  Toast.initializeToastSystem?.();
+  const containerExists = !!document.getElementById('toast-container');
+  console.log('Toast container exists:', containerExists);
 
-  // Test 2: Check initialization
-  console.log('2. Initialization:');
-  const toastQueue = window.NightingaleToast?.initializeToastSystem?.();
-  console.log('   Toast queue created:', !!toastQueue);
-  console.log(
-    '   Container exists:',
-    !!document.getElementById('toast-container'),
-  );
-
-  // Test 3: Test basic functionality
-  console.log('3. Testing basic toast:');
+  // Basic toast
   try {
-    const result = window.showToast?.(
-      'Toast system test successful!',
-      'success',
-    );
-    console.log('   Toast result:', !!result);
+    const result = Toast.show('Toast system test successful!', 'success');
+    console.log('Toast result:', !!result);
   } catch (error) {
-    console.error('   Toast error:', error.message);
+    console.error('Toast error:', error.message);
   }
 
-  // Test 4: Test all toast types
-  console.log('4. Testing all toast types:');
+  // All types
   setTimeout(() => {
     try {
-      window.showToast?.('Info toast test', 'info');
-      window.showToast?.('Warning toast test', 'warning');
-      window.showToast?.('Error toast test', 'error');
-      console.log('   All toast types tested');
+      Toast.show('Info toast test', 'info');
+      Toast.show('Warning toast test', 'warning');
+      Toast.show('Error toast test', 'error');
+      console.log('All toast types tested');
     } catch (error) {
-      console.error('   Multi-toast error:', error.message);
+      console.error('Multi-toast error:', error.message);
     }
-  }, 1000);
+  }, 500);
 
-  console.log('5. Active toast count:', window.getActiveToastCount?.() || 0);
+  console.log('Active toast count:', Toast.getActiveToastCount?.() || 0);
   console.groupEnd();
 }
 

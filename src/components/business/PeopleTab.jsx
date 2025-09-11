@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import PersonDetailsView from './PersonDetailsView';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
+import dateUtils from '../../services/nightingale.dayjs.js';
 /**
  * Nightingale CMS - People Tab Component (JSX)
  */
@@ -62,7 +63,7 @@ function usePeopleData({ fullData, onViewModeChange, onBackToList }) {
   };
   const handleBackToList = () => backToList();
   const formatDate = (dateString) =>
-    window.dateUtils?.format?.(dateString) || dateString;
+    dateUtils.format?.(dateString) || dateString;
   return {
     data: filteredPeople,
     loading: false,

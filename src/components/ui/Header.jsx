@@ -29,21 +29,24 @@ function Header({
   onSettingsClick,
   onManualSave,
 }) {
-  // Get button components with fallback
-  const PrimaryButton =
-    window.PrimaryButton ||
-    window.Button ||
-    function FallbackButton({ children, onClick, title }) {
-      return (
-        <button
-          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
-          onClick={onClick}
-          title={title}
-        >
-          {children}
-        </button>
-      );
-    };
+  // Local fallback button (no global window fallback)
+  const PrimaryButton = function FallbackButton({ children, onClick, title }) {
+    return (
+      <button
+        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
+        onClick={onClick}
+        title={title}
+      >
+        {children}
+      </button>
+    );
+  };
+
+  PrimaryButton.propTypes = {
+    children: PropTypes.node,
+    onClick: PropTypes.func,
+    title: PropTypes.string,
+  };
 
   // Determine autosave display status
   const getAutosaveDisplay = () => {

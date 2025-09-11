@@ -21,6 +21,7 @@
 import NightingaleDayJS from './nightingale.dayjs.js';
 import NightingaleToast from './nightingale.toast.js';
 import NightingaleLogger from './nightingale.logger.js';
+import { getFileService } from './fileServiceProvider.js';
 
 /**
  * Template Management Service
@@ -566,10 +567,7 @@ class NightingaleTemplates {
    * @private
    */
   _getFileService() {
-    if (typeof window !== 'undefined') {
-      return window.NightingaleFileService || window.FileService || null;
-    }
-    return null;
+    return getFileService();
   }
 
   /**

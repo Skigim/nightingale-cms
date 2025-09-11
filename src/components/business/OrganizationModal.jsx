@@ -9,7 +9,10 @@
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
+import { Validators } from '../../services/core.js';
+import dateUtils from '../../services/nightingale.dayjs.js';
+import Toast from '../../services/nightingale.toast.js';
 function OrganizationModal({
   isOpen = false,
   onClose = () => {},
@@ -157,7 +160,7 @@ function OrganizationModal({
   // Validation functions
   const validateStep = useCallback(
     (stepIndex) => {
-      const validators = window.Validators || {};
+      const validators = Validators || {};
       const errors = {};
 
       try {
@@ -248,7 +251,7 @@ function OrganizationModal({
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
-          window.showToast?.(
+          Toast.showToast?.(
             'Please fix validation errors before continuing',
             'error',
           );
@@ -361,7 +364,7 @@ function OrganizationModal({
       }
 
       const currentData = await fileService.readFile();
-      const dateUtils = window.dateUtils || {};
+      // dateUtils imported
 
       // Initialize default data structure if file doesn't exist or is empty
       const defaultData = {
@@ -456,7 +459,7 @@ function OrganizationModal({
         throw new Error('Failed to save data - writeFile returned false');
       }
 
-      window.showToast?.(successMessage, 'success');
+      Toast.showToast?.(successMessage, 'success');
 
       // Call callback with the created/updated organization
       const resultOrganization = editOrganizationId
@@ -468,10 +471,7 @@ function OrganizationModal({
     } catch (error) {
       const logger = window.NightingaleLogger?.get('organization:save');
       logger?.error('Organization save failed', { error: error.message });
-      window.showToast?.(
-        'Error saving organization: ' + error.message,
-        'error',
-      );
+      Toast.showToast?.('Error saving organization: ' + error.message, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -545,10 +545,10 @@ function OrganizationModal({
 
   // Render step content
   const renderStepContent = useCallback(() => {
-    const FormField = window.FormField;
-    const TextInput = window.TextInput;
-    const Select = window.Select;
-    const Textarea = window.Textarea;
+    const FormField = getComponent('ui', 'FormField');
+    const TextInput = getComponent('ui', 'TextInput');
+    const Select = getComponent('ui', 'Select');
+    const Textarea = getComponent('ui', 'Textarea');
 
     if (!FormField || !TextInput) {
       return e(
@@ -718,10 +718,8 @@ function OrganizationModal({
               'Key Personnel',
             ),
             e(
-              window.SecondaryButton,
-              {
-                onClick: addPersonnel,
-              },
+              getComponent('ui', 'SecondaryButton'),
+              { onClick: addPersonnel },
               'Add Person',
             ),
           ),
@@ -746,11 +744,8 @@ function OrganizationModal({
                   ),
                   organizationData.personnel.length > 1 &&
                     e(
-                      window.DangerButton,
-                      {
-                        onClick: () => removePersonnel(index),
-                        size: 'sm',
-                      },
+                      getComponent('ui', 'DangerButton'),
+                      { onClick: () => removePersonnel(index), size: 'sm' },
                       'Remove',
                     ),
                 ),
@@ -993,18 +988,10 @@ function OrganizationModal({
   const editModeFooter = editOrganizationId
     ? e(
         'div',
-        {
-          className: 'flex items-center justify-end px-6 py-4 space-x-3',
-        },
+        { className: 'flex items-center justify-end px-6 py-4 space-x-3' },
+        e(getComponent('ui', 'OutlineButton'), { onClick: onClose }, 'Cancel'),
         e(
-          window.OutlineButton,
-          {
-            onClick: onClose,
-          },
-          'Cancel',
-        ),
-        e(
-          window.PrimaryButton,
+          getComponent('ui', 'PrimaryButton'),
           {
             onClick: handleSubmit,
             disabled: isLoading || !hasChanges,
@@ -1017,7 +1004,7 @@ function OrganizationModal({
 
   // Render the modal using StepperModal
   return e(
-    window.StepperModal,
+    getComponent('ui', 'StepperModal') || getComponent('ui', 'Modal'),
     {
       isOpen,
       onClose,

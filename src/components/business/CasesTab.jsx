@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
+import dateUtils from '../../services/nightingale.dayjs.js';
 /**
  * Nightingale CMS - Cases Tab Component
  *
@@ -62,10 +63,11 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     if (searchString.trim()) {
       const term = searchString.toLowerCase();
       filtered = filtered.filter((caseItem) => {
-        const person = window.NightingaleDataManagement?.findPersonById?.(
-          fullData.people,
-          caseItem.personId,
-        );
+        const person =
+          globalThis.NightingaleDataManagement?.findPersonById?.(
+            fullData.people,
+            caseItem.personId,
+          ) || null;
         const personName = person?.name?.toLowerCase() || '';
 
         return (
@@ -93,9 +95,8 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     onViewModeChange?.('details');
   };
 
-  const formatDate = (dateString) => {
-    return window.dateUtils?.format?.(dateString) || dateString;
-  };
+  const formatDate = (dateString) =>
+    dateUtils.format?.(dateString) || dateString;
 
   return {
     data: filteredCases,
@@ -133,9 +134,9 @@ function renderCasesContent({ components, data: dataResult, props }) {
 
   // Conditional rendering for details view
   if (dataResult.viewMode === 'details' && dataResult.detailsCaseId) {
-    // Use CaseDetailsView component with fallback
+    // Resolve CaseDetailsView via registry
     const CaseDetailsView =
-      window.CaseDetailsView ||
+      getComponent('business', 'CaseDetailsView') ||
       (({ caseId }) =>
         e(
           'div',
@@ -215,10 +216,11 @@ function renderCasesContent({ components, data: dataResult, props }) {
             label: 'Person',
             sortable: true,
             render: (value) => {
-              const person = window.NightingaleDataManagement?.findPersonById?.(
-                props.fullData?.people,
-                value,
-              );
+              const person =
+                globalThis.NightingaleDataManagement?.findPersonById?.(
+                  props.fullData?.people,
+                  value,
+                ) || null;
               return e(
                 'span',
                 { className: 'font-medium text-white' },
@@ -309,7 +311,7 @@ function renderCasesModals({ data: dataResult, props }) {
 
   // Get CaseCreationModal with fallback
   const CaseCreationModal =
-    window.CaseCreationModal ||
+    getComponent('business', 'CaseCreationModal') ||
     (({ isOpen, onClose }) =>
       isOpen
         ? e(

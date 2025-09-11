@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
+import Toast from '../../services/nightingale.toast.js';
 
 /**
  * SettingsModal Component
@@ -36,9 +37,8 @@ function SettingsModal({
   const [loadingData, setLoadingData] = useState(false);
 
   // Get dependencies
-  const Modal = getComponent('ui', 'Modal') || window.Modal;
-  const showToast =
-    window.showToast || window.NightingaleToast?.show || function () {};
+  const Modal = getComponent('ui', 'Modal');
+  const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
   // Validate required props
   if (!Modal) {

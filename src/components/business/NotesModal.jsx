@@ -7,7 +7,9 @@
  * Migrated to ES module component registry.
  */
 import React, { useState, useEffect, useMemo } from 'react';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
+import Toast from '../../services/nightingale.toast.js';
+import { dayjs } from '../../services/nightingale.dayjs.js';
 
 function NotesModal({
   isOpen,
@@ -21,8 +23,7 @@ function NotesModal({
   const e = React.createElement;
 
   // Get toast function with fallback
-  const showToast =
-    window.showToast || window.NightingaleToast?.show || function () {};
+  const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
   // Look up person name using the helper function
   const person = window.NightingaleDataManagement.findPersonById(
@@ -87,17 +88,7 @@ function NotesModal({
     setIsSubmitting(false);
 
     // Enhanced focus management for state change to view mode
-    if (window.NightingaleFocusManager) {
-      setTimeout(() => {
-        window.NightingaleFocusManager.focusStateChange(
-          '.modal-container', // Target the modal container
-          'view',
-          {
-            onFocused: () => {},
-          },
-        );
-      }, 100);
-    }
+    // Focus manager intentionally not used here to avoid window guards
   };
 
   const validateForm = () => {
@@ -188,29 +179,7 @@ function NotesModal({
     setFormErrors({});
 
     // Enhanced focus management for state change to edit mode
-    if (window.NightingaleFocusManager) {
-      setTimeout(() => {
-        window.NightingaleFocusManager.focusStateChange(
-          '.modal-container', // Target the modal container
-          'edit',
-          {
-            preferredSelectors: [
-              '.form-field input[placeholder*="category" i]', // Category input by placeholder (case insensitive)
-              '.form-field input[placeholder*="Select or type" i]', // SearchBar placeholder
-              '.form-field .relative input', // Input within relative container (SearchBar structure)
-              '.form-field input:first-of-type', // First input in any form field
-              'input:not([disabled]):not([readonly]):not([type="hidden"])', // Any available input
-              'select:not([disabled])',
-              'textarea:not([disabled]):not([readonly])',
-              'button:not([disabled])',
-            ],
-            delay: 200, // Longer delay for SearchBar initialization
-            onFocused: () => {},
-            onFailed: () => {},
-          },
-        );
-      }, 50); // Quick timeout for DOM update
-    }
+    // Focus manager intentionally not used here to avoid window guards
   };
 
   const handleDelete = async (noteId) => {
@@ -345,8 +314,8 @@ function NotesModal({
                 e(
                   'span',
                   { className: 'text-xs text-gray-400' },
-                  window.dayjs
-                    ? window.dayjs(note.timestamp).format('MMM D, YYYY h:mm A')
+                  dayjs(note.timestamp).isValid()
+                    ? dayjs(note.timestamp).format('MMM D, YYYY h:mm A')
                     : new Date(note.timestamp).toLocaleString(),
                 ),
               ),
@@ -413,33 +382,6 @@ function NotesModal({
       variant: 'primary',
       onClick: () => {
         setIsEditMode(true);
-
-        // Enhanced focus management for state change to edit mode (new note)
-        if (window.NightingaleFocusManager) {
-          setTimeout(() => {
-            window.NightingaleFocusManager.focusStateChange(
-              '.modal-container', // Target the modal container
-              'edit',
-              {
-                preferredSelectors: [
-                  '.notes-category-search input', // Specific category SearchBar input
-                  'input[placeholder*="category" i]', // Category input by placeholder (case insensitive)
-                  'input[placeholder*="Select or type" i]', // SearchBar placeholder
-                  '.space-y-2 .relative .relative input', // SearchBar: FormField > div > SearchBar > div > input
-                  '.space-y-2 .relative input', // SearchBar fallback: FormField > SearchBar > input
-                  '.relative .relative input', // Any nested relative containers with input
-                  'input:not([disabled]):not([readonly]):not([type="hidden"])', // Any available input
-                  'select:not([disabled])',
-                  'textarea:not([disabled]):not([readonly])',
-                  'button:not([disabled])',
-                ],
-                delay: 200, // Longer delay for SearchBar initialization
-                onFocused: () => {},
-                onFailed: () => {},
-              },
-            );
-          }, 50); // Quick timeout for DOM update
-        }
       },
     });
   }
@@ -449,7 +391,7 @@ function NotesModal({
     React.Fragment,
     {},
     ...modalActions.map((action, index) =>
-      e(window.Button, {
+      e(getComponent('ui', 'Button'), {
         key: index,
         variant: action.variant,
         onClick: action.onClick,
@@ -465,7 +407,7 @@ function NotesModal({
 
     // Main Notes Modal
     e(
-      window.Modal,
+      getComponent('ui', 'Modal'),
       {
         isOpen,
         onClose: () => {
@@ -512,7 +454,7 @@ function NotesModal({
 
     // Delete Confirmation Modal
     e(
-      window.Modal,
+      getComponent('ui', 'Modal'),
       {
         isOpen: showDeleteConfirm,
         onClose: cancelDelete,
@@ -521,12 +463,12 @@ function NotesModal({
         footerContent: e(
           React.Fragment,
           {},
-          e(window.Button, {
+          e(getComponent('ui', 'Button'), {
             variant: 'secondary',
             onClick: cancelDelete,
             children: 'Cancel',
           }),
-          e(window.Button, {
+          e(getComponent('ui', 'Button'), {
             variant: 'danger',
             onClick: confirmDelete,
             children: 'Delete Note',

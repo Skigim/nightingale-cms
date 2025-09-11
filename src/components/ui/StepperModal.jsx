@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
 
 /**
  * Nightingale Component Library - Stepper Modal
@@ -89,9 +89,10 @@ function StepperModal({
       </div>
     ) : null);
 
-  // We need to get Modal from the global registry since this component depends on it
+  // Resolve Modal from UI registry without window fallback
   const Modal =
-    window.Modal || (() => <div>Modal component not available</div>);
+    getComponent('ui', 'Modal') ||
+    (() => <div>Modal component not available</div>);
 
   return (
     <Modal

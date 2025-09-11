@@ -56,8 +56,12 @@ class NightingaleFocusManager {
     };
 
     // Apply debouncing if requested and Lodash is available
-    if (config.debounce && typeof _ !== 'undefined' && _.debounce) {
-      const debouncedFocus = _.debounce(performFocus, 50);
+    if (
+      config.debounce &&
+      typeof globalThis._ !== 'undefined' &&
+      globalThis._.debounce
+    ) {
+      const debouncedFocus = globalThis._.debounce(performFocus, 50);
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve(debouncedFocus());
@@ -93,7 +97,7 @@ class NightingaleFocusManager {
             return element;
           }
         } catch (error) {
-          const logger = window.NightingaleLogger?.get('ui:focus');
+          const logger = globalThis.NightingaleLogger?.get('ui:focus');
           logger?.debug('Focus attempt failed, we continue.', {
             selector,
             error: error.message,
@@ -118,8 +122,8 @@ class NightingaleFocusManager {
   static _isVisible(element) {
     return (
       element.offsetParent !== null &&
-      window.getComputedStyle(element).visibility !== 'hidden' &&
-      window.getComputedStyle(element).display !== 'none'
+      globalThis.getComputedStyle(element).visibility !== 'hidden' &&
+      globalThis.getComputedStyle(element).display !== 'none'
     );
   }
 
@@ -267,24 +271,24 @@ function checkAppStatus() {
   };
 
   // Check services
-  status.services.nightingaleServices = !!window.NightingaleServices;
-  status.services.dataManagement = !!window.NightingaleDataManagement;
-  status.services.fileService = !!window.fileService;
-  status.services.toastService = !!window.showToast;
+  status.services.nightingaleServices = !!globalThis.NightingaleServices;
+  status.services.dataManagement = !!globalThis.NightingaleDataManagement;
+  status.services.fileService = !!globalThis.fileService;
+  status.services.toastService = !!globalThis.showToast;
 
   // Check components (avoid direct window.* to satisfy lint rules)
   status.components.react = typeof globalThis.React !== 'undefined';
   status.components.reactDOM = typeof globalThis.ReactDOM !== 'undefined';
-  status.components.componentLibrary = !!window.NightingaleComponentLibrary;
+  status.components.componentLibrary = !!globalThis.NightingaleComponentLibrary;
 
   // Check data
-  status.data.localStorage = !!window.localStorage;
+  status.data.localStorage = !!globalThis.localStorage;
   status.data.savedData = !!localStorage.getItem('nightingale_data');
 
   // Check browser features
-  status.browser.clipboard = !!navigator.clipboard;
-  status.browser.broadcastChannel = !!window.BroadcastChannel;
-  status.browser.fetch = !!window.fetch;
+  status.browser.clipboard = !!globalThis.navigator?.clipboard;
+  status.browser.broadcastChannel = !!globalThis.BroadcastChannel;
+  status.browser.fetch = !!globalThis.fetch;
 
   return status;
 }
@@ -293,17 +297,8 @@ function checkAppStatus() {
  * Debug utility to dump component library status
  */
 function debugComponentLibrary() {
-  if (window.NightingaleComponentLibrary) {
-    // Placeholder: structured logger hook will emit component registry status here.
-    // Returning lightweight snapshot (non-logging) keeps function non-empty and lint-compliant.
-    return {
-      registrySize: Object.keys(window.NightingaleComponentLibrary || {})
-        .length,
-      // next: logger.debug('componentLibrary.status', { size: registrySize })
-    };
-  }
-  // No component library available
-  return null;
+  const lib = globalThis.NightingaleComponentLibrary || null;
+  return lib ? { registrySize: Object.keys(lib).length } : null;
 }
 
 // Create service object

@@ -9,7 +9,10 @@
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
+import { Validators } from '../../services/core.js';
+import dateUtils from '../../services/nightingale.dayjs.js';
+import Toast from '../../services/nightingale.toast.js';
 function PersonCreationModal({
   isOpen = false,
   onClose = () => {},
@@ -196,7 +199,7 @@ function PersonCreationModal({
   const validateStep = useCallback(
     (stepIndex) => {
       // Add defensive check for fullData to handle legacy files (used in try-catch)
-      const validators = window.Validators || {};
+      const validators = Validators || {};
       const errors = {};
 
       try {
@@ -282,7 +285,7 @@ function PersonCreationModal({
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
-          window.showToast?.(
+          Toast.showToast?.(
             'Please fix validation errors before continuing',
             'error',
           );
@@ -387,7 +390,7 @@ function PersonCreationModal({
       }
 
       const currentData = await fileService.readFile();
-      const dateUtils = window.dateUtils || {};
+      // dateUtils imported
 
       // Initialize default data structure if file doesn't exist or is empty
       const defaultData = {
@@ -466,7 +469,7 @@ function PersonCreationModal({
         throw new Error('Failed to save data - writeFile returned false');
       }
 
-      window.showToast?.(successMessage, 'success');
+      Toast.showToast?.(successMessage, 'success');
 
       // Call callback with the created/updated person
       const resultPerson = editPersonId
@@ -492,7 +495,7 @@ function PersonCreationModal({
         userMessage += error.message;
       }
 
-      window.showToast?.(userMessage, 'error');
+      Toast.showToast?.(userMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -508,11 +511,11 @@ function PersonCreationModal({
 
   // Render step content
   const renderStepContent = useCallback(() => {
-    const FormField = window.FormField;
-    const TextInput = window.TextInput;
-    const DateInput = window.DateInput;
-    const Select = window.Select;
-    const Checkbox = window.Checkbox;
+    const FormField = getComponent('ui', 'FormField');
+    const TextInput = getComponent('ui', 'TextInput');
+    const DateInput = getComponent('ui', 'DateInput');
+    const Select = getComponent('ui', 'Select');
+    const Checkbox = getComponent('ui', 'Checkbox');
 
     if (!FormField || !TextInput) {
       return e(
@@ -1050,18 +1053,10 @@ function PersonCreationModal({
   const editModeFooter = editPersonId
     ? e(
         'div',
-        {
-          className: 'flex items-center justify-end px-6 py-4 space-x-3',
-        },
+        { className: 'flex items-center justify-end px-6 py-4 space-x-3' },
+        e(getComponent('ui', 'OutlineButton'), { onClick: onClose }, 'Cancel'),
         e(
-          window.OutlineButton,
-          {
-            onClick: onClose,
-          },
-          'Cancel',
-        ),
-        e(
-          window.PrimaryButton,
+          getComponent('ui', 'PrimaryButton'),
           {
             onClick: handleSubmit,
             disabled: isLoading || !hasChanges,
@@ -1074,7 +1069,7 @@ function PersonCreationModal({
 
   // Render the modal using StepperModal
   return e(
-    window.StepperModal,
+    getComponent('ui', 'StepperModal') || getComponent('ui', 'Modal'),
     {
       isOpen,
       onClose,

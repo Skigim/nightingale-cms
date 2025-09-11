@@ -9,7 +9,8 @@
  * @author Nightingale CMS Team
  */
 import React, { useState } from 'react';
-import { registerComponent } from '../../services/registry';
+import PropTypes from 'prop-types';
+import { registerComponent, getComponent } from '../../services/registry';
 
 /**
  * CaseDetailsView Component
@@ -43,18 +44,22 @@ function CaseDetailsView({
 
   // Data lookups
   const caseData = fullData?.cases?.find((c) => c.id === caseId);
-  const person = window.NightingaleDataManagement?.findPersonById?.(
-    fullData?.people,
-    caseData?.personId,
-  );
+  const person =
+    globalThis.NightingaleDataManagement?.findPersonById?.(
+      fullData?.people,
+      caseData?.personId,
+    ) || null;
   // TODO: Add spouse and organization display when needed
   // const spouse = caseData?.spouseId ? window.NightingaleDataManagement?.findPersonById?.(fullData?.people, caseData.spouseId) : null;
   // const organization = caseData?.organizationId ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0')) : null;
 
   // Get component dependencies
-  const CaseCreationModal = window.CaseCreationModal;
-  const FinancialManagementSection = window.FinancialManagementSection;
-  const NotesModal = window.NotesModal;
+  const CaseCreationModal = getComponent('business', 'CaseCreationModal');
+  const FinancialManagementSection = getComponent(
+    'business',
+    'FinancialManagementSection',
+  );
+  const NotesModal = getComponent('business', 'NotesModal');
 
   // Update case field helper
   const updateCaseField = (field, value) => {
@@ -149,7 +154,7 @@ function CaseDetailsView({
               className:
                 'text-gray-400 copy-mcn-header cursor-pointer hover:text-blue-400 transition-colors',
               onClick: () =>
-                window.NightingaleCMSUtilities?.copyMCN?.(caseData.mcn),
+                globalThis.NightingaleCMSUtilities?.copyMCN?.(caseData.mcn),
               title: 'Click to copy MCN',
             },
             `MCN: ${caseData.mcn || 'Not set'}`,
@@ -233,7 +238,9 @@ function CaseDetailsView({
             'button',
             {
               onClick: () =>
-                window.NightingaleCMSUtilities?.generateCaseSummary?.(caseData),
+                globalThis.NightingaleCMSUtilities?.generateCaseSummary?.(
+                  caseData,
+                ),
               className:
                 'bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md',
             },
@@ -243,7 +250,7 @@ function CaseDetailsView({
             'button',
             {
               onClick: () =>
-                window.NightingaleCMSUtilities?.openVRApp?.(caseData),
+                globalThis.NightingaleCMSUtilities?.openVRApp?.(caseData),
               className:
                 'bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-md',
             },
@@ -278,13 +285,14 @@ function CaseDetailsView({
         editCaseId: caseData.id,
         fullData,
         fileService,
-        onViewCaseDetails: (caseId) => {
+        onViewCaseDetails: () => {
           setIsEditModalOpen(false);
-          // Note: These variables seem to be from parent scope in original
-          // This might need adjustment based on actual usage
-          if (window.setDetailsCaseId) window.setDetailsCaseId(caseId);
-          if (window.setViewMode) window.setViewMode('details');
-          if (window.onViewModeChange) window.onViewModeChange('details');
+          // Rely on parent callbacks if provided via props
+          if (typeof onBackToList === 'function') {
+            // no-op here; parent controls navigation
+          }
+          // Local navigation fallback
+          // Consumers should pass a handler to switch to details view; otherwise, do nothing
         },
         onCaseCreated: (updatedCaseData) => {
           onUpdateData(updatedCaseData);
@@ -304,3 +312,11 @@ registerComponent('business', 'CaseDetailsView', CaseDetailsView);
 
 // ES6 Module Export
 export default CaseDetailsView;
+
+CaseDetailsView.propTypes = {
+  caseId: PropTypes.string.isRequired,
+  fullData: PropTypes.object.isRequired,
+  onUpdateData: PropTypes.func.isRequired,
+  onBackToList: PropTypes.func,
+  fileService: PropTypes.object,
+};

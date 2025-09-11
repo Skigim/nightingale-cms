@@ -206,15 +206,7 @@ function getRegistryComponent(
     }
   }
 
-  // Legacy fallback to window object (for backwards compatibility during transition)
-  if (window[componentName]) {
-    console.debug(`Found "${componentName}" on window object`);
-    return window[componentName];
-  }
-
-  // If an explicit null is passed, treat as "no fallback" and return null
-  if (fallbackComponent === null) return null;
-  if (fallbackComponent !== undefined) return fallbackComponent;
+  // No legacy window fallback: components must be registered or provided via fallback
 
   // Only emit a visible error component when no explicit null/override provided
   console.warn(
@@ -255,10 +247,6 @@ function SearchSection({ searchBar, className = '' }) {
   );
 }
 
-/**
- * Standardized Content Section Component
- * Provides consistent Card-wrapped content areas for all tabs
- */
 function ContentSection({ children, variant = 'table', className = '' }) {
   const Card = getRegistryComponent('Card', null);
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+import Toast from '../../services/nightingale.toast.js';
 
 /**
  * Nightingale Component Library - Modal System
@@ -50,23 +51,15 @@ function Modal({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  // Enhanced focus management using NightingaleFocusManager
+  // Enhanced focus management using optional focus manager
   useEffect(() => {
     if (isOpen && modalRef.current) {
-      // Use NightingaleFocusManager if available, fallback to basic focus
-      if (window.NightingaleFocusManager) {
-        window.NightingaleFocusManager.focusModalOpen(modalRef.current, {
-          onFocused: () => {},
-          onNoFocusable: () => {},
-        });
-      } else {
-        // Fallback focus management
-        const focusableElements = modalRef.current.querySelectorAll(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-        );
-        if (focusableElements.length > 0) {
-          focusableElements[0].focus();
-        }
+      // Fallback focus management
+      const focusableElements = modalRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
       }
     }
   }, [isOpen]);
@@ -84,7 +77,7 @@ function Modal({
   const modalSizeClass = sizeClasses[size] || sizeClasses.default;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-auto pointer-events-auto"
       onClick={(e) => {
         // Close on backdrop click if onClose provided
@@ -324,9 +317,7 @@ FormModal.propTypes = {
 
 // Show toast notifications using the existing toast system
 function showModalToast(message, type = 'success') {
-  if (typeof window.showToast === 'function') {
-    window.showToast(message, type);
-  }
+  Toast.showToast?.(message, type);
 }
 
 // Export components

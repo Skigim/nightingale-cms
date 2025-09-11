@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
+import { Validators } from '../../services/core.js';
 
 /**
  * Nightingale Component Library - Form Components
@@ -446,8 +447,8 @@ Checkbox.propTypes = {
 
 // Helper function to create common validators
 function createValidator(type, options = {}) {
-  if (typeof window.Validators !== 'undefined' && window.Validators[type]) {
-    return window.Validators[type](options.message);
+  if (Validators && Validators[type]) {
+    return Validators[type](options.message);
   }
   return null;
 }
