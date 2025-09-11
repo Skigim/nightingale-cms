@@ -1,11 +1,11 @@
 # Contributing
 
-This repository uses a dev-first branching model:
+This repository uses a simple two-branch model:
 
-- `dev`: Primary integration branch for minor adjustments and bug testing.
+- `dev`: Primary branch for day-to-day work, integration, UAT, and release candidates.
 - `main`: Stable, deployment-ready branch. Only updated via PRs from `dev`.
-- Feature branches: Create from `dev` (e.g., `feature/xyz`, `bugfix/abc`) and merge back into `dev`
-  via PR.
+- Feature branches (optional): Create from `dev` (e.g., `feature/xyz`, `bugfix/abc`) and merge back
+  into `dev` via PR.
 
 ## Workflow
 
@@ -18,20 +18,19 @@ This repository uses a dev-first branching model:
 3. Open a PR into `dev`:
    - Ensure CI is green (lint + tests).
 4. Merge to `dev` after review.
-5. Periodically open a PR from `dev` → `main` for release; do not push directly to `main`.
+5. Open a PR from `dev` → `main` to release; do not push directly to `main`.
 
 ## CI & Deploy
 
 - CI runs on `dev` and feature branches to validate linting and tests.
 - Deploy workflow runs only on `main` push.
 
-## Release Branch Flow
+## Release Process (Two-Branch)
 
-- Create a release branch from `dev` when stabilizing (e.g., `release/1.0.0`).
-- Continue day-to-day work on `dev`. For release fixes, commit to `release/x.y.z` and then merge
-  `release/x.y.z` back into `dev` to keep `dev` ahead.
-- When ready to ship, merge `dev` → `main` via PR. Tags are created on the release branch (e.g.,
-  `v1.0.0-rc.1`, `v1.0.0`).
+- Stabilize and conduct UAT directly on `dev`.
+- Create release candidates by tagging on `dev` (e.g., `v1.0.0-rc.1`).
+- When ready to ship, open a PR from `dev` → `main`, merge after checks pass, and create the final
+  tag (e.g., `v1.0.0`).
 
 ## Coding Standards
 

@@ -1,6 +1,6 @@
 # Code Freeze: v1.0.0 Release
 
-Effective immediately on branch `release/1.0.0`.
+Effective immediately on branch `dev`.
 
 Allowed changes during freeze:
 
@@ -16,5 +16,5 @@ Process:
 
 - Use conventional commits with allowed scopes
   (`modals, ui, data, config, services, components, api, tests, deps`).
-- Open fixes directly on `release/1.0.0`. After verification, merge back into `dev`.
+- Commit fixes on `dev` only; avoid new features during freeze.
 - Keep `Release-Checklist.md` up to date.

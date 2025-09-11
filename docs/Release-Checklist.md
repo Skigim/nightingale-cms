@@ -3,8 +3,8 @@
 ### 1. **Code Freeze & Feature Complete**
 
 - [x] Lock feature development — Code freeze announced in `docs/Code-Freeze.md`
-- [x] Create a `release/1.0.0` branch from `dev`
-- [x] Tag the feature-complete state: `v1.0.0-rc.1` (pushed)
+- [x] UAT and stabilization occur on `dev` (no separate release branch)
+- [x] Tag the feature-complete state on `dev`: `v1.0.0-rc.1` (pushed)
 
 ### 2. **Quality Assurance Phase** (1-2 weeks)
 
@@ -129,9 +129,8 @@ const searchResults = useMemo(() => performSearch(cases, searchTerm), [cases, se
 # Tag release candidate
 git tag -a v1.0.0-rc.2 -m "Release candidate 2"
 
-# Deploy to staging environment
-npm run build:staging
-npm run deploy:staging # currently a stub in package.json
+# Optional staging build (local preview)
+npm run build:staging && npm run start:preview
 ```
 
 #### Week 2: Beta Testing
@@ -154,7 +153,7 @@ npm run build:production
 # Final security audit
 npm audit --production
 
-# Tag final release
+# Tag final release on dev
 git tag -a v1.0.0 -m "Initial release"
 ```
 
