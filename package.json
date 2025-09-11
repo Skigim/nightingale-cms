@@ -4,16 +4,17 @@
   "description": "A comprehensive React-based case management system for vocational rehabilitation services",
   "main": "index.html",
   "scripts": {
-    "start": "npx serve . --port=3000",
+    "start": "npm run build && npx serve dist --port=3000",
+    "start:preview": "vite preview --port=3000",
     "dev": "vite",
     "build": "vite build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "seed": "node scripts/seed.js",
-  "lint": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\"",
-  "lint:fix": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\" --fix",
-  "lint:report": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\" --format=json --output-file=lint-report.json",
+    "lint": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\"",
+    "lint:fix": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\" --fix",
+    "lint:report": "eslint --config .eslintrc.cjs \"src/**/*.{js,jsx}\" --format=json --output-file=lint-report.json",
     "audit": "npm audit && npm run lint",
     "audit:security": "npm audit --audit-level=moderate",
     "format": "prettier --write \"**/*.{js,jsx,json,css,md,html}\"",
@@ -38,7 +39,7 @@
   "bugs": {
     "url": "https://github.com/your-org/nightingale-cms/issues"
   },
-  "homepage": "https://github.com/your-org/nightingale-cms#readme",
+  "homepage": "https://Skigim.github.io/nightingale-cms/",
   "type": "module",
   "devDependencies": {
     "@babel/core": "^7.22.0",
