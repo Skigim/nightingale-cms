@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
+import { backfillClientNames } from '../../services/dataFixes.js';
 
 /**
  * SettingsModal Component
@@ -35,6 +36,7 @@ function SettingsModal({
 }) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+  const [isBackfilling, setIsBackfilling] = useState(false);
 
   // Get dependencies
   const Modal = getComponent('ui', 'Modal');
@@ -244,6 +246,42 @@ function SettingsModal({
     }
   };
 
+  const handleBackfillClientNames = async () => {
+    if (!fileService?.writeFile) {
+      showToast('File service not available', 'error');
+      return;
+    }
+    if (!fileStatus || fileStatus !== 'connected') {
+      showToast('Connect to directory first', 'warning');
+      return;
+    }
+    setIsBackfilling(true);
+    try {
+      const { changed, updatedData, persisted } = await backfillClientNames(
+        typeof onDataLoaded === 'function'
+          ? await fileService.readFile()
+          : await fileService.readFile(),
+        fileService,
+        true,
+      );
+      if (changed > 0) {
+        onDataLoaded?.(updatedData);
+        showToast(
+          `Backfilled ${changed} case client name${changed === 1 ? '' : 's'}${
+            persisted ? ' and saved' : ''
+          }`,
+          'success',
+        );
+      } else {
+        showToast('No missing client names detected', 'info');
+      }
+    } catch (e) {
+      showToast('Backfill failed', 'error');
+    } finally {
+      setIsBackfilling(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -296,7 +334,7 @@ function SettingsModal({
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-white">Data Management</h3>
           <p className="text-gray-400 text-sm">
-            Load existing data or create sample data for testing.
+            Load existing data, create sample data, or run one-time data fixes.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <button
@@ -320,6 +358,17 @@ function SettingsModal({
               }`}
             >
               Create Sample Data
+            </button>
+            <button
+              onClick={handleBackfillClientNames}
+              disabled={fileStatus !== 'connected' || isBackfilling}
+              className={`px-4 py-3 rounded-lg font-medium transition-colors ${
+                fileStatus !== 'connected' || isBackfilling
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              }`}
+            >
+              {isBackfilling ? 'Backfilling...' : 'Backfill Client Names'}
             </button>
           </div>
         </div>
