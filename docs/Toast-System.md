@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Nightingale Toast System provides a comprehensive, centralized notification system for all Nightingale applications. It replaces the multiple duplicate `showToast` implementations with a single, feature-rich system.
+The Nightingale Toast System provides a comprehensive, centralized notification system for all
+Nightingale applications. It replaces the multiple duplicate `showToast` implementations with a
+single, feature-rich system.
 
 ## Features
 
@@ -28,11 +30,7 @@ The Nightingale Toast System provides a comprehensive, centralized notification 
 
 ```javascript
 // Import in your component files
-import {
-  showToast,
-  showSuccessToast,
-  showErrorToast,
-} from '../js/nightingale.toast.js';
+import { showToast, showSuccessToast, showErrorToast } from '../js/nightingale.toast.js';
 
 // Or use the global functions (auto-available after script load)
 // window.showToast, window.showSuccessToast, etc.
@@ -153,7 +151,8 @@ showSuccessToast('Operation completed!');
 
 ### Custom Styling
 
-The toast system uses Tailwind CSS classes. You can customize the appearance by updating the configuration:
+The toast system uses Tailwind CSS classes. You can customize the appearance by updating the
+configuration:
 
 ```javascript
 updateToastConfig({
@@ -217,7 +216,8 @@ open App/test-toast.html
 
 ### Toast Container Missing
 
-The system automatically creates the container if missing. Ensure your page doesn't prevent DOM modifications.
+The system automatically creates the container if missing. Ensure your page doesn't prevent DOM
+modifications.
 
 ### Styles Not Applied
 
@@ -253,4 +253,5 @@ if (typeof showToast === 'function') {
 
 ## Questions or Issues?
 
-For implementation questions or bug reports, check the existing toast implementations in the HTML files for reference patterns, or refer to the test file for working examples.
+For implementation questions or bug reports, check the existing toast implementations in the HTML
+files for reference patterns, or refer to the test file for working examples.

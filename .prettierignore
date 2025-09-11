@@ -2,6 +2,10 @@
 build
 dist
 coverage
+docs/api
+
+# Generated or exported data snapshots
+Data/*.json
 
 # Ignore dependencies
 node_modules

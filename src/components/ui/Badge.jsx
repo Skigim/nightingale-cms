@@ -1,0 +1,324 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { registerComponent } from '../../services/registry';
+
+/**
+ * Nightingale Component Library - Badge System
+ *
+ * Status badges and indicators that integrate with Nightingale's consistent
+ * color scheme and provide standardized visual feedback.
+ */
+
+/**
+ * Status Badge Component
+ * @param {Object} props - Component props
+ * @param {string} props.status - The status value to display
+ * @param {string} props.variant - Badge variant: 'status', 'priority', 'verification', 'case-type'
+ * @param {string} props.size - Badge size: 'sm', 'md', 'lg'
+ * @param {string} props.className - Additional CSS classes
+ * @param {Object} props.customColors - Custom color mapping override
+ * @returns {React.Element} Badge component
+ */
+function Badge({
+  status,
+  variant = 'status',
+  size = 'md',
+  className = '',
+  customColors = null,
+}) {
+  if (!status) return null;
+
+  // Color mappings for different badge types
+  const colorMappings = {
+    // Verification status colors (from Correspondence app)
+    verification: {
+      'Needs VR': 'bg-red-600 text-red-100',
+      'Review Pending': 'bg-orange-500 text-orange-100',
+      'AVS Pending': 'bg-blue-600 text-blue-100',
+      'VR Pending': 'bg-yellow-600 text-yellow-100',
+      Verified: 'bg-green-600 text-green-100',
+    },
+
+    // Case status colors
+    status: {
+      Active: 'bg-green-600 text-green-100',
+      Pending: 'bg-yellow-600 text-yellow-100',
+      Closed: 'bg-gray-600 text-gray-100',
+      Denied: 'bg-red-600 text-red-100',
+      'Under Review': 'bg-blue-600 text-blue-100',
+      Approved: 'bg-green-600 text-green-100',
+      Incomplete: 'bg-orange-600 text-orange-100',
+    },
+
+    // Priority levels
+    priority: {
+      High: 'bg-red-600 text-red-100',
+      Medium: 'bg-yellow-600 text-yellow-100',
+      Low: 'bg-green-600 text-green-100',
+      Critical: 'bg-red-800 text-red-100',
+      Normal: 'bg-gray-600 text-gray-100',
+    },
+
+    // Case types
+    'case-type': {
+      LTC: 'bg-blue-600 text-blue-100',
+      SIMP: 'bg-purple-600 text-purple-100',
+      QMB: 'bg-green-600 text-green-100',
+      SLMB: 'bg-yellow-600 text-yellow-100',
+      QI: 'bg-orange-600 text-orange-100',
+    },
+
+    // Application types
+    application: {
+      Application: 'bg-blue-600 text-blue-100',
+      Renewal: 'bg-green-600 text-green-100',
+      Review: 'bg-yellow-600 text-yellow-100',
+      Appeal: 'bg-red-600 text-red-100',
+    },
+  };
+
+  // Size classes
+  const sizeClasses = {
+    sm: 'px-2 py-0.5 text-xs',
+    md: 'px-2 py-1 text-xs',
+    lg: 'px-3 py-1 text-sm',
+  };
+
+  // Get colors for the status
+  const colors = customColors || colorMappings[variant] || colorMappings.status;
+  const colorClass = colors[status] || 'bg-gray-600 text-gray-100';
+
+  // Build final className
+  const finalClassName = `
+    inline-flex items-center rounded-full font-medium
+    ${sizeClasses[size]}
+    ${colorClass}
+    ${className}
+  `
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return (
+    <span
+      className={finalClassName}
+      title={status} // Tooltip for accessibility
+    >
+      {status}
+    </span>
+  );
+}
+
+// PropTypes for Badge component
+Badge.propTypes = {
+  status: PropTypes.string.isRequired,
+  variant: PropTypes.oneOf([
+    'status',
+    'priority',
+    'verification',
+    'case-type',
+    'application',
+  ]),
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  className: PropTypes.string,
+  customColors: PropTypes.object,
+};
+
+/**
+ * Progress Badge Component - shows completion percentage
+ * @param {Object} props - Component props
+ * @param {number} props.current - Current progress value
+ * @param {number} props.total - Total/max value
+ * @param {string} props.label - Optional label to display
+ * @param {string} props.size - Badge size: 'sm', 'md', 'lg'
+ * @param {boolean} props.showPercentage - Whether to show percentage
+ * @returns {React.Element} Progress badge
+ */
+function ProgressBadge({
+  current = 0,
+  total = 100,
+  label = null,
+  size = 'md',
+  showPercentage = true,
+}) {
+  const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
+
+  // Color based on completion percentage
+  let colorClass;
+  if (percentage >= 100) {
+    colorClass = 'bg-green-600 text-green-100';
+  } else if (percentage >= 75) {
+    colorClass = 'bg-blue-600 text-blue-100';
+  } else if (percentage >= 50) {
+    colorClass = 'bg-yellow-600 text-yellow-100';
+  } else if (percentage > 0) {
+    colorClass = 'bg-orange-600 text-orange-100';
+  } else {
+    colorClass = 'bg-gray-600 text-gray-100';
+  }
+
+  const sizeClasses = {
+    sm: 'px-2 py-0.5 text-xs',
+    md: 'px-2 py-1 text-xs',
+    lg: 'px-3 py-1 text-sm',
+  };
+
+  const displayText = label
+    ? `${label}: ${showPercentage ? `${percentage}%` : `${current}/${total}`}`
+    : showPercentage
+      ? `${percentage}%`
+      : `${current}/${total}`;
+
+  return (
+    <span
+      className={`
+        inline-flex items-center rounded-full font-medium
+        ${sizeClasses[size]}
+        ${colorClass}
+      `
+        .replace(/\s+/g, ' ')
+        .trim()}
+      title={`${current} of ${total} complete (${percentage}%)`}
+    >
+      {displayText}
+    </span>
+  );
+}
+
+// PropTypes for ProgressBadge
+ProgressBadge.propTypes = {
+  current: PropTypes.number,
+  total: PropTypes.number,
+  label: PropTypes.string,
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  showPercentage: PropTypes.bool,
+};
+
+/**
+ * Count Badge Component - shows numeric counts (like notifications)
+ * @param {Object} props - Component props
+ * @param {number} props.count - Number to display
+ * @param {string} props.variant - Color variant: 'default', 'primary', 'success', 'warning', 'danger'
+ * @param {number} props.max - Maximum number to show before showing "max+"
+ * @param {boolean} props.showZero - Whether to show the badge when count is 0
+ * @returns {React.Element|null} Count badge or null if count is 0 and showZero is false
+ */
+function CountBadge({
+  count = 0,
+  variant = 'default',
+  max = 99,
+  showZero = false,
+}) {
+  if (count === 0 && !showZero) return null;
+
+  const colorClasses = {
+    default: 'bg-gray-600 text-gray-100',
+    primary: 'bg-blue-600 text-blue-100',
+    success: 'bg-green-600 text-green-100',
+    warning: 'bg-yellow-600 text-yellow-100',
+    danger: 'bg-red-600 text-red-100',
+  };
+
+  const displayCount = count > max ? `${max}+` : count.toString();
+
+  return (
+    <span
+      className={`
+        inline-flex items-center justify-center
+        min-w-[1.25rem] h-5 px-1
+        rounded-full text-xs font-medium
+        ${colorClasses[variant]}
+      `
+        .replace(/\s+/g, ' ')
+        .trim()}
+      title={`${count} items`}
+    >
+      {displayCount}
+    </span>
+  );
+}
+
+// PropTypes for CountBadge
+CountBadge.propTypes = {
+  count: PropTypes.number,
+  variant: PropTypes.oneOf([
+    'default',
+    'primary',
+    'success',
+    'warning',
+    'danger',
+  ]),
+  max: PropTypes.number,
+  showZero: PropTypes.bool,
+};
+
+/**
+ * Multi-Badge Component - displays multiple badges in a row
+ * @param {Object} props - Component props
+ * @param {Array} props.badges - Array of badge configurations
+ * @param {string} props.spacing - Spacing between badges: 'tight', 'normal', 'loose'
+ * @param {string} props.wrap - How to handle wrapping: 'wrap', 'nowrap', 'truncate'
+ * @returns {React.Element} Multi-badge container
+ */
+function MultiBadge({ badges = [], spacing = 'normal', wrap = 'wrap' }) {
+  if (!badges.length) return null;
+
+  const spacingClasses = {
+    tight: 'gap-1',
+    normal: 'gap-2',
+    loose: 'gap-3',
+  };
+
+  const wrapClasses = {
+    wrap: 'flex-wrap',
+    nowrap: 'flex-nowrap',
+    truncate: 'flex-nowrap overflow-hidden',
+  };
+
+  return (
+    <div
+      className={`
+        flex items-center
+        ${spacingClasses[spacing]}
+        ${wrapClasses[wrap]}
+      `
+        .replace(/\s+/g, ' ')
+        .trim()}
+    >
+      {badges.map((badgeProps, index) => (
+        <Badge
+          key={badgeProps.key || index}
+          {...badgeProps}
+        />
+      ))}
+    </div>
+  );
+}
+
+// PropTypes for MultiBadge
+MultiBadge.propTypes = {
+  badges: PropTypes.array,
+  spacing: PropTypes.oneOf(['tight', 'normal', 'loose']),
+  wrap: PropTypes.oneOf(['wrap', 'nowrap', 'truncate']),
+};
+
+// Export components
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    Badge,
+    ProgressBadge,
+    CountBadge,
+    MultiBadge,
+  };
+}
+
+// Make available globally
+// Register with UI registry (legacy global removal)
+registerComponent('ui', 'Badge', Badge);
+registerComponent('ui', 'StatusBadge', Badge); // alias
+registerComponent('ui', 'ProgressBadge', ProgressBadge);
+registerComponent('ui', 'CountBadge', CountBadge);
+registerComponent('ui', 'MultiBadge', MultiBadge);
+
+// ES6 Module Export
+export default Badge;
+export { Badge, ProgressBadge, CountBadge, MultiBadge };

@@ -1,0 +1,239 @@
+{
+  "cases": [],
+  "people": [],
+  "organizations": [],
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2025-08-28T00:00:00.000Z",
+    "type": "empty-schema",
+    "description": "Complete Nightingale CMS data structure template with all possible fields",
+    "schemaVersion": "2024.1",
+    "totalCases": 0,
+    "totalPeople": 0,
+    "totalOrganizations": 0,
+    "dataFormat": "normalized",
+    "migrationNotes": "Template structure for development and testing"
+  },
+  "caseTemplate": {
+    "id": "",
+    "mcn": "",
+    "masterCaseNumber": "",
+    "clientName": "",
+    "personId": "",
+    "status": "",
+    "priority": false,
+    "caseType": "",
+    "serviceType": "",
+    "applicationDate": "",
+    "createdDate": "",
+    "lastUpdated": "",
+    "description": "",
+    "withWaiver": false,
+    "retroRequested": "",
+    "livingArrangement": "",
+    "organizationAddress": "",
+    "clientAddress": {
+      "street": "",
+      "city": "",
+      "state": "",
+      "zip": ""
+    },
+    "authorizedReps": [],
+    "appDetails": {
+      "appDate": "",
+      "caseType": "",
+      "serviceType": ""
+    },
+    "financials": {
+      "resources": [
+        {
+          "id": "",
+          "description": "",
+          "type": "",
+          "amount": 0,
+          "value": 0,
+          "location": "",
+          "accountNumber": "",
+          "frequency": "",
+          "dateAdded": "",
+          "source": "",
+          "verificationSource": "",
+          "notes": "",
+          "verified": false
+        }
+      ],
+      "income": [
+        {
+          "id": "",
+          "description": "",
+          "type": "",
+          "amount": 0,
+          "value": 0,
+          "frequency": "",
+          "dateAdded": "",
+          "source": "",
+          "verificationSource": "",
+          "location": "",
+          "notes": "",
+          "verified": false
+        }
+      ],
+      "expenses": [
+        {
+          "id": "",
+          "description": "",
+          "type": "",
+          "amount": 0,
+          "value": 0,
+          "frequency": "",
+          "dateAdded": "",
+          "source": "",
+          "verificationSource": "",
+          "location": "",
+          "notes": "",
+          "verified": false
+        }
+      ]
+    },
+    "notes": [
+      {
+        "id": "",
+        "title": "",
+        "content": "",
+        "author": "",
+        "date": "",
+        "category": "",
+        "lastModified": ""
+      }
+    ],
+    "todos": [
+      {
+        "id": "",
+        "task": "",
+        "status": "",
+        "dueDate": "",
+        "completedDate": "",
+        "assignedTo": "",
+        "priority": "",
+        "notes": ""
+      }
+    ],
+    "vrRequests": [
+      {
+        "id": "",
+        "type": "",
+        "status": "",
+        "requestDate": "",
+        "completedDate": "",
+        "notes": "",
+        "assignedTo": "",
+        "description": ""
+      }
+    ],
+    "verificationRequest": {
+      "requestType": "",
+      "status": "",
+      "dateRequested": "",
+      "dateCompleted": "",
+      "notes": "",
+      "requestedBy": "",
+      "completedBy": ""
+    },
+    "searchableText": "",
+    "source": "",
+    "verificationSource": ""
+  },
+  "personTemplate": {
+    "id": "",
+    "name": "",
+    "firstName": "",
+    "lastName": "",
+    "middleName": "",
+    "ssn": "",
+    "dateOfBirth": "",
+    "phone": "",
+    "email": "",
+    "status": "",
+    "dateAdded": "",
+    "lastUpdated": "",
+    "relationship": "",
+    "address": {
+      "street": "",
+      "city": "",
+      "state": "",
+      "zip": ""
+    },
+    "mailingAddress": {
+      "street": "",
+      "city": "",
+      "state": "",
+      "zip": "",
+      "sameAsPhysical": false
+    },
+    "emergencyContact": {
+      "name": "",
+      "phone": "",
+      "relationship": ""
+    },
+    "notes": "",
+    "tags": []
+  },
+  "organizationTemplate": {
+    "id": "",
+    "name": "",
+    "type": "",
+    "status": "",
+    "phone": "",
+    "email": "",
+    "website": "",
+    "dateAdded": "",
+    "lastUpdated": "",
+    "address": {
+      "street": "",
+      "city": "",
+      "state": "",
+      "zip": ""
+    },
+    "contactPerson": {
+      "name": "",
+      "title": "",
+      "phone": "",
+      "email": ""
+    },
+    "services": [],
+    "notes": "",
+    "tags": []
+  },
+  "nextPersonId": 1,
+  "nextCaseId": 1,
+  "nextOrganizationId": 1,
+  "nextFinancialItemId": 1,
+  "nextNoteId": 1,
+  "showAllCases": false,
+  "showAllContacts": false,
+  "showAllPeople": true,
+  "caseSortReversed": false,
+  "priorityFilterActive": false,
+  "contacts": [],
+  "vrTemplates": [],
+  "nextVrTemplateId": 1,
+  "vrCategories": [],
+  "vrRequests": [],
+  "nextVrRequestId": 1,
+  "vrDraftItems": [],
+  "activeCase": null,
+  "isDataLoaded": true,
+  "showAllOrganizations": false,
+  "accordionState": {
+    "simp_applicant": true,
+    "simp_joint": false,
+    "simp_spouse": true
+  },
+  "viewState": {
+    "currentTab": "case-management",
+    "currentTitle": "Cases",
+    "currentCaseId": null,
+    "lastRefreshTimestamp": null,
+    "expandedFinancialCards": {}
+  }
+}

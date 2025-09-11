@@ -1,0 +1,242 @@
+/**
+ * @jest-environment jsdom
+ */
+
+import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+import ErrorBoundary from '../../src/components/ui/ErrorBoundary.jsx';
+
+// Mock component that throws an error when instructed
+const ThrowError = ({ shouldThrow }) => {
+  if (shouldThrow) {
+    throw new Error('Test error from ThrowError component');
+  }
+  return <div>No error</div>;
+};
+
+// Mock component that always works
+const WorkingComponent = () => <div>Working component</div>;
+
+describe('ErrorBoundary Component', () => {
+  // Suppress console.error for these tests since we're intentionally causing errors
+  const originalError = console.error;
+  let mockLogger;
+  
+  beforeAll(() => {
+    console.error = jest.fn();
+    // Mock the Nightingale logger
+    mockLogger = {
+      error: jest.fn(),
+    };
+    window.NightingaleLogger = {
+      get: jest.fn(() => mockLogger),
+    };
+  });
+
+  afterAll(() => {
+    console.error = originalError;
+    delete window.NightingaleLogger;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Mock window.location.reload
+    Object.defineProperty(window, 'location', {
+      value: {
+        reload: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  test('renders children when no error occurs', () => {
+    render(
+      <ErrorBoundary>
+        <WorkingComponent />
+      </ErrorBoundary>,
+    );
+
+    expect(screen.getByText('Working component')).toBeInTheDocument();
+  });
+
+  test('renders error UI when child component throws error', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(
+      screen.getByText(/The application encountered an error/),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Reload Application')).toBeInTheDocument();
+  });
+
+  test('shows technical details when expanded', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    const details = screen.getByText('Technical Details');
+    expect(details).toBeInTheDocument();
+
+    // Click to expand details
+    fireEvent.click(details);
+
+    // Should show error details in a pre element
+    const errorDetails = screen.getByText(
+      /Test error from ThrowError component/,
+    );
+    expect(errorDetails).toBeInTheDocument();
+    expect(errorDetails.tagName).toBe('PRE');
+  });
+
+  test('reload button calls window.location.reload', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    const reloadButton = screen.getByText('Reload Application');
+    fireEvent.click(reloadButton);
+
+    expect(window.location.reload).toHaveBeenCalledTimes(1);
+  });
+
+  test('has correct styling for error UI', () => {
+    const { container } = render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    const errorContainer = container.querySelector('.bg-gray-900');
+    expect(errorContainer).toBeInTheDocument();
+    expect(errorContainer).toHaveClass(
+      'h-full',
+      'w-full',
+      'flex',
+      'items-center',
+      'justify-center',
+      'bg-gray-900',
+      'text-white',
+      'p-8',
+    );
+  });
+
+  test('error boundary catches errors during rendering', () => {
+    const { rerender } = render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={false} />
+      </ErrorBoundary>,
+    );
+
+    // Initially no error
+    expect(screen.getByText('No error')).toBeInTheDocument();
+
+    // Trigger error by re-rendering with shouldThrow=true
+    rerender(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Should now show error boundary UI
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    expect(screen.queryByText('No error')).not.toBeInTheDocument();
+  });
+
+  test('error boundary handles componentDidCatch lifecycle', () => {
+    const errorBoundary = render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Should render error UI, indicating componentDidCatch was called
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+  });
+
+  test('renders with proper accessibility structure', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Check for proper heading structure
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent('Something went wrong');
+
+    // Check for button
+    const button = screen.getByRole('button', { name: 'Reload Application' });
+    expect(button).toBeInTheDocument();
+
+    // Check for details/summary structure
+    const details = screen.getByText('Technical Details');
+    expect(details.tagName).toBe('SUMMARY');
+  });
+
+  test('logs error via Nightingale logger when available', () => {
+    render(
+      <ErrorBoundary>
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Should log error via NightingaleLogger
+    expect(window.NightingaleLogger.get).toHaveBeenCalledWith('ErrorBoundary');
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Error caught by boundary:',
+      expect.objectContaining({
+        message: 'Test error from ThrowError component',
+      }),
+    );
+  });
+
+  test('handles missing logger gracefully', () => {
+    // Remove logger temporarily
+    const tempLogger = window.NightingaleLogger;
+    delete window.NightingaleLogger;
+
+    expect(() => {
+      render(
+        <ErrorBoundary>
+          <ThrowError shouldThrow={true} />
+        </ErrorBoundary>,
+      );
+    }).not.toThrow();
+
+    // Should still render error UI
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+
+    // Restore logger
+    window.NightingaleLogger = tempLogger;
+  });
+
+  test('resets error state when key prop changes', () => {
+    const { rerender } = render(
+      <ErrorBoundary key="initial">
+        <ThrowError shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    // Should show error state
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+
+    // Change key prop to reset error boundary
+    rerender(
+      <ErrorBoundary key="reset">
+        <ThrowError shouldThrow={false} />
+      </ErrorBoundary>,
+    );
+
+    // Should now show working component
+    expect(screen.getByText('No error')).toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+  });
+});

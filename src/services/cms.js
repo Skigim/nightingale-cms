@@ -2,28 +2,37 @@
  * Nightingale CMS Business Utilities Service
  *
  * Provides utility functions specific to CMS business operations and workflows.
- * This service handles domain-specific logic for the Nightingale CMS application.
+ * Handles domain-specific logic for financial data, case management, and application processing.
  *
- * @namespace NightingaleCMSUtilities
+ * Features:
+ * - Financial data flattening and aggregation
+ * - Application date label management
+ * - Default application details creation
+ * - Note category extraction and organization
+ * - Case summary generation
+ * - VR application integration
+ * - Financial data migration utilities
+ *
  * @version 2.0.0
  * @author Nightingale CMS Team
- * @created 2025-08-24
  */
 
-(function (window) {
-  'use strict';
-
-  // ========================================================================
-  // CMS-SPECIFIC DATA UTILITIES
-  // ========================================================================
+/**
+ * CMS Business Utilities Service
+ */
+class NightingaleCMSUtilities {
+  constructor() {
+    this.version = '2.0.0';
+    this.name = 'NightingaleCMSUtilities';
+  }
 
   /**
    * Flattens all financial items (resources, income, expenses) from a case object
    * into a single array.
-   * @param {object} caseObject The case object containing the financials property.
-   * @returns {object[]} A single array containing all financial items.
+   * @param {Object} caseObject The case object containing the financials property.
+   * @returns {Object[]} A single array containing all financial items.
    */
-  function getFlatFinancials(caseObject) {
+  getFlatFinancials(caseObject) {
     if (!caseObject || !caseObject.financials) return [];
     return [
       ...(caseObject.financials.resources || []),
@@ -37,213 +46,318 @@
    * @param {string} applicationType The type of application (e.g., "Application" or "Renewal").
    * @returns {string} The appropriate label.
    */
-  function getAppDateLabel(applicationType) {
+  getAppDateLabel(applicationType) {
     return applicationType === 'Renewal' ? 'Renewal Due' : 'Application Date';
   }
 
   /**
    * Returns a new, default object for application details.
-   * @returns {object} The default appDetails object.
+   * @returns {Object} The default appDetails object.
    */
-  function getDefaultAppDetails() {
+  getDefaultAppDetails() {
     return {
       appDate: '',
-      caseType: 'LTC',
       applicationType: 'Application',
-      avsConsentDate: '',
-      admissionDate: '',
-      medicareAExpDate: '',
+      povertyGuidelines: '',
+      householdSize: '',
+      totalIncome: '',
+      annualIncome: '',
+      monthlyIncome: '',
+      weeklyIncome: '',
+      eligibilityStatus: 'Pending',
+      notes: '',
     };
   }
 
   /**
-   * Extracts a unique, sorted list of note categories from all cases.
-   * @param {object[]} cases The array of case objects.
-   * @returns {string[]} A sorted array of unique note category strings.
+   * Extracts unique note categories from a case's notes array.
+   * @param {Object} caseObject The case object containing notes.
+   * @returns {string[]} Array of unique note categories.
    */
-  function getUniqueNoteCategories(cases) {
-    if (!cases) return [];
-    const allNotes = cases.flatMap((c) => c.notes || []);
-    return [...new Set(allNotes.map((n) => n.category).filter(Boolean))].sort();
-  }
-
-  // ========================================================================
-  // CASE ACTION UTILITIES
-  // ========================================================================
-
-  /**
-   * Generate a comprehensive case summary with metadata
-   * @param {Object} caseData - Case data object
-   * @returns {Object} Summary data object
-   */
-  function generateCaseSummary(caseData) {
-    if (!caseData) {
-      console.warn('generateCaseSummary: No case data provided');
-      return null;
+  getUniqueNoteCategories(caseObject) {
+    if (!caseObject || !caseObject.notes || !Array.isArray(caseObject.notes)) {
+      return [];
     }
 
-    const summaryData = {
-      caseName: caseData.mcn || 'Unknown',
-      applicant: caseData.personId,
-      caseType: caseData.appDetails?.caseType,
-      status: caseData.status,
-      financialItems: {
-        resources: caseData.financials?.resources?.length || 0,
-        income: caseData.financials?.income?.length || 0,
-        expenses: caseData.financials?.expenses?.length || 0,
-      },
-      notes: caseData.notes?.length || 0,
-      applicationDate: caseData.applicationDate,
-      lastModified: caseData.lastModified,
-      totalFinancialItems:
-        (caseData.financials?.resources?.length || 0) +
-        (caseData.financials?.income?.length || 0) +
-        (caseData.financials?.expenses?.length || 0),
-    };
+    const categories = caseObject.notes
+      .map((note) => note.category)
+      .filter((category) => category && category.trim() !== '');
 
-    console.log('Generated summary for case:', summaryData);
-
-    // Use toast service if available
-    if (window.showToast) {
-      window.showToast('Case summary generation feature coming soon', 'info');
-    }
-
-    return summaryData;
+    return [...new Set(categories)].sort();
   }
 
   /**
-   * Open VR/Correspondence app with case context
-   * @param {Object} caseData - Case data object
-   * @param {string} targetApp - Target application ('correspondence', 'reports', etc.)
+   * Generates a comprehensive summary of a case for reporting or display purposes.
+   * @param {Object} caseObject The case object to summarize.
+   * @param {Object} fullData The complete data object containing people and organizations.
+   * @returns {Object} A summary object with key case information.
    */
-  function openVRApp(caseData, targetApp = 'correspondence') {
-    if (!caseData) {
-      console.warn('openVRApp: No case data provided');
-      if (window.showToast) {
-        window.showToast('No case data available', 'error');
-      }
-      return;
+  generateCaseSummary(caseObject, fullData = {}) {
+    if (!caseObject) {
+      return {
+        error: 'No case object provided',
+      };
     }
 
-    const appUrls = {
-      correspondence: 'NightingaleCorrespondence.html',
-      reports: 'NightingaleReports.html',
-    };
+    const people = fullData.people || [];
+    const organizations = fullData.organizations || [];
 
-    const baseUrl = appUrls[targetApp] || appUrls.correspondence;
-    const vrUrl = `${baseUrl}?mcn=${encodeURIComponent(caseData.mcn || '')}`;
-
-    try {
-      window.open(vrUrl, '_blank');
-      console.log(`Opened ${targetApp} app for case:`, caseData.mcn);
-    } catch (error) {
-      console.error('Failed to open VR app:', error);
-      if (window.showToast) {
-        window.showToast('Failed to open VR application', 'error');
-      }
-    }
-  }
-
-  // ========================================================================
-  // DEVELOPMENT AND TESTING UTILITIES
-  // ========================================================================
-
-  /**
-   * Test financial item migration functionality
-   */
-  function testFinancialMigration() {
-    console.group('🧪 Testing Financial Item Migration');
-
-    const legacyFinancialItem = {
-      id: 1,
-      type: 'Checking Account', // Legacy field
-      value: 1500.0, // Legacy field
-      source: 'Bank Statement', // Legacy field
-      location: 'Bank of America',
-      accountNumber: '1234',
-      verificationStatus: 'Verified',
-      owner: 'applicant',
-    };
-
-    console.log('Legacy Item:', legacyFinancialItem);
-
-    // Simulate migration using data management service
-    const migratedItem = {
-      ...legacyFinancialItem,
-      description: legacyFinancialItem.type,
-      amount: legacyFinancialItem.value,
-      verificationSource: legacyFinancialItem.source,
-      frequency: 'monthly',
-      dateAdded: new Date().toISOString(),
-    };
-
-    console.log('Migrated Item:', migratedItem);
-    console.log(
-      '✅ Migration test completed - both type/description and value/amount fields preserved'
+    // Find associated person and organization
+    const person = people.find((p) => p.id === caseObject.personId);
+    const organization = organizations.find(
+      (o) => o.id === caseObject.organizationId,
     );
-    console.groupEnd();
+
+    // Calculate financial totals
+    const flatFinancials = this.getFlatFinancials(caseObject);
+    const totalResources = (caseObject.financials?.resources || []).reduce(
+      (sum, item) => sum + (parseFloat(item.value) || 0),
+      0,
+    );
+    const totalIncome = (caseObject.financials?.income || []).reduce(
+      (sum, item) => sum + (parseFloat(item.value) || 0),
+      0,
+    );
+    const totalExpenses = (caseObject.financials?.expenses || []).reduce(
+      (sum, item) => sum + (parseFloat(item.value) || 0),
+      0,
+    );
+
+    // Count notes by category
+    const noteCategories = this.getUniqueNoteCategories(caseObject);
+    const noteCounts = noteCategories.reduce((counts, category) => {
+      counts[category] = (caseObject.notes || []).filter(
+        (note) => note.category === category,
+      ).length;
+      return counts;
+    }, {});
 
     return {
-      legacy: legacyFinancialItem,
-      migrated: migratedItem,
-      success: true,
+      // Basic case information
+      caseId: caseObject.id,
+      caseNumber: caseObject.caseNumber,
+      status: caseObject.status,
+      type: caseObject.type,
+      createdDate: caseObject.createdDate,
+      modifiedDate: caseObject.modifiedDate,
+
+      // Associated entities
+      person: person
+        ? {
+            id: person.id,
+            name: person.name,
+            email: person.email,
+            phone: person.phone,
+          }
+        : null,
+      organization: organization
+        ? {
+            id: organization.id,
+            name: organization.name,
+            email: organization.email,
+            phone: organization.phone,
+          }
+        : null,
+
+      // Application details
+      appDetails: caseObject.appDetails || this.getDefaultAppDetails(),
+      appDateLabel: this.getAppDateLabel(
+        caseObject.appDetails?.applicationType,
+      ),
+
+      // Financial summary
+      financials: {
+        totalItems: flatFinancials.length,
+        totalResources: totalResources,
+        totalIncome: totalIncome,
+        totalExpenses: totalExpenses,
+        netWorth: totalResources - totalExpenses,
+        resourcesCount: (caseObject.financials?.resources || []).length,
+        incomeCount: (caseObject.financials?.income || []).length,
+        expensesCount: (caseObject.financials?.expenses || []).length,
+      },
+
+      // Notes summary
+      notes: {
+        totalNotes: (caseObject.notes || []).length,
+        categories: noteCategories,
+        categoryCount: noteCategories.length,
+        noteCounts: noteCounts,
+      },
+
+      // Metadata
+      summary: {
+        completeness: this._calculateCompleteness(caseObject),
+        lastActivity: caseObject.modifiedDate || caseObject.createdDate,
+        hasFinancials: flatFinancials.length > 0,
+        hasNotes: (caseObject.notes || []).length > 0,
+        hasAppDetails: !!(
+          caseObject.appDetails && caseObject.appDetails.appDate
+        ),
+      },
     };
   }
 
-  // ========================================================================
-  // SERVICE INITIALIZATION AND EXPORT
-  // ========================================================================
+  /**
+   * Opens the VR (Verification Request) application in a new window or tab.
+   * @param {string} baseUrl The base URL for the VR application (optional).
+   * @param {Object} params Additional parameters to pass to the VR app (optional).
+   * @returns {Window|null} Reference to the opened window, or null if failed.
+   */
+  openVRApp(baseUrl = './nightingale-correspondence.html', params = {}) {
+    try {
+      // Build query string from params
+      const queryParams = new URLSearchParams(params).toString();
+      const fullUrl = queryParams ? `${baseUrl}?${queryParams}` : baseUrl;
 
-  // Create service object
-  const NightingaleCMSUtilities = {
-    // CMS-specific data utilities
-    getFlatFinancials,
-    getAppDateLabel,
-    getDefaultAppDetails,
-    getUniqueNoteCategories,
-
-    // Case action functions
-    generateCaseSummary,
-    openVRApp,
-
-    // Development utilities
-    testFinancialMigration,
-
-    // Metadata
-    version: '2.0.0',
-    name: 'NightingaleCMSUtilities',
-  };
-
-  // Export to global scope
-  if (typeof window !== 'undefined') {
-    window.NightingaleCMSUtilities = NightingaleCMSUtilities;
-    console.log('✅ Nightingale CMS Utilities Service loaded');
-
-    // Register with service registry if available
-    if (
-      window.NightingaleServices &&
-      window.NightingaleServices.registerService
-    ) {
-      window.NightingaleServices.registerService(
-        'cmsUtilities',
-        NightingaleCMSUtilities,
-        'business'
+      // Open in new window/tab
+      const vrWindow = window.open(
+        fullUrl,
+        'NightingaleVR',
+        'width=1200,height=800,scrollbars=yes,resizable=yes',
       );
-      console.log(
-        '🏢 CMS Utilities Service registered with Nightingale Services'
-      );
+
+      if (!vrWindow) {
+        console.warn('Failed to open VR application - popup may be blocked');
+        return null;
+      }
+
+      return vrWindow;
+    } catch (error) {
+      console.error('Error opening VR application:', error);
+      return null;
     }
-
-    // Legacy global functions for backward compatibility
-    window.getFlatFinancials = getFlatFinancials;
-    window.getAppDateLabel = getAppDateLabel;
-    window.getDefaultAppDetails = getDefaultAppDetails;
-    window.getUniqueNoteCategories = getUniqueNoteCategories;
-    window.generateCaseSummary = generateCaseSummary;
-    window.openVRApp = openVRApp;
-    window.testFinancialMigration = testFinancialMigration;
   }
 
-  // Return service for module systems
-  return NightingaleCMSUtilities;
-})(typeof window !== 'undefined' ? window : this);
+  /**
+   * Tests financial data migration by validating financial item structure and calculating totals.
+   * @param {Object} caseObject The case object to test.
+   * @returns {Object} Migration test results with validation details.
+   */
+  testFinancialMigration(caseObject) {
+    if (!caseObject) {
+      return {
+        success: false,
+        error: 'No case object provided',
+      };
+    }
+
+    const results = {
+      success: true,
+      warnings: [],
+      errors: [],
+      summary: {},
+    };
+
+    try {
+      // Test financial structure
+      const financials = caseObject.financials || {};
+      const expectedSections = ['resources', 'income', 'expenses'];
+
+      expectedSections.forEach((section) => {
+        if (!financials[section]) {
+          results.warnings.push(`Missing ${section} section`);
+          financials[section] = [];
+        } else if (!Array.isArray(financials[section])) {
+          results.errors.push(`${section} is not an array`);
+          results.success = false;
+        }
+      });
+
+      // Test individual financial items
+      const flatFinancials = this.getFlatFinancials(caseObject);
+      const requiredFields = ['type', 'value'];
+      const recommendedFields = ['owner', 'location', 'description'];
+
+      flatFinancials.forEach((item, index) => {
+        requiredFields.forEach((field) => {
+          if (!item[field]) {
+            results.errors.push(
+              `Item ${index + 1}: Missing required field '${field}'`,
+            );
+            results.success = false;
+          }
+        });
+
+        recommendedFields.forEach((field) => {
+          if (!item[field]) {
+            results.warnings.push(
+              `Item ${index + 1}: Missing recommended field '${field}'`,
+            );
+          }
+        });
+
+        // Test numeric value
+        const numericValue = parseFloat(item.value);
+        if (isNaN(numericValue)) {
+          results.errors.push(
+            `Item ${index + 1}: Invalid numeric value '${item.value}'`,
+          );
+          results.success = false;
+        }
+      });
+
+      // Generate summary
+      results.summary = {
+        totalItems: flatFinancials.length,
+        resourcesCount: (financials.resources || []).length,
+        incomeCount: (financials.income || []).length,
+        expensesCount: (financials.expenses || []).length,
+        warningCount: results.warnings.length,
+        errorCount: results.errors.length,
+      };
+    } catch (error) {
+      results.success = false;
+      results.errors.push(`Migration test failed: ${error.message}`);
+    }
+
+    return results;
+  }
+
+  /**
+   * Calculate the completeness percentage of a case based on key fields.
+   * @param {Object} caseObject The case object to evaluate.
+   * @returns {number} Completeness percentage (0-100).
+   * @private
+   */
+  _calculateCompleteness(caseObject) {
+    if (!caseObject) return 0;
+
+    const checkpoints = [
+      !!caseObject.caseNumber,
+      !!caseObject.personId,
+      !!caseObject.status,
+      !!caseObject.type,
+      !!(caseObject.appDetails && caseObject.appDetails.appDate),
+      !!(caseObject.appDetails && caseObject.appDetails.applicationType),
+      !!(
+        caseObject.financials &&
+        ((caseObject.financials.resources &&
+          caseObject.financials.resources.length > 0) ||
+          (caseObject.financials.income &&
+            caseObject.financials.income.length > 0) ||
+          (caseObject.financials.expenses &&
+            caseObject.financials.expenses.length > 0))
+      ),
+      !!(caseObject.notes && caseObject.notes.length > 0),
+    ];
+
+    const completed = checkpoints.filter(Boolean).length;
+    return Math.round((completed / checkpoints.length) * 100);
+  }
+}
+
+// Create singleton instance
+const cmsUtilities = new NightingaleCMSUtilities();
+
+// ES6 Module Exports
+export default cmsUtilities;
+export const {
+  getFlatFinancials,
+  getAppDateLabel,
+  getDefaultAppDetails,
+  getUniqueNoteCategories,
+  generateCaseSummary,
+  openVRApp,
+  testFinancialMigration,
+} = cmsUtilities;

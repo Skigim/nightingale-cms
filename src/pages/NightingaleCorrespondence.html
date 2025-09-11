@@ -1,13 +1,28 @@
 <!doctype html>
-<html lang="en" class="h-full bg-gray-900 text-white">
+<html
+  lang="en"
+  class="h-full bg-gray-900 text-white"
+>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
     <title>Nightingale Correspondence (React)</title>
     <!-- React DevTools Detection -->
-    <meta name="react-devtools" content="enabled" />
-    <meta name="application-name" content="Nightingale Correspondence" />
-    <meta name="framework" content="React" />
+    <meta
+      name="react-devtools"
+      content="enabled"
+    />
+    <meta
+      name="application-name"
+      content="Nightingale Correspondence"
+    />
+    <meta
+      name="framework"
+      content="React"
+    />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: file:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com chrome-extension: moz-extension: edge-extension: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com chrome-extension: moz-extension: edge-extension:; font-src https://fonts.gstatic.com data:; connect-src 'self' https: chrome-extension: moz-extension: edge-extension: data: blob: file:; img-src 'self' data: blob: chrome-extension: moz-extension: edge-extension:; frame-src 'self' chrome-extension: moz-extension: edge-extension:;"
@@ -38,7 +53,7 @@
                     status: 200,
                     statusText: 'OK',
                     headers: { 'Content-Type': 'application/javascript' },
-                  })
+                  }),
                 );
               }
             }
@@ -111,9 +126,19 @@
       }
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       html {
         font-family: 'Inter', sans-serif;
@@ -166,7 +191,10 @@
   </head>
   <body class="h-full bg-gray-900 text-white">
     <div id="root"></div>
-    <div id="toast-container" class="fixed bottom-6 right-6 z-[2000] flex flex-col gap-3"></div>
+    <div
+      id="toast-container"
+      class="fixed bottom-6 right-6 z-[2000] flex flex-col gap-3"
+    ></div>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -230,7 +258,7 @@
                   headers: {
                     'Content-Type': 'application/javascript',
                   },
-                })
+                }),
               );
             }
           }
@@ -340,18 +368,18 @@
                   e(
                     'div',
                     { className: 'font-medium' },
-                    `${item.type} ${item.accountNumber ? `(${item.accountNumber})` : ''}`
+                    `${item.type} ${item.accountNumber ? `(${item.accountNumber})` : ''}`,
                   ),
                   e(Badge, {
                     status: item.verificationStatus,
                     variant: 'verification',
                     size: 'sm',
-                  })
+                  }),
                 ),
-                e('div', { className: 'text-sm text-gray-400' }, `${item.location} - $${(item.value || 0).toFixed(2)}`)
-              )
-            )
-          )
+                e('div', { className: 'text-sm text-gray-400' }, `${item.location} - $${(item.value || 0).toFixed(2)}`),
+              ),
+            ),
+          ),
         );
       }
 
@@ -395,8 +423,8 @@
                 onChange: (e) => setShowVerified(e.target.checked),
                 className: 'h-4 w-4 rounded border-gray-500 text-blue-500 focus:ring-blue-500/50',
               }),
-              e('span', null, 'Show Verified')
-            )
+              e('span', null, 'Show Verified'),
+            ),
           ),
           !hasAnyItems
             ? e(
@@ -404,7 +432,7 @@
                 { className: 'text-gray-500 text-center py-4' },
                 showVerified
                   ? 'No financial items found for this case.'
-                  : "No unverified financial items found. Toggle 'Show Verified' to see all items."
+                  : "No unverified financial items found. Toggle 'Show Verified' to see all items.",
               )
             : e(
                 'div',
@@ -419,13 +447,13 @@
                       {
                         className: 'text-md font-semibold text-green-400 mb-2',
                       },
-                      `Resources (${filteredResources.length})`
+                      `Resources (${filteredResources.length})`,
                     ),
                     e(FinancialsList, {
                       items: filteredResources,
                       selectedIds: selectedFinItemIds,
                       onToggleItem: onFinancialItemToggle,
-                    })
+                    }),
                   ),
                 // Income Section
                 filteredIncome.length > 0 &&
@@ -435,13 +463,13 @@
                     e(
                       'h4',
                       { className: 'text-md font-semibold text-blue-400 mb-2' },
-                      `Income (${filteredIncome.length})`
+                      `Income (${filteredIncome.length})`,
                     ),
                     e(FinancialsList, {
                       items: filteredIncome,
                       selectedIds: selectedFinItemIds,
                       onToggleItem: onFinancialItemToggle,
-                    })
+                    }),
                   ),
                 // Expenses Section
                 filteredExpenses.length > 0 &&
@@ -451,15 +479,15 @@
                     e(
                       'h4',
                       { className: 'text-md font-semibold text-red-400 mb-2' },
-                      `Expenses (${filteredExpenses.length})`
+                      `Expenses (${filteredExpenses.length})`,
                     ),
                     e(FinancialsList, {
                       items: filteredExpenses,
                       selectedIds: selectedFinItemIds,
                       onToggleItem: onFinancialItemToggle,
-                    })
-                  )
-              )
+                    }),
+                  ),
+              ),
         );
       }
 
@@ -654,7 +682,7 @@
                 className: 'text-blue-200 text-xs ml-1',
                 title: previewValue,
               },
-              `(${displayText})`
+              `(${displayText})`,
             ),
           e(
             'button',
@@ -665,9 +693,9 @@
                 'ml-1 flex-shrink-0 h-3 w-3 rounded-full inline-flex items-center justify-center text-blue-300 hover:bg-blue-500 hover:text-white focus:outline-none',
             },
             e('span', { className: 'sr-only' }, 'Remove'),
-            '×'
+            '×',
           ),
-          children
+          children,
         );
       }
 
@@ -828,7 +856,7 @@
               category: 'Financial',
             },
           ],
-          []
+          [],
         );
 
         // Convert string value to Slate value
@@ -922,7 +950,7 @@
                 return e('div', { ...props.attributes }, props.children);
             }
           },
-          [activeCase, fullData]
+          [activeCase, fullData],
         );
 
         // Handle key events
@@ -1148,8 +1176,8 @@
                   fontSize: '14px',
                   lineHeight: '1.5',
                 },
-              })
-            )
+              }),
+            ),
           ),
 
           // Autocomplete dropdown
@@ -1171,7 +1199,7 @@
                 {
                   className: 'p-2 text-xs text-gray-400 border-b border-gray-600',
                 },
-                'Type / to search placeholders...'
+                'Type / to search placeholders...',
               ),
               availablePlaceholders.map((placeholder, index) =>
                 e(
@@ -1189,12 +1217,12 @@
                       className:
                         'inline-flex items-center px-2 py-1 bg-blue-500 text-white text-sm rounded-md font-mono',
                     },
-                    placeholder.key
+                    placeholder.key,
                   ),
-                  e('span', { className: 'text-gray-300 text-sm ml-2' }, placeholder.description)
-                )
-              )
-            )
+                  e('span', { className: 'text-gray-300 text-sm ml-2' }, placeholder.description),
+                ),
+              ),
+            ),
         );
       }
       PlaceholderEditor.displayName = 'SlateTextEditor';
@@ -1308,7 +1336,7 @@
                     'div',
                     { className: 'flex-1' },
                     e('div', { className: 'font-medium' }, template.name),
-                    e('div', { className: 'text-sm text-gray-400' }, template.category)
+                    e('div', { className: 'text-sm text-gray-400' }, template.category),
                   ),
                   e(
                     'div',
@@ -1320,7 +1348,7 @@
                         className: 'text-blue-400 hover:text-blue-300 p-1',
                         title: 'Edit',
                       },
-                      'Edit'
+                      'Edit',
                     ),
                     e(
                       'button',
@@ -1329,10 +1357,10 @@
                         className: 'text-red-400 hover:text-red-300 p-1',
                         title: 'Delete',
                       },
-                      'Delete'
-                    )
-                  )
-                )
+                      'Delete',
+                    ),
+                  ),
+                ),
               )
             : e('p', { className: 'text-gray-500 text-center py-4' }, 'No templates created yet.');
 
@@ -1356,7 +1384,7 @@
             onClick: onClose,
             className: 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md',
           },
-          'Close'
+          'Close',
         );
 
         return e(
@@ -1383,10 +1411,10 @@
                     onClick: () => setShowTemplateForm(true),
                     className: 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md',
                   },
-                  'Add Template'
-                )
+                  'Add Template',
+                ),
               ),
-              e('div', { className: 'space-y-2 max-h-64 overflow-y-auto' }, templatesHTML)
+              e('div', { className: 'space-y-2 max-h-64 overflow-y-auto' }, templatesHTML),
             ),
             e(
               'div',
@@ -1409,8 +1437,8 @@
                     onClick: handleAddCategory,
                     className: 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md',
                   },
-                  'Add Category'
-                )
+                  'Add Category',
+                ),
               ),
               e(
                 'div',
@@ -1426,13 +1454,13 @@
                         key: category,
                         className: 'bg-gray-700 px-2 py-1 rounded text-sm',
                       },
-                      category
-                    )
-                  )
-                )
-              )
-            )
-          )
+                      category,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
       }
 
@@ -1467,7 +1495,7 @@
 
           // Check for duplicate template names (excluding current template if editing)
           const existingTemplate = fullData.vrTemplates.find(
-            (t) => t.name.toLowerCase() === formData.name.toLowerCase() && t.id !== template?.id
+            (t) => t.name.toLowerCase() === formData.name.toLowerCase() && t.id !== template?.id,
           );
           if (existingTemplate) {
             newErrors.name = 'A template with this name already exists.';
@@ -1585,7 +1613,7 @@
               onClick: onClose,
               className: 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md',
             },
-            'Cancel'
+            'Cancel',
           ),
           e(
             'button',
@@ -1593,8 +1621,8 @@
               onClick: handleSave,
               className: 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md',
             },
-            template ? 'Update Template' : 'Create Template'
-          )
+            template ? 'Update Template' : 'Create Template',
+          ),
         );
 
         return e(
@@ -1621,7 +1649,7 @@
                     htmlFor: 'template-name',
                     className: 'block text-sm font-medium text-gray-400 mb-1',
                   },
-                  'Template Name'
+                  'Template Name',
                 ),
                 e('input', {
                   id: 'template-name',
@@ -1631,7 +1659,7 @@
                   placeholder: 'e.g., Bank Statement Request',
                   className: `w-full bg-gray-700 rounded-md p-2 ${errors.name ? 'border border-red-500' : ''}`,
                 }),
-                errors.name && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.name)
+                errors.name && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.name),
               ),
               e(
                 'div',
@@ -1642,7 +1670,7 @@
                     htmlFor: 'template-category',
                     className: 'block text-sm font-medium text-gray-400 mb-1',
                   },
-                  'Category'
+                  'Category',
                 ),
                 e(
                   'select',
@@ -1653,9 +1681,9 @@
                     className: `w-full bg-gray-700 rounded-md p-2 ${errors.category ? 'border border-red-500' : ''}`,
                   },
                   e('option', { value: '' }, 'Select a category...'),
-                  ...(fullData?.vrCategories || []).map((cat) => e('option', { key: cat, value: cat }, cat))
+                  ...(fullData?.vrCategories || []).map((cat) => e('option', { key: cat, value: cat }, cat)),
                 ),
-                errors.category && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.category)
+                errors.category && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.category),
               ),
               e(
                 'div',
@@ -1666,7 +1694,7 @@
                     htmlFor: 'template-content',
                     className: 'block text-sm font-medium text-gray-400 mb-1',
                   },
-                  'Template Content'
+                  'Template Content',
                 ),
                 e(PlaceholderEditor, {
                   value: formData.content,
@@ -1675,8 +1703,8 @@
                   fullData: fullData,
                   placeholder: 'Enter your template text here. Type / to see available placeholders...',
                 }),
-                errors.content && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.content)
-              )
+                errors.content && e('p', { className: 'text-red-400 text-xs mt-1' }, errors.content),
+              ),
             ),
             // Helper Section
             e(
@@ -1692,9 +1720,9 @@
                     { key: group, className: 'mb-2' },
                     e('strong', { className: 'text-blue-400' }, group + ':'),
                     e('br'),
-                    e('span', { className: 'text-gray-400' }, placeholders.map((p) => `{${p}}`).join(', '))
-                  )
-                )
+                    e('span', { className: 'text-gray-400' }, placeholders.map((p) => `{${p}}`).join(', ')),
+                  ),
+                ),
               ),
               e(
                 'div',
@@ -1708,11 +1736,11 @@
                   e('li', null, "• Use {ClientName} for the client's full name"),
                   e('li', null, '• Use {MCN} for the Master Case Number'),
                   e('li', null, '• Financial placeholders work with selected items'),
-                  e('li', null, '• Placeholders are case-sensitive')
-                )
-              )
-            )
-          )
+                  e('li', null, '• Placeholders are case-sensitive'),
+                ),
+              ),
+            ),
+          ),
         );
       }
 
@@ -1885,7 +1913,7 @@
                     onClick: () => handleStatusChange('Returned'),
                     className: 'bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm',
                   },
-                  'Mark as Returned'
+                  'Mark as Returned',
                 ),
                 e(
                   'button',
@@ -1893,7 +1921,7 @@
                     onClick: handleDeleteRequest,
                     className: 'bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm',
                   },
-                  'Delete'
+                  'Delete',
                 ),
               ];
             case 'Returned':
@@ -1927,7 +1955,7 @@
                           className:
                             'bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded text-sm',
                         },
-                        'Confirm'
+                        'Confirm',
                       ),
                       e(
                         'button',
@@ -1938,8 +1966,8 @@
                           },
                           className: 'bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm',
                         },
-                        'Cancel'
-                      )
+                        'Cancel',
+                      ),
                     ),
                   ]
                 : [
@@ -1949,7 +1977,7 @@
                         onClick: () => setShowVerificationInput(true),
                         className: 'bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm',
                       },
-                      'Mark as Verified'
+                      'Mark as Verified',
                     ),
                   ];
             case 'Verified':
@@ -1957,7 +1985,7 @@
                 e(
                   'span',
                   { className: 'text-green-400 text-sm' },
-                  `✓ Verified ${request.verifiedDate ? dateUtils.format(request.verifiedDate) : ''}`
+                  `✓ Verified ${request.verifiedDate ? dateUtils.format(request.verifiedDate) : ''}`,
                 ),
                 request.verificationSource &&
                   e('span', { className: 'text-gray-400 text-sm' }, `Source: ${request.verificationSource}`),
@@ -1973,7 +2001,7 @@
             onClick: onClose,
             className: 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md',
           },
-          'Close'
+          'Close',
         );
 
         return e(
@@ -2004,11 +2032,11 @@
                     'div',
                     { className: 'flex gap-4 text-xs text-gray-500 mt-2' },
                     e('span', null, `⏰ Due ${dateUtils.format(request.dueDate)}`),
-                    request.returnedDate && e('span', null, `📥 Returned ${dateUtils.format(request.returnedDate)}`)
-                  )
+                    request.returnedDate && e('span', null, `📥 Returned ${dateUtils.format(request.returnedDate)}`),
+                  ),
                 ),
-                e('div', { className: 'flex gap-2 flex-wrap' }, ...getContextualActions())
-              )
+                e('div', { className: 'flex gap-2 flex-wrap' }, ...getContextualActions()),
+              ),
             ),
 
             // Request Content
@@ -2022,8 +2050,8 @@
                   className:
                     'bg-gray-800 p-3 rounded font-mono text-sm whitespace-pre-wrap text-gray-200 border border-gray-600',
                 },
-                request.content
-              )
+                request.content,
+              ),
             ),
 
             // Financial Items (if any)
@@ -2035,7 +2063,7 @@
                 e(
                   'h4',
                   { className: 'font-semibold text-blue-400 mb-3' },
-                  `Linked Financial Items (${request.financialItemIds.length})`
+                  `Linked Financial Items (${request.financialItemIds.length})`,
                 ),
                 e(
                   'div',
@@ -2060,12 +2088,12 @@
                         className: 'bg-gray-800 p-2 rounded text-sm',
                       },
                       e('div', { className: 'font-medium' }, `${item.type} - ${item.location}`),
-                      e('div', { className: 'text-gray-400 text-xs' }, `$${item.value?.toFixed(2) || '0.00'}`)
+                      e('div', { className: 'text-gray-400 text-xs' }, `$${item.value?.toFixed(2) || '0.00'}`),
                     );
-                  })
-                )
-              )
-          )
+                  }),
+                ),
+              ),
+          ),
         );
       }
 
@@ -2263,7 +2291,7 @@
 
             showToast(
               `${updatedCount} VR request(s) marked as verified. ${financialItemsUpdated} financial item(s) updated.`,
-              'success'
+              'success',
             );
           } else {
             showToast("No eligible VR requests found. Only 'Returned' requests can be marked as verified.", 'error');
@@ -2390,9 +2418,9 @@
                   e(
                     'div',
                     { className: 'text-xs text-gray-500 mt-1' },
-                    `Created: ${dateUtils.format(request.createdDate)} • Due: ${dateUtils.format(request.dueDate)}`
-                  )
-                )
+                    `Created: ${dateUtils.format(request.createdDate)} • Due: ${dateUtils.format(request.dueDate)}`,
+                  ),
+                ),
               ),
               e(
                 'div',
@@ -2404,7 +2432,7 @@
                     {
                       className: `px-2 py-1 text-xs rounded-full ${statusColors[request.status]}`,
                     },
-                    request.status
+                    request.status,
                   ),
                 e(
                   'div',
@@ -2420,11 +2448,11 @@
                         className: 'bg-orange-600 hover:bg-orange-700 text-white text-xs px-2 py-1 rounded',
                         title: 'Mark as returned',
                       },
-                      'Mark as Returned'
-                    )
-                )
-              )
-            )
+                      'Mark as Returned',
+                    ),
+                ),
+              ),
+            ),
           );
         };
 
@@ -2434,7 +2462,7 @@
             onClick: onClose,
             className: 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md',
           },
-          'Close'
+          'Close',
         );
 
         return e(
@@ -2459,7 +2487,7 @@
                   null,
                   e('h4', { className: 'text-lg font-semibold text-blue-400' }, 'VR Request History'),
                   currentCaseId &&
-                    e('div', { className: 'text-sm text-gray-400 mt-1' }, 'Case-specific VR requests only')
+                    e('div', { className: 'text-sm text-gray-400 mt-1' }, 'Case-specific VR requests only'),
                 ),
                 e(
                   'div',
@@ -2471,10 +2499,10 @@
                         onClick: handleBulkMarkAsVerified,
                         className: 'bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded',
                       },
-                      `Verify Selected (${selectedRequestIds.size})`
+                      `Verify Selected (${selectedRequestIds.size})`,
                     ),
-                  e('div', { className: 'text-sm text-gray-400' }, `${filteredRequests.length} requests`)
-                )
+                  e('div', { className: 'text-sm text-gray-400' }, `${filteredRequests.length} requests`),
+                ),
               ),
 
               // Status Summary
@@ -2495,9 +2523,9 @@
                       className: `p-3 rounded border ${colors[status]}`,
                     },
                     e('div', { className: 'text-2xl font-bold' }, count),
-                    e('div', { className: 'text-sm text-gray-400' }, status)
+                    e('div', { className: 'text-sm text-gray-400' }, status),
                   );
-                })
+                }),
               ),
 
               // Requests by Status
@@ -2510,16 +2538,16 @@
                     e(
                       'h5',
                       { className: 'text-md font-semibold text-blue-300 mb-3' },
-                      `${status} Requests (${requestsByStatus[status].length})`
+                      `${status} Requests (${requestsByStatus[status].length})`,
                     ),
                     e(
                       'div',
                       { className: 'space-y-3 max-h-64 overflow-y-auto' },
-                      requestsByStatus[status].map(renderRequestCard)
-                    )
-                  )
-              )
-            )
+                      requestsByStatus[status].map(renderRequestCard),
+                    ),
+                  ),
+              ),
+            ),
           ),
 
           // VR Management Modal
@@ -2534,7 +2562,7 @@
               fullData: fullData,
               onUpdateData: onUpdateData,
               fileService: fileService,
-            })
+            }),
         );
       }
 
@@ -2613,7 +2641,7 @@
             {
               className: 'bg-gray-800 p-6 rounded-lg shadow-lg flex items-center justify-center h-full',
             },
-            e('p', { className: 'text-gray-500' }, 'Select a case to begin building a VR.')
+            e('p', { className: 'text-gray-500' }, 'Select a case to begin building a VR.'),
           );
         }
 
@@ -2627,7 +2655,7 @@
             {
               className: 'text-2xl font-bold text-blue-300 border-b border-gray-700 pb-2',
             },
-            'Request Builder'
+            'Request Builder',
           ),
           e(
             'div',
@@ -2645,7 +2673,7 @@
                     htmlFor: 'vr-template-category-select',
                     className: 'block text-sm font-medium text-gray-400 mb-1',
                   },
-                  'Category'
+                  'Category',
                 ),
                 e(
                   'select',
@@ -2656,8 +2684,8 @@
                     onChange: (e) => setSelectedCategory(e.target.value),
                   },
                   e('option', { value: '' }, 'All Categories'),
-                  ...(fullData.vrCategories || []).map((cat) => e('option', { key: cat, value: cat }, cat))
-                )
+                  ...(fullData.vrCategories || []).map((cat) => e('option', { key: cat, value: cat }, cat)),
+                ),
               ),
               e(
                 'div',
@@ -2668,7 +2696,7 @@
                     htmlFor: 'vr-template-select',
                     className: 'block text-sm font-medium text-gray-400 mb-1',
                   },
-                  'Template'
+                  'Template',
                 ),
                 e(
                   'select',
@@ -2680,10 +2708,10 @@
                     disabled: templates.length === 0,
                   },
                   e('option', { value: '' }, 'Select a template...'),
-                  ...templates.map((t) => e('option', { key: t.id, value: t.id }, t.name))
-                )
-              )
-            )
+                  ...templates.map((t) => e('option', { key: t.id, value: t.id }, t.name)),
+                ),
+              ),
+            ),
           ),
           e(
             'div',
@@ -2705,7 +2733,7 @@
                   className: 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md disabled:opacity-50',
                   disabled: !selectedTemplateId,
                 },
-                'Add to Request'
+                'Add to Request',
               ),
               e(
                 'button',
@@ -2713,7 +2741,7 @@
                   onClick: () => setFinalContent(''),
                   className: 'bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md',
                 },
-                'Clear'
+                'Clear',
               ),
               e(
                 'button',
@@ -2721,9 +2749,9 @@
                   onClick: () => navigator.clipboard.writeText(finalContent),
                   className: 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md ml-auto',
                 },
-                'Copy to Clipboard'
-              )
-            )
+                'Copy to Clipboard',
+              ),
+            ),
           ),
           e(
             'div',
@@ -2746,7 +2774,7 @@
                     onChange: (e) => setDueDays(e.target.value),
                     className: 'h-4 w-4 text-blue-500 border-gray-500 mr-2',
                   }),
-                  e('span', null, '15 days')
+                  e('span', null, '15 days'),
                 ),
                 e(
                   'label',
@@ -2759,8 +2787,8 @@
                     onChange: (e) => setDueDays(e.target.value),
                     className: 'h-4 w-4 text-blue-500 border-gray-500 mr-2',
                   }),
-                  e('span', null, '30 days')
-                )
+                  e('span', null, '30 days'),
+                ),
               ),
               e(
                 'button',
@@ -2770,10 +2798,10 @@
                     'bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md disabled:opacity-50',
                   disabled: !finalContent.trim(),
                 },
-                'Create VR & Update Statuses'
-              )
-            )
-          )
+                'Create VR & Update Statuses',
+              ),
+            ),
+          ),
         );
       }
 
@@ -2815,7 +2843,7 @@
               keys: ['mcn', 'name'],
               threshold: 0.2,
             }),
-          [cases]
+          [cases],
         );
 
         // Prepare searchable cases with display labels
@@ -2870,7 +2898,7 @@
             {
               className: 'text-2xl font-bold text-blue-300 border-b border-gray-700 pb-2',
             },
-            'Case Data'
+            'Case Data',
           ),
           e(
             'div',
@@ -2894,9 +2922,9 @@
                         { className: 'font-medium text-blue-300 text-lg' },
                         activeCase.displayName ||
                           fullData.people.find((p) => p.id === activeCase.personId)?.name ||
-                          'Unknown Client'
+                          'Unknown Client',
                       ),
-                      e('div', { className: 'text-sm text-gray-400' }, `MCN: ${activeCase.mcn}`)
+                      e('div', { className: 'text-sm text-gray-400' }, `MCN: ${activeCase.mcn}`),
                     ),
                     e(
                       'button',
@@ -2906,8 +2934,8 @@
                           'ml-3 px-3 py-1 text-sm text-blue-400 hover:text-blue-300 hover:bg-gray-600 rounded-md transition-colors border border-gray-600',
                         title: 'Change case',
                       },
-                      'Change'
-                    )
+                      'Change',
+                    ),
                   )
                 : // No case selected - show search interface
                   e(
@@ -2916,7 +2944,7 @@
                     e(
                       'div',
                       { className: 'flex items-center justify-between mb-3' },
-                      e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Find Case')
+                      e('h3', { className: 'text-lg font-semibold text-blue-400' }, 'Find Case'),
                     ),
                     e(SearchBar, {
                       value: searchTerm,
@@ -2946,12 +2974,12 @@
                             'div',
                             { className: 'flex flex-col' },
                             e('div', { className: 'font-medium text-blue-300' }, result.displayName),
-                            e('div', { className: 'text-sm text-gray-400' }, `MCN: ${result.mcn}`)
-                          )
+                            e('div', { className: 'text-sm text-gray-400' }, `MCN: ${result.mcn}`),
+                          ),
                         ),
                       maxResults: 6,
                       minQueryLength: 0,
-                    })
+                    }),
                   ),
               // Show search when case is selected and Change was clicked
               activeCase &&
@@ -2970,8 +2998,8 @@
                         className: 'text-sm text-gray-400 hover:text-red-400 transition-colors',
                         title: 'Cancel search',
                       },
-                      'Cancel'
-                    )
+                      'Cancel',
+                    ),
                   ),
                   e(SearchBar, {
                     value: searchTerm,
@@ -3001,16 +3029,16 @@
                           'div',
                           { className: 'flex flex-col' },
                           e('div', { className: 'font-medium text-blue-300' }, result.displayName),
-                          e('div', { className: 'text-sm text-gray-400' }, `MCN: ${result.mcn}`)
-                        )
+                          e('div', { className: 'text-sm text-gray-400' }, `MCN: ${result.mcn}`),
+                        ),
                       ),
                     maxResults: 6,
                     minQueryLength: 0,
                     autoFocus: true,
-                  })
-                )
+                  }),
+                ),
               // SearchBar component now handles dropdown internally
-            )
+            ),
           ),
           activeCase &&
             e(CaseDetailsPanel, {
@@ -3018,7 +3046,7 @@
               fullData,
               selectedFinItemIds,
               onFinancialItemToggle,
-            })
+            }),
         );
       }
 
@@ -3170,7 +3198,7 @@
             // Return true to signal completion for UI cleanup
             return true;
           },
-          [activeCase, fullData, selectedFinItemIds]
+          [activeCase, fullData, selectedFinItemIds],
         );
 
         const fileService = useMemo(
@@ -3180,7 +3208,7 @@
               errorCallback: showToast,
               sanitizeFn: typeof sanitize !== 'undefined' ? sanitize : (str) => str,
             }),
-          []
+          [],
         );
 
         const loadInitialData = useCallback(async () => {
@@ -3258,7 +3286,7 @@
                 setPendingMcn(event.data.mcn);
                 showToast(
                   `Received MCN ${event.data.mcn} from CMS broadcast. Loading when data is ready...`,
-                  'success'
+                  'success',
                 );
                 return;
               }
@@ -3399,7 +3427,7 @@
                 className: 'bg-red-800 border border-red-600 text-red-200 p-4 rounded-lg text-center',
               },
               e('h3', { className: 'font-bold' }, 'Connection Error'),
-              e('p', null, error)
+              e('p', null, error),
             );
           }
           if (!fullData) {
@@ -3426,7 +3454,7 @@
               selectedFinItemIds: selectedFinItemIds,
               onCreateVr: handleCreateVrRequest,
               onComplete: () => setSelectedFinItemIds(new Set()), // Function to clear selections
-            })
+            }),
           );
         };
 
@@ -3456,9 +3484,9 @@
                   strokeLinejoin: 'round',
                   strokeWidth: 2,
                   d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-                })
+                }),
               ),
-              e('span', { className: 'font-bold text-lg' }, 'Standalone VR Generator')
+              e('span', { className: 'font-bold text-lg' }, 'Standalone VR Generator'),
             ),
             // Management buttons will be added here in a later step
             e(
@@ -3486,9 +3514,9 @@
                     strokeLinejoin: 'round',
                     strokeWidth: 2,
                     d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-                  })
+                  }),
                 ),
-                'Templates'
+                'Templates',
               ),
               e(
                 'button',
@@ -3512,9 +3540,9 @@
                     strokeLinejoin: 'round',
                     strokeWidth: 2,
                     d: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
-                  })
+                  }),
                 ),
-                'History'
+                'History',
               ),
               e(
                 'button',
@@ -3539,11 +3567,11 @@
                     strokeLinejoin: 'round',
                     strokeWidth: 2,
                     d: 'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4',
-                  })
+                  }),
                 ),
-                'Save'
-              )
-            )
+                'Save',
+              ),
+            ),
           ),
           renderContent(),
           isTemplateManagerOpen &&
@@ -3562,7 +3590,7 @@
               onUpdateData: handleUpdateData,
               currentCaseId: currentCaseId,
               fileService: fileService,
-            })
+            }),
         );
       }
 

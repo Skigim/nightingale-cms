@@ -6,6 +6,9 @@
  * toast types, queue management, and auto-dismiss functionality.
  */
 
+// TODO: Replace with proper import once logger is modernized
+// import NightingaleLogger from './nightingale.logger.js';
+
 /**
  * Toast notification system configuration
  */
@@ -73,13 +76,11 @@ class ToastQueue {
   add(message, type = 'info', duration = null) {
     // Validate message
     if (!message || typeof message !== 'string') {
-      console.warn('Toast message must be a non-empty string');
       return;
     }
 
     // Validate type
     if (!TOAST_CONFIG.types[type]) {
-      console.warn(`Invalid toast type: ${type}. Using 'info' instead.`);
       type = 'info';
     }
 
@@ -112,7 +113,7 @@ class ToastQueue {
       message,
       type,
       toastDuration,
-      toastData
+      toastData,
     );
 
     // Add to container
@@ -179,7 +180,7 @@ class ToastQueue {
               this.remove(toastData);
             }
           },
-          Math.max(remainingTime, 100)
+          Math.max(remainingTime, 100),
         ); // Minimum 100ms
       }
     });
@@ -216,7 +217,7 @@ class ToastQueue {
           toastData.element.parentNode.removeChild(toastData.element);
         }
       },
-      { once: true }
+      { once: true },
     );
 
     // Fallback removal in case transitionend doesn't fire
@@ -277,16 +278,33 @@ function initializeToastSystem() {
  */
 function showToast(message, type = 'info', duration = null) {
   try {
+    // Ensure DOM is ready before showing toasts
+    if (typeof document === 'undefined') {
+      console.warn('Toast system: DOM not available');
+      return null;
+    }
+
     // Initialize if needed
     if (!toastQueue) {
       initializeToastSystem();
     }
 
+    // Validate message before processing
+    if (!message || typeof message !== 'string') {
+      console.warn('Toast system: Invalid message provided', message);
+      return null;
+    }
+
     return toastQueue.add(message, type, duration);
   } catch (error) {
-    console.error('Toast system error:', error);
-    // Fallback to console if toast system fails
-    console.log(`Toast: ${type.toUpperCase()} - ${message}`);
+    const logger = window.NightingaleLogger?.get('toast:system');
+    logger?.error('Toast system failed', {
+      error: error.message,
+      message,
+      type,
+    });
+    // Fallback to console for critical errors
+    console.error('Toast system failure:', error.message, { message, type });
     return null;
   }
 }
@@ -372,47 +390,44 @@ if (typeof document !== 'undefined') {
   }
 }
 
-// Export for different environments
-if (typeof module !== 'undefined' && module.exports) {
-  // Node.js/CommonJS
-  module.exports = {
-    showToast,
-    showSuccessToast,
-    showErrorToast,
-    showWarningToast,
-    showInfoToast,
-    clearAllToasts,
-    getActiveToastCount,
-    updateToastConfig,
-    initializeToastSystem,
-    ToastQueue,
-    TOAST_CONFIG,
-  };
+// Initialize the system immediately when available
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeToastSystem();
+    });
+  } else {
+    initializeToastSystem();
+  }
 }
 
-// Make available globally for browser environments
-if (typeof window !== 'undefined') {
-  window.showToast = showToast;
-  window.showSuccessToast = showSuccessToast;
-  window.showErrorToast = showErrorToast;
-  window.showWarningToast = showWarningToast;
-  window.showInfoToast = showInfoToast;
-  window.clearAllToasts = clearAllToasts;
-  window.getActiveToastCount = getActiveToastCount;
-  window.updateToastConfig = updateToastConfig;
+// Named exports
+export {
+  showToast,
+  showSuccessToast,
+  showErrorToast,
+  showWarningToast,
+  showInfoToast,
+  clearAllToasts,
+  getActiveToastCount,
+  updateToastConfig,
+  initializeToastSystem,
+  ToastQueue,
+  TOAST_CONFIG,
+};
 
-  // Also expose the class and config for advanced usage
-  window.NightingaleToast = {
-    showToast,
-    showSuccessToast,
-    showErrorToast,
-    showWarningToast,
-    showInfoToast,
-    clearAllToasts,
-    getActiveToastCount,
-    updateToastConfig,
-    initializeToastSystem,
-    ToastQueue,
-    TOAST_CONFIG,
-  };
-}
+// ES6 Module Export
+export default {
+  showToast,
+  showSuccessToast,
+  showErrorToast,
+  showWarningToast,
+  showInfoToast,
+  clearAllToasts,
+  getActiveToastCount,
+  updateToastConfig,
+  initializeToastSystem,
+  ToastQueue,
+  TOAST_CONFIG,
+  show: showToast, // Alias for backward compatibility
+};

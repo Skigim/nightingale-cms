@@ -1,0 +1,72 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JavaScript, TypeScript, JSON files
+[*.{js,jsx,ts,tsx,json,jsonc}]
+indent_style = space
+indent_size = 2
+
+# CSS, SCSS, LESS files
+[*.{css,scss,less}]
+indent_style = space
+indent_size = 2
+
+# HTML files
+[*.{html,htm}]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.{md,mdx}]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
+
+# YAML files
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Package.json, tsconfig.json (often have different conventions)
+[{package.json,tsconfig.json}]
+indent_style = space
+indent_size = 2
+
+# Batch files (Windows)
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# Shell scripts
+[*.sh]
+end_of_line = lf
+
+# Docker files
+[{Dockerfile,*.dockerfile}]
+indent_style = space
+indent_size = 2
+
+# Configuration files that might use tabs
+[{Makefile,*.mk}]
+indent_style = tab
+
+# Ignore minified files and third-party assets
+[*.min.*]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+[**/assets/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+[**/node_modules/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset

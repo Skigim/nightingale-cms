@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Nightingale CMS Data Migration Tool</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        max-width: 800px;
+        width: 100%;
+      }
+
+      h1 {
+        color: #2d3748;
+        margin-bottom: 8px;
+        font-size: 28px;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        color: #718096;
+        margin-bottom: 32px;
+        font-size: 16px;
+      }
+
+      .upload-area {
+        border: 3px dashed #cbd5e0;
+        border-radius: 12px;
+        padding: 40px;
+        text-align: center;
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .upload-area:hover {
+        border-color: #667eea;
+        background-color: #f7fafc;
+      }
+
+      .upload-area.dragover {
+        border-color: #667eea;
+        background-color: #ebf8ff;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      .upload-text {
+        color: #4a5568;
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .upload-subtext {
+        color: #a0aec0;
+        font-size: 14px;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 8px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .results {
+        margin-top: 24px;
+        padding: 20px;
+        background-color: #f7fafc;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+      }
+
+      .results h3 {
+        color: #2d3748;
+        margin-bottom: 12px;
+      }
+
+      .migration-log {
+        background: #1a202c;
+        color: #e2e8f0;
+        padding: 16px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        max-height: 300px;
+        overflow-y: auto;
+        margin: 16px 0;
+        white-space: pre-wrap;
+      }
+
+      .success {
+        color: #38a169;
+        font-weight: 600;
+      }
+
+      .error {
+        color: #e53e3e;
+        font-weight: 600;
+      }
+
+      .warning {
+        color: #d69e2e;
+        font-weight: 600;
+      }
+
+      .download-link {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 12px 24px;
+        background: #38a169;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .download-link:hover {
+        background: #2f855a;
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🩺 Nightingale CMS Data Migration Tool</h1>
+      <p class="subtitle">Migrate legacy case data to the current normalized format</p>
+
+      <div
+        class="upload-area"
+        id="uploadArea"
+      >
+        <div class="upload-text">📁 Drop your nightingale-data.json file here</div>
+        <div class="upload-subtext">or click to browse</div>
+        <input
+          type="file"
+          id="fileInput"
+          class="file-input"
+          accept=".json"
+        />
+      </div>
+
+      <div style="text-align: center; margin-bottom: 24px">
+        <button
+          class="btn"
+          onclick="document.getElementById('fileInput').click()"
+        >
+          Choose File
+        </button>
+      </div>
+
+      <div style="text-align: center">
+        <button
+          class="btn"
+          id="migrateBtn"
+          onclick="migrateData()"
+          disabled
+        >
+          🔄 Migrate Data
+        </button>
+      </div>
+
+      <div
+        id="results"
+        class="results"
+        style="display: none"
+      >
+        <h3>Migration Results</h3>
+        <div
+          id="migrationLog"
+          class="migration-log"
+        ></div>
+        <div
+          id="downloadSection"
+          style="display: none"
+        >
+          <a
+            id="downloadLink"
+            class="download-link"
+            download="nightingale-data-migrated.json"
+          >
+            📥 Download Migrated Data
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let rawData = null;
+      let migratedData = null;
+      let migrationLog = [];
+
+      // Utility function to generate secure IDs
+      function generateSecureId(prefix = 'item') {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          return `${prefix}-${crypto.randomUUID()}`;
+        }
+
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+          const array = new Uint32Array(3);
+          crypto.getRandomValues(array);
+          const timestamp = Date.now().toString(36);
+          const randomPart = Array.from(array, (x) => x.toString(36)).join('');
+          return `${prefix}-${timestamp}-${randomPart}`;
+        }
+
+        console.warn('🔒 Using non-cryptographic ID generation - consider updating browser');
+        const timestamp = Date.now().toString(36);
+        const randomPart = Math.random().toString(36).substring(2, 8);
+        return `${prefix}-${timestamp}-${randomPart}`;
+      }
+
+      // Main migration function
+      async function normalizeDataMigrations(data) {
+        if (!data) return data;
+
+        log('🔄 Running data migrations for CMS React compatibility...');
+        const normalizedData = JSON.parse(JSON.stringify(data));
+
+        // Normalize case data structure
+        if (normalizedData.cases) {
+          log(`📦 Processing ${normalizedData.cases.length} cases...`);
+
+          normalizedData.cases = normalizedData.cases.map((caseItem, index) => {
+            const normalizedCase = { ...caseItem };
+
+            // Ensure every case has a proper ID with secure generation
+            if (!normalizedCase.id || normalizedCase.id === null) {
+              normalizedCase.id = generateSecureId('case');
+              log(
+                `🆔 Generated new case ID: ${normalizedCase.id} for MCN: ${normalizedCase.mcn || normalizedCase.masterCaseNumber}`,
+                'success',
+              );
+            }
+
+            // Legacy field migration: masterCaseNumber -> mcn
+            if (caseItem.masterCaseNumber && !caseItem.mcn) {
+              normalizedCase.mcn = caseItem.masterCaseNumber;
+              log(`🏷️ Migrated masterCaseNumber "${caseItem.masterCaseNumber}" → mcn`, 'success');
+            }
+
+            // Map appDetails.appDate to applicationDate
+            if (caseItem.appDetails && caseItem.appDetails.appDate && !caseItem.applicationDate) {
+              normalizedCase.applicationDate = caseItem.appDetails.appDate;
+              log(`📅 Migrated appDetails.appDate → applicationDate`, 'success');
+            }
+
+            // Map appDetails.caseType to caseType if missing
+            if (caseItem.appDetails && caseItem.appDetails.caseType && !caseItem.caseType) {
+              normalizedCase.caseType = caseItem.appDetails.caseType;
+              log(`📋 Migrated appDetails.caseType "${caseItem.appDetails.caseType}" → caseType`, 'success');
+            }
+
+            // Convert legacy createdAt to createdDate
+            if (caseItem.createdAt && !caseItem.createdDate) {
+              normalizedCase.createdDate = caseItem.createdAt;
+              log(`🕒 Migrated createdAt → createdDate`, 'success');
+            }
+
+            // Ensure personId is a string (legacy uses numbers)
+            if (normalizedCase.personId && typeof normalizedCase.personId === 'number') {
+              normalizedCase.personId = normalizedCase.personId.toString();
+              log(`🔢 Converted personId ${normalizedCase.personId} to string format`, 'success');
+            }
+
+            // Add required fields with defaults for legacy cases
+            const defaults = [
+              { field: 'status', value: 'Pending' },
+              { field: 'description', value: '' },
+              { field: 'priority', value: false },
+              { field: 'withWaiver', value: false },
+              { field: 'authorizedReps', value: [] },
+              { field: 'retroRequested', value: 'No' },
+              { field: 'livingArrangement', value: 'Not specified' },
+              { field: 'organizationAddress', value: 'Not specified' },
+            ];
+
+            defaults.forEach(({ field, value }) => {
+              if (!normalizedCase[field]) {
+                normalizedCase[field] = value;
+              }
+            });
+
+            // Ensure financials structure exists
+            if (!normalizedCase.financials) {
+              normalizedCase.financials = {
+                resources: [],
+                income: [],
+                expenses: [],
+              };
+              log(`💰 Initialized financials structure for case ${normalizedCase.mcn}`, 'success');
+            }
+
+            // Financial items migration
+            if (normalizedCase.financials) {
+              ['resources', 'income', 'expenses'].forEach((financialType) => {
+                if (normalizedCase.financials[financialType]) {
+                  normalizedCase.financials[financialType] = normalizedCase.financials[financialType].map((item) => {
+                    const migratedItem = { ...item };
+
+                    if (item.type && !item.description) {
+                      migratedItem.description = item.type;
+                      log(`🏷️ Migrated financial item type "${item.type}" → description`, 'success');
+                    }
+
+                    if (item.value !== undefined && item.amount === undefined) {
+                      migratedItem.amount = item.value;
+                      log(`💰 Migrated financial item value ${item.value} → amount`, 'success');
+                    }
+
+                    // Ensure backward compatibility
+                    if (item.description && !item.type) {
+                      migratedItem.type = item.description;
+                    }
+                    if (item.amount !== undefined && item.value === undefined) {
+                      migratedItem.value = item.amount;
+                    }
+
+                    if (!migratedItem.frequency) {
+                      migratedItem.frequency = 'monthly';
+                    }
+
+                    if (!migratedItem.dateAdded) {
+                      migratedItem.dateAdded = new Date().toISOString();
+                    }
+
+                    if (item.source && !item.verificationSource) {
+                      migratedItem.verificationSource = item.source;
+                    }
+
+                    return migratedItem;
+                  });
+                }
+              });
+            }
+
+            return normalizedCase;
+          });
+
+          log(`✅ Completed case migrations for ${normalizedData.cases.length} cases`, 'success');
+        }
+
+        // Normalize people data structure
+        if (normalizedData.people) {
+          log(`👥 Processing ${normalizedData.people.length} people...`);
+
+          normalizedData.people = normalizedData.people.map((person) => {
+            const normalizedPerson = { ...person };
+
+            if (!normalizedPerson.id) {
+              normalizedPerson.id = generateSecureId('person');
+              log(`🆔 Generated person ID: ${normalizedPerson.id} for ${normalizedPerson.name}`, 'success');
+            }
+
+            const defaults = [
+              { field: 'name', value: 'Unknown Person' },
+              { field: 'status', value: 'active' },
+              { field: 'dateAdded', value: new Date().toISOString() },
+            ];
+
+            defaults.forEach(({ field, value }) => {
+              if (!normalizedPerson[field]) {
+                normalizedPerson[field] = value;
+              }
+            });
+
+            return normalizedPerson;
+          });
+
+          // Resolve duplicate person IDs
+          const seenPersonIds = new Set();
+          normalizedData.people = normalizedData.people.map((person) => {
+            if (seenPersonIds.has(person.id)) {
+              const oldId = person.id;
+              person.id = generateSecureId('person');
+              log(`🔄 Resolved duplicate person ID: ${oldId} → ${person.id} for ${person.name}`, 'warning');
+            }
+            seenPersonIds.add(person.id);
+            return person;
+          });
+
+          log(`✅ Completed people migrations for ${normalizedData.people.length} people`, 'success');
+        }
+
+        // Normalize organizations data structure
+        if (normalizedData.organizations) {
+          log(`🏢 Processing ${normalizedData.organizations.length} organizations...`);
+
+          normalizedData.organizations = normalizedData.organizations.map((org) => {
+            const normalizedOrg = { ...org };
+
+            if (!normalizedOrg.id) {
+              normalizedOrg.id = generateSecureId('org');
+              log(`🆔 Generated organization ID: ${normalizedOrg.id} for ${normalizedOrg.name}`, 'success');
+            }
+
+            const defaults = [
+              { field: 'name', value: 'Unknown Organization' },
+              { field: 'status', value: 'active' },
+              { field: 'dateAdded', value: new Date().toISOString() },
+            ];
+
+            defaults.forEach(({ field, value }) => {
+              if (!normalizedOrg[field]) {
+                normalizedOrg[field] = value;
+              }
+            });
+
+            return normalizedOrg;
+          });
+
+          log(
+            `✅ Completed organization migrations for ${normalizedData.organizations.length} organizations`,
+            'success',
+          );
+        }
+
+        log('🎉 Data migration completed successfully!', 'success');
+        return normalizedData;
+      }
+
+      function log(message, type = 'info') {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = `[${timestamp}] ${message}`;
+        migrationLog.push({ message: logEntry, type });
+
+        if (document.getElementById('migrationLog')) {
+          updateLogDisplay();
+        }
+
+        console.log(logEntry);
+      }
+
+      function updateLogDisplay() {
+        const logElement = document.getElementById('migrationLog');
+        logElement.innerHTML = migrationLog
+          .map((entry) => {
+            let className = '';
+            switch (entry.type) {
+              case 'success':
+                className = 'success';
+                break;
+              case 'error':
+                className = 'error';
+                break;
+              case 'warning':
+                className = 'warning';
+                break;
+            }
+            return `<span class="${className}">${entry.message}</span>`;
+          })
+          .join('\n');
+        logElement.scrollTop = logElement.scrollHeight;
+      }
+
+      // File handling
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const migrateBtn = document.getElementById('migrateBtn');
+
+      uploadArea.addEventListener('click', () => fileInput.click());
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+      });
+
+      function handleFiles(files) {
+        if (files.length === 0) return;
+
+        const file = files[0];
+        if (!file.name.endsWith('.json')) {
+          alert('Please select a JSON file');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            rawData = JSON.parse(e.target.result);
+            log(`📁 Loaded file: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`, 'success');
+
+            // Show normal counts during initial file load (before anonymization)
+            log(
+              `📊 Found: ${rawData.cases ? rawData.cases.length : 0} cases, ${rawData.people ? rawData.people.length : 0} people, ${rawData.organizations ? rawData.organizations.length : 0} organizations`,
+            );
+            migrateBtn.disabled = false;
+            uploadArea.innerHTML = `<div class="upload-text success">✅ ${file.name} loaded successfully</div>`;
+          } catch (error) {
+            log(`❌ Error parsing JSON: ${error.message}`, 'error');
+            alert('Invalid JSON file');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      async function migrateData() {
+        if (!rawData) {
+          alert('Please load a data file first');
+          return;
+        }
+
+        migrationLog = [];
+        document.getElementById('results').style.display = 'block';
+        migrateBtn.disabled = true;
+        migrateBtn.textContent = '🔄 Processing...';
+
+        try {
+          // Apply data migrations
+          log('🔄 Starting data migration process...', 'info');
+          migratedData = await normalizeDataMigrations(rawData);
+
+          // Create download link
+          const timestamp = new Date().toISOString().split('T')[0];
+          const filename = `nightingale-data-migrated-${timestamp}.json`;
+
+          const dataStr = JSON.stringify(migratedData, null, 2);
+          const dataBlob = new Blob([dataStr], { type: 'application/json' });
+          const url = URL.createObjectURL(dataBlob);
+
+          const downloadLink = document.getElementById('downloadLink');
+          downloadLink.href = url;
+          downloadLink.download = filename;
+          downloadLink.style.display = 'inline-block';
+          document.getElementById('downloadSection').style.display = 'block';
+
+          // Final summary
+          log(
+            `📊 Final: ${migratedData.cases ? migratedData.cases.length : 0} cases, ${migratedData.people ? migratedData.people.length : 0} people, ${migratedData.organizations ? migratedData.organizations.length : 0} organizations`,
+            'info',
+          );
+
+          log('🎉 Migration completed! File is ready for download.', 'success');
+        } catch (error) {
+          log(`❌ Process failed: ${error.message}`, 'error');
+          console.error(error);
+        } finally {
+          migrateBtn.disabled = false;
+          migrateBtn.textContent = '🔄 Migrate Data';
+        }
+      }
+    </script>
+  </body>
+</html>

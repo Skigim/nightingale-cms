@@ -1,10 +1,12 @@
 # Nightingale CMS - Case Management System
 
-A comprehensive React-based case management system, featuring modern UI components, robust data management, and streamlined workflows.
+A comprehensive React-based case management system, featuring modern UI components, robust data
+management, and streamlined workflows.
 
 ## 🎯 Project Overview
 
-Nightingale CMS helps social workers track applications, manage client relationships, monitor financial resources, and generate reports for and long-term care services.
+Nightingale CMS helps social workers track applications, manage client relationships, monitor
+financial resources, and generate reports for and long-term care services.
 
 ### Key Features
 
@@ -181,7 +183,7 @@ function NewComponent({ prop1, prop2, ...props }) {
 
   return e(
     'div',
-    { className: 'component-styles', ...props }
+    { className: 'component-styles', ...props },
     // Component content
   );
 }
@@ -203,14 +205,10 @@ if (typeof window !== 'undefined') {
 await window.NightingaleServices.getService('fileService').saveData(data);
 
 // Load data
-const data =
-  await window.NightingaleServices.getService('fileService').loadData();
+const data = await window.NightingaleServices.getService('fileService').loadData();
 
 // Search data
-const results = window.NightingaleServices.getService('search').searchCases(
-  data.cases,
-  query
-);
+const results = window.NightingaleServices.getService('search').searchCases(data.cases, query);
 
 // Legacy compatibility (still works)
 await window.NightingaleFileService.saveData(data);
@@ -255,7 +253,8 @@ const variants = {
 ### Project Documentation
 
 - [Architecture Context](Docs/Architecture-Context.md) - Current implementation vs future model
-- [Service Organization](Docs/Service-Reorganization-Migration-Guide.md) - Service layer architecture
+- [Service Organization](Docs/Service-Reorganization-Migration-Guide.md) - Service layer
+  architecture
 - [Data Migration Guide](Docs/Data-Migration-Guide.md) - Legacy data migration procedures
 - [Component Analysis](Docs/Tab-Component-Analysis.md) - Component architecture patterns
 - [React Best Practices](Docs/react-best-practices.md) - Development guidelines
