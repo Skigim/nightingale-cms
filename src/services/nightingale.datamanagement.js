@@ -46,6 +46,72 @@ function generateSecureId(prefix = 'item') {
   return `${prefix}-${timestamp}-${randomPart}`;
 }
 
+/**
+ * Ensure an ID is a string and optionally sanitize format
+ * Keeps existing prefixed/UUID ids; converts numbers to strings.
+ *
+ * @param {string|number} id
+ * @returns {string}
+ */
+function ensureStringId(id) {
+  if (id === undefined || id === null) return '';
+  return String(id);
+}
+
+/**
+ * Extract numeric suffix from an id for counter derivation.
+ * @param {string} id
+ * @returns {number|null}
+ */
+function numericSuffix(id) {
+  if (!id) return null;
+  const m = String(id).match(/(\d+)(?!.*\d)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+/**
+ * Normalize address to object form; accept string legacy value
+ * @param {object|string|undefined} addr
+ * @returns {{street:string,city:string,state:string,zip:string}}
+ */
+function normalizeAddress(addr) {
+  if (addr && typeof addr === 'object') {
+    return {
+      street: addr.street || '',
+      city: addr.city || '',
+      state: addr.state || '',
+      zip: addr.zip || '',
+    };
+  }
+  if (typeof addr === 'string') {
+    // Best-effort split: "street, city, state zip"
+    const parts = addr.split(',').map((s) => s.trim());
+    const [street = '', city = '', stateZip = ''] = parts;
+    let state = '';
+    let zip = '';
+    if (stateZip) {
+      const m = stateZip.match(/([A-Za-z]{2})\s*(\d{5}(?:-\d{4})?)?/);
+      if (m) {
+        state = m[1] || '';
+        zip = m[2] || '';
+      } else {
+        state = stateZip;
+      }
+    }
+    return { street, city, state, zip };
+  }
+  return { street: '', city: '', state: '', zip: '' };
+}
+
+/**
+ * Coerce amount/value to number
+ */
+function toNumber(val, fallback = 0) {
+  if (val === undefined || val === null || val === '') return fallback;
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 // ========================================================================
 // DATA LOOKUP AND SEARCH FUNCTIONS
 // ========================================================================
@@ -90,8 +156,20 @@ async function normalizeDataMigrations(data) {
   // Create a deep clone to prevent race conditions during concurrent modifications
   const normalizedData = JSON.parse(JSON.stringify(data));
 
+  // Ensure metadata scaffold
+  normalizedData.metadata = normalizedData.metadata || {};
+  if (!normalizedData.metadata.schemaVersion) {
+    normalizedData.metadata.schemaVersion = '2024.1';
+  }
+  if (!normalizedData.metadata.version) {
+    normalizedData.metadata.version = '1.0.0';
+  }
+
   // Normalize case data structure
   if (normalizedData.cases) {
+    const peopleById = new Map(
+      (normalizedData.people || []).map((p) => [ensureStringId(p.id), p]),
+    );
     normalizedData.cases = normalizedData.cases.map((caseItem) => {
       const normalizedCase = { ...caseItem };
 
@@ -99,11 +177,17 @@ async function normalizeDataMigrations(data) {
       if (!normalizedCase.id || normalizedCase.id === null) {
         normalizedCase.id = generateSecureId('case');
       }
+      normalizedCase.id = ensureStringId(normalizedCase.id);
 
       // Ensure MCN field consistency - map both directions
       // Legacy field migration: masterCaseNumber -> mcn
       if (caseItem.masterCaseNumber && !caseItem.mcn) {
         normalizedCase.mcn = caseItem.masterCaseNumber;
+      }
+
+      // Enforce MCN numeric-only string if present
+      if (normalizedCase.mcn) {
+        normalizedCase.mcn = String(normalizedCase.mcn).replace(/\D/g, '');
       }
 
       // Map appDetails.appDate to applicationDate
@@ -127,6 +211,23 @@ async function normalizeDataMigrations(data) {
         typeof normalizedCase.personId === 'number'
       ) {
         normalizedCase.personId = normalizedCase.personId.toString();
+      }
+      if (normalizedCase.personId) {
+        normalizedCase.personId = ensureStringId(normalizedCase.personId);
+      }
+
+      // Backfill clientName from person if missing
+      if (!normalizedCase.clientName && normalizedCase.personId) {
+        const person = peopleById.get(normalizedCase.personId);
+        if (person?.name) normalizedCase.clientName = person.name;
+      }
+
+      // Backfill clientAddress from person if missing
+      if (!normalizedCase.clientAddress && normalizedCase.personId) {
+        const person = peopleById.get(normalizedCase.personId);
+        if (person?.address) {
+          normalizedCase.clientAddress = normalizeAddress(person.address);
+        }
       }
 
       // Add required fields with defaults for legacy cases
@@ -180,6 +281,13 @@ async function normalizeDataMigrations(data) {
               normalizedCase.financials[financialType].map((item) => {
                 const migratedItem = { ...item };
 
+                // Ensure id
+                if (!migratedItem.id) {
+                  migratedItem.id = generateSecureId('financial');
+                } else {
+                  migratedItem.id = ensureStringId(migratedItem.id);
+                }
+
                 // Migrate type → description (CMSOld uses "type", React uses "description")
                 if (item.type && !item.description) {
                   migratedItem.description = item.type;
@@ -212,6 +320,28 @@ async function normalizeDataMigrations(data) {
                   migratedItem.verificationSource = item.source;
                 }
 
+                // Normalize numeric fields
+                migratedItem.amount = toNumber(migratedItem.amount, 0);
+                migratedItem.value = toNumber(
+                  migratedItem.value,
+                  migratedItem.amount,
+                );
+
+                // Defaults for UI expectations
+                if (!migratedItem.owner) migratedItem.owner = 'applicant';
+                if (!migratedItem.verificationStatus) {
+                  migratedItem.verificationStatus =
+                    item.verified === true ? 'Verified' : 'Needs VR';
+                }
+                if (
+                  migratedItem.accountNumber &&
+                  typeof migratedItem.accountNumber === 'number'
+                ) {
+                  migratedItem.accountNumber = String(
+                    migratedItem.accountNumber,
+                  );
+                }
+
                 return migratedItem;
               });
           }
@@ -231,6 +361,7 @@ async function normalizeDataMigrations(data) {
       if (!normalizedPerson.id) {
         normalizedPerson.id = generateSecureId('person');
       }
+      normalizedPerson.id = ensureStringId(normalizedPerson.id);
 
       // Ensure default values for required fields
       if (!normalizedPerson.name) {
@@ -243,6 +374,24 @@ async function normalizeDataMigrations(data) {
 
       if (!normalizedPerson.dateAdded) {
         normalizedPerson.dateAdded = new Date().toISOString();
+      }
+
+      // Normalize address structures
+      if (normalizedPerson.address) {
+        normalizedPerson.address = normalizeAddress(normalizedPerson.address);
+      }
+      if (normalizedPerson.mailingAddress) {
+        const m = normalizedPerson.mailingAddress;
+        normalizedPerson.mailingAddress = {
+          ...normalizeAddress(m),
+          sameAsPhysical:
+            typeof m.sameAsPhysical === 'boolean' ? m.sameAsPhysical : false,
+        };
+      } else {
+        normalizedPerson.mailingAddress = {
+          ...normalizeAddress(undefined),
+          sameAsPhysical: false,
+        };
       }
 
       return normalizedPerson;
@@ -268,6 +417,7 @@ async function normalizeDataMigrations(data) {
       if (!normalizedOrg.id) {
         normalizedOrg.id = generateSecureId('org');
       }
+      normalizedOrg.id = ensureStringId(normalizedOrg.id);
 
       // Ensure default values for required fields
       if (!normalizedOrg.name) {
@@ -282,9 +432,76 @@ async function normalizeDataMigrations(data) {
         normalizedOrg.dateAdded = new Date().toISOString();
       }
 
+      // Normalize address and contact structures
+      if (normalizedOrg.address) {
+        normalizedOrg.address = normalizeAddress(normalizedOrg.address);
+      }
+      if (normalizedOrg.contactPerson) {
+        normalizedOrg.contactPerson = {
+          name: normalizedOrg.contactPerson.name || '',
+          title: normalizedOrg.contactPerson.title || '',
+          phone: normalizedOrg.contactPerson.phone || '',
+          email: normalizedOrg.contactPerson.email || '',
+        };
+      }
+
+      // Ensure personnel list exists for modern UI
+      if (!Array.isArray(normalizedOrg.personnel)) {
+        normalizedOrg.personnel = [];
+      }
+
       return normalizedOrg;
     });
   }
+
+  // Ensure counters exist by deriving from current data when missing
+  const deriveNext = (items, fallback = 1) => {
+    if (!Array.isArray(items) || items.length === 0) return fallback;
+    const maxNum = items.reduce((acc, it) => {
+      const n = numericSuffix(ensureStringId(it.id));
+      return n && n > acc ? n : acc;
+    }, 0);
+    return (maxNum || 0) + 1;
+  };
+
+  if (normalizedData.nextPersonId == null) {
+    normalizedData.nextPersonId = deriveNext(normalizedData.people, 1);
+  }
+  if (normalizedData.nextOrganizationId == null) {
+    normalizedData.nextOrganizationId = deriveNext(
+      normalizedData.organizations,
+      1,
+    );
+  }
+  if (normalizedData.nextCaseId == null) {
+    normalizedData.nextCaseId = deriveNext(normalizedData.cases, 1);
+  }
+  if (normalizedData.nextFinancialItemId == null) {
+    const allFin = (normalizedData.cases || []).flatMap((c) =>
+      ['resources', 'income', 'expenses'].flatMap(
+        (k) => c.financials?.[k] || [],
+      ),
+    );
+    normalizedData.nextFinancialItemId = deriveNext(allFin, 1);
+  }
+  if (normalizedData.nextNoteId == null) {
+    const allNotes = (normalizedData.cases || []).flatMap((c) => c.notes || []);
+    normalizedData.nextNoteId = deriveNext(allNotes, 1);
+  }
+
+  // Ensure optional scaffolds
+  normalizedData.vrTemplates = normalizedData.vrTemplates || [];
+  normalizedData.vrCategories = normalizedData.vrCategories || [];
+  normalizedData.vrRequests = normalizedData.vrRequests || [];
+  normalizedData.contacts = normalizedData.contacts || [];
+  normalizedData.viewState = normalizedData.viewState || {
+    currentTab: 'case-management',
+    currentTitle: 'Cases',
+    currentCaseId: null,
+    lastRefreshTimestamp: new Date().toISOString(),
+    expandedFinancialCards: {},
+  };
+  normalizedData.accordionState = normalizedData.accordionState || {};
 
   return normalizedData;
 }
@@ -447,6 +664,7 @@ function validateOrganizationData(orgData) {
 const NightingaleDataManagement = {
   // Utility functions
   generateSecureId,
+  ensureStringId,
 
   // Data lookup functions
   findPersonById,
@@ -475,6 +693,7 @@ const NightingaleDataManagement = {
 // Export individual functions for tree-shaking
 export {
   generateSecureId,
+  ensureStringId,
   findPersonById,
   normalizeDataMigrations,
   updateCaseInCollection,
