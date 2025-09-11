@@ -221,10 +221,17 @@ function renderCasesContent({ components, data: dataResult, props }) {
                   props.fullData?.people,
                   value,
                 ) || null;
+              // Fallback: if combined name missing, derive from first/last to avoid 'Unknown'
+              const displayName =
+                person?.name ||
+                [person?.firstName, person?.lastName]
+                  .filter(Boolean)
+                  .join(' ') ||
+                'Unknown';
               return e(
                 'span',
                 { className: 'font-medium text-white' },
-                person?.name || 'Unknown',
+                displayName,
               );
             },
           },
