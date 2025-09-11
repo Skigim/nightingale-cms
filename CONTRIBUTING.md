@@ -25,6 +25,14 @@ This repository uses a dev-first branching model:
 - CI runs on `dev` and feature branches to validate linting and tests.
 - Deploy workflow runs only on `main` push.
 
+## Release Branch Flow
+
+- Create a release branch from `dev` when stabilizing (e.g., `release/1.0.0`).
+- Continue day-to-day work on `dev`. For release fixes, commit to `release/x.y.z` and then merge
+  `release/x.y.z` back into `dev` to keep `dev` ahead.
+- When ready to ship, merge `dev` → `main` via PR. Tags are created on the release branch (e.g.,
+  `v1.0.0-rc.1`, `v1.0.0`).
+
 ## Coding Standards
 
 - React 18 with ES modules; UI vs Business layer separation.
