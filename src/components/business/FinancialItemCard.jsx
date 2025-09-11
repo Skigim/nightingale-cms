@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+// Removed eslint-disable for prop-types; adding explicit PropTypes below
 /**
  * Nightingale Component Library - FinancialItemCard
  * Layer: Business (Domain-Specific)
@@ -10,7 +10,8 @@
  * Migrated to ES module component registry.
  */
 import React, { useMemo, useCallback } from 'react';
-import { registerComponent } from '../../services/registry';
+import PropTypes from 'prop-types';
+import { registerComponent, getComponent } from '../../services/registry';
 function FinancialItemCard({
   item,
   itemType,
@@ -22,6 +23,9 @@ function FinancialItemCard({
   showActions = true,
 }) {
   const e = React.createElement;
+  // Retrieve UI components via registry (avoid window.* globals)
+  const Badge = getComponent('ui', 'Badge');
+  const Button = getComponent('ui', 'Button');
 
   // Get verification status text for Badge component
   const getVerificationStatus = useMemo(() => {
@@ -162,11 +166,12 @@ function FinancialItemCard({
             )
           : e('div'), // Empty div to maintain flex layout
         // Badge - right side
-        e(window.Badge, {
-          status: getVerificationStatus.text,
-          variant: 'verification',
-          size: 'sm',
-        }),
+        Badge &&
+          e(Badge, {
+            status: getVerificationStatus.text,
+            variant: 'verification',
+            size: 'sm',
+          }),
       ),
 
       // Action buttons (only shown when confirming delete)
@@ -179,19 +184,21 @@ function FinancialItemCard({
               'flex justify-end space-x-1 pt-2 border-t border-gray-600',
           },
           // Confirm button (green check)
-          e(window.Button, {
-            variant: 'success',
-            size: 'sm',
-            onClick: handleDeleteConfirm,
-            children: '✓',
-          }),
+          Button &&
+            e(Button, {
+              variant: 'success',
+              size: 'sm',
+              onClick: handleDeleteConfirm,
+              children: '✓',
+            }),
           // Cancel button (red X)
-          e(window.Button, {
-            variant: 'danger',
-            size: 'sm',
-            onClick: handleDeleteClick,
-            children: '✗',
-          }),
+          Button &&
+            e(Button, {
+              variant: 'danger',
+              size: 'sm',
+              onClick: handleDeleteClick,
+              children: '✗',
+            }),
         ),
     );
   }, [
@@ -203,6 +210,8 @@ function FinancialItemCard({
     handleDeleteConfirm,
     handleDeleteClick,
     e,
+    Badge,
+    Button,
   ]);
 
   // Don't render if no item provided
@@ -373,3 +382,67 @@ registerComponent('business', 'FinancialItemGrid', FinancialItemGrid);
 // ES6 Module Export
 export default FinancialItemCard;
 export { FinancialItemCard, FinancialItemList, FinancialItemGrid };
+
+// PropTypes
+FinancialItemCard.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    description: PropTypes.string,
+    type: PropTypes.string,
+    amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    frequency: PropTypes.string,
+    accountNumber: PropTypes.string,
+    verificationStatus: PropTypes.string,
+    verificationSource: PropTypes.string,
+    location: PropTypes.string,
+  }),
+  itemType: PropTypes.string,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onDeleteConfirm: PropTypes.func,
+  onDeleteCancel: PropTypes.func,
+  confirmingDelete: PropTypes.bool,
+  showActions: PropTypes.bool,
+};
+
+FinancialItemList.propTypes = {
+  items: PropTypes.arrayOf(FinancialItemCard.propTypes.item),
+  itemType: PropTypes.string,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onDeleteConfirm: PropTypes.func,
+  onDeleteCancel: PropTypes.func,
+  confirmingDelete: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.bool,
+  ]),
+  onAdd: PropTypes.func,
+  title: PropTypes.string,
+  interactive: PropTypes.bool,
+  showActions: PropTypes.bool,
+};
+
+FinancialItemGrid.propTypes = {
+  items: PropTypes.arrayOf(FinancialItemCard.propTypes.item),
+  itemType: PropTypes.string,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func,
+  onDeleteConfirm: PropTypes.func,
+  onDeleteCancel: PropTypes.func,
+  confirmingDelete: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.bool,
+  ]),
+  onAdd: PropTypes.func,
+  title: PropTypes.string,
+  interactive: PropTypes.bool,
+  showActions: PropTypes.bool,
+  columns: PropTypes.oneOfType([
+    PropTypes.oneOf(['auto']),
+    PropTypes.number,
+    PropTypes.string,
+  ]),
+};

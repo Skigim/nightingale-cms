@@ -179,7 +179,6 @@ function Header({
           <PrimaryButton
             onClick={onManualSave}
             title="Manual save (autosave not available)"
-            size="sm"
           >
             Save
           </PrimaryButton>
