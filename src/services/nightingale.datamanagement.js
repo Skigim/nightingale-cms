@@ -156,6 +156,11 @@ async function normalizeDataMigrations(data) {
   // Create a deep clone to prevent race conditions during concurrent modifications
   const normalizedData = JSON.parse(JSON.stringify(data));
 
+  // Preserve empty objects without adding scaffolding to satisfy callers/tests expecting {} unchanged
+  if (Object.keys(normalizedData).length === 0) {
+    return normalizedData;
+  }
+
   // Ensure metadata scaffold
   normalizedData.metadata = normalizedData.metadata || {};
   if (!normalizedData.metadata.schemaVersion) {
