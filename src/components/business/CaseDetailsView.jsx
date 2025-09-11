@@ -11,6 +11,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
+import { ensureStringId } from '../../services/nightingale.datamanagement.js';
 
 /**
  * CaseDetailsView Component
@@ -42,8 +43,10 @@ function CaseDetailsView({
     return null;
   }
 
-  // Data lookups
-  const caseData = fullData?.cases?.find((c) => c.id === caseId);
+  // Data lookups (robust ID matching)
+  const caseData = fullData?.cases?.find(
+    (c) => ensureStringId(c.id) === ensureStringId(caseId),
+  );
   const person =
     globalThis.NightingaleDataManagement?.findPersonById?.(
       fullData?.people,
@@ -127,7 +130,11 @@ function CaseDetailsView({
               title: 'Click to edit case details',
               onClick: () => setIsEditModalOpen(true),
             },
-            person?.name || 'Unknown',
+            person?.name ||
+              [person?.firstName, person?.lastName].filter(Boolean).join(' ') ||
+              caseData?.clientName ||
+              caseData?.personName ||
+              'Unknown',
             ' ',
             e(
               'svg',
