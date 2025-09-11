@@ -23,6 +23,7 @@ import OrganizationsTab from './OrganizationsTab.jsx';
 import EligibilityTab from './EligibilityTab.jsx';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
+import { getFileService } from '../../services/fileServiceProvider.js';
 // Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
 
 /**
@@ -45,12 +46,17 @@ function NightingaleCMSApp() {
   // const [organizationsViewMode, setOrganizationsViewMode] = useState('list'); // Track if we're in organization details view
   // const [organizationsBackFunction, setOrganizationsBackFunction] = useState(null); // Function to go back from organization details
 
-  // Autosave & File service state (combined)
-  const [autosaveFileService] = useState(null); // legacy service placeholder
-  const [autosaveStatus] = useState({
-    status: 'disconnected',
-    message: 'Service not initialized',
-  });
+  // File service instance (hydrated from provider)
+  const [fileService, setFileServiceState] = useState(() => getFileService());
+
+  // Derive autosave status (kept for Header prop compatibility)
+  const autosaveStatus = useMemo(
+    () => ({
+      status: fileService ? 'ready' : 'disconnected',
+      message: fileService ? 'Service initialized' : 'Service not initialized',
+    }),
+    [fileService],
+  );
 
   // Use ref for live data access to avoid stale closure issues
   const fullDataRef = useRef(null);
@@ -65,8 +71,27 @@ function NightingaleCMSApp() {
     fullDataRef.current = fullData;
   }, [fullData]);
 
-  // Backward compatibility aliases
-  const fileService = autosaveFileService; // For components that expect fileService
+  // Listen for provider readiness events to hydrate service after mount
+  useEffect(() => {
+    const handler = () => {
+      const svc = getFileService();
+      if (svc && svc !== fileService) {
+        setFileServiceState(svc);
+      }
+    };
+    // Attempt immediate hydration (handles case where service set before mount)
+    handler();
+    if (typeof document !== 'undefined') {
+      document.addEventListener('fileService:ready', handler);
+    }
+    return () => {
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('fileService:ready', handler);
+      }
+    };
+    // fileService intentionally excluded from deps to avoid stale removal/add cycle
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Memoize non-tab components (tabs imported directly above)
   const components = useMemo(
@@ -120,11 +145,11 @@ function NightingaleCMSApp() {
   const serviceStatus = useMemo(
     () => ({
       isReady: !!fileService,
-      hasAutosave: !!autosaveFileService,
+      hasAutosave: !!fileService, // unified service now
       canSave: !!fileService?.saveData,
-      isLoading: false, // legacy loading removed
+      isLoading: false,
     }),
-    [fileService, autosaveFileService],
+    [fileService],
   );
 
   // Toast function - module based
