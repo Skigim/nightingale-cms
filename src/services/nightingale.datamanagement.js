@@ -173,7 +173,18 @@ async function normalizeDataMigrations(data) {
   // Normalize case data structure
   if (normalizedData.cases) {
     const peopleById = new Map(
-      (normalizedData.people || []).map((p) => [ensureStringId(p.id), p]),
+      (normalizedData.people || []).map((p) => {
+        const person = { ...p };
+        // Derive composite name if missing
+        if (!person.name) {
+          const composite = [person.firstName, person.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .trim();
+          if (composite) person.name = composite;
+        }
+        return [ensureStringId(person.id), person];
+      }),
     );
     normalizedData.cases = normalizedData.cases.map((caseItem) => {
       const normalizedCase = { ...caseItem };
@@ -370,7 +381,14 @@ async function normalizeDataMigrations(data) {
 
       // Ensure default values for required fields
       if (!normalizedPerson.name) {
-        normalizedPerson.name = 'Unknown Person';
+        const composite = [
+          normalizedPerson.firstName,
+          normalizedPerson.lastName,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+        normalizedPerson.name = composite || 'Unknown Person';
       }
 
       if (!normalizedPerson.status) {
