@@ -10,6 +10,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
 import { dayjs } from '../../services/nightingale.dayjs.js';
+import { findPersonById } from '../../services/nightingale.datamanagement.js';
 
 function NotesModal({
   isOpen,
@@ -25,11 +26,8 @@ function NotesModal({
   // Get toast function with fallback
   const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
-  // Look up person name using the helper function
-  const person = window.NightingaleDataManagement.findPersonById(
-    fullData?.people,
-    caseData?.personId,
-  );
+  // Look up person name using the helper function (module import)
+  const person = findPersonById(fullData?.people, caseData?.personId);
   const clientName = person ? person.name : 'Unknown Client';
   const mcn = caseData?.mcn || 'No MCN';
 
@@ -161,7 +159,7 @@ function NotesModal({
 
       resetForm();
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('notes:save');
+      const logger = globalThis.NightingaleLogger?.get('notes:save');
       logger?.error('Note save failed', { error: error.message });
       showToast('Error saving note. Please try again.', 'error');
     } finally {
@@ -183,7 +181,7 @@ function NotesModal({
   };
 
   const handleDelete = async (noteId) => {
-    // Set up React-based confirmation instead of blocking window.confirm()
+    // Set up React-based confirmation instead of blocking confirm()
     setNoteToDelete(noteId);
     setShowDeleteConfirm(true);
   };
@@ -202,7 +200,7 @@ function NotesModal({
 
       showToast('Note deleted successfully', 'success');
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('notes:delete');
+      const logger = globalThis.NightingaleLogger?.get('notes:delete');
       logger?.error('Note deletion failed', { error: error.message });
       showToast('Error deleting note. Please try again.', 'error');
     } finally {
@@ -218,19 +216,23 @@ function NotesModal({
   };
 
   const renderNoteForm = () => {
+    const FormField = getComponent('ui', 'FormField');
+    const SearchBar = getComponent('ui', 'SearchBar');
+    const Textarea = getComponent('ui', 'Textarea');
+
     return e(
       'div',
       { className: 'space-y-4' },
 
       // Category field with dropdown search
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Category',
           required: true,
           error: formErrors.category,
         },
-        e(window.SearchBar, {
+        e(SearchBar, {
           value: formData.category,
           onChange: (event) => {
             // Handle input change events from typing
@@ -253,13 +255,13 @@ function NotesModal({
 
       // Text field (RTF-capable textarea)
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Note Text',
           required: true,
           error: formErrors.text,
         },
-        e(window.Textarea, {
+        e(Textarea, {
           value: formData.text,
           onChange: (e) => handleInputChange('text', e.target.value),
           placeholder: 'Enter note details...',
@@ -285,6 +287,9 @@ function NotesModal({
       );
     }
 
+    const Badge = getComponent('ui', 'Badge');
+    const Button = getComponent('ui', 'Button');
+
     return e(
       'div',
       { className: 'space-y-4 max-h-96 overflow-y-auto' },
@@ -306,7 +311,7 @@ function NotesModal({
               e(
                 'div',
                 { className: 'flex items-center gap-2 mb-1' },
-                e(window.Badge, {
+                e(Badge, {
                   variant: 'info',
                   size: 'sm',
                   text: note.category,
@@ -325,13 +330,13 @@ function NotesModal({
             e(
               'div',
               { className: 'flex gap-2' },
-              e(window.Button, {
+              e(Button, {
                 variant: 'secondary',
                 size: 'sm',
                 onClick: () => handleEdit(note),
                 children: 'Edit',
               }),
-              e(window.Button, {
+              e(Button, {
                 variant: 'danger',
                 size: 'sm',
                 onClick: () => handleDelete(note.id),

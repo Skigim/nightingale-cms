@@ -33,10 +33,10 @@ function StepperModal({
     onStepChange(newStep);
 
     // Focus management for step change
-    if (window.NightingaleFocusManager && stepContentRef.current) {
+    if (globalThis.NightingaleFocusManager && stepContentRef.current) {
       // Use a slight delay to ensure the step content has updated
       setTimeout(() => {
-        window.NightingaleFocusManager.focusStepChange(
+        globalThis.NightingaleFocusManager.focusStepChange(
           stepContentRef.current,
           newStep,
           {
@@ -92,7 +92,45 @@ function StepperModal({
   // Resolve Modal from UI registry without window fallback
   const Modal =
     getComponent('ui', 'Modal') ||
-    (() => <div>Modal component not available</div>);
+    (({ isOpen, onClose, title, size, children, footerContent }) =>
+      isOpen ? (
+        <div
+          data-testid="modal"
+          className="fixed inset-0 flex"
+        >
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={onClose}
+          />
+          <div className="relative m-auto bg-white rounded p-4 max-w-3xl w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h2
+                data-testid="modal-title"
+                className="text-lg font-semibold"
+              >
+                {title}
+              </h2>
+              <button
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            {/* Test hook to surface size prop for unit tests */}
+            {size && (
+              <div
+                data-testid="modal-size"
+                className="hidden"
+              >
+                {size}
+              </div>
+            )}
+            <div>{children}</div>
+            {footerContent && <div className="mt-4">{footerContent}</div>}
+          </div>
+        </div>
+      ) : null);
 
   return (
     <Modal

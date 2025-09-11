@@ -38,9 +38,36 @@ import './components/business/PersonDetailsView.jsx';
 
 // Import the root app last so all dependencies are registered
 import NightingaleCMSApp from './components/business/NightingaleCMSApp.jsx';
+import AutosaveFileService from './services/nightingale.autosavefile.js';
+import { setFileService } from './services/fileServiceProvider.js';
+import Toast from './services/nightingale.toast.js';
+
+// Initialize core providers/services before mount
+function initializeProviders() {
+  try {
+    // Create autosave-enabled file service instance
+    const fileService = new AutosaveFileService({
+      errorCallback: (msg, type = 'error') => Toast.showToast?.(msg, type),
+    });
+    // Provide to services via provider
+    setFileService(fileService);
+
+    // Optionally expose to legacy globals (read-only) for diagnostics
+    if (!globalThis.fileService) {
+      Object.defineProperty(globalThis, 'fileService', {
+        value: fileService,
+        writable: false,
+        configurable: true,
+      });
+    }
+  } catch (e) {
+    console.error('Failed to initialize file service', e);
+  }
+}
 
 // Minimal bootstrap: render app directly (React already on window via CDN)
 const mount = () => {
+  initializeProviders();
   const rootEl = document.getElementById('root');
   if (!rootEl) return;
   const root = ReactDOM.createRoot(rootEl);

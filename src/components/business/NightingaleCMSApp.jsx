@@ -22,6 +22,7 @@ import PeopleTab from './PeopleTab.jsx';
 import OrganizationsTab from './OrganizationsTab.jsx';
 import EligibilityTab from './EligibilityTab.jsx';
 import { registerComponent, getComponent } from '../../services/registry';
+import Toast from '../../services/nightingale.toast.js';
 // Keep Header / Sidebar / SettingsModal via global for now (can be migrated later)
 
 /**
@@ -126,8 +127,8 @@ function NightingaleCMSApp() {
     [fileService, autosaveFileService],
   );
 
-  // Toast function - now guaranteed to work by main.js setup
-  const showToast = window.showToast;
+  // Toast function - module based
+  const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
   // (Legacy services ready listener removed) Autosave/file service will now be
   // initialized elsewhere; component renders immediately.
@@ -139,7 +140,7 @@ function NightingaleCMSApp() {
         await fileService.saveData();
         showToast('Data saved successfully', 'success');
       } catch (error) {
-        const logger = window.NightingaleLogger?.get('cms:manualSave');
+        const logger = globalThis.NightingaleLogger?.get('cms:manualSave');
         logger?.error('Manual save failed', { error: error.message });
         showToast('Failed to save data', 'error');
       }

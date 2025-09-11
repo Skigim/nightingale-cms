@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
+import Toast from '../../services/nightingale.toast.js';
 
 /**
  * Data management hook for Organizations Tab
@@ -19,8 +20,8 @@ function useOrganizationsData(props) {
   } = props;
   // Hooks from React (unconditional at top of scope)
 
-  // Toast function - now guaranteed to work by main.js setup
-  const showToast = window.showToast;
+  // Toast function via module
+  const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
   // All state hooks (called unconditionally per React rules)
   const [searchTerm, setSearchTerm] = useState('');
@@ -154,7 +155,9 @@ function useOrganizationsData(props) {
           showToast('Organization updated successfully!', 'success');
         }
       } catch (error) {
-        const logger = window.NightingaleLogger?.get('organizationsTab:save');
+        const logger = globalThis.NightingaleLogger?.get(
+          'organizationsTab:save',
+        );
         logger?.error('Organization save failed', { error: error.message });
         showToast('Error saving organization', 'error');
       }

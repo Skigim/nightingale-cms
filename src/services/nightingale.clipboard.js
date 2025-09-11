@@ -10,9 +10,9 @@
  * @created 2025-08-24
  */
 
-// TODO: Replace with proper imports once logger and toast are modernized
+// TODO: Replace with proper imports once logger is modernized
 // import NightingaleLogger from './nightingale.logger.js';
-// import { showToast } from './nightingale.toast.js';
+import Toast from './nightingale.toast.js';
 
 /**
  * Modern clipboard operations with user feedback
@@ -39,18 +39,14 @@ class NightingaleClipboard {
 
     // Validate input
     if (!text || typeof text !== 'string') {
-      if (config.showToast && window.showToast) {
-        window.showToast('Nothing to copy', 'error');
-      }
+      if (config.showToast) Toast.showToast?.('Nothing to copy', 'error');
       return false;
     }
 
     // Sanitize the text to copy
     const sanitizedText = text.trim();
     if (!sanitizedText) {
-      if (config.showToast && window.showToast) {
-        window.showToast('Nothing to copy', 'error');
-      }
+      if (config.showToast) Toast.showToast?.('Nothing to copy', 'error');
       return false;
     }
 
@@ -59,8 +55,8 @@ class NightingaleClipboard {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(sanitizedText);
 
-        if (config.showToast && window.showToast) {
-          window.showToast(config.successMessage, 'success');
+        if (config.showToast) {
+          Toast.showToast?.(config.successMessage, 'success');
         }
         return true;
       }
@@ -68,7 +64,7 @@ class NightingaleClipboard {
       // Fallback to execCommand for older browsers
       return this._fallbackCopy(sanitizedText, config);
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('clipboard:copy');
+      const logger = globalThis.NightingaleLogger?.get('clipboard:copy');
       logger?.debug('Modern clipboard API failed, trying fallback', {
         error: error.message,
       });
@@ -100,18 +96,18 @@ class NightingaleClipboard {
       document.body.removeChild(textarea);
 
       if (successful) {
-        if (config.showToast && window.showToast) {
-          window.showToast(config.successMessage, 'success');
+        if (config.showToast) {
+          Toast.showToast?.(config.successMessage, 'success');
         }
         return true;
       } else {
         throw new Error('execCommand failed');
       }
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('clipboard:fallback');
+      const logger = globalThis.NightingaleLogger?.get('clipboard:fallback');
       logger?.warn('Fallback copy failed', { error: error.message });
-      if (config.showToast && window.showToast) {
-        window.showToast(config.errorMessage, 'error');
+      if (config.showToast) {
+        Toast.showToast?.(config.errorMessage, 'error');
       }
       return false;
     }

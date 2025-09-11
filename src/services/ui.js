@@ -252,7 +252,7 @@ function testDataIntegrityBroadcast() {
 
     return true;
   } catch (error) {
-    const logger = window.NightingaleLogger?.get('ui:broadcast');
+    const logger = globalThis.NightingaleLogger?.get('ui:broadcast');
     logger?.debug('Broadcast failed', { error: error.message });
     return false;
   }

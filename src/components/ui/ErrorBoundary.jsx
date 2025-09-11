@@ -42,7 +42,7 @@ class ErrorBoundary extends Component {
 
     // Log via Nightingale logger if available
     try {
-      const logger = window.NightingaleLogger?.get('ErrorBoundary');
+      const logger = globalThis.NightingaleLogger?.get('ErrorBoundary');
       logger?.error('Error caught by boundary:', error);
     } catch (logError) {
       // Silently handle logger errors

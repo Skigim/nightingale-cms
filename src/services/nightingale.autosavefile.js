@@ -97,7 +97,7 @@ class AutosaveFileService {
 
       this.updateStatus('initialized', 'Service ready');
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('autosave:init');
+      const logger = globalThis.NightingaleLogger?.get('autosave:init');
       logger?.error('Autosave init failed', { error: error.message });
       this.updateStatus('error', 'Initialization failed: ' + error.message);
     }
@@ -187,7 +187,7 @@ class AutosaveFileService {
           const success = await this._performWrite(data);
           resolve(success);
         } catch (error) {
-          const logger = window.NightingaleLogger?.get('autosave:write');
+          const logger = globalThis.NightingaleLogger?.get('autosave:write');
           logger?.error('Write operation failed', { error: error.message });
           reject(error);
         }
@@ -255,9 +255,9 @@ class AutosaveFileService {
       const rawData = JSON.parse(contents);
 
       // Apply data migrations if available
-      if (window.NightingaleDataManagement?.normalizeDataMigrations) {
+      if (globalThis.NightingaleDataManagement?.normalizeDataMigrations) {
         const migratedData =
-          await window.NightingaleDataManagement.normalizeDataMigrations(
+          await globalThis.NightingaleDataManagement.normalizeDataMigrations(
             rawData,
           );
         return migratedData;
@@ -302,7 +302,7 @@ class AutosaveFileService {
         return { handle, permission };
       }
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('autosave:directory');
+      const logger = globalThis.NightingaleLogger?.get('autosave:directory');
       logger?.warn('Directory handle verification failed', {
         error: error.message,
       });
@@ -546,7 +546,7 @@ class AutosaveFileService {
         this.handleSaveFailure('Write operation failed');
       }
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('autosave:save');
+      const logger = globalThis.NightingaleLogger?.get('autosave:save');
       logger?.error('Save operation failed', { error: error.message });
       this.handleSaveFailure(error.message);
     } finally {
@@ -600,7 +600,7 @@ class AutosaveFileService {
         }
       }
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('autosave:permissions');
+      const logger = globalThis.NightingaleLogger?.get('autosave:permissions');
       logger?.debug('Permission check failed', { error: error.message });
       this.state.permissionStatus = 'unknown';
     }

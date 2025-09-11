@@ -2,8 +2,9 @@
 // Note: React hooks declared within component functions for purity
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
 import dateUtils from '../../services/nightingale.dayjs.js';
+import Toast from '../../services/nightingale.toast.js';
 
 // Access utilities via module import
 const getDateUtils = () => dateUtils || {};
@@ -32,17 +33,22 @@ const getInitialCaseData = () => {
 function BasicInfoStep({ caseData, updateField, validationErrors }) {
   const e = React.createElement;
 
+  const FormField = getComponent('ui', 'FormField');
+  const TextInput = getComponent('ui', 'TextInput');
+  const Select = getComponent('ui', 'Select');
+  const DateInput = getComponent('ui', 'DateInput');
+
   return e(
     'div',
     { className: 'space-y-4' },
     e(
-      window.FormField,
+      FormField,
       {
         label: 'Master Case Number (MCN)',
         required: true,
         error: validationErrors.mcn,
       },
-      e(window.TextInput, {
+      e(TextInput, {
         value: caseData.mcn || '',
         onChange: (e) =>
           updateField('mcn', e.target.value.replace(/[^0-9]/g, '')),
@@ -53,25 +59,25 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
       'div',
       { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Application Date',
           required: true,
           error: validationErrors.applicationDate,
         },
-        e(window.DateInput, {
+        e(DateInput, {
           value: caseData.applicationDate,
           onChange: (e) => updateField('applicationDate', e.target.value),
         }),
       ),
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Case Type',
           required: true,
           error: validationErrors.caseType,
         },
-        e(window.Select, {
+        e(Select, {
           value: caseData.caseType,
           onChange: (e) => updateField('caseType', e.target.value),
           options: [
@@ -86,13 +92,13 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
       'div',
       { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Retro Requested?',
           required: true,
           error: validationErrors.retroRequested,
         },
-        e(window.Select, {
+        e(Select, {
           value: caseData.retroRequested,
           onChange: (e) => updateField('retroRequested', e.target.value),
           options: [
@@ -103,9 +109,9 @@ function BasicInfoStep({ caseData, updateField, validationErrors }) {
         }),
       ),
       e(
-        window.FormField,
+        FormField,
         { label: 'Priority Case' },
-        e(window.Select, {
+        e(Select, {
           value: caseData.priority ? 'Yes' : 'No',
           onChange: (e) => updateField('priority', e.target.value === 'Yes'),
           options: [
@@ -217,17 +223,20 @@ function ClientSelectionStep({
     (p) => String(p.id) !== String(caseData.personId),
   );
 
+  const FormField = getComponent('ui', 'FormField');
+  const SearchBar = getComponent('ui', 'SearchBar');
+
   return e(
     'div',
     { className: 'space-y-4 case-creation-step', style: { zIndex: 1020 } },
     e(
-      window.FormField,
+      FormField,
       {
         label: 'Select Client',
         required: true,
         error: validationErrors.personId,
       },
-      e(window.SearchBar, {
+      e(SearchBar, {
         value: clientSearchValue,
         onChange: (e) => setClientSearchValue(e.target.value),
         placeholder: 'Search for a client...',
@@ -251,13 +260,13 @@ function ClientSelectionStep({
     ),
     caseData.caseType === 'SIMP' &&
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Select Spouse (for SIMP)',
           required: true,
           error: validationErrors.spouseId,
         },
-        e(window.SearchBar, {
+        e(SearchBar, {
           value: spouseSearchValue,
           onChange: (e) => setSpouseSearchValue(e.target.value),
           placeholder: 'Search for spouse...',
@@ -280,9 +289,9 @@ function ClientSelectionStep({
         }),
       ),
     e(
-      window.FormField,
+      FormField,
       { label: 'Authorized Representative' },
-      e(window.SearchBar, {
+      e(SearchBar, {
         value: repSearchValue,
         onChange: (e) => setRepSearchValue(e.target.value),
         placeholder: 'Search for a representative...',
@@ -352,6 +361,12 @@ function CaseDetailsStep({
   ]);
 
   // Living arrangement fields based on selected option
+  // UI components from registry
+  const FormField = getComponent('ui', 'FormField');
+  const TextInput = getComponent('ui', 'TextInput');
+  const Select = getComponent('ui', 'Select');
+  const DateInput = getComponent('ui', 'DateInput');
+
   let locationFields = null;
   if (caseData.livingArrangement === 'Apartment/House') {
     const selectedPerson = fullData?.people?.find(
@@ -376,13 +391,13 @@ function CaseDetailsStep({
               'Editing address for: ' + selectedPerson.name,
             ),
             e(
-              window.FormField,
+              FormField,
               {
                 label: 'Street Address',
                 required: true,
                 error: validationErrors.address,
               },
-              e(window.TextInput, {
+              e(TextInput, {
                 value: selectedPerson.address?.street || '',
                 onChange: (e) => updatePersonAddress('street', e.target.value),
                 placeholder: '123 Main Street',
@@ -392,22 +407,22 @@ function CaseDetailsStep({
               'div',
               { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
               e(
-                window.FormField,
+                FormField,
                 { label: 'City', required: true, error: validationErrors.city },
-                e(window.TextInput, {
+                e(TextInput, {
                   value: selectedPerson.address?.city || '',
                   onChange: (e) => updatePersonAddress('city', e.target.value),
                   placeholder: 'Springfield',
                 }),
               ),
               e(
-                window.FormField,
+                FormField,
                 {
                   label: 'State',
                   required: true,
                   error: validationErrors.state,
                 },
-                e(window.Select, {
+                e(Select, {
                   value: selectedPerson.address?.state || 'IL',
                   onChange: (e) => updatePersonAddress('state', e.target.value),
                   options: [
@@ -427,13 +442,13 @@ function CaseDetailsStep({
               ),
             ),
             e(
-              window.FormField,
+              FormField,
               {
                 label: 'ZIP Code',
                 required: true,
                 error: validationErrors.zip,
               },
-              e(window.TextInput, {
+              e(TextInput, {
                 value: selectedPerson.address?.zip || '',
                 onChange: (e) => updatePersonAddress('zip', e.target.value),
                 placeholder: '62701',
@@ -460,13 +475,13 @@ function CaseDetailsStep({
         'Facility Information',
       ),
       e(
-        window.FormField,
+        FormField,
         {
           label: `Select ${caseData.livingArrangement} Facility`,
           required: true,
           error: validationErrors.organizationId,
         },
-        e(window.Select, {
+        e(Select, {
           value: caseData.organizationId,
           onChange: (e) => updateField('organizationId', e.target.value),
           options: organizationOptions,
@@ -488,13 +503,13 @@ function CaseDetailsStep({
         'Living Arrangement',
       ),
       e(
-        window.FormField,
+        FormField,
         {
           label: 'Living Arrangement',
           required: true,
           error: validationErrors.livingArrangement,
         },
-        e(window.Select, {
+        e(Select, {
           value: caseData.livingArrangement,
           onChange: (e) => updateField('livingArrangement', e.target.value),
           options: [
@@ -518,9 +533,9 @@ function CaseDetailsStep({
                 : 'mt-4 grid grid-cols-1 md:grid-cols-2 gap-4',
           },
           e(
-            window.FormField,
+            FormField,
             { label: 'With Waiver?' },
-            e(window.Select, {
+            e(Select, {
               value: caseData.withWaiver ? 'Yes' : 'No',
               onChange: (e) =>
                 updateField('withWaiver', e.target.value === 'Yes'),
@@ -533,12 +548,12 @@ function CaseDetailsStep({
           (caseData.livingArrangement === 'Assisted Living' ||
             caseData.livingArrangement === 'Nursing Home') &&
             e(
-              window.FormField,
+              FormField,
               {
                 label: 'Admission Date',
                 error: validationErrors.admissionDate,
               },
-              e(window.DateInput, {
+              e(DateInput, {
                 value: caseData.admissionDate,
                 onChange: (e) => updateField('admissionDate', e.target.value),
               }),
@@ -745,7 +760,9 @@ function CaseCreationModal({
   const [isLoading, setIsLoading] = useState(false);
 
   // Toast function - now guaranteed to work by main.js setup
-  const showToast = window.showToast;
+  const showToast = React.useCallback((msg, type) => {
+    Toast.showToast?.(msg, type);
+  }, []);
 
   // Create filtered steps config for edit mode (removes Review step)
   const filteredStepsConfig = editCaseId
@@ -804,7 +821,9 @@ function CaseCreationModal({
         const newErrors = validator(caseData, safeFullData);
         return newErrors;
       } catch (error) {
-        const logger = window.NightingaleLogger?.get('caseCreation:validate');
+        const logger = globalThis.NightingaleLogger?.get(
+          'caseCreation:validate',
+        );
         logger?.warn('Step validation failed', {
           error: error.message,
           step: stepConfig.key,
@@ -951,7 +970,7 @@ function CaseCreationModal({
       showToast(successMessage, 'success');
       onClose();
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('caseCreation:save');
+      const logger = globalThis.NightingaleLogger?.get('caseCreation:save');
       logger?.error('Case save failed', { error: error.message });
       // Error saving case suppressed (no-op)
       showToast('Error saving case: ' + error.message, 'error');
@@ -1057,7 +1076,7 @@ function CaseCreationModal({
           className: 'flex items-center justify-between px-6 py-4',
         },
         e(
-          window.Button,
+          getComponent('ui', 'Button'),
           {
             variant: 'outline',
             onClick: () => {
@@ -1076,14 +1095,14 @@ function CaseCreationModal({
           'div',
           { className: 'flex space-x-3 ml-6' }, // Added ml-6 for padding between sections
           e(
-            window.OutlineButton,
+            getComponent('ui', 'OutlineButton'),
             {
               onClick: onClose,
             },
             'Cancel',
           ),
           e(
-            window.PrimaryButton,
+            getComponent('ui', 'PrimaryButton'),
             {
               onClick: handleComplete,
               disabled: !hasChanges,
@@ -1095,7 +1114,7 @@ function CaseCreationModal({
     : null;
 
   return e(
-    window.StepperModal,
+    getComponent('ui', 'StepperModal') || getComponent('ui', 'Modal'),
     {
       isOpen,
       onClose,

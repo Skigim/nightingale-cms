@@ -16,7 +16,8 @@
  * @returns {React.Element|null} The AVS import modal component
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
+import { parseAvsData } from '../../services/nightingale.parsers.js';
 function AvsImportModal({
   isOpen,
   onClose,
@@ -95,12 +96,8 @@ function AvsImportModal({
     setError(null);
 
     try {
-      // Use global parser service (loaded via script tags)
-      if (!window.parseAvsData) {
-        throw new Error('AVS parser service not available');
-      }
-
-      const parsedAccounts = window.parseAvsData(rawData, knownAccountTypes);
+      // Use module parser service
+      const parsedAccounts = parseAvsData(rawData, knownAccountTypes);
 
       if (!parsedAccounts || parsedAccounts.length === 0) {
         setError(
@@ -215,7 +212,7 @@ function AvsImportModal({
   ).length;
 
   return e(
-    window.Modal,
+    getComponent('ui', 'Modal'),
     {
       isOpen,
       onClose,
@@ -250,14 +247,14 @@ function AvsImportModal({
         ),
 
         e(
-          window.FormField,
+          getComponent('ui', 'FormField'),
           {
             label: 'Paste Raw AVS Data',
             required: true,
             error: error && !previewItems.length ? error : null,
             hint: 'Copy the entire AVS report and paste it here',
           },
-          e(window.Textarea, {
+          e(getComponent('ui', 'Textarea'), {
             value: rawData,
             onChange: (e) => setRawData(e.target.value),
             placeholder:
@@ -272,7 +269,7 @@ function AvsImportModal({
           'div',
           { className: 'flex justify-start' },
           e(
-            window.Button,
+            getComponent('ui', 'Button'),
             {
               type: 'button',
               onClick: handleParseData,
@@ -369,7 +366,7 @@ function AvsImportModal({
           className: 'flex justify-end space-x-3 pt-4 border-t border-gray-600',
         },
         e(
-          window.Button,
+          getComponent('ui', 'Button'),
           {
             type: 'button',
             onClick: onClose,
@@ -406,7 +403,7 @@ function ImportButton({ disabled, selectedCount }) {
       : 'Import Selected';
 
   return e(
-    window.Button,
+    getComponent('ui', 'Button'),
     {
       type: 'submit',
       disabled,
@@ -499,14 +496,7 @@ function PreviewItem({ item, isSelected, onToggle }) {
       'aria-label': `Select ${item.type} account`,
     }),
 
-    e('input', {
-      type: 'checkbox',
-      checked: item.selected,
-      onChange: (e) => onToggle(item.id, e.target.checked),
-      className:
-        'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-gray-700',
-      'aria-label': `Select ${item.type} account`,
-    }),
+    // Secondary checkbox removed (duplicate)
 
     e(
       'div',

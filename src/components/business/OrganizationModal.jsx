@@ -225,7 +225,9 @@ function OrganizationModal({
 
         return errors;
       } catch (error) {
-        const logger = window.NightingaleLogger?.get('organization:validate');
+        const logger = globalThis.NightingaleLogger?.get(
+          'organization:validate',
+        );
         logger?.warn('Organization validation failed', {
           error: error.message,
         });
@@ -352,7 +354,7 @@ function OrganizationModal({
 
     if (Object.keys(finalErrors).length > 0) {
       setValidationErrors(finalErrors);
-      window.showToast?.('Please fix all validation errors', 'error');
+      Toast.showToast?.('Please fix all validation errors', 'error');
       return;
     }
 
@@ -469,7 +471,7 @@ function OrganizationModal({
       onOrganizationCreated(resultOrganization);
       onClose();
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('organization:save');
+      const logger = globalThis.NightingaleLogger?.get('organization:save');
       logger?.error('Organization save failed', { error: error.message });
       Toast.showToast?.('Error saving organization: ' + error.message, 'error');
     } finally {

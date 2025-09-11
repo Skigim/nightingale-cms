@@ -38,7 +38,17 @@ function SettingsModal({
 
   // Get dependencies
   const Modal = getComponent('ui', 'Modal');
-  const showToast = (msg, type) => Toast.showToast?.(msg, type);
+  const showToast = (msg, type) => {
+    // Call module toast
+    Toast.showToast?.(msg, type);
+    // Also call global for test/back-compat
+    if (typeof globalThis !== 'undefined') {
+      const g = globalThis;
+      if (typeof g.showToast === 'function') g.showToast(msg, type);
+      else if (g.window && typeof g.window.showToast === 'function')
+        g.window.showToast(msg, type);
+    }
+  };
 
   // Validate required props
   if (!Modal) {
@@ -48,8 +58,8 @@ function SettingsModal({
   if (typeof onClose !== 'function') {
     return null;
   }
-
   const handleConnect = async () => {
+    const logger = globalThis.NightingaleLogger?.get('settings:connect');
     if (!fileService?.connect) {
       showToast('File service not available', 'error');
       return;
@@ -66,7 +76,6 @@ function SettingsModal({
         showToast('Failed to connect to directory', 'error');
       }
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('settings:connect');
       logger?.error('Directory connection failed', { error: error.message });
       if (onFileStatusChange) onFileStatusChange('disconnected');
       showToast('Error connecting to directory', 'error');
@@ -85,9 +94,11 @@ function SettingsModal({
     try {
       const data = await fileService.readFile();
       if (data) {
-        const normalizedData = window.NightingaleDataManagement
+        const normalizedData = globalThis.NightingaleDataManagement
           ?.normalizeDataMigrations
-          ? await window.NightingaleDataManagement.normalizeDataMigrations(data)
+          ? await globalThis.NightingaleDataManagement.normalizeDataMigrations(
+              data,
+            )
           : data;
 
         if (onDataLoaded) onDataLoaded(normalizedData);
@@ -100,7 +111,7 @@ function SettingsModal({
         showToast('No data file found', 'warning');
       }
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('settings:loadData');
+      const logger = globalThis.NightingaleLogger?.get('settings:loadData');
       logger?.error('Data loading failed', { error: error.message });
       showToast('Error loading data file', 'error');
     } finally {
@@ -227,7 +238,7 @@ function SettingsModal({
       showToast('Sample data created and loaded!', 'success');
       onClose();
     } catch (error) {
-      const logger = window.NightingaleLogger?.get('settings:createSample');
+      const logger = globalThis.NightingaleLogger?.get('settings:createSample');
       logger?.error('Sample data creation failed', { error: error.message });
       showToast('Error creating sample data', 'error');
     }

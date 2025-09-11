@@ -8,7 +8,8 @@
  * @component FinancialItemModal
  */
 import React, { useState, useEffect } from 'react';
-import { registerComponent } from '../../services/registry';
+import { registerComponent, getComponent } from '../../services/registry';
+import Toast from '../../services/nightingale.toast.js';
 
 function FinancialItemModal({
   isOpen,
@@ -21,8 +22,8 @@ function FinancialItemModal({
 }) {
   const e = React.createElement;
 
-  // Toast function - now guaranteed to work by main.js setup
-  const showToast = window.showToast;
+  // Toast via module
+  const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
   const [formData, setFormData] = useState({
     id: editingItem?.id || null,
@@ -223,7 +224,8 @@ function FinancialItemModal({
     ),
   );
 
-  return e(window.Modal, {
+  const Modal = getComponent('ui', 'Modal');
+  return e(Modal || 'div', {
     isOpen,
     onClose,
     title: `${isEditing ? 'Edit' : 'Add'} ${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Item`,
