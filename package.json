@@ -4,8 +4,7 @@
   "description": "A comprehensive React-based case management system for vocational rehabilitation services",
   "main": "index.html",
   "scripts": {
-    "start": "npm run build && npx serve dist --port=3000",
-    "start:preview": "vite preview --port=3000",
+    "start": "npx serve . --port=3000",
     "dev": "vite",
     "build": "vite build",
     "test": "jest",
@@ -39,7 +38,7 @@
   "bugs": {
     "url": "https://github.com/your-org/nightingale-cms/issues"
   },
-  "homepage": "https://Skigim.github.io/nightingale-cms/",
+  "homepage": "https://github.com/your-org/nightingale-cms#readme",
   "type": "module",
   "devDependencies": {
     "@babel/core": "^7.22.0",
@@ -57,7 +56,6 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-internal": "file:./eslint-plugin-internal",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",

@@ -1,6 +1,6 @@
 # Nightingale CMS Architecture Context
 
-## Current Implementation Status (September 2025)
+## Current Implementation Status (August 2025)
 
 This document provides an up-to-date view of the Nightingale CMS architecture, reflecting the
 current ES6 module system, two-layer component architecture, and modern React implementation.
@@ -9,7 +9,7 @@ current ES6 module system, two-layer component architecture, and modern React im
 
 ## 🏗️ Architecture Overview
 
-### **ES6 Module System + Vite** ✅
+### **ES6 Module System** ✅
 
 **Main Entry Point:** `src/main.js`
 
@@ -17,7 +17,6 @@ current ES6 module system, two-layer component architecture, and modern React im
 - Service registration and global compatibility
 - React 18 with createRoot initialization
 - External library management (Day.js, Fuse.js)
-- Vite dev server and build pipeline; GitHub Pages deployment (base path configured)
 
 **Directory Structure:**
 
@@ -37,8 +36,8 @@ src/
 
 - Framework-agnostic, reusable presentation components
 - Button, Modal, DataTable, SearchBar, FormComponents
-- Preferred modern React + JSX; legacy `React.createElement` only in migration-pending files
-- Self-registration into UI registry for backward compatibility
+- Component-scoped React.createElement pattern
+- Global registration for backward compatibility
 
 **Business Layer** (`src/components/business/`):
 
@@ -46,7 +45,6 @@ src/
 - CaseCreationModal, PersonCreationModal, tab components
 - Uses UI components as building blocks
 - Implements Nightingale business validation
-- Orchestrates services (normalization, migration, persistence)
 
 ---
 
@@ -71,14 +69,13 @@ src/
 - Financial tracking (resources, income, expenses)
 - Verification request system (recently added)
 
-**🔄 Recently Updated (August 2025):** **🔄 Recently Updated (September 2025):**
+**🔄 Recently Updated (August 2025):**
 
-- Vite build + GitHub Pages deployment workflow (lint → test → build → deploy)
-- Custom ESLint internal rule to prevent suppressing PropTypes checks
-- Search refactor: direct Fuse.js usage (no global constructor dependency)
-- Normalization enhancements: string IDs, MCN cleanup, person.name derivation, case.clientName
-  backfill
-- One-time data fixers and migration orchestration service added
+- Migrated to ES6 module system
+- Implemented two-layer architecture
+- Enhanced component registration system
+- Added comprehensive logging service
+- Updated React patterns to follow best practices
 
 ---
 
@@ -88,7 +85,7 @@ src/
 
 **Core Identity:**
 
-- ✅ `name` (full name field; derived from first/last if missing)
+- ✅ `name` (full name field)
 - ✅ `dateOfBirth` with date picker
 - ✅ `ssn` with masking
 - ✅ `id` (auto-generated)
@@ -151,7 +148,7 @@ src/
 
 **Relationships:**
 
-- ✅ `personId` (primary client; foreign key to people)
+- ✅ `personId` (primary client)
 - ✅ `spouseId` (for SIMP cases)
 - ✅ `organizationId` (linked facility)
 - ✅ `authorizedReps` (array of person IDs)
@@ -169,7 +166,6 @@ src/
 - ✅ CaseDetailsView with comprehensive display
 - ✅ Financial item management with modals
 - ✅ SearchBar integration for client selection
-- ✅ Grid rendering uses denormalized `clientName` for performance/stability
 
 ---
 
@@ -186,24 +182,16 @@ src/
 
 ---
 
-## 🧩 Service Layer Implementation
+## �️ Service Layer Implementation
 
 ### ✅ **Core Services**
 
 **Data Management:**
 
 - ✅ `core.js` - Security, validation, formatting utilities
-- ✅ `nightingale.datamanagement.js` - Data operations and persistence (includes normalization
-  pipeline)
+- ✅ `nightingale.datamanagement.js` - Data operations and persistence
 - ✅ `nightingale.autosavefile.js` - Auto-save functionality
-- ✅ `nightingale.search.js` - Fuse.js integration (now instantiated directly where needed)
-
-**Migration & Fixers:**
-
-- ✅ `migration.js` - Detect legacy profiles and orchestrate full migration (normalize + fixers +
-  report)
-- ✅ `dataFixes.js` - One-time corrective scripts (e.g., backfill missing `case.clientName` from
-  person)
+- ✅ `nightingale.search.js` - Fuse.js integration
 
 **UI Services:**
 
@@ -219,7 +207,7 @@ src/
 
 ---
 
-## 🧱 Component Library Status
+## � Component Library Status
 
 ### ✅ **UI Components (Complete)**
 
@@ -271,67 +259,19 @@ src/
 - ✅ NightingaleCMSApp (main application component)
 - ✅ DashboardTab (dashboard overview)
 - ✅ SettingsModal (application settings)
-- ⏩ Migration submodal planned (detect → migrate → backup/write)
 
 ---
 
-## �️ Migration Workflow (Submodal)
-
-A dedicated submodal in Settings handles end-to-end migration of legacy JSON files into the modern
-schema. It is explicit, reversible (backup), and surfaces a report before/after write.
-
-**Wire-Up Checklist**
-
-- Load: `const raw = await fileService.readFile()`.
-- Detect: `const detection = detectLegacyProfile(raw)` → show badges/counters.
-- Migrate: `const { migratedData, report } = await runFullMigration(raw, { applyFixes: true })`.
-- Backup + write:
-  - Prefer writing a backup first: `nightingale-data.backup-<timestamp>.json` (if provider supports
-    named writes) or provide a Download JSON fallback.
-  - Persist migrated: `await fileService.writeFile(migratedData)`.
-- Refresh: `onDataLoaded?.(migratedData)` and success toast.
-- Errors: catch → `window.NightingaleLogger?.get('Migration').error(e)` and
-  `showToast('Migration failed','error')`.
-
-**Service Imports**
-
-- `import { detectLegacyProfile, runFullMigration } from '../../src/services/migration.js'`
-- `import { getFileService } from '../../src/services/fileServiceProvider.js'` (optional centralized
-  access)
-
-**Report Contents**
-
-- `appliedTransforms`: e.g., masterCaseNumber → mcn, value → amount, type → description, string ID
-  coercion.
-- `counts.before/after`: cases, people, organizations.
-- `fixes.clientNamesAdded`: number of denormalized names added.
-- `warnings.orphanCasePersonIds`: unresolved references to review.
-
-**UI States**
-
-- Buttons disabled during actions; clear labels: Detecting…, Migrating…, Saving…
-- Summary panel: detection indicators and migration report.
-- CTAs: Download migrated JSON, Write & Backup, Cancel.
-
-**Edge Cases**
-
-- Empty/invalid JSON: present error and abort.
-- Already modern: `isLegacy=false`; optionally expose a “Re-run fixers only” path.
-- Read-only provider: fallback to Download JSON; skip write.
-- Partial legacy (mixed shapes): run best-effort transforms; list skipped items in report.
-
----
-
-## �🚀 Development Workflow
+## 🚀 Development Workflow
 
 ### ✅ **Current Development Setup**
 
 **Build System:**
 
-- Vite dev server and build pipeline (`npm run dev`, `npm run build`)
-- GitHub Actions: CI (lint + tests) and Pages deploy
-- Jest + React Testing Library configured
-- ESLint with custom internal plugin rule (no new PropTypes disables)
+- ES6 modules with in-browser loading for development
+- NPM scripts for development server (`npm run dev`)
+- Jest testing framework configured
+- ESLint with React rules
 - Prettier for code formatting
 
 **Quality Assurance:**
@@ -339,7 +279,6 @@ schema. It is explicit, reversible (backup), and surfaces a report before/after 
 - Conventional commits specification
 - Husky git hooks for pre-commit checks
 - Lint-staged for automated formatting
-- Targeted unit tests for normalization and migration report invariants
 
 **Component Development:**
 
@@ -360,14 +299,12 @@ schema. It is explicit, reversible (backup), and surfaces a report before/after 
 - **Financial Management** with full CRUD operations
 - **Search System** with fuzzy matching across all data
 - **Modern React Architecture** with proper patterns and performance
-- **Automated Build & Deploy** via Vite + GitHub Pages
 
 ### 🔄 **Active Development Areas**
 
-- **Migration UI** (submodal in Settings for detect → migrate → backup/write)
-- **Integrity Audits** (report orphan links, invalid IDs, incomplete addresses)
-- **Global Cleanup** (remove remaining legacy global lookups)
-- **Minor assets** (404 page and static asset base-path fixes)
+- **Testing System** (test files exist but need implementation)
+- **Build Optimization** (currently development-focused)
+- **Enhanced Verification Tracking** (VR system needs UI)
 
 ### 📈 **Architecture Maturity**
 
@@ -380,5 +317,5 @@ The Nightingale CMS has evolved into a **production-ready** case management syst
 
 ---
 
-_Document last updated: September 11, 2025 - Reflects Vite build/deploy, migration/fixers services,
-and recent normalization/search updates._
+_Document last updated: August 30, 2025 - Reflects current ES6 module system and complete feature
+implementation_
