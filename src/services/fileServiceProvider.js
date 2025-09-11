@@ -5,6 +5,15 @@ let fileServiceInstance = null;
 
 export function setFileService(service) {
   fileServiceInstance = service || null;
+  try {
+    if (service && typeof document !== 'undefined') {
+      document.dispatchEvent(
+        new CustomEvent('fileService:ready', { detail: { provided: true } }),
+      );
+    }
+  } catch (_) {
+    // Silently ignore if CustomEvent unsupported
+  }
 }
 
 export function getFileService() {
