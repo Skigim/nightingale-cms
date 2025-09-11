@@ -20,8 +20,10 @@ function useOrganizationsData(props) {
   } = props;
   // Hooks from React (unconditional at top of scope)
 
-  // Toast function via module
-  const showToast = (msg, type) => Toast.showToast?.(msg, type);
+  // Toast function via module (stable reference for hook deps)
+  const showToast = useCallback((msg, type) => {
+    Toast.showToast?.(msg, type);
+  }, []);
 
   // All state hooks (called unconditionally per React rules)
   const [searchTerm, setSearchTerm] = useState('');
