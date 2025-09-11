@@ -184,24 +184,26 @@ FallbackTabHeader.propTypes = {
  *
  * @param {string} componentName - Name of the component to retrieve
  * @param {Object} fallbackComponent - Fallback component if registry lookup fails
+ * @param {string[]} [registries=['ui', 'business']] - Optional array of registry names to search in order
  * @returns {Function} React component function
  */
-function getRegistryComponent(componentName, fallbackComponent) {
+function getRegistryComponent(
+  componentName,
+  fallbackComponent,
+  registries = ['ui', 'business'],
+) {
   // Debug logging to track registry lookups
-  console.debug(`Looking for component "${componentName}"`);
+  console.debug(
+    `Looking for component "${componentName}" in registries:`,
+    registries,
+  );
 
-  // First try the UI registry
-  const uiComponent = getComponent('ui', componentName);
-  if (uiComponent) {
-    console.debug(`Found "${componentName}" in UI registry`);
-    return uiComponent;
-  }
-
-  // Then try the business registry (for modals and business components)
-  const businessComponent = getComponent('business', componentName);
-  if (businessComponent) {
-    console.debug(`Found "${componentName}" in Business registry`);
-    return businessComponent;
+  for (const registryName of registries) {
+    const component = getComponent(registryName, componentName, true); // silent = true
+    if (component) {
+      console.debug(`Found "${componentName}" in "${registryName}" registry`);
+      return component;
+    }
   }
 
   // Legacy fallback to window object (for backwards compatibility during transition)
@@ -215,6 +217,9 @@ function getRegistryComponent(componentName, fallbackComponent) {
   if (fallbackComponent !== undefined) return fallbackComponent;
 
   // Only emit a visible error component when no explicit null/override provided
+  console.warn(
+    `Component "${componentName}" not found in any registry and no fallback provided.`,
+  );
   return function ComponentNotFound() {
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
@@ -222,9 +227,7 @@ function getRegistryComponent(componentName, fallbackComponent) {
       </div>
     );
   };
-}
-
-/**
+} /**
  * Standardized Search Section Component
  * Provides consistent Card-wrapped search bar for all tabs
  */
@@ -306,30 +309,37 @@ ContentSection.propTypes = {
  */
 function resolveComponents() {
   return {
-    Modal: getRegistryComponent('Modal', FallbackModal),
-    ConfirmationModal: getRegistryComponent('ConfirmationModal', null),
-    Button: getRegistryComponent('Button', FallbackButton),
-    SearchBar: getRegistryComponent('SearchBar', FallbackSearchBar),
-    TabHeader: getRegistryComponent('TabHeader', FallbackTabHeader),
-    DataTable: getRegistryComponent('DataTable', null),
-    Badge: getRegistryComponent('Badge', null),
-    // Card Components
-    Card: getRegistryComponent('Card', null),
-    // Layout Helpers
+    // UI Components (explicitly from 'ui' registry)
+    Modal: getRegistryComponent('Modal', FallbackModal, ['ui']),
+    ConfirmationModal: getRegistryComponent('ConfirmationModal', null, ['ui']),
+    Button: getRegistryComponent('Button', FallbackButton, ['ui']),
+    SearchBar: getRegistryComponent('SearchBar', FallbackSearchBar, ['ui']),
+    TabHeader: getRegistryComponent('TabHeader', FallbackTabHeader, ['ui']),
+    DataTable: getRegistryComponent('DataTable', null, ['ui']),
+    Badge: getRegistryComponent('Badge', null, ['ui']),
+    Card: getRegistryComponent('Card', null, ['ui']),
+    FormField: getRegistryComponent('FormField', null, ['ui']),
+    TextInput: getRegistryComponent('TextInput', null, ['ui']),
+    Select: getRegistryComponent('Select', null, ['ui']),
+    DateInput: getRegistryComponent('DateInput', null, ['ui']),
+    Textarea: getRegistryComponent('Textarea', null, ['ui']),
+    Checkbox: getRegistryComponent('Checkbox', null, ['ui']),
+
+    // Layout Helpers (defined within this module)
     SearchSection,
     ContentSection,
-    // Form Components
-    FormField: getRegistryComponent('FormField', null),
-    TextInput: getRegistryComponent('TextInput', null),
-    Select: getRegistryComponent('Select', null),
-    DateInput: getRegistryComponent('DateInput', null),
-    Textarea: getRegistryComponent('Textarea', null),
-    Checkbox: getRegistryComponent('Checkbox', null),
-    // Business Components
-    PersonCreationModal: getRegistryComponent('PersonCreationModal', null),
-    CaseCreationModal: getRegistryComponent('CaseCreationModal', null),
-    OrganizationModal: getRegistryComponent('OrganizationModal', null),
-    NotesModal: getRegistryComponent('NotesModal', null),
+
+    // Business Components (explicitly from 'business' registry)
+    PersonCreationModal: getRegistryComponent('PersonCreationModal', null, [
+      'business',
+    ]),
+    CaseCreationModal: getRegistryComponent('CaseCreationModal', null, [
+      'business',
+    ]),
+    OrganizationModal: getRegistryComponent('OrganizationModal', null, [
+      'business',
+    ]),
+    NotesModal: getRegistryComponent('NotesModal', null, ['business']),
   };
 }
 

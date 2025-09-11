@@ -1,6 +1,7 @@
 // OrganizationsTab.js
 // Migrated to ES module component registry.
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
 
@@ -458,11 +459,11 @@ const OrganizationsTab = createBusinessComponent({
 
 // PropTypes validation
 OrganizationsTab.propTypes = {
-  fullData: window.PropTypes?.object,
-  onUpdateData: window.PropTypes?.func,
-  fileService: window.PropTypes?.object,
-  onViewModeChange: window.PropTypes?.func,
-  onBackToList: window.PropTypes?.func,
+  fullData: PropTypes.object,
+  onUpdateData: PropTypes.func,
+  fileService: PropTypes.object,
+  onViewModeChange: PropTypes.func,
+  onBackToList: PropTypes.func,
 };
 
 // Register with business registry (legacy global removed)

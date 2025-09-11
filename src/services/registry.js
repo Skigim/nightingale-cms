@@ -16,17 +16,21 @@ export const registerComponent = (registryName, componentName, component) => {
   reg[componentName] = component;
 };
 
-export const getComponent = (registryName, componentName) => {
+export const getComponent = (registryName, componentName, silent = false) => {
   const reg = registries[registryName];
   if (!reg) {
-    console.warn(`Registry "${registryName}" not found.`);
+    if (!silent) {
+      console.warn(`Registry "${registryName}" not found.`);
+    }
     return null;
   }
   const cmp = reg[componentName];
   if (!cmp) {
-    console.warn(
-      `Component "${componentName}" not found in registry "${registryName}".`,
-    );
+    if (!silent) {
+      console.warn(
+        `Component "${componentName}" not found in registry "${registryName}".`,
+      );
+    }
     return null;
   }
   return cmp;

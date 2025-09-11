@@ -33,8 +33,46 @@ module.exports = {
         message: 'Use direct React imports instead of window.React. See MIGRATION_GUIDE.md for patterns.',
       },
     ],
-    // Warn about dynamic Tailwind class construction
-    'no-template-literals-in-class-names': 'off', // Custom rule would go here
+    // Forbid window fallback patterns like `window.Foo || ...`, `if (window.Foo)`, `window?.Foo ?? ...`
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector:
+          "LogicalExpression[operator=/^(\\|\\||\\?\\?)$/][left.type='MemberExpression'][left.object.name='window']",
+        message:
+          'Avoid window fallbacks (window.* on the left of ||/??). Use the registry (getComponent/registerComponent) or imports.',
+      },
+      {
+        selector:
+          "LogicalExpression[operator=/^(\\|\\||\\?\\?)$/] > ChainExpression.left MemberExpression[object.name='window']",
+        message:
+          'Avoid window fallbacks (window.* on the left of ||/??). Use the registry (getComponent/registerComponent) or imports.',
+      },
+      {
+        selector:
+          "IfStatement[test.type='MemberExpression'][test.object.name='window']",
+        message:
+          'Avoid guarding with window.* in if conditions. Use capability detection via registry or dependency injection.',
+      },
+      {
+        selector:
+          'IfStatement > ChainExpression[test] MemberExpression[object.name="window"]',
+        message:
+          'Avoid guarding with window?.* in if conditions. Use registry or dependency injection.',
+      },
+      {
+        selector:
+          "ConditionalExpression[test.type='MemberExpression'][test.object.name='window']",
+        message:
+          'Avoid conditional expressions that guard on window.*. Use registry or dependency injection.',
+      },
+      {
+        selector:
+          'ConditionalExpression > ChainExpression[test] MemberExpression[object.name="window"]',
+        message:
+          'Avoid conditional expressions that guard on window?.*. Use registry or dependency injection.',
+      },
+    ],
   },
   settings: {
     react: {

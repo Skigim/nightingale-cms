@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import PersonDetailsView from './PersonDetailsView';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
@@ -224,9 +225,9 @@ function renderPeopleContent({ components, data: dataResult, props }) {
     </Box>
   );
 }
-function renderPeopleModals({ data: dataResult, props }) {
+function renderPeopleModals({ components, data: dataResult, props }) {
   const PersonCreationModal =
-    window.PersonCreationModal ||
+    components.PersonCreationModal ||
     (({ isOpen, onClose }) =>
       isOpen ? (
         <div
@@ -304,11 +305,11 @@ const PeopleTab = createBusinessComponent({
   defaultProps: { fullData: { people: [], cases: [] } },
 });
 PeopleTab.propTypes = {
-  fullData: window.PropTypes?.object,
-  onUpdateData: window.PropTypes?.func,
-  fileService: window.PropTypes?.object,
-  onViewModeChange: window.PropTypes?.func,
-  onBackToList: window.PropTypes?.func,
+  fullData: PropTypes.object,
+  onUpdateData: PropTypes.func,
+  fileService: PropTypes.object,
+  onViewModeChange: PropTypes.func,
+  onBackToList: PropTypes.func,
 };
 registerComponent('business', 'PeopleTab', PeopleTab);
 export default PeopleTab;
