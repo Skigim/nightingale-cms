@@ -40,6 +40,7 @@ function NightingaleCMSApp() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [caseViewMode, setCaseViewMode] = useState('list'); // Track if we're in case details view
   const [caseBackFunction, setCaseBackFunction] = useState(null); // Function to go back from case details
+  const [isBugModalOpen, setIsBugModalOpen] = useState(false);
   // TODO: Implement people and organizations navigation in sidebar
   // const [peopleViewMode, setPeopleViewMode] = useState('list'); // Track if we're in person details view
   // const [peopleBackFunction, setPeopleBackFunction] = useState(null); // Function to go back from person details
@@ -99,6 +100,7 @@ function NightingaleCMSApp() {
       Sidebar: getComponent('ui', 'Sidebar'),
       Header: getComponent('ui', 'Header'),
       SettingsModal: getComponent('business', 'SettingsModal'),
+      BugReportModal: getComponent('business', 'BugReportModal'),
     }),
     [],
   );
@@ -154,6 +156,42 @@ function NightingaleCMSApp() {
 
   // Toast function - module based
   const showToast = (msg, type) => Toast.showToast?.(msg, type);
+
+  const handleSubmitBug = useCallback(
+    async ({ content, activeTab: tab, createdAt }) => {
+      try {
+        const logger = globalThis.NightingaleLogger?.get('bug-report');
+        logger?.info('Bug report submitted', { tab, createdAt, content });
+        const entry = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          tab,
+          content,
+          createdAt,
+        };
+        // Persist to localStorage list first (source of truth for aggregation)
+        const key = 'nightingale-bug-reports';
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        list.push(entry);
+        localStorage.setItem(key, JSON.stringify(list));
+
+        // Attempt to mirror to project folder as JSON array
+        if (fileService?.writeNamedFile) {
+          const fileName = 'bug-reports.json';
+          await fileService.writeNamedFile(fileName, list);
+          showToast('Bug report saved to project folder', 'success');
+        } else {
+          showToast('Bug report stored locally (no file access)', 'warning');
+        }
+      } catch (err) {
+        const logger = globalThis.NightingaleLogger?.get('bug-report');
+        logger?.error('Failed to submit bug report', { error: err.message });
+        showToast('Failed to save bug report', 'error');
+      } finally {
+        setIsBugModalOpen(false);
+      }
+    },
+    [fileService],
+  );
 
   // (Legacy services ready listener removed) Autosave/file service will now be
   // initialized elsewhere; component renders immediately.
@@ -211,6 +249,7 @@ function NightingaleCMSApp() {
         activeTab,
         onTabChange: setActiveTab,
         onSettingsClick: () => setIsSettingsOpen(true),
+        onReportBugClick: () => setIsBugModalOpen(true),
         caseViewMode,
         onCaseBackToList: () => {
           if (caseBackFunction) caseBackFunction();
@@ -240,6 +279,13 @@ function NightingaleCMSApp() {
         onDataLoaded: handleDataLoaded,
         fileStatus,
         onFileStatusChange: setFileStatus,
+      }),
+    components.BugReportModal &&
+      React.createElement(components.BugReportModal, {
+        isOpen: isBugModalOpen,
+        onClose: () => setIsBugModalOpen(false),
+        onSubmit: handleSubmitBug,
+        activeTab,
       }),
   );
 }

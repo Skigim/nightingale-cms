@@ -28,6 +28,7 @@ function Sidebar({
   activeTab,
   onTabChange,
   onSettingsClick,
+  onReportBugClick,
   caseViewMode,
   onCaseBackToList,
 }) {
@@ -140,6 +141,35 @@ function Sidebar({
 
       <nav className="flex-1 p-2 space-y-2">{tabs.map(renderTabButton)}</nav>
 
+      {/* Report Bug button (above settings) */}
+      {onReportBugClick && (
+        <div className="p-2 border-t border-gray-700">
+          <button
+            onClick={onReportBugClick}
+            className="w-full p-3 rounded-md text-yellow-400 hover:bg-gray-700 hover:text-yellow-300 transition-all duration-200 group relative"
+            title="Report a Bug"
+          >
+            <svg
+              className="w-5 h-5 mx-auto"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v2m0 4h.01M5 13a7 7 0 1114 0A7 7 0 015 13z"
+              />
+            </svg>
+            {/* Tooltip */}
+            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              Report a Bug
+            </div>
+          </button>
+        </div>
+      )}
+
       {/* Settings button */}
       {onSettingsClick && (
         <div className="p-2 border-t border-gray-700">
@@ -181,6 +211,7 @@ Sidebar.propTypes = {
   activeTab: PropTypes.string.isRequired,
   onTabChange: PropTypes.func.isRequired,
   onSettingsClick: PropTypes.func,
+  onReportBugClick: PropTypes.func,
   caseViewMode: PropTypes.string,
   onCaseBackToList: PropTypes.func,
 };
