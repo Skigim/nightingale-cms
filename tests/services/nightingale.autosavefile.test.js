@@ -160,11 +160,19 @@ describe('AutosaveFileService', () => {
   });
 
   describe('Autosave Lifecycle', () => {
-    test('should start and stop autosave', () => {
+    test('should start and stop autosave', async () => {
       // Mock timers
       jest.useFakeTimers();
 
+      // Ensure permission is treated as granted for this test
+      service.directoryHandle = {
+        queryPermission: jest.fn(() => Promise.resolve('granted')),
+      };
+
       service.startAutosave();
+      // Wait microtasks for permission check chain
+      await Promise.resolve();
+      await Promise.resolve();
       expect(service.state.isRunning).toBe(true);
       expect(mockStatusCallback).toHaveBeenCalledWith(
         expect.objectContaining({

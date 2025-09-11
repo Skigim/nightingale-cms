@@ -97,6 +97,16 @@ function SettingsModal({
     }
   };
 
+  const handleDisconnect = async () => {
+    try {
+      await fileService?.disconnect?.();
+      onFileStatusChange?.('disconnected');
+      showToast('Disconnected from directory', 'info');
+    } catch (_) {
+      showToast('Failed to disconnect', 'error');
+    }
+  };
+
   const handleLoadData = async () => {
     if (!fileService?.readFile) {
       showToast('File service not available', 'error');
@@ -454,6 +464,12 @@ function SettingsModal({
                 }`}
               >
                 {isConnecting ? 'Connecting...' : 'Connect to Directory'}
+              </button>
+              <button
+                onClick={handleDisconnect}
+                className="px-4 py-2 rounded-lg font-medium transition-colors bg-gray-600 hover:bg-gray-700 text-white"
+              >
+                Disconnect
               </button>
               <div
                 className={`px-3 py-1 rounded-full text-xs font-medium ${

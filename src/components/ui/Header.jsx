@@ -60,6 +60,11 @@ function Header({
         return { text: 'Saved', className: 'text-green-400', icon: '✓' };
       case 'saving':
         return { text: 'Saving...', className: 'text-blue-400', icon: '⏳' };
+      case 'running':
+      case 'connected':
+        return { text: 'Auto', className: 'text-green-400', icon: '🔄' };
+      case 'waiting':
+        return { text: 'Waiting', className: 'text-yellow-300', icon: '…' };
       case 'error':
         return { text: 'Error', className: 'text-red-400', icon: '⚠️' };
       case 'initialized':
@@ -74,12 +79,15 @@ function Header({
   const showManualSave =
     !autosaveStatus ||
     autosaveStatus.status === 'error' ||
-    autosaveStatus.status === 'stopped';
+    autosaveStatus.status === 'stopped' ||
+    autosaveStatus.status === 'waiting';
 
   const getFileStatusText = () => {
     switch (fileStatus) {
       case 'connected':
         return 'Connected';
+      case 'reconnect':
+        return 'Reconnect';
       case 'disconnected':
         return 'Disconnected';
       default:
@@ -91,6 +99,8 @@ function Header({
     switch (fileStatus) {
       case 'connected':
         return 'Click to open settings and change save folder';
+      case 'reconnect':
+        return 'Click to reconnect folder access (permission needed)';
       case 'disconnected':
         return 'Click to open settings and connect to save folder';
       default:
@@ -104,6 +114,8 @@ function Header({
     switch (fileStatus) {
       case 'connected':
         return `${baseClasses} bg-green-600 text-green-100 hover:bg-green-500 cursor-pointer`;
+      case 'reconnect':
+        return `${baseClasses} bg-yellow-600 text-yellow-100 hover:bg-yellow-500 cursor-pointer`;
       case 'disconnected':
         return `${baseClasses} bg-red-600 text-red-100 hover:bg-red-500 cursor-pointer`;
       default:
@@ -196,7 +208,12 @@ function Header({
 }
 
 Header.propTypes = {
-  fileStatus: PropTypes.oneOf(['connected', 'disconnected', 'connecting']),
+  fileStatus: PropTypes.oneOf([
+    'connected',
+    'reconnect',
+    'disconnected',
+    'connecting',
+  ]),
   autosaveStatus: PropTypes.shape({
     status: PropTypes.string,
     message: PropTypes.string,

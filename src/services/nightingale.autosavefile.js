@@ -497,7 +497,19 @@ class AutosaveFileService {
       this.checkPermissions();
     }, 30000); // Check every 30 seconds
 
+    // Immediately report running to match legacy UX, then correct based on permission
     this.updateStatus('running', 'Autosave active');
+    // Do not request permission here to avoid non-gesture prompts
+    Promise.resolve()
+      .then(() => this.checkPermission?.())
+      .then((perm) => {
+        if (perm !== 'granted') {
+          this.updateStatus('waiting', 'Waiting for folder connection');
+        }
+      })
+      .catch(() => {
+        this.updateStatus('waiting', 'Waiting for folder connection');
+      });
   }
 
   /**
@@ -712,6 +724,23 @@ class AutosaveFileService {
     this.stopAutosave();
     this.dataProvider = null;
     this.statusCallback = null;
+  }
+
+  /**
+   * Disconnect from current directory and clear persisted handle.
+   * Does not prompt for permissions; intended to be called from a user action.
+   */
+  async disconnect() {
+    try {
+      this.stopAutosave();
+      await this.clearStoredDirectoryHandle();
+    } catch (_) {
+      // ignore
+    } finally {
+      this.directoryHandle = null;
+      this.state.permissionStatus = 'prompt';
+      this.updateStatus('disconnected', 'No data folder connected');
+    }
   }
 
   /**

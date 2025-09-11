@@ -49,23 +49,48 @@ function NightingaleCMSApp() {
 
   // File service instance (hydrated from provider)
   const [fileService, setFileServiceState] = useState(() => getFileService());
+  const [autosaveStatus, setAutosaveStatus] = useState(null);
 
-  // Derive autosave status (kept for Header prop compatibility)
-  const autosaveStatus = useMemo(
-    () => ({
-      status: fileService ? 'ready' : 'disconnected',
-      message: fileService ? 'Service initialized' : 'Service not initialized',
-    }),
-    [fileService],
-  );
+  // Keep AutosaveFileService synced with current data and status callback
+  useEffect(() => {
+    if (!fileService) return;
+    try {
+      if (typeof fileService.initializeWithReactState === 'function') {
+        fileService.initializeWithReactState(
+          () => fullDataRef.current,
+          (status) => {
+            setAutosaveStatus(status);
+            if (status?.status === 'waiting') {
+              setFileStatus('reconnect');
+            }
+          },
+        );
+      } else if (typeof fileService.setDataProvider === 'function') {
+        // Fallback: at least ensure provider is set
+        fileService.setDataProvider(() => fullDataRef.current);
+      }
+    } catch (_) {
+      // no-op; UI will show disconnected
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileService]);
 
   // Use ref for live data access to avoid stale closure issues
   const fullDataRef = useRef(null);
 
   // Data update handler - must be defined before useMemo that uses it
-  const handleDataUpdate = useCallback((newData) => {
-    setFullData(newData);
-  }, []);
+  const handleDataUpdate = useCallback(
+    (newData) => {
+      setFullData(newData);
+      // Notify autosave service debounced save may proceed
+      try {
+        fileService?.notifyDataChange?.();
+      } catch (_) {
+        /* ignore */
+      }
+    },
+    [fileService],
+  );
 
   // Keep ref synchronized with state
   useEffect(() => {
@@ -93,6 +118,35 @@ function NightingaleCMSApp() {
     // fileService intentionally excluded from deps to avoid stale removal/add cycle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When fileService changes, reflect connection status and auto-load data
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!fileService?.checkPermission) return;
+      try {
+        const perm = await fileService.checkPermission();
+        if (cancelled) return;
+        if (perm === 'granted') {
+          setFileStatus('connected');
+          if (typeof fileService.readFile === 'function') {
+            const data = await fileService.readFile();
+            if (cancelled) return;
+            if (data && Object.keys(data).length > 0) {
+              setFullData(data);
+            }
+          }
+        } else {
+          setFileStatus('reconnect');
+        }
+      } catch (_) {
+        setFileStatus('disconnected');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fileService]);
 
   // Memoize non-tab components (tabs imported directly above)
   const components = useMemo(
@@ -148,7 +202,7 @@ function NightingaleCMSApp() {
     () => ({
       isReady: !!fileService,
       hasAutosave: !!fileService, // unified service now
-      canSave: !!fileService?.saveData,
+      canSave: !!fileService?.save,
       isLoading: false,
     }),
     [fileService],
@@ -200,7 +254,7 @@ function NightingaleCMSApp() {
   const handleManualSave = async () => {
     if (serviceStatus.canSave) {
       try {
-        await fileService.saveData();
+        await fileService.save();
         showToast('Data saved successfully', 'success');
       } catch (error) {
         const logger = globalThis.NightingaleLogger?.get('cms:manualSave');
@@ -213,9 +267,17 @@ function NightingaleCMSApp() {
   };
 
   // Handle data updates from children
-  const handleDataLoaded = useCallback((data) => {
-    setFullData(data);
-  }, []);
+  const handleDataLoaded = useCallback(
+    (data) => {
+      setFullData(data);
+      try {
+        fileService?.notifyDataChange?.();
+      } catch (_) {
+        /* ignore */
+      }
+    },
+    [fileService],
+  );
 
   // Render active tab using lookup mapping (JSX friendly)
   const renderActiveTab = () => {
