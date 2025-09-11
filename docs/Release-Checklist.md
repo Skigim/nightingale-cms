@@ -2,13 +2,20 @@
 
 ### 1. **Code Freeze & Feature Complete**
 
-- **Lock feature development** - only bug fixes and polish allowed
-- Create a `release/1.0.0` branch from `dev` (done)
-- Tag the feature-complete state: `v1.0.0-rc.1`
+- [x] Lock feature development — Code freeze announced in `docs/Code-Freeze.md`
+- [x] Create a `release/1.0.0` branch from `dev`
+- [x] Tag the feature-complete state: `v1.0.0-rc.1` (pushed)
 
 ### 2. **Quality Assurance Phase** (1-2 weeks)
 
 #### A. Automated Testing
+
+Status:
+
+- [x] Full suite executed — all tests passed (730/730)
+- [ ] Coverage thresholds met (80%) — current overall ~35% (improve during QA)
+- [x] E2E stub executed
+- [x] Performance stub executed
 
 ```bash
 # Full test suite with coverage
