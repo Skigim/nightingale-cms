@@ -47,6 +47,7 @@ function SettingsModal({
   const [detection, setDetection] = useState(null);
   const [migrationReport, setMigrationReport] = useState(null);
   const [migrationError, setMigrationError] = useState(null);
+  const [migratedData, setMigratedData] = useState(null);
 
   // Get dependencies
   const Modal = getComponent('ui', 'Modal');
@@ -306,6 +307,7 @@ function SettingsModal({
     setDetection(null);
     setMigrationReport(null);
     setMigrationError(null);
+    setMigratedData(null);
     try {
       const rawData = await fileService.readFile();
       if (!rawData || Object.keys(rawData).length === 0) {
@@ -333,13 +335,82 @@ function SettingsModal({
       const { migratedData, report } = await runFullMigration(rawData, {
         applyFixes: true,
       });
-      await fileService.writeFile(migratedData);
-      onDataLoaded?.(migratedData);
+      // Do not write immediately; store results and let user choose action
+      setMigratedData(migratedData);
       setMigrationReport(report);
-      showToast('Migration complete', 'success');
+      showToast('Migration analysis complete. Choose how to proceed.', 'info');
     } catch (err) {
       setMigrationError('Migration failed');
       showToast('Migration failed', 'error');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
+  const handleDownloadMigrated = () => {
+    try {
+      if (!migratedData) return;
+      const blob = new Blob([JSON.stringify(migratedData, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'nightingale-data.migrated.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded migrated JSON', 'success');
+    } catch (_) {
+      showToast('Failed to download JSON', 'error');
+    }
+  };
+
+  const handleWriteAndBackup = async () => {
+    if (!migratedData) return;
+    if (!fileService) {
+      showToast('File service not available', 'error');
+      return;
+    }
+    setIsMigrating(true);
+    try {
+      let backupCreated = false;
+      let written = false;
+      let backupName = '';
+
+      if (typeof fileService.backupAndWrite === 'function') {
+        const res = await fileService.backupAndWrite(migratedData);
+        backupCreated = !!res?.backupCreated;
+        written = !!res?.written;
+        backupName = res?.backupName || '';
+      } else if (typeof fileService.writeNamedFile === 'function') {
+        const ts = new Date().toISOString().replace(/[:]/g, '-');
+        const name = `nightingale-data.backup-${ts}.json`;
+        backupCreated = await fileService.writeNamedFile(name, migratedData);
+        written = await fileService.writeFile(migratedData);
+        backupName = name;
+      } else if (typeof fileService.writeFile === 'function') {
+        // Fallback: write without backup, and notify user
+        written = await fileService.writeFile(migratedData);
+      }
+
+      if (written) {
+        onDataLoaded?.(migratedData);
+        const msg = backupCreated
+          ? `Migration written with backup (${backupName})`
+          : 'Migration written (no backup support)';
+        showToast(msg, 'success');
+      } else {
+        // If we couldn't write, offer download fallback
+        showToast(
+          'Write failed or unsupported. Downloading JSON instead.',
+          'warning',
+        );
+        handleDownloadMigrated();
+      }
+    } catch (_) {
+      showToast('Write & backup failed', 'error');
     } finally {
       setIsMigrating(false);
     }
@@ -483,11 +554,34 @@ function SettingsModal({
           footerContent={
             <div className="flex space-x-3">
               <button
+                onClick={handleDownloadMigrated}
+                disabled={!migratedData || isMigrating}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  !migratedData || isMigrating
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
+                }`}
+              >
+                Download Migrated JSON
+              </button>
+              <button
+                onClick={handleWriteAndBackup}
+                disabled={!migratedData || isMigrating}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  !migratedData || isMigrating
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+              >
+                Write & Backup
+              </button>
+              <button
                 onClick={() => {
                   setIsMigrationOpen(false);
                   setDetection(null);
                   setMigrationReport(null);
                   setMigrationError(null);
+                  setMigratedData(null);
                 }}
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
               >
@@ -502,7 +596,7 @@ function SettingsModal({
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                {isMigrating ? 'Migrating...' : 'Run Full Migration'}
+                {isMigrating ? 'Processing...' : 'Run Full Migration'}
               </button>
             </div>
           }

@@ -236,6 +236,50 @@ class AutosaveFileService {
     }
   }
 
+  /**
+   * Write JSON data to an arbitrary file name in the connected directory.
+   * Returns true on success, false otherwise.
+   */
+  async writeNamedFile(fileName, data) {
+    if (!this.directoryHandle) {
+      return false;
+    }
+
+    const permission = await this.checkPermission();
+    if (permission !== 'granted') {
+      return false;
+    }
+
+    try {
+      const fileHandle = await this.directoryHandle.getFileHandle(fileName, {
+        create: true,
+      });
+      const writable = await fileHandle.createWritable();
+      await writable.write(JSON.stringify(data, null, 2));
+      await writable.close();
+      return true;
+    } catch (err) {
+      this.errorCallback(
+        `Error writing file "${fileName}": ${err.message}`,
+        'error',
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Create a timestamped backup file, then write to the primary file.
+   * Returns { backupCreated, written, backupName }.
+   */
+  async backupAndWrite(data) {
+    const ts = new Date().toISOString().replace(/[:]/g, '-');
+    const backupName = `nightingale-data.backup-${ts}.json`;
+
+    const backupCreated = await this.writeNamedFile(backupName, data);
+    const written = await this._performWrite(data);
+    return { backupCreated, written, backupName };
+  }
+
   async readFile() {
     if (!this.directoryHandle) {
       return null;

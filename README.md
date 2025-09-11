@@ -291,6 +291,34 @@ The system includes automatic data migration for:
 - Schema changes
 - Data validation and cleanup
 
+### Migration UI (Recommended)
+
+Use the built-in Migration UI (in Settings) to safely migrate legacy JSON data to the modern schema.
+
+- Open `Settings → Data Migration` in the app.
+- Connect to your data directory if prompted (File System Access API).
+- Click Detect to see a summary of legacy indicators (e.g., `masterCaseNumber → mcn`, numeric IDs,
+  financial field renames).
+- Review the report; then choose how to proceed:
+  - `Download Migrated JSON`: Exports the transformed data so you can manually replace
+    `nightingale-data.json`.
+  - `Write & Backup` (recommended):
+    - Creates `nightingale-data.backup-<timestamp>.json` in the same folder (if provider supports
+      named writes).
+    - Writes the migrated data to `nightingale-data.json`.
+- On read-only or unsupported providers, prefer `Download Migrated JSON` and replace the file
+  manually.
+- The migration report includes:
+  - `appliedTransforms` (e.g., value→amount, type→description, string ID coercion)
+  - `counts.before/after` for cases/people/organizations
+  - `fixes.clientNamesAdded`
+  - `warnings.orphanCasePersonIds`
+
+Notes:
+
+- Errors are logged via the app logger and surfaced via toasts; no changes are written on failure.
+- If data is already modern, you can still re-run fixers (e.g., client name backfill) from Settings.
+
 ### Version Updates
 
 - Component library updates
