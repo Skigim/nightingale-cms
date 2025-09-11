@@ -416,7 +416,19 @@ function renderOrganizationsModals({ components, data, props }) {
         editOrganizationId: state.selectedOrganization.id,
         fullData,
         fileService,
-        onOrganizationCreated: (updatedData) => {
+        // OrganizationModal currently invokes this callback with a single organization entity
+        // to match People/Case modal patterns. Merge the entity into the existing dataset here.
+        onOrganizationCreated: (organizationEntity) => {
+          if (!organizationEntity) {
+            state.setIsDetailsModalOpen(false);
+            return;
+          }
+          const updatedData = {
+            ...fullData,
+            organizations: (fullData?.organizations || []).map((o) =>
+              o.id === organizationEntity.id ? organizationEntity : o,
+            ),
+          };
           onUpdateData(updatedData);
           state.setIsDetailsModalOpen(false);
         },
@@ -433,8 +445,20 @@ function renderOrganizationsModals({ components, data, props }) {
         onClose: () => state.setIsCreateModalOpen(false),
         fullData,
         fileService,
-        onOrganizationCreated: (newOrganizationData) => {
-          onUpdateData(newOrganizationData);
+        // Merge newly created organization entity into dataset
+        onOrganizationCreated: (organizationEntity) => {
+          if (!organizationEntity) {
+            state.setIsCreateModalOpen(false);
+            return;
+          }
+          const updatedData = {
+            ...fullData,
+            organizations: [
+              ...(fullData?.organizations || []),
+              organizationEntity,
+            ],
+          };
+          onUpdateData(updatedData);
           state.setIsCreateModalOpen(false);
         },
       }),
