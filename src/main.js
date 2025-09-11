@@ -35,6 +35,7 @@ import './components/business/NotesModal.jsx';
 import './components/business/OrganizationModal.jsx';
 import './components/business/PersonCreationModal.jsx';
 import './components/business/PersonDetailsView.jsx';
+import './components/business/BugReportModal.jsx';
 
 // Import the root app last so all dependencies are registered
 import NightingaleCMSApp from './components/business/NightingaleCMSApp.jsx';
