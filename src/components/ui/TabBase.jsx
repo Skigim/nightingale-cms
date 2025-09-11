@@ -187,16 +187,28 @@ FallbackTabHeader.propTypes = {
  * @returns {Function} React component function
  */
 function getRegistryComponent(componentName, fallbackComponent) {
+  // Debug logging to track registry lookups
+  console.debug(`Looking for component "${componentName}"`);
+
   // First try the UI registry
   const uiComponent = getComponent('ui', componentName);
-  if (uiComponent) return uiComponent;
+  if (uiComponent) {
+    console.debug(`Found "${componentName}" in UI registry`);
+    return uiComponent;
+  }
 
   // Then try the business registry (for modals and business components)
   const businessComponent = getComponent('business', componentName);
-  if (businessComponent) return businessComponent;
+  if (businessComponent) {
+    console.debug(`Found "${componentName}" in Business registry`);
+    return businessComponent;
+  }
 
   // Legacy fallback to window object (for backwards compatibility during transition)
-  if (window[componentName]) return window[componentName];
+  if (window[componentName]) {
+    console.debug(`Found "${componentName}" on window object`);
+    return window[componentName];
+  }
 
   // If an explicit null is passed, treat as "no fallback" and return null
   if (fallbackComponent === null) return null;
