@@ -1,3 +1,4 @@
+// Load custom rule implementations
 module.exports = {
   env: {
     browser: true,
@@ -16,8 +17,10 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react', 'react-hooks'],
+  plugins: ['react', 'react-hooks', 'internal'],
+  // Custom rules registration (map namespace to implementation)
   rules: {
+  'internal/no-prop-types-disable': 'error',
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'warn',
     'no-unused-vars': 'warn',
@@ -74,15 +77,13 @@ module.exports = {
       },
     ],
   },
-  settings: {
-    react: {
-      version: 'detect',
-    },
-  },
+  settings: { react: { version: 'detect' } },
   globals: {
     React: 'readonly',
     ReactDOM: 'readonly',
     _: 'readonly',
     window: 'writable',
   },
+  // Specify plugin resolution
+  settings: { react: { version: 'detect' } },
 };
