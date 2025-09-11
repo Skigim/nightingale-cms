@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import Fuse from 'fuse.js';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 
@@ -63,18 +64,32 @@ function SearchBar({
   // Memoize search service creation (only if dropdown enabled)
   const createSearchService = useCallback(() => {
     if (!shouldUseDropdown) return null;
+    if (searchKeys.length === 0) return null;
 
-    if (searchKeys.length > 0) {
-      const options = {
-        keys: searchKeys,
-        includeScore: false,
-        threshold: 0.3,
-        ignoreLocation: true,
-        ...fuseOptions,
+    const options = {
+      keys: searchKeys,
+      includeScore: false,
+      threshold: 0.3,
+      ignoreLocation: true,
+      ...fuseOptions,
+    };
+
+    try {
+      const fuse = new Fuse(data, options);
+      // Return minimal service interface expected by component
+      return {
+        search: (query) => {
+          if (!query || typeof query !== 'string') return [];
+          return fuse
+            .search(query)
+            .map((r) => r.item)
+            .filter(Boolean);
+        },
       };
-      return new window.NightingaleSearchService(data, options);
+    } catch (err) {
+      // Fallback to null so simple filter path is used
+      return null;
     }
-    return null; // Will fall back to simple filtering
   }, [shouldUseDropdown, data, searchKeys, fuseOptions]);
 
   // Initialize search service only when dropdown is enabled
