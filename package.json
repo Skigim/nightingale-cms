@@ -1,6 +1,6 @@
 {
   "name": "nightingale-cms",
-  "version": "2.0.0",
+  "version": "1.0.0-rc.1",
   "description": "A comprehensive React-based case management system for vocational rehabilitation services",
   "main": "index.html",
   "scripts": {
