@@ -215,18 +215,20 @@ function renderCasesContent({ components, data: dataResult, props }) {
             field: 'personId',
             label: 'Person',
             sortable: true,
-            render: (value) => {
+            render: (value, caseRow) => {
               const person =
                 globalThis.NightingaleDataManagement?.findPersonById?.(
                   props.fullData?.people,
                   value,
                 ) || null;
-              // Fallback: if combined name missing, derive from first/last to avoid 'Unknown'
+              // Fallback hierarchy: person.name -> first+last -> caseRow.clientName -> caseRow.personName -> 'Unknown'
               const displayName =
                 person?.name ||
                 [person?.firstName, person?.lastName]
                   .filter(Boolean)
                   .join(' ') ||
+                caseRow?.clientName ||
+                caseRow?.personName ||
                 'Unknown';
               return e(
                 'span',
