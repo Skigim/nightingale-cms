@@ -2,15 +2,35 @@ import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 
-function BugReportModal({ isOpen, onClose, onSubmit, activeTab }) {
+function BugReportModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  activeTab,
+  includeDiagnostics = true,
+  diagnostics: incomingDiagnostics,
+}) {
   const [text, setText] = useState('');
+  const [showDiagnostics, setShowDiagnostics] = useState(!!includeDiagnostics);
 
   const handleSubmit = useCallback(() => {
     const content = text.trim();
     if (!content) return;
-    onSubmit?.({ content, activeTab, createdAt: new Date().toISOString() });
+    const payload = { content, activeTab, createdAt: new Date().toISOString() };
+    if (showDiagnostics) {
+      payload.diagnostics = incomingDiagnostics || {
+        userAgent: globalThis?.navigator?.userAgent || 'unknown',
+        platform: globalThis?.navigator?.platform || 'unknown',
+        language: globalThis?.navigator?.language || 'unknown',
+        viewport: {
+          width: globalThis?.innerWidth || null,
+          height: globalThis?.innerHeight || null,
+        },
+      };
+    }
+    onSubmit?.(payload);
     setText('');
-  }, [text, onSubmit, activeTab]);
+  }, [text, onSubmit, activeTab, showDiagnostics, incomingDiagnostics]);
 
   if (!isOpen) return null;
 
@@ -33,6 +53,19 @@ function BugReportModal({ isOpen, onClose, onSubmit, activeTab }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
+        {includeDiagnostics && (
+          <div className="mt-3 text-sm text-gray-300">
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="form-checkbox"
+                checked={showDiagnostics}
+                onChange={(e) => setShowDiagnostics(e.target.checked)}
+              />
+              Include diagnostics (browser, platform, viewport)
+            </label>
+          </div>
+        )}
         <div className="mt-3 flex justify-end gap-2">
           <button
             className="px-3 py-2 rounded-md bg-gray-700 hover:bg-gray-600"
@@ -58,6 +91,8 @@ BugReportModal.propTypes = {
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
   activeTab: PropTypes.string,
+  includeDiagnostics: PropTypes.bool,
+  diagnostics: PropTypes.object,
 };
 
 registerComponent('business', 'BugReportModal', BugReportModal);

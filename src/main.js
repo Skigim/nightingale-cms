@@ -42,10 +42,25 @@ import NightingaleCMSApp from './components/business/NightingaleCMSApp.jsx';
 import AutosaveFileService from './services/nightingale.autosavefile.js';
 import { setFileService } from './services/fileServiceProvider.js';
 import Toast from './services/nightingale.toast.js';
+import NightingaleLogger from './services/nightingale.logger.js';
 
 // Initialize core providers/services before mount
 function initializeProviders() {
   try {
+    // Initialize structured logger early (console + memory transports)
+    try {
+      NightingaleLogger.setupBasic(true);
+      if (!globalThis.NightingaleLogger) {
+        Object.defineProperty(globalThis, 'NightingaleLogger', {
+          value: NightingaleLogger,
+          writable: false,
+          configurable: true,
+        });
+      }
+    } catch (e) {
+      // Swallow logger init errors; app should continue
+    }
+
     // Create autosave-enabled file service instance
     const fileService = new AutosaveFileService({
       errorCallback: (msg, type = 'error') => Toast.showToast?.(msg, type),
