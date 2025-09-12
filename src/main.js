@@ -49,6 +49,7 @@ function initializeProviders() {
   try {
     // Initialize structured logger early (console + memory transports)
     try {
+      // Enable memory transport for logger
       NightingaleLogger.setupBasic(true);
       if (!globalThis.NightingaleLogger) {
         Object.defineProperty(globalThis, 'NightingaleLogger', {
