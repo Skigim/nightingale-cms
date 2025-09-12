@@ -7,7 +7,7 @@
  *
  * @component FinancialItemModal
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
 
@@ -21,6 +21,9 @@ function FinancialItemModal({
   editingItem = null,
 }) {
   const e = React.createElement;
+  const formIdRef = useRef(
+    `financial-item-form-${Math.random().toString(36).slice(2)}`,
+  );
 
   // Toast via module
   const showToast = (msg, type) => Toast.showToast?.(msg, type);
@@ -216,7 +219,8 @@ function FinancialItemModal({
     e(
       'button',
       {
-        onClick: handleSave,
+        type: 'submit',
+        form: formIdRef.current,
         className:
           'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg',
       },
@@ -232,8 +236,15 @@ function FinancialItemModal({
     size: 'large',
     footerContent,
     children: e(
-      'div',
-      { className: 'space-y-6' },
+      'form',
+      {
+        id: formIdRef.current,
+        onSubmit: (ev) => {
+          ev.preventDefault();
+          handleSave();
+        },
+        className: 'space-y-6',
+      },
 
       // Form Grid
       e(
