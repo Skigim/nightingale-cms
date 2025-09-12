@@ -87,6 +87,15 @@ class AutosaveFileService {
    */
   async initialize() {
     try {
+      // Request persistent storage where supported to improve retention across refresh (Chromium/Edge)
+      try {
+        if (navigator?.storage?.persist) {
+          await navigator.storage.persist();
+        }
+      } catch (_) {
+        // non-fatal
+      }
+
       // Try to restore previous directory access
       await this.restoreLastDirectoryAccess();
 
@@ -331,7 +340,21 @@ class AutosaveFileService {
       const handle = await this.getStoredDirectoryHandle();
       if (handle) {
         this.directoryHandle = handle;
-        const permission = await this.checkPermission();
+        // Some browsers may report 'prompt' until re-request; try a non-blocking request
+        let permission = await this.checkPermission();
+        if (
+          permission !== 'granted' &&
+          this.directoryHandle?.requestPermission
+        ) {
+          try {
+            const req = await this.directoryHandle.requestPermission({
+              mode: 'readwrite',
+            });
+            permission = req;
+          } catch (_) {
+            // ignore; user gesture required
+          }
+        }
         this.state.permissionStatus = permission;
 
         if (permission === 'granted') {

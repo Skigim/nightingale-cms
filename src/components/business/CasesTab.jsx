@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
 import dateUtils from '../../services/nightingale.dayjs.js';
+import { findPersonById } from '../../services/nightingale.datamanagement.js';
 /**
  * Nightingale CMS - Cases Tab Component
  *
@@ -63,11 +64,7 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     if (searchString.trim()) {
       const term = searchString.toLowerCase();
       filtered = filtered.filter((caseItem) => {
-        const person =
-          globalThis.NightingaleDataManagement?.findPersonById?.(
-            fullData.people,
-            caseItem.personId,
-          ) || null;
+        const person = findPersonById(fullData.people, caseItem.personId);
         const personName = person?.name?.toLowerCase() || '';
 
         return (

@@ -71,7 +71,7 @@ src/
 - Financial tracking (resources, income, expenses)
 - Verification request system (recently added)
 
-**🔄 Recently Updated (August 2025):** **🔄 Recently Updated (September 2025):**
+**🔄 Recently Updated (September 2025):**
 
 - Vite build + GitHub Pages deployment workflow (lint → test → build → deploy)
 - Custom ESLint internal rule to prevent suppressing PropTypes checks
@@ -295,9 +295,8 @@ schema. It is explicit, reversible (backup), and surfaces a report before/after 
 
 **Service Imports**
 
-- `import { detectLegacyProfile, runFullMigration } from '../../src/services/migration.js'`
-- `import { getFileService } from '../../src/services/fileServiceProvider.js'` (optional centralized
-  access)
+- `import { detectLegacyProfile, runFullMigration } from '../../services/migration.js'`
+- `import { getFileService } from '../../services/fileServiceProvider.js'` (centralized provider)
 
 **Report Contents**
 

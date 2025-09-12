@@ -149,115 +149,17 @@ function SettingsModal({
     }
 
     try {
-      const sampleData = {
-        cases: [
-          {
-            id: 'case-001',
-            mcn: 'MCN-2025-001',
-            personId: 'person-001',
-            status: 'Pending',
-            applicationDate: '2025-08-01',
-            description: 'Sample case for testing',
-            caseType: 'VR',
-            priority: 'Normal',
-            address: '123 Main St',
-            city: 'Springfield',
-            state: 'IL',
-            zipCode: '62701',
-            organizationId: 'org-001',
-            authorizedReps: [],
-          },
-          {
-            id: 'case-002',
-            mcn: 'MCN-2025-002',
-            personId: 'person-002',
-            status: 'Approved',
-            applicationDate: '2025-08-05',
-            description: 'Another sample case',
-            caseType: 'LTC',
-            priority: 'High',
-            address: '456 Oak Ave',
-            city: 'Springfield',
-            state: 'IL',
-            zipCode: '62702',
-            organizationId: 'org-002',
-            authorizedReps: [],
-          },
-        ],
-        people: [
-          {
-            id: 'person-001',
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            phone: '(555) 123-4567',
-            address: '123 Main St, Springfield, IL 62701',
-            status: 'active',
-            dateAdded: new Date().toISOString(),
-          },
-          {
-            id: 'person-002',
-            name: 'Jane Smith',
-            email: 'jane.smith@example.com',
-            phone: '(555) 234-5678',
-            address: '789 Pine St, Springfield, IL 62703',
-            status: 'active',
-            dateAdded: new Date().toISOString(),
-          },
-        ],
-        organizations: [
-          {
-            id: 'org-001',
-            name: 'Springfield Community Services',
-            type: 'Non-Profit',
-            contactPerson: 'Mary Wilson',
-            email: 'info@springfieldcs.org',
-            phone: '(555) 987-6543',
-            address: '100 Community Drive, Springfield, IL 62701',
-            status: 'active',
-            dateAdded: new Date().toISOString(),
-          },
-          {
-            id: 'org-002',
-            name: 'Regional Health Center',
-            type: 'Healthcare',
-            contactPerson: 'Dr. Sarah Davis',
-            email: 'contact@regionalhc.org',
-            phone: '(555) 876-5432',
-            address: '200 Medical Plaza, Springfield, IL 62702',
-            status: 'active',
-            dateAdded: new Date().toISOString(),
-          },
-        ],
-        financials: [
-          {
-            id: 'fin-001',
-            caseId: 'case-001',
-            amount: 1250.0,
-            description: 'VR Services',
-            category: 'Training',
-          },
-        ],
-        notes: [
-          {
-            id: 'note-001',
-            caseId: 'case-001',
-            content: 'Initial assessment completed',
-            date: '2025-08-02',
-            type: 'Assessment',
-          },
-        ],
-        vrRequests: [
-          {
-            id: 'vr-001',
-            caseId: 'case-001',
-            status: 'Pending',
-            requestDate: '2025-08-01',
-          },
-        ],
-      };
+      // Lazy-load generator (reduces initial bundle size)
+      const mod = await import('../../services/sampleData.js');
+      const sampleData =
+        mod.generateSampleData?.({
+          organizations: 20,
+          people: 100,
+          cases: 50,
+        }) || {};
 
       await fileService.writeFile(sampleData);
-      if (onDataLoaded) onDataLoaded(sampleData);
+      onDataLoaded?.(sampleData);
       showToast('Sample data created and loaded!', 'success');
       onClose();
     } catch (error) {

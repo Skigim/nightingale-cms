@@ -1,365 +1,159 @@
 # Nightingale CMS - Case Management System
 
-A comprehensive React-based case management system, featuring modern UI components, robust data
-management, and streamlined workflows.
+A React 18 + Tailwind CSS case management system with a clean two-layer architecture, robust data
+services, and a modern build (Vite).
 
-## 🎯 Project Overview
+## 🎯 What it does
 
-Nightingale CMS helps social workers track applications, manage client relationships, monitor
-financial resources, and generate reports for and long-term care services.
-
-### Key Features
-
-- **📋 Case Management**: Complete application lifecycle tracking
-- **👥 People & Organizations**: Contact and service provider management
-- **💰 Financial Tracking**: Resources, income, and expense monitoring
-- **📊 Reports & Analytics**: Data insights and summary generation
-- **🧩 Component Library**: Reusable UI components with consistent design
-- **🔄 Data Migrations**: Backward compatibility with legacy data
+- 📋 Case management: full lifecycle tracking with MCN, status, and relationships
+- 👥 People & Organizations: contacts and facilities with relationships
+- 💰 Financial tracking: resources, income, expenses
+- 📊 Reports & correspondence: standalone pages for generation and review
+- 🧩 Component library: reusable UI in a presentational layer; business layer composes workflows
+- 🔄 Migration tooling: detect → migrate → backup/write for legacy JSON
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Local file system access
-- No build tools required (uses in-browser Babel)
+- Node.js 18+ and npm 8+
+- Modern browser
 
-### Running the Application
-
-1. **Clone/Download** the project to your local machine
-2. **Open** `index.html` in your web browser for the main suite, or use individual pages:
-   - Main CMS Suite: `index.html`
-   - Main React App: `index.html` (Unified CMS application)
-   - Reports: `src/pages/NightingaleReports.html`
-   - Correspondence: `src/pages/NightingaleCorrespondence.html`
-3. **Create Sample Data** using the "Create Sample Data" button (in legacy app)
-4. **Start Managing Cases** with the intuitive interface
-
-### Development Setup
+### Install and run (recommended)
 
 ```bash
-# Navigate to project directory
-cd CMSWorkspace
-
-# Open in VS Code (recommended)
-code .
-
-# Serve files with Python (recommended for local development)
-python -m http.server 8080
-
-# Or open index.html directly in browser
+npm install
+npm run dev
 ```
+
+Vite will start the dev server. Open the URL it prints (usually http://localhost:5173).
+
+### Build and preview
+
+```bash
+npm run build
+npm run start:preview
+```
+
+### Static HTML entry (optional)
+
+You can open `index.html` directly in a browser for a static demo. For development, prefer the Vite
+server to avoid file protocol and module import limitations.
 
 ## 🏗️ Architecture
 
-### Component-Based Design
-
 ```
 src/
-├── components/           # Reusable Component Library
-│   ├── ui/              # Generic UI components (framework-agnostic)
-│   │   ├── Button.js    # Multi-variant button with icons
-│   │   ├── DataTable.js # Sortable, filterable tables
-│   │   ├── Modal.js     # Overlay dialogs and forms
-│   │   ├── SearchBar.js # Search with real-time filtering
-│   │   ├── Badge.js     # Status and category indicators
-│   │   ├── FormComponents.js # Form inputs with validation
-│   │   └── TabBase.js   # Tab component factory
-│   └── business/        # Domain-specific CMS components
-│       ├── CaseCreationModal.js   # Case creation workflows
-│       ├── PersonCreationModal.js # Person management forms
-│       ├── OrganizationModal.js   # Organization management
-│       └── FinancialItemModal.js  # Financial item management
-├── services/            # Core Services & Utilities
-│   ├── core.js          # Core application services
-│   ├── cms.js           # CMS-specific business logic
-│   ├── ui.js            # UI interaction utilities
-│   ├── nightingale.fileservice.js    # File I/O operations
-│   ├── nightingale.search.js         # Search/filtering logic
-│   ├── nightingale.dayjs.js          # Date/time utilities
-│   ├── nightingale.autosave.js       # Auto-save functionality
-│   └── nightingale.toast.js          # Toast notifications
-├── pages/               # Application Pages
-│   ├── NightingaleReports.html       # Reports and analytics
-│   └── NightingaleCorrespondence.html # Document generation
-├── assets/              # Third-party libraries
-│   ├── dayjs.min.js     # Date manipulation
-│   ├── fuse.min.js      # Fuzzy search
-│   └── lodash.min.js    # Utility functions
-Data/                    # JSON data files and backups
-Docs/                    # Project documentation
-index.html              # Main application shell
+├── components/
+│   ├── ui/            # Generic presentational components (no business logic)
+│   └── business/      # Domain workflows that compose UI + services
+├── services/          # ES module services (data, migration, search, etc.)
+├── assets/            # Third-party libs (Day.js, Fuse.js) for non-bundled usage
+└── pages/             # Standalone HTML pages (reports, correspondence)
 ```
 
-### Technology Stack
+- ES modules throughout; React 18 render via `createRoot`
+- Self-registration via a dedicated registry: `registerComponent('ui'|'business', name, component)`
+- Data stored as JSON; persisted via a file service abstraction
+- Search powered by `fuse.js`; dates via `dayjs`
 
-- **Frontend**: React 18, HTML5, CSS3
-- **Styling**: Tailwind CSS for responsive design
-- **Data**: JSON-based with localStorage persistence
-- **Date/Time**: Day.js for manipulation and formatting
-- **Search**: Fuse.js for fuzzy searching
-- **Utilities**: Lodash for data manipulation
-- **Development**: In-browser Babel transformation
+## 📚 Components
 
-## 📚 Component Library
+- UI: Button, Modal, DataTable, SearchBar, Badge, Form inputs, StepperModal
+- Business: CaseCreationModal, CaseDetailsView, PeopleTab, OrganizationsTab, SettingsModal
 
-### Button Components
+## 💾 Data
 
-- **PrimaryButton**: Main action buttons with icon support
-- **SecondaryButton**: Secondary actions and navigation
-- **SuccessButton**: Confirmation and save actions
-- **DangerButton**: Delete and destructive actions
+Example shape:
 
-### Data Components
-
-- **DataTable**: Sortable, paginated tables with custom renderers
-- **SearchBar**: Real-time search with debounced input
-- **Badge**: Status indicators with variant styling
-
-### Layout Components
-
-- **Modal**: Overlay dialogs with focus management
-- **FormComponents**: Input fields with validation and error display
-
-## 💾 Data Management
-
-### Data Structure
-
-```javascript
+```json
 {
-  cases: [
-    {
-      id: "case-001",
-      mcn: "MCN-2025-001",
-      personId: "person-001",
-      status: "Pending",
-      applicationDate: "2025-08-01",
-      caseType: "VR",
-      // ... additional fields
-    }
+  "cases": [
+    { "id": "case-001", "mcn": "MCN-2025-001", "personId": "person-001", "status": "Pending" }
   ],
-  people: [
-    {
-      id: "person-001",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "(555) 123-4567",
-      status: "active"
-      // ... additional fields
-    }
-  ],
-  organizations: [
-    {
-      id: "org-001",
-      name: "Springfield Community Services",
-      type: "Non-Profit",
-      contactPerson: "Mary Wilson",
-      // ... additional fields
-    }
-  ],
-  financials: [...],
-  notes: [...],
-  vrRequests: [...]
+  "people": [{ "id": "person-001", "name": "John Doe" }],
+  "organizations": [{ "id": "org-001", "name": "Regional Health" }],
+  "vrRequests": []
 }
 ```
 
-### Data Persistence
+Persistence:
 
-- **Local Storage**: Automatic save/load from browser storage
-- **JSON Export/Import**: Backup and restore capabilities
-- **Migration System**: Automatic data structure updates
-- **Validation**: Schema validation and error handling
+- JSON files via a file service provider
+- Export/Import supported via the Settings modal
 
 ## 🔧 Development
 
-### Adding New Components
+### Adding a UI component (modern pattern)
 
-```javascript
-// Create component in src/components/ui/ (generic) or src/components/business/ (domain-specific)
-function NewComponent({ prop1, prop2, ...props }) {
-  const e = window.React.createElement; // Component-scoped React.createElement
-  const [state, setState] = useState(initialValue);
+```jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+import { registerComponent } from './src/services/registry.js';
 
-  return e(
-    'div',
-    { className: 'component-styles', ...props },
-    // Component content
-  );
+function NewComponent({ label }) {
+  return <div className="p-2 text-white">{label}</div>;
 }
 
-// Register component
-if (typeof window !== 'undefined') {
-  window.NewComponent = NewComponent;
+NewComponent.propTypes = { label: PropTypes.string };
 
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('NewComponent', NewComponent);
-  }
-}
+registerComponent('ui', 'NewComponent', NewComponent);
+export default NewComponent;
 ```
 
-### Data Operations
+### Using services
 
-```javascript
-// Save data (using modern service pattern)
-await window.NightingaleServices.getService('fileService').saveData(data);
+```js
+import { detectLegacyProfile, runFullMigration } from './src/services/migration.js';
+import { getFileService } from './src/services/fileServiceProvider.js';
 
-// Load data
-const data = await window.NightingaleServices.getService('fileService').loadData();
-
-// Search data
-const results = window.NightingaleServices.getService('search').searchCases(data.cases, query);
-
-// Legacy compatibility (still works)
-await window.NightingaleFileService.saveData(data);
-const results = window.NightingaleSearch.searchCases(data.cases, query);
-```
-
-### Styling Guidelines
-
-```javascript
-// Use Tailwind CSS classes
-className: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700';
-
-// Responsive design
-className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
-
-// Component variants
-const variants = {
-  primary: 'bg-blue-600 text-white',
-  secondary: 'bg-gray-600 text-white',
-  success: 'bg-green-600 text-white',
-};
+const fs = getFileService();
+const raw = await fs.readFile();
+const detection = detectLegacyProfile(raw);
+const { migratedData, report } = await runFullMigration(raw, { applyFixes: true });
+await fs.writeFile(migratedData);
 ```
 
 ## 🧪 Testing
 
-### Manual Testing
-
-1. **Component Isolation**: Test each component individually
-2. **User Workflows**: Complete case management scenarios
-3. **Data Validation**: Test with various data formats
-4. **Error Handling**: Verify graceful failure modes
-
-### Browser Testing
-
-- Chrome (recommended for development)
-- Firefox
-- Safari
-- Edge
+- Jest + React Testing Library (jsdom)
+- Run tests: `npm test`
+- Coverage: `npm run test:coverage`
 
 ## 📖 Documentation
 
-### Project Documentation
+- Architecture: `docs/Architecture-Context.md`
+- Data Migration Guide: `docs/Data-Migration-Guide.md`
+- React Best Practices: `docs/react-best-practices.md`
+- Toast System: `docs/Toast-System.md`
 
-- [Architecture Context](Docs/Architecture-Context.md) - Current implementation vs future model
-- [Service Organization](Docs/Service-Reorganization-Migration-Guide.md) - Service layer
-  architecture
-- [Data Migration Guide](Docs/Data-Migration-Guide.md) - Legacy data migration procedures
-- [Component Analysis](Docs/Tab-Component-Analysis.md) - Component architecture patterns
-- [React Best Practices](Docs/react-best-practices.md) - Development guidelines
+API references:
 
-### API Documentation
+- File Service Provider: `src/services/fileServiceProvider.js`
+- Search Service: `src/services/nightingale.search.js`
+- Autosave: `src/services/README-autosave.md`
 
-- [File Service API](src/services/nightingale.fileservice.js) - File I/O operations
-- [Search Service API](src/services/nightingale.search.js) - Search and filtering
-- [Autosave Service](src/services/README-autosave.md) - Automatic data saving
+## � Deployment
 
-## 🚀 Deployment
+- Build with Vite: `npm run build`
+- GitHub Pages supported (see `homepage` in package.json)
 
-### Development
+## 🔄 Migration UI (in Settings)
 
-- Open `index.html` directly in browser for the main suite
-- Uses in-browser Babel compilation for rapid development
-- Individual pages can be accessed directly in `src/pages/`
+1. Connect to your data directory
+2. Detect legacy indicators (e.g., `masterCaseNumber → mcn`, numeric IDs)
+3. Run full migration (includes fixers, e.g., client name backfill)
+4. Download migrated JSON or Write & Backup to `nightingale-data.json`
 
-### Production
+Errors are logged and surfaced via toasts. If the provider is read-only, use Download and replace
+manually.
 
-- Pre-compile with build tools for performance
-- Host static files on web server
-- Configure proper MIME types for .js files
-- Consider using a local server (Python, Node.js, etc.) for development
+## 🗺️ Roadmap (highlights)
 
-## 🔄 Migration & Updates
+- Advanced reporting
+- Integrity audits (orphan links, invalid IDs)
+- Cleanup remaining legacy globals
 
-### Data Migration
+—
 
-The system includes automatic data migration for:
-
-- Legacy case data structures
-- New field additions
-- Schema changes
-- Data validation and cleanup
-
-### Migration UI (Recommended)
-
-Use the built-in Migration UI (in Settings) to safely migrate legacy JSON data to the modern schema.
-
-- Open `Settings → Data Migration` in the app.
-- Connect to your data directory if prompted (File System Access API).
-- Click Detect to see a summary of legacy indicators (e.g., `masterCaseNumber → mcn`, numeric IDs,
-  financial field renames).
-- Review the report; then choose how to proceed:
-  - `Download Migrated JSON`: Exports the transformed data so you can manually replace
-    `nightingale-data.json`.
-  - `Write & Backup` (recommended):
-    - Creates `nightingale-data.backup-<timestamp>.json` in the same folder (if provider supports
-      named writes).
-    - Writes the migrated data to `nightingale-data.json`.
-- On read-only or unsupported providers, prefer `Download Migrated JSON` and replace the file
-  manually.
-- The migration report includes:
-  - `appliedTransforms` (e.g., value→amount, type→description, string ID coercion)
-  - `counts.before/after` for cases/people/organizations
-  - `fixes.clientNamesAdded`
-  - `warnings.orphanCasePersonIds`
-
-Notes:
-
-- Errors are logged via the app logger and surfaced via toasts; no changes are written on failure.
-- If data is already modern, you can still re-run fixers (e.g., client name backfill) from Settings.
-
-### Version Updates
-
-- Component library updates
-- New feature additions
-- Bug fixes and improvements
-- Performance optimizations
-
-## 📞 Support
-
-### Development Environment
-
-- VS Code with React extensions recommended
-- Browser DevTools for debugging
-- React DevTools extension helpful
-
-### Troubleshooting
-
-- Check browser console for errors
-- Verify data structure integrity
-- Clear localStorage for fresh start
-- Review component documentation
-
-## 🎯 Roadmap
-
-### Planned Features
-
-- [ ] Advanced reporting dashboard
-- [ ] Multi-user authentication
-- [ ] Real-time collaboration
-- [ ] Mobile responsive optimization
-- [ ] API integration capabilities
-- [ ] Advanced search and filtering
-- [ ] Document management system
-
-### Performance Improvements
-
-- [ ] Component lazy loading
-- [ ] Virtual scrolling for large datasets
-- [ ] Optimized re-rendering
-- [ ] Bundle size optimization
-
----
-
-**Nightingale CMS** - Empowering case management with modern web technology.
+Nightingale CMS — modern, modular case management.

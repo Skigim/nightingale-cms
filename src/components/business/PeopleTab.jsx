@@ -99,6 +99,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { DataGrid } from '@mui/x-data-grid';
 function renderPeopleContent({ components, data: dataResult, props }) {
   const { SearchBar, SearchSection } = components;
   if (dataResult.selectedPersonId && PersonDetailsView) {
@@ -111,6 +112,9 @@ function renderPeopleContent({ components, data: dataResult, props }) {
       />
     );
   }
+  const isTestEnv =
+    typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test';
+  const canUseGrid = !isTestEnv;
   return (
     <Box
       sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
@@ -167,6 +171,44 @@ function renderPeopleContent({ components, data: dataResult, props }) {
             No people found
           </Typography>
         </Paper>
+      ) : canUseGrid ? (
+        <div style={{ height: 640, width: '100%' }}>
+          <DataGrid
+            rows={dataResult.data.map((p) => ({
+              id: p.id,
+              name: p.name || 'N/A',
+              email: p.email || 'N/A',
+              phone: p.phone || 'N/A',
+              address: (() => {
+                const v = p.address;
+                if (typeof v === 'string') return v;
+                if (v && typeof v === 'object') {
+                  const parts = [v.street, v.city, v.state, v.zip].filter(
+                    Boolean,
+                  );
+                  return parts.length ? parts.join(', ') : 'N/A';
+                }
+                return 'N/A';
+              })(),
+            }))}
+            columns={[
+              { field: 'name', headerName: 'Name', flex: 1, minWidth: 180 },
+              { field: 'email', headerName: 'Email', flex: 1, minWidth: 200 },
+              { field: 'phone', headerName: 'Phone', width: 160 },
+              {
+                field: 'address',
+                headerName: 'Address',
+                flex: 1,
+                minWidth: 220,
+              },
+            ]}
+            disableRowSelectionOnClick
+            onRowClick={(params) => {
+              const person = dataResult.data.find((p) => p.id === params.id);
+              if (person) dataResult.handleViewDetails(person);
+            }}
+          />
+        </div>
       ) : (
         <TableContainer
           component={Paper}

@@ -21,6 +21,8 @@ import CasesTab from './CasesTab.jsx';
 import PeopleTab from './PeopleTab.jsx';
 import OrganizationsTab from './OrganizationsTab.jsx';
 import EligibilityTab from './EligibilityTab.jsx';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
 import { getFileService } from '../../services/fileServiceProvider.js';
@@ -303,52 +305,148 @@ function NightingaleCMSApp() {
 
   // React is imported via ESM; no global safety check needed
 
-  return React.createElement(
-    'div',
-    { className: 'h-screen w-screen flex' },
-    components.Sidebar &&
-      React.createElement(components.Sidebar, {
-        activeTab,
-        onTabChange: setActiveTab,
-        onSettingsClick: () => setIsSettingsOpen(true),
-        onReportBugClick: () => setIsBugModalOpen(true),
-        caseViewMode,
-        onCaseBackToList: () => {
-          if (caseBackFunction) caseBackFunction();
+  // Global MUI dark theme aligned with Tailwind colors used in the app
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: 'dark',
+          primary: { main: '#3B82F6' }, // blue-500
+          secondary: { main: '#6366F1' }, // indigo-500
+          background: {
+            default: '#111827', // gray-900 (matches app main background)
+            paper: '#1F2937', // gray-800
+          },
+          text: {
+            primary: '#E5E7EB', // gray-200
+            secondary: '#9CA3AF', // gray-400
+          },
+        },
+        components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              // Theme the scrollbars for the main app content area only
+              'main.flex-1': {
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#4B5563 #111827', // thumb track (Firefox)
+              },
+              'main.flex-1::-webkit-scrollbar': {
+                width: '10px',
+                height: '10px',
+              },
+              'main.flex-1::-webkit-scrollbar-track': {
+                background: '#111827', // gray-900
+                borderRadius: 8,
+              },
+              'main.flex-1::-webkit-scrollbar-thumb': {
+                backgroundColor: '#4B5563', // gray-600
+                borderRadius: 8,
+                border: '2px solid #111827',
+              },
+              'main.flex-1::-webkit-scrollbar-thumb:hover': {
+                backgroundColor: '#6B7280', // gray-500
+              },
+            },
+          },
+          MuiButton: {
+            styleOverrides: {
+              root: { textTransform: 'none', borderRadius: 8 },
+            },
+          },
+          MuiPaper: {
+            styleOverrides: {
+              root: { backgroundImage: 'none' },
+            },
+          },
+          MuiTableCell: {
+            styleOverrides: {
+              head: { fontWeight: 600 },
+            },
+          },
+          MuiDataGrid: {
+            styleOverrides: {
+              root: {
+                // Customize native scrollbars for WebKit and Firefox
+                '& .MuiDataGrid-virtualScroller': {
+                  scrollbarWidth: 'thin', // Firefox
+                  scrollbarColor: '#4B5563 #111827', // thumb track
+                },
+                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar': {
+                  width: '10px',
+                  height: '10px',
+                },
+                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-track': {
+                  background: '#111827', // bg-gray-900
+                  borderRadius: 8,
+                },
+                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb': {
+                  backgroundColor: '#4B5563', // gray-600
+                  borderRadius: 8,
+                  border: '2px solid #111827',
+                },
+                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb:hover':
+                  {
+                    backgroundColor: '#6B7280', // gray-500
+                  },
+              },
+            },
+          },
         },
       }),
+    [],
+  );
+
+  return React.createElement(
+    ThemeProvider,
+    { theme },
+    React.createElement(CssBaseline, null),
     React.createElement(
       'div',
-      { className: 'flex-1 flex flex-col overflow-hidden' },
-      components.Header &&
-        React.createElement(components.Header, {
-          fileStatus,
-          autosaveStatus,
+      { className: 'h-screen w-screen flex' },
+      components.Sidebar &&
+        React.createElement(components.Sidebar, {
+          activeTab,
+          onTabChange: setActiveTab,
           onSettingsClick: () => setIsSettingsOpen(true),
-          onManualSave: handleManualSave,
+          onReportBugClick: () => setIsBugModalOpen(true),
+          caseViewMode,
+          onCaseBackToList: () => {
+            if (caseBackFunction) caseBackFunction();
+          },
         }),
       React.createElement(
-        'main',
-        { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
-        renderActiveTab(),
+        'div',
+        { className: 'flex-1 flex flex-col overflow-hidden' },
+        components.Header &&
+          React.createElement(components.Header, {
+            fileStatus,
+            autosaveStatus,
+            onSettingsClick: () => setIsSettingsOpen(true),
+            onManualSave: handleManualSave,
+          }),
+        React.createElement(
+          'main',
+          { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
+          renderActiveTab(),
+        ),
       ),
+      components.SettingsModal &&
+        React.createElement(components.SettingsModal, {
+          isOpen: isSettingsOpen,
+          onClose: () => setIsSettingsOpen(false),
+          fileService,
+          onDataLoaded: handleDataLoaded,
+          fileStatus,
+          onFileStatusChange: setFileStatus,
+        }),
+      components.BugReportModal &&
+        React.createElement(components.BugReportModal, {
+          isOpen: isBugModalOpen,
+          onClose: () => setIsBugModalOpen(false),
+          onSubmit: handleSubmitBug,
+          activeTab,
+        }),
     ),
-    components.SettingsModal &&
-      React.createElement(components.SettingsModal, {
-        isOpen: isSettingsOpen,
-        onClose: () => setIsSettingsOpen(false),
-        fileService,
-        onDataLoaded: handleDataLoaded,
-        fileStatus,
-        onFileStatusChange: setFileStatus,
-      }),
-    components.BugReportModal &&
-      React.createElement(components.BugReportModal, {
-        isOpen: isBugModalOpen,
-        onClose: () => setIsBugModalOpen(false),
-        onSubmit: handleSubmitBug,
-        activeTab,
-      }),
   );
 }
 
