@@ -426,7 +426,7 @@ function NightingaleCMSApp() {
           }),
         React.createElement(
           'main',
-          { className: 'flex-1 min-h-0 overflow-hidden p-6 bg-gray-900' },
+          { className: 'flex-1 min-h-0 overflow-auto p-6 bg-gray-900' },
           renderActiveTab(),
         ),
       ),

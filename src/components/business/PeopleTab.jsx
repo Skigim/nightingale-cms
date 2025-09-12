@@ -169,29 +169,10 @@ function renderPeopleContent({ components, data: dataResult }) {
           </Typography>
         </Paper>
       ) : canUseGrid ? (
-        <Box sx={{ height: 576, maxHeight: '100%', display: 'flex' }}>
+        <Box sx={{ width: '100%' }}>
           <DataGrid
-            sx={{
-              flex: 1,
-              '& .MuiDataGrid-virtualScroller': {
-                overflowX: 'hidden',
-                overflowY: 'auto',
-              },
-              '& .MuiDataGrid-topContainer': {
-                overflow: 'hidden',
-                scrollbarWidth: 'none',
-              },
-              '& .MuiDataGrid-columnHeaders': {
-                overflow: 'hidden',
-                scrollbarWidth: 'none',
-              },
-              '& .MuiDataGrid-columnHeaders::-webkit-scrollbar': {
-                display: 'none',
-              },
-              '& .MuiDataGrid-scrollbar, & .MuiDataGrid-scrollbarFiller': {
-                display: 'none',
-              },
-            }}
+            autoHeight
+            sx={{ width: '100%' }}
             rows={dataResult.data.map((p) => ({
               id: p.id,
               name: p.name || 'N/A',

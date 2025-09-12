@@ -360,36 +360,10 @@ function renderOrganizationsContent({ components, data }) {
       ) : canUseGrid ? (
         e(
           'div',
-          {
-            style: {
-              width: '100%',
-              height: '576px',
-              maxHeight: '100%',
-              display: 'flex',
-            },
-          },
+          { style: { width: '100%' } },
           e(DataGrid, {
-            sx: {
-              flex: 1,
-              '& .MuiDataGrid-virtualScroller': {
-                overflowX: 'hidden',
-                overflowY: 'auto',
-              },
-              '& .MuiDataGrid-topContainer': {
-                overflow: 'hidden',
-                scrollbarWidth: 'none',
-              },
-              '& .MuiDataGrid-columnHeaders': {
-                overflow: 'hidden',
-                scrollbarWidth: 'none',
-              },
-              '& .MuiDataGrid-columnHeaders::-webkit-scrollbar': {
-                display: 'none',
-              },
-              '& .MuiDataGrid-scrollbar, & .MuiDataGrid-scrollbarFiller': {
-                display: 'none',
-              },
-            },
+            autoHeight: true,
+            sx: { width: '100%' },
             rows: data.data.map((org) => ({
               id: org.id,
               name: org.name || 'N/A',
