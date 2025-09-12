@@ -13,7 +13,6 @@ import Toast from '../../services/nightingale.toast.js';
 
 /**
  * Data management hook for Organizations Tab
- * Implements all the data-related logic and state management
  */
 function useOrganizationsData(props) {
   const {
@@ -23,14 +22,11 @@ function useOrganizationsData(props) {
     onViewModeChange,
     onBackToList,
   } = props;
-  // Hooks from React (unconditional at top of scope)
 
-  // Toast function via module (stable reference for hook deps)
   const showToast = useCallback((msg, type) => {
     Toast.showToast?.(msg, type);
   }, []);
 
-  // All state hooks (called unconditionally per React rules)
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrganization, setSelectedOrganization] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -40,30 +36,21 @@ function useOrganizationsData(props) {
   const [confirmingOrganizationDelete, setConfirmingOrganizationDelete] =
     useState(null);
 
-  // Back to list function
   const backToList = useCallback(() => {
     onViewModeChange?.('list');
   }, [onViewModeChange]);
 
-  // Expose the back function to parent
   useEffect(() => {
-    if (onBackToList) {
-      onBackToList(() => backToList);
-    }
+    if (onBackToList) onBackToList(() => backToList);
   }, [onBackToList, backToList]);
 
-  // Filter organizations
   const filteredOrganizations = useMemo(() => {
     if (!fullData?.organizations) return [];
-
     let filtered = fullData.organizations;
-
-    // Ensure searchTerm is a string before using string methods
     const searchString = typeof searchTerm === 'string' ? searchTerm : '';
     if (searchString && searchString.trim()) {
       const term = searchString.toLowerCase();
       filtered = filtered.filter((org) => {
-        // Helper function to safely search address object
         const searchAddress = (address) => {
           if (!address || typeof address !== 'object') return false;
           return (
@@ -73,7 +60,6 @@ function useOrganizationsData(props) {
             address.zip?.includes?.(term)
           );
         };
-
         return (
           org.name?.toLowerCase?.().includes(term) ||
           org.type?.toLowerCase?.().includes(term) ||
@@ -84,11 +70,9 @@ function useOrganizationsData(props) {
         );
       });
     }
-
     return filtered;
   }, [fullData, searchTerm]);
 
-  // Event handlers
   const handleOrganizationClick = useCallback((organization) => {
     setSelectedOrganization(organization);
     setIsDetailsModalOpen(true);
@@ -221,7 +205,6 @@ function renderOrganizationsContent({ components, data }) {
     typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test';
   const canUseGrid = !isTestEnv;
 
-  // Define table columns (for DataTable fallback)
   const columns = [
     {
       field: 'name',
@@ -232,10 +215,7 @@ function renderOrganizationsContent({ components, data }) {
           ? e(TextInput, {
               value: state.editValues.name,
               onChange: (value) =>
-                state.setEditValues({
-                  ...state.editValues,
-                  name: value,
-                }),
+                state.setEditValues({ ...state.editValues, name: value }),
               className: 'w-full',
             })
           : e(
@@ -253,10 +233,7 @@ function renderOrganizationsContent({ components, data }) {
           ? e(Select, {
               value: state.editValues.type,
               onChange: (value) =>
-                state.setEditValues({
-                  ...state.editValues,
-                  type: value,
-                }),
+                state.setEditValues({ ...state.editValues, type: value }),
               options: [
                 { value: '', label: 'Select Type' },
                 { value: 'healthcare', label: 'Healthcare' },
@@ -286,10 +263,7 @@ function renderOrganizationsContent({ components, data }) {
               type: 'email',
               value: state.editValues.email,
               onChange: (value) =>
-                state.setEditValues({
-                  ...state.editValues,
-                  email: value,
-                }),
+                state.setEditValues({ ...state.editValues, email: value }),
               className: 'w-full',
             })
           : e('div', { className: 'text-gray-300' }, org?.email || 'N/A'),
@@ -304,10 +278,7 @@ function renderOrganizationsContent({ components, data }) {
               type: 'tel',
               value: state.editValues.phone,
               onChange: (value) =>
-                state.setEditValues({
-                  ...state.editValues,
-                  phone: value,
-                }),
+                state.setEditValues({ ...state.editValues, phone: value }),
               className: 'w-full',
             })
           : e('div', { className: 'text-gray-300' }, org?.phone || 'N/A'),
@@ -316,7 +287,14 @@ function renderOrganizationsContent({ components, data }) {
 
   return (
     <Box
-      sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
+      sx={{
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+      }}
     >
       <Box
         sx={{
@@ -348,7 +326,6 @@ function renderOrganizationsContent({ components, data }) {
           Add New Organization
         </Button>
       </Box>
-
       {e(SearchSection, {
         searchBar: e(
           'div',
@@ -371,45 +348,7 @@ function renderOrganizationsContent({ components, data }) {
         ),
       })}
 
-      {canUseGrid
-        ? e(
-            'div',
-            { style: { height: 640, width: '100%' } },
-            e(DataGrid, {
-              rows: data.data.map((org) => ({
-                id: org.id,
-                name: org.name || 'N/A',
-                type: org.type || 'N/A',
-                email: org.email || 'N/A',
-                phone: org.phone || 'N/A',
-              })),
-              columns: [
-                {
-                  field: 'name',
-                  headerName: 'Organization Name',
-                  flex: 1,
-                  minWidth: 220,
-                },
-                { field: 'type', headerName: 'Type', width: 140 },
-                { field: 'email', headerName: 'Email', flex: 1, minWidth: 220 },
-                { field: 'phone', headerName: 'Phone', width: 160 },
-              ],
-              disableRowSelectionOnClick: true,
-              onRowClick: (params) => {
-                const org = data.data.find((o) => o.id === params.id);
-                if (org) handlers.handleOrganizationClick(org);
-              },
-            }),
-          )
-        : e(DataTable, {
-            data: data.data,
-            columns,
-            onRowClick: handlers.handleOrganizationClick,
-            className: 'w-full',
-            emptyMessage: 'No organizations found',
-          })}
-
-      {data.data.length === 0 && (
+      {data.data.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <Typography
             variant="body1"
@@ -418,6 +357,76 @@ function renderOrganizationsContent({ components, data }) {
             No organizations found
           </Typography>
         </Paper>
+      ) : canUseGrid ? (
+        e(
+          'div',
+          {
+            style: {
+              width: '100%',
+              height: '576px',
+              maxHeight: '100%',
+              display: 'flex',
+            },
+          },
+          e(DataGrid, {
+            sx: {
+              flex: 1,
+              '& .MuiDataGrid-virtualScroller': {
+                overflowX: 'hidden',
+                overflowY: 'auto',
+              },
+              '& .MuiDataGrid-topContainer': {
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+              },
+              '& .MuiDataGrid-columnHeaders::-webkit-scrollbar': {
+                display: 'none',
+              },
+              '& .MuiDataGrid-scrollbar, & .MuiDataGrid-scrollbarFiller': {
+                display: 'none',
+              },
+            },
+            rows: data.data.map((org) => ({
+              id: org.id,
+              name: org.name || 'N/A',
+              type: org.type || 'N/A',
+              email: org.email || 'N/A',
+              phone: org.phone || 'N/A',
+            })),
+            columns: [
+              {
+                field: 'name',
+                headerName: 'Organization Name',
+                flex: 1,
+                minWidth: 220,
+              },
+              { field: 'type', headerName: 'Type', width: 140 },
+              { field: 'email', headerName: 'Email', flex: 1, minWidth: 220 },
+              { field: 'phone', headerName: 'Phone', width: 160 },
+            ],
+            disableRowSelectionOnClick: true,
+            initialState: {
+              pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            },
+            pageSizeOptions: [10, 25, 50],
+            onRowClick: (params) => {
+              const org = data.data.find((o) => o.id === params.id);
+              if (org) handlers.handleOrganizationClick(org);
+            },
+          }),
+        )
+      ) : (
+        e(DataTable, {
+          data: data.data,
+          columns,
+          onRowClick: handlers.handleOrganizationClick,
+          className: 'w-full',
+          emptyMessage: 'No organizations found',
+        })
       )}
     </Box>
   );

@@ -107,7 +107,14 @@ function renderPeopleContent({ components, data: dataResult }) {
   const canUseGrid = !isTestEnv;
   return (
     <Box
-      sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
+      sx={{
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+      }}
     >
       <Box
         sx={{
@@ -162,8 +169,29 @@ function renderPeopleContent({ components, data: dataResult }) {
           </Typography>
         </Paper>
       ) : canUseGrid ? (
-        <div style={{ height: 640, width: '100%' }}>
+        <Box sx={{ height: 576, maxHeight: '100%', display: 'flex' }}>
           <DataGrid
+            sx={{
+              flex: 1,
+              '& .MuiDataGrid-virtualScroller': {
+                overflowX: 'hidden',
+                overflowY: 'auto',
+              },
+              '& .MuiDataGrid-topContainer': {
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+              },
+              '& .MuiDataGrid-columnHeaders::-webkit-scrollbar': {
+                display: 'none',
+              },
+              '& .MuiDataGrid-scrollbar, & .MuiDataGrid-scrollbarFiller': {
+                display: 'none',
+              },
+            }}
             rows={dataResult.data.map((p) => ({
               id: p.id,
               name: p.name || 'N/A',
@@ -193,12 +221,16 @@ function renderPeopleContent({ components, data: dataResult }) {
               },
             ]}
             disableRowSelectionOnClick
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            }}
+            pageSizeOptions={[10, 25, 50]}
             onRowClick={(params) => {
               const person = dataResult.data.find((p) => p.id === params.id);
               if (person) dataResult.handlePersonClick(person);
             }}
           />
-        </div>
+        </Box>
       ) : (
         <TableContainer
           component={Paper}

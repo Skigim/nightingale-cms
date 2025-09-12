@@ -162,7 +162,14 @@ function renderCasesContent({ components, data: dataResult, props }) {
   // Main cases list view - standardized MUI layout
   return (
     <Box
-      sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
+      sx={{
+        width: '100%',
+        height: '100%',
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 3,
+      }}
     >
       <Box
         sx={{
@@ -194,7 +201,6 @@ function renderCasesContent({ components, data: dataResult, props }) {
           New Case
         </Button>
       </Box>
-
       {e(SearchSection, {
         searchBar: e(SearchBar, {
           value: dataResult.searchTerm,
@@ -218,8 +224,36 @@ function renderCasesContent({ components, data: dataResult, props }) {
       ) : canUseGrid ? (
         e(
           'div',
-          { style: { height: 640, width: '100%' } },
+          {
+            style: {
+              width: '100%',
+              height: '576px',
+              maxHeight: '100%',
+              display: 'flex',
+            },
+          },
           e(DataGrid, {
+            sx: {
+              flex: 1,
+              '& .MuiDataGrid-virtualScroller': {
+                overflowX: 'hidden',
+                overflowY: 'auto',
+              },
+              '& .MuiDataGrid-topContainer': {
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                overflow: 'hidden',
+                scrollbarWidth: 'none',
+              },
+              '& .MuiDataGrid-columnHeaders::-webkit-scrollbar': {
+                display: 'none',
+              },
+              '& .MuiDataGrid-scrollbar, & .MuiDataGrid-scrollbarFiller': {
+                display: 'none',
+              },
+            },
             rows: dataResult.data.map((c) => {
               const person =
                 globalThis.NightingaleDataManagement?.findPersonById?.(
@@ -256,51 +290,12 @@ function renderCasesContent({ components, data: dataResult, props }) {
                 headerName: 'Application Date',
                 width: 180,
               },
-              {
-                field: 'actions',
-                headerName: 'Actions',
-                sortable: false,
-                filterable: false,
-                width: 160,
-                renderCell: (params) =>
-                  e(
-                    'div',
-                    { className: 'flex space-x-2' },
-                    e(
-                      'button',
-                      {
-                        className:
-                          'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                        onClick: (ev) => {
-                          ev.stopPropagation();
-                          const caseItem = dataResult.data.find(
-                            (x) => x.id === params.id,
-                          );
-                          if (caseItem)
-                            dataResult.handleOpenCaseDetails(caseItem, ev);
-                        },
-                      },
-                      'Details',
-                    ),
-                    e(
-                      'button',
-                      {
-                        className:
-                          'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                        onClick: (ev) => {
-                          ev.stopPropagation();
-                          const caseItem = dataResult.data.find(
-                            (x) => x.id === params.id,
-                          );
-                          if (caseItem) dataResult.handleCaseClick(caseItem);
-                        },
-                      },
-                      'Edit',
-                    ),
-                  ),
-              },
             ],
             disableRowSelectionOnClick: true,
+            initialState: {
+              pagination: { paginationModel: { pageSize: 10, page: 0 } },
+            },
+            pageSizeOptions: [10, 25, 50],
             onRowClick: (params) => {
               const caseItem = dataResult.data.find((x) => x.id === params.id);
               if (caseItem) dataResult.handleCaseClick(caseItem);
@@ -378,38 +373,6 @@ function renderCasesContent({ components, data: dataResult, props }) {
                   'span',
                   { className: 'text-gray-300' },
                   dataResult.formatDate(value),
-                ),
-            },
-            {
-              field: 'actions',
-              label: 'Actions',
-              sortable: false,
-              render: (value, caseItem) =>
-                e(
-                  'div',
-                  { className: 'flex space-x-2' },
-                  e(
-                    'button',
-                    {
-                      className:
-                        'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                      onClick: (e) =>
-                        dataResult.handleOpenCaseDetails(caseItem, e),
-                    },
-                    'Details',
-                  ),
-                  e(
-                    'button',
-                    {
-                      className:
-                        'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                      onClick: (e) => {
-                        e.stopPropagation();
-                        dataResult.handleCaseClick(caseItem);
-                      },
-                    },
-                    'Edit',
-                  ),
                 ),
             },
           ],

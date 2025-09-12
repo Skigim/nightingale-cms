@@ -340,21 +340,8 @@ class AutosaveFileService {
       const handle = await this.getStoredDirectoryHandle();
       if (handle) {
         this.directoryHandle = handle;
-        // Some browsers may report 'prompt' until re-request; try a non-blocking request
-        let permission = await this.checkPermission();
-        if (
-          permission !== 'granted' &&
-          this.directoryHandle?.requestPermission
-        ) {
-          try {
-            const req = await this.directoryHandle.requestPermission({
-              mode: 'readwrite',
-            });
-            permission = req;
-          } catch (_) {
-            // ignore; user gesture required
-          }
-        }
+        // Only query permission on restore; request must happen via user gesture later
+        const permission = await this.checkPermission();
         this.state.permissionStatus = permission;
 
         if (permission === 'granted') {
@@ -379,6 +366,32 @@ class AutosaveFileService {
     this.state.permissionStatus = 'prompt';
     this.updateStatus('disconnected', 'No data folder connected');
     return { handle: null, permission: 'prompt' };
+  }
+
+  /**
+   * Attempt to request permission for the current directory handle.
+   * Should be called in response to a user gesture (e.g., button click).
+   * Returns true if granted.
+   */
+  async ensurePermission() {
+    if (!this.directoryHandle || !this.directoryHandle.requestPermission) {
+      return false;
+    }
+    try {
+      const result = await this.directoryHandle.requestPermission({
+        mode: 'readwrite',
+      });
+      this.state.permissionStatus = result;
+      if (result === 'granted') {
+        this.updateStatus('connected', 'Connected to data folder');
+        return true;
+      }
+      this.updateStatus('waiting', 'Waiting for folder connection');
+      return false;
+    } catch (_) {
+      this.updateStatus('waiting', 'Waiting for folder connection');
+      return false;
+    }
   }
 
   // IndexedDB operations for directory handle persistence

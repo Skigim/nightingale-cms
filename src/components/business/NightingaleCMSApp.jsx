@@ -366,28 +366,9 @@ function NightingaleCMSApp() {
           MuiDataGrid: {
             styleOverrides: {
               root: {
-                // Customize native scrollbars for WebKit and Firefox
-                '& .MuiDataGrid-virtualScroller': {
-                  scrollbarWidth: 'thin', // Firefox
-                  scrollbarColor: '#4B5563 #111827', // thumb track
-                },
-                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar': {
-                  width: '10px',
-                  height: '10px',
-                },
-                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-track': {
-                  background: '#111827', // bg-gray-900
-                  borderRadius: 8,
-                },
-                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb': {
-                  backgroundColor: '#4B5563', // gray-600
-                  borderRadius: 8,
-                  border: '2px solid #111827',
-                },
-                '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb:hover':
-                  {
-                    backgroundColor: '#6B7280', // gray-500
-                  },
+                // Avoid customizing native scrollbars inside the DataGrid virtual scroller
+                // to prevent a duplicate (native) scrollbar from appearing alongside
+                // MUI X's overlay scrollbar implementation.
               },
             },
           },
@@ -416,17 +397,36 @@ function NightingaleCMSApp() {
         }),
       React.createElement(
         'div',
-        { className: 'flex-1 flex flex-col overflow-hidden' },
+        { className: 'flex-1 flex flex-col overflow-hidden min-h-0 min-w-0' },
         components.Header &&
           React.createElement(components.Header, {
             fileStatus,
             autosaveStatus,
-            onSettingsClick: () => setIsSettingsOpen(true),
+            onSettingsClick: async () => {
+              // If we are in reconnect state, try to request permission via user gesture first
+              if (fileStatus === 'reconnect' && fileService?.ensurePermission) {
+                const granted = await fileService.ensurePermission();
+                if (granted) {
+                  setFileStatus('connected');
+                  // Attempt to read data after reconnect
+                  try {
+                    const data = await fileService.readFile?.();
+                    if (data && Object.keys(data).length > 0) {
+                      setFullData(data);
+                    }
+                  } catch (_) {
+                    /* ignore */
+                  }
+                  return; // No need to open settings if permission granted
+                }
+              }
+              setIsSettingsOpen(true);
+            },
             onManualSave: handleManualSave,
           }),
         React.createElement(
           'main',
-          { className: 'flex-1 overflow-auto p-6 bg-gray-900' },
+          { className: 'flex-1 min-h-0 overflow-hidden p-6 bg-gray-900' },
           renderActiveTab(),
         ),
       ),
