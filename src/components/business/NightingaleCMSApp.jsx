@@ -80,6 +80,16 @@ function NightingaleCMSApp() {
   // Use ref for live data access to avoid stale closure issues
   const fullDataRef = useRef(null);
 
+  // Opt-in navigation logging via localStorage flag
+  const navLogsEnabled = useMemo(() => {
+    try {
+      const v = localStorage.getItem('nightingale:navLogs');
+      return v === '1' || v === 'true' || v === 'on';
+    } catch (_) {
+      return false;
+    }
+  }, []);
+
   // Data update handler - must be defined before useMemo that uses it
   const handleDataUpdate = useCallback(
     (newData) => {
@@ -98,6 +108,39 @@ function NightingaleCMSApp() {
   useEffect(() => {
     fullDataRef.current = fullData;
   }, [fullData]);
+
+  const handleTabChange = useCallback(
+    (nextTab) => {
+      if (navLogsEnabled) {
+        try {
+          const logger = globalThis.NightingaleLogger?.get('nav:tab_change');
+          logger?.info('Tab changed', { from: activeTab, to: nextTab });
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      setActiveTab(nextTab);
+    },
+    [navLogsEnabled, activeTab],
+  );
+
+  const handleCaseViewModeChange = useCallback(
+    (nextMode) => {
+      if (navLogsEnabled) {
+        try {
+          const logger = globalThis.NightingaleLogger?.get('nav:cases');
+          logger?.info('Case view mode changed', {
+            from: caseViewMode,
+            to: nextMode,
+          });
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      setCaseViewMode(nextMode);
+    },
+    [navLogsEnabled, caseViewMode],
+  );
 
   // Listen for provider readiness events to hydrate service after mount
   useEffect(() => {
@@ -169,7 +212,7 @@ function NightingaleCMSApp() {
         fullData,
         onUpdateData: handleDataUpdate,
         fileService,
-        onViewModeChange: setCaseViewMode,
+        onViewModeChange: handleCaseViewModeChange,
         onBackToList: setCaseBackFunction,
       },
       people: {
@@ -194,7 +237,7 @@ function NightingaleCMSApp() {
       fullData,
       fileService,
       handleDataUpdate,
-      setCaseViewMode,
+      handleCaseViewModeChange,
       setCaseBackFunction,
     ],
   );
@@ -413,11 +456,19 @@ function NightingaleCMSApp() {
       components.Sidebar &&
         React.createElement(components.Sidebar, {
           activeTab,
-          onTabChange: setActiveTab,
+          onTabChange: handleTabChange,
           onSettingsClick: () => setIsSettingsOpen(true),
           onReportBugClick: () => setIsBugModalOpen(true),
           caseViewMode,
           onCaseBackToList: () => {
+            if (navLogsEnabled) {
+              try {
+                const logger = globalThis.NightingaleLogger?.get('nav:cases');
+                logger?.info('Back to cases list');
+              } catch (_) {
+                /* ignore */
+              }
+            }
             if (caseBackFunction) caseBackFunction();
           },
         }),

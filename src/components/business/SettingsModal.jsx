@@ -48,6 +48,24 @@ function SettingsModal({
   const [migrationReport, setMigrationReport] = useState(null);
   const [migrationError, setMigrationError] = useState(null);
   const [migratedData, setMigratedData] = useState(null);
+  // Diagnostics state
+  const initialNavLogs = (() => {
+    try {
+      const v = localStorage.getItem('nightingale:navLogs');
+      return v === '1' || v === 'true' || v === 'on';
+    } catch (_) {
+      return false;
+    }
+  })();
+  const initialLevel = (() => {
+    try {
+      return globalThis.NightingaleLogger?.getConfig?.().level || 'info';
+    } catch (_) {
+      return 'info';
+    }
+  })();
+  const [navLogsEnabled, setNavLogsEnabled] = useState(initialNavLogs);
+  const [logLevel, setLogLevel] = useState(initialLevel);
 
   // Get dependencies
   const Modal = getComponent('ui', 'Modal');
@@ -437,6 +455,113 @@ function SettingsModal({
               >
                 Data Migration
               </button>
+            </div>
+          </div>
+          {/* Diagnostics & Logging */}
+          <div className="space-y-3 p-4 bg-gray-800 rounded-lg border border-gray-700">
+            <h3 className="text-lg font-semibold text-white">
+              Diagnostics & Logging
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+                <input
+                  type="checkbox"
+                  checked={navLogsEnabled}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    setNavLogsEnabled(enabled);
+                    try {
+                      if (enabled)
+                        localStorage.setItem('nightingale:navLogs', '1');
+                      else localStorage.removeItem('nightingale:navLogs');
+                      const logger = globalThis.NightingaleLogger?.get(
+                        'settings:diagnostics',
+                      );
+                      logger?.info('Navigation logging toggled', { enabled });
+                      showToast(
+                        `Navigation logging ${enabled ? 'enabled' : 'disabled'}`,
+                        'info',
+                      );
+                    } catch (_) {
+                      showToast('Failed to update setting', 'error');
+                    }
+                  }}
+                  className="form-checkbox h-5 w-5 text-blue-600"
+                />
+                <span className="text-gray-200">Enable navigation logs</span>
+              </label>
+              <div className="p-3 bg-gray-700 rounded-lg flex items-center justify-between">
+                <div className="text-gray-200">Log level</div>
+                <select
+                  value={logLevel}
+                  onChange={(e) => {
+                    const lvl = e.target.value;
+                    setLogLevel(lvl);
+                    try {
+                      globalThis.NightingaleLogger?.configure?.({ level: lvl });
+                      const logger = globalThis.NightingaleLogger?.get(
+                        'settings:diagnostics',
+                      );
+                      logger?.info('Log level changed', { level: lvl });
+                      showToast(`Log level set to ${lvl}`, 'info');
+                    } catch (_) {
+                      showToast('Failed to set log level', 'error');
+                    }
+                  }}
+                  className="bg-gray-600 text-white rounded px-2 py-1"
+                >
+                  <option value="trace">trace</option>
+                  <option value="debug">debug</option>
+                  <option value="info">info</option>
+                  <option value="warn">warn</option>
+                  <option value="error">error</option>
+                  <option value="silent">silent</option>
+                </select>
+              </div>
+              <button
+                onClick={() => {
+                  try {
+                    const json =
+                      globalThis.NightingaleLogger?.exportLogs?.('json');
+                    const content =
+                      typeof json === 'string'
+                        ? json
+                        : JSON.stringify(json, null, 2);
+                    const blob = new Blob([content], {
+                      type: 'application/json',
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+                    a.href = url;
+                    a.download = `nightingale-logs-${ts}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    showToast('Logs exported', 'success');
+                  } catch (_) {
+                    showToast('Failed to export logs', 'error');
+                  }
+                }}
+                className="px-4 py-3 rounded-lg font-medium transition-colors bg-gray-700 hover:bg-gray-600 text-white"
+              >
+                Export Recent Logs (JSON)
+              </button>
+              <div className="p-3 bg-gray-700 rounded-lg text-sm text-gray-300">
+                <div className="font-medium mb-1">Current logger status</div>
+                <div>
+                  {(() => {
+                    try {
+                      const cfg = globalThis.NightingaleLogger?.getConfig?.();
+                      if (!cfg) return 'Logger unavailable';
+                      return `level: ${cfg.level}, transports: ${cfg.transports.length}, enrichers: ${cfg.enrichers.length}`;
+                    } catch (_) {
+                      return 'Logger unavailable';
+                    }
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
           <div className="space-y-2 p-4 bg-gray-700 rounded-lg">

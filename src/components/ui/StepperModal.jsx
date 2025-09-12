@@ -34,6 +34,12 @@ function StepperModal({
 
   // Enhanced step change handler with focus management
   const handleStepChange = (newStep) => {
+    try {
+      const logger = globalThis.NightingaleLogger?.get('nav:stepper');
+      logger?.info('Step change', { from: currentStep, to: newStep, title });
+    } catch (_) {
+      /* ignore */
+    }
     onStepChange(newStep);
 
     // Focus management for step change
@@ -53,17 +59,47 @@ function StepperModal({
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
+      try {
+        const logger = globalThis.NightingaleLogger?.get('nav:stepper');
+        logger?.debug('Next clicked', {
+          from: currentStep,
+          to: currentStep + 1,
+          title,
+        });
+      } catch (_) {
+        /* ignore */
+      }
       handleStepChange(currentStep + 1);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
+      try {
+        const logger = globalThis.NightingaleLogger?.get('nav:stepper');
+        logger?.debug('Back clicked', {
+          from: currentStep,
+          to: currentStep - 1,
+          title,
+        });
+      } catch (_) {
+        /* ignore */
+      }
       handleStepChange(currentStep - 1);
     }
   };
 
   const isLastStep = currentStep === steps.length - 1;
+
+  const handleComplete = () => {
+    try {
+      const logger = globalThis.NightingaleLogger?.get('nav:stepper');
+      logger?.info('Complete triggered', { step: currentStep, title });
+    } catch (_) {
+      /* ignore */
+    }
+    onComplete?.();
+  };
 
   const shouldIgnorePlainEnter = (target) => {
     // Always ignore contenteditable or textarea unless Ctrl/Cmd is pressed
@@ -93,7 +129,7 @@ function StepperModal({
     // Ctrl/Cmd + Enter -> Complete (if enabled)
     if (confirmOnCtrlEnter && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      if (!isCompleteDisabled) onComplete?.();
+      if (!isCompleteDisabled) handleComplete();
       return;
     }
 
@@ -107,7 +143,7 @@ function StepperModal({
     } else {
       // complete-on-last
       if (isLastStep) {
-        if (!isCompleteDisabled) onComplete?.();
+        if (!isCompleteDisabled) handleComplete();
       } else {
         handleNext();
       }
@@ -129,7 +165,7 @@ function StepperModal({
         </button>
         {/* Next/Complete Button */}
         <button
-          onClick={isLastStep ? onComplete : handleNext}
+          onClick={isLastStep ? handleComplete : handleNext}
           disabled={isLastStep ? isCompleteDisabled : false}
           className={`px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             isLastStep
@@ -212,6 +248,17 @@ function StepperModal({
                   onClick={(e) => {
                     e.preventDefault();
                     if (isAccessible) {
+                      try {
+                        const logger =
+                          globalThis.NightingaleLogger?.get('nav:stepper');
+                        logger?.debug('Step clicked', {
+                          from: currentStep,
+                          to: index,
+                          title,
+                        });
+                      } catch (_) {
+                        /* ignore */
+                      }
                       handleStepChange(index);
                     }
                   }}

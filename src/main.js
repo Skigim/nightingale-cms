@@ -51,6 +51,12 @@ function initializeProviders() {
     try {
       // Enable memory transport for logger
       NightingaleLogger.setupBasic(true);
+      // Default to verbose console during release window
+      try {
+        NightingaleLogger.configure({ level: 'debug' });
+      } catch (_) {
+        /* ignore */
+      }
       if (!globalThis.NightingaleLogger) {
         Object.defineProperty(globalThis, 'NightingaleLogger', {
           value: NightingaleLogger,
@@ -85,6 +91,12 @@ function initializeProviders() {
 // Minimal bootstrap: render app directly (React already on window via CDN)
 const mount = () => {
   initializeProviders();
+  // Enable navigation logging by default
+  try {
+    localStorage.setItem('nightingale:navLogs', '1');
+  } catch (_) {
+    /* ignore */
+  }
   const rootEl = document.getElementById('root');
   if (!rootEl) return;
   const root = ReactDOM.createRoot(rootEl);
