@@ -2,6 +2,10 @@
 // Migrated to ES module component registry.
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
@@ -210,16 +214,7 @@ function useOrganizationsData(props) {
  */
 function renderOrganizationsContent({ components, data }) {
   const e = React.createElement;
-  const {
-    SearchBar,
-    DataTable,
-    TabHeader,
-    Button,
-    TextInput,
-    Select,
-    SearchSection,
-    ContentSection,
-  } = components;
+  const { SearchBar, DataTable, TextInput, Select, SearchSection } = components;
   const { state, handlers } = data;
 
   const isTestEnv =
@@ -319,52 +314,64 @@ function renderOrganizationsContent({ components, data }) {
     },
   ];
 
-  return e(
-    'div',
-    { className: 'space-y-6' },
+  return (
+    <Box
+      sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+          >
+            Organizations Management
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+          >{`${data.meta.filteredCount} organizations`}</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => data.state.setIsCreateModalOpen(true)}
+          aria-label="New Organization"
+        >
+          Add New Organization
+        </Button>
+      </Box>
 
-    // Tab Header
-    e(TabHeader, {
-      title: 'Organizations Management',
-      count: `${data.meta.filteredCount} organizations`,
-      icon: {
-        d: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-      },
-      actions: e(Button, {
-        variant: 'primary',
-        onClick: () => data.state.setIsCreateModalOpen(true),
-        children: 'Add New Organization',
-      }),
-    }),
-
-    // Search Bar
-    e(SearchSection, {
-      searchBar: e(
-        'div',
-        { className: 'flex items-center space-x-4' },
-        e(
+      {e(SearchSection, {
+        searchBar: e(
           'div',
-          { className: 'flex-1' },
-          e(SearchBar, {
-            value: state.searchTerm,
-            onChange: (e) => {
-              // Handle both direct string values and event objects
-              const value = typeof e === 'string' ? e : e?.target?.value || '';
-              state.setSearchTerm(value);
-            },
-            placeholder:
-              'Search organizations by name, type, email, or phone...',
-            className: 'w-full',
-          }),
+          { className: 'flex items-center space-x-4' },
+          e(
+            'div',
+            { className: 'flex-1' },
+            e(SearchBar, {
+              value: state.searchTerm,
+              onChange: (e) => {
+                const value =
+                  typeof e === 'string' ? e : e?.target?.value || '';
+                state.setSearchTerm(value);
+              },
+              placeholder:
+                'Search organizations by name, type, email, or phone...',
+              className: 'w-full',
+            }),
+          ),
         ),
-      ),
-    }),
+      })}
 
-    // Organizations Table / DataGrid
-    e(
-      ContentSection,
-      { variant: 'table' },
-      canUseGrid
+      {canUseGrid
         ? e(
             'div',
             { style: { height: 640, width: '100%' } },
@@ -400,8 +407,19 @@ function renderOrganizationsContent({ components, data }) {
             onRowClick: handlers.handleOrganizationClick,
             className: 'w-full',
             emptyMessage: 'No organizations found',
-          }),
-    ),
+          })}
+
+      {data.data.length === 0 && (
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+          >
+            No organizations found
+          </Typography>
+        </Paper>
+      )}
+    </Box>
   );
 }
 

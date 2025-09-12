@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
@@ -127,15 +131,13 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
  */
 function renderCasesContent({ components, data: dataResult, props }) {
   const e = React.createElement;
-  const { SearchBar, DataTable, TabHeader, SearchSection, ContentSection } =
-    components;
+  const { SearchBar, DataTable, SearchSection } = components;
   const isTestEnv =
     typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test';
   const canUseGrid = !isTestEnv;
 
   // Conditional rendering for details view
   if (dataResult.viewMode === 'details' && dataResult.detailsCaseId) {
-    // Resolve CaseDetailsView via registry
     const CaseDetailsView =
       getComponent('business', 'CaseDetailsView') ||
       (({ caseId }) =>
@@ -157,219 +159,110 @@ function renderCasesContent({ components, data: dataResult, props }) {
     });
   }
 
-  // Main cases list view
-  return e(
-    'div',
-    { className: 'w-full space-y-4' },
+  // Main cases list view - standardized MUI layout
+  return (
+    <Box
+      sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+          >
+            Cases
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+          >{`${dataResult.data.length} case${dataResult.data.length !== 1 ? 's' : ''}`}</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => dataResult.setIsCreateModalOpen(true)}
+          aria-label="New Case"
+        >
+          New Case
+        </Button>
+      </Box>
 
-    // Compact Header Bar
-    e(TabHeader, {
-      title: 'Cases',
-      count: `${dataResult.data.length} case${dataResult.data.length !== 1 ? 's' : ''}`,
-      icon: {
-        d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-      },
-      iconProps: { className: 'w-8 h-8 text-blue-400' },
-      actions: e(
-        'button',
-        {
-          className:
-            'bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm transition-colors',
-          onClick: () => dataResult.setIsCreateModalOpen(true),
-        },
-        'New Case',
-      ),
-    }),
+      {e(SearchSection, {
+        searchBar: e(SearchBar, {
+          value: dataResult.searchTerm,
+          onChange: (ev) => {
+            const value = typeof ev === 'string' ? ev : ev?.target?.value || '';
+            dataResult.setSearchTerm(value);
+          },
+          placeholder: 'Search cases by MCN, person name, status...',
+        }),
+      })}
 
-    // Search Section
-    e(SearchSection, {
-      searchBar: e(SearchBar, {
-        value: dataResult.searchTerm,
-        onChange: (e) => {
-          // Handle both direct string values and event objects
-          const value = typeof e === 'string' ? e : e?.target?.value || '';
-          dataResult.setSearchTerm(value);
-        },
-        placeholder: 'Search cases by MCN, person name, status...',
-        className: 'w-full',
-      }),
-    }),
-
-    // Cases Table / DataGrid
-    e(
-      ContentSection,
-      { variant: 'table' },
-      canUseGrid
-        ? e(
-            'div',
-            { style: { height: 640, width: '100%' } },
-            e(DataGrid, {
-              rows: dataResult.data.map((c) => {
-                const person =
-                  globalThis.NightingaleDataManagement?.findPersonById?.(
-                    props.fullData?.people,
-                    c.personId,
-                  ) || null;
-                const personName =
-                  person?.name ||
-                  [person?.firstName, person?.lastName]
-                    .filter(Boolean)
-                    .join(' ') ||
-                  c?.clientName ||
-                  c?.personName ||
-                  'Unknown';
-                return {
-                  id: c.id,
-                  mcn: c.mcn || 'N/A',
-                  personName,
-                  status: c.status || 'Unknown',
-                  applicationDate: dataResult.formatDate(c.applicationDate),
-                };
-              }),
-              columns: [
-                { field: 'mcn', headerName: 'MCN', width: 140 },
-                {
-                  field: 'personName',
-                  headerName: 'Person',
-                  flex: 1,
-                  minWidth: 180,
-                },
-                { field: 'status', headerName: 'Status', width: 140 },
-                {
-                  field: 'applicationDate',
-                  headerName: 'Application Date',
-                  width: 180,
-                },
-                {
-                  field: 'actions',
-                  headerName: 'Actions',
-                  sortable: false,
-                  filterable: false,
-                  width: 160,
-                  renderCell: (params) =>
-                    e(
-                      'div',
-                      { className: 'flex space-x-2' },
-                      e(
-                        'button',
-                        {
-                          className:
-                            'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                          onClick: (ev) => {
-                            ev.stopPropagation();
-                            const caseItem = dataResult.data.find(
-                              (x) => x.id === params.id,
-                            );
-                            if (caseItem)
-                              dataResult.handleOpenCaseDetails(caseItem, ev);
-                          },
-                        },
-                        'Details',
-                      ),
-                      e(
-                        'button',
-                        {
-                          className:
-                            'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                          onClick: (ev) => {
-                            ev.stopPropagation();
-                            const caseItem = dataResult.data.find(
-                              (x) => x.id === params.id,
-                            );
-                            if (caseItem) dataResult.handleCaseClick(caseItem);
-                          },
-                        },
-                        'Edit',
-                      ),
-                    ),
-                },
-              ],
-              disableRowSelectionOnClick: true,
-              onRowClick: (params) => {
-                const caseItem = dataResult.data.find(
-                  (x) => x.id === params.id,
-                );
-                if (caseItem) dataResult.handleCaseClick(caseItem);
-              },
+      {dataResult.data.length === 0 ? (
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+          >
+            No cases found
+          </Typography>
+        </Paper>
+      ) : canUseGrid ? (
+        e(
+          'div',
+          { style: { height: 640, width: '100%' } },
+          e(DataGrid, {
+            rows: dataResult.data.map((c) => {
+              const person =
+                globalThis.NightingaleDataManagement?.findPersonById?.(
+                  props.fullData?.people,
+                  c.personId,
+                ) || null;
+              const personName =
+                person?.name ||
+                [person?.firstName, person?.lastName]
+                  .filter(Boolean)
+                  .join(' ') ||
+                c?.clientName ||
+                c?.personName ||
+                'Unknown';
+              return {
+                id: c.id,
+                mcn: c.mcn || 'N/A',
+                personName,
+                status: c.status || 'Unknown',
+                applicationDate: dataResult.formatDate(c.applicationDate),
+              };
             }),
-          )
-        : e(DataTable, {
-            data: dataResult.data,
             columns: [
+              { field: 'mcn', headerName: 'MCN', width: 140 },
               {
-                field: 'mcn',
-                label: 'MCN',
-                sortable: true,
-                render: (value) =>
-                  e(
-                    'span',
-                    { className: 'font-mono text-blue-400' },
-                    value || 'N/A',
-                  ),
+                field: 'personName',
+                headerName: 'Person',
+                flex: 1,
+                minWidth: 180,
               },
-              {
-                field: 'personId',
-                label: 'Person',
-                sortable: true,
-                render: (value, caseRow) => {
-                  const person =
-                    globalThis.NightingaleDataManagement?.findPersonById?.(
-                      props.fullData?.people,
-                      value,
-                    ) || null;
-                  const displayName =
-                    person?.name ||
-                    [person?.firstName, person?.lastName]
-                      .filter(Boolean)
-                      .join(' ') ||
-                    caseRow?.clientName ||
-                    caseRow?.personName ||
-                    'Unknown';
-                  return e(
-                    'span',
-                    { className: 'font-medium text-white' },
-                    displayName,
-                  );
-                },
-              },
-              {
-                field: 'status',
-                label: 'Status',
-                sortable: true,
-                render: (value) => {
-                  const statusColors = {
-                    Pending: 'bg-yellow-500',
-                    'In Progress': 'bg-blue-500',
-                    Active: 'bg-green-500',
-                    Closed: 'bg-gray-500',
-                    Denied: 'bg-red-500',
-                  };
-                  const colorClass = statusColors[value] || 'bg-gray-500';
-                  return e(
-                    'span',
-                    {
-                      className: `px-2 py-1 rounded text-xs text-white ${colorClass}`,
-                    },
-                    value || 'Unknown',
-                  );
-                },
-              },
+              { field: 'status', headerName: 'Status', width: 140 },
               {
                 field: 'applicationDate',
-                label: 'Application Date',
-                sortable: true,
-                render: (value) =>
-                  e(
-                    'span',
-                    { className: 'text-gray-300' },
-                    dataResult.formatDate(value),
-                  ),
+                headerName: 'Application Date',
+                width: 180,
               },
               {
                 field: 'actions',
-                label: 'Actions',
+                headerName: 'Actions',
                 sortable: false,
-                render: (value, caseItem) =>
+                filterable: false,
+                width: 160,
+                renderCell: (params) =>
                   e(
                     'div',
                     { className: 'flex space-x-2' },
@@ -378,8 +271,14 @@ function renderCasesContent({ components, data: dataResult, props }) {
                       {
                         className:
                           'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                        onClick: (e) =>
-                          dataResult.handleOpenCaseDetails(caseItem, e),
+                        onClick: (ev) => {
+                          ev.stopPropagation();
+                          const caseItem = dataResult.data.find(
+                            (x) => x.id === params.id,
+                          );
+                          if (caseItem)
+                            dataResult.handleOpenCaseDetails(caseItem, ev);
+                        },
                       },
                       'Details',
                     ),
@@ -388,9 +287,12 @@ function renderCasesContent({ components, data: dataResult, props }) {
                       {
                         className:
                           'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
-                        onClick: (e) => {
-                          e.stopPropagation();
-                          dataResult.handleCaseClick(caseItem);
+                        onClick: (ev) => {
+                          ev.stopPropagation();
+                          const caseItem = dataResult.data.find(
+                            (x) => x.id === params.id,
+                          );
+                          if (caseItem) dataResult.handleCaseClick(caseItem);
                         },
                       },
                       'Edit',
@@ -398,11 +300,125 @@ function renderCasesContent({ components, data: dataResult, props }) {
                   ),
               },
             ],
-            onRowClick: dataResult.handleCaseClick,
-            className: 'w-full',
-            emptyMessage: 'No cases found',
+            disableRowSelectionOnClick: true,
+            onRowClick: (params) => {
+              const caseItem = dataResult.data.find((x) => x.id === params.id);
+              if (caseItem) dataResult.handleCaseClick(caseItem);
+            },
           }),
-    ),
+        )
+      ) : (
+        e(DataTable, {
+          data: dataResult.data,
+          columns: [
+            {
+              field: 'mcn',
+              label: 'MCN',
+              sortable: true,
+              render: (value) =>
+                e(
+                  'span',
+                  { className: 'font-mono text-blue-400' },
+                  value || 'N/A',
+                ),
+            },
+            {
+              field: 'personId',
+              label: 'Person',
+              sortable: true,
+              render: (value, caseRow) => {
+                const person =
+                  globalThis.NightingaleDataManagement?.findPersonById?.(
+                    props.fullData?.people,
+                    value,
+                  ) || null;
+                const displayName =
+                  person?.name ||
+                  [person?.firstName, person?.lastName]
+                    .filter(Boolean)
+                    .join(' ') ||
+                  caseRow?.clientName ||
+                  caseRow?.personName ||
+                  'Unknown';
+                return e(
+                  'span',
+                  { className: 'font-medium text-white' },
+                  displayName,
+                );
+              },
+            },
+            {
+              field: 'status',
+              label: 'Status',
+              sortable: true,
+              render: (value) => {
+                const statusColors = {
+                  Pending: 'bg-yellow-500',
+                  'In Progress': 'bg-blue-500',
+                  Active: 'bg-green-500',
+                  Closed: 'bg-gray-500',
+                  Denied: 'bg-red-500',
+                };
+                const colorClass = statusColors[value] || 'bg-gray-500';
+                return e(
+                  'span',
+                  {
+                    className: `px-2 py-1 rounded text-xs text-white ${colorClass}`,
+                  },
+                  value || 'Unknown',
+                );
+              },
+            },
+            {
+              field: 'applicationDate',
+              label: 'Application Date',
+              sortable: true,
+              render: (value) =>
+                e(
+                  'span',
+                  { className: 'text-gray-300' },
+                  dataResult.formatDate(value),
+                ),
+            },
+            {
+              field: 'actions',
+              label: 'Actions',
+              sortable: false,
+              render: (value, caseItem) =>
+                e(
+                  'div',
+                  { className: 'flex space-x-2' },
+                  e(
+                    'button',
+                    {
+                      className:
+                        'bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors',
+                      onClick: (e) =>
+                        dataResult.handleOpenCaseDetails(caseItem, e),
+                    },
+                    'Details',
+                  ),
+                  e(
+                    'button',
+                    {
+                      className:
+                        'bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors',
+                      onClick: (e) => {
+                        e.stopPropagation();
+                        dataResult.handleCaseClick(caseItem);
+                      },
+                    },
+                    'Edit',
+                  ),
+                ),
+            },
+          ],
+          onRowClick: dataResult.handleCaseClick,
+          className: 'w-full',
+          emptyMessage: 'No cases found',
+        })
+      )}
+    </Box>
   );
 }
 
