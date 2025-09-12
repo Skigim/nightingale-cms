@@ -14,7 +14,8 @@ Testing: Jest + React Testing Library (jsdom)
 ## 2. Non‑Negotiable Rules
 
 1. Modern React components: use JSX syntax with ES6 imports (`import React from 'react'`).
-2. Legacy components: define `const e = window.React.createElement;` inside function (migration pending).
+2. Legacy components: define `const e = window.React.createElement;` inside function (migration
+   pending).
 3. No global alias like `window.e`.
 4. UI layer = presentational only (no domain logic, no data mutation).
 5. Business layer composes UI components + domain rules only.
@@ -24,6 +25,10 @@ Testing: Jest + React Testing Library (jsdom)
 9. Avoid inline styles; use Tailwind utility classes.
 10. Add loading / empty / error states for async or data-driven UI.
 11. Do not introduce new globals—attach only via existing registries.
+
+- Allowed diagnostics globals (read-only): `globalThis.NightingaleLogger`, `globalThis.fileService`.
+- Do not add any other globals.
+
 12. Add PropTypes validation for all component props.
 
 ## 3. Component Layering
@@ -46,13 +51,15 @@ import { registerComponent } from '../../services/registry';
 
 // Component definition...
 
-// Registration
-registerComponent('MyComponent', MyComponent);
+// Registration (choose appropriate registry)
+registerComponent('ui', 'MyComponent', MyComponent); // UI components
+// registerComponent('business', 'MyComponent', MyComponent); // Business components
 
 export default MyComponent;
 ```
 
 Legacy components use:
+
 ```javascript
 if (typeof window !== 'undefined') {
   window.MyComponent = MyComponent; // backward compatibility
@@ -65,9 +72,14 @@ if (typeof window !== 'undefined') {
 
 Never register both UI and Business registries—choose the correct one.
 
+Note: Window-level registries like `window.NightingaleUI`/`window.NightingaleBusiness` are
+historical and being phased out. Prefer the ES module registry via `services/registry.js` in all new
+code.
+
 ## 5. React Pattern Template
 
 ### Modern Pattern (Preferred)
+
 ```jsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
@@ -76,13 +88,19 @@ function ExampleComponent({ value: initialValue = '', onChange, ...props }) {
   // Hooks (unconditional)
   const [value, setValue] = useState(initialValue);
   const derived = useMemo(() => value.trim(), [value]);
-  const handleChange = useCallback((ev) => {
-    setValue(ev.target.value);
-    onChange?.(ev.target.value);
-  }, [onChange]);
+  const handleChange = useCallback(
+    (ev) => {
+      setValue(ev.target.value);
+      onChange?.(ev.target.value);
+    },
+    [onChange],
+  );
 
   return (
-    <div className="p-4" {...props}>
+    <div
+      className="p-4"
+      {...props}
+    >
       {derived}
     </div>
   );
@@ -97,6 +115,7 @@ export default ExampleComponent;
 ```
 
 ### Legacy Pattern (Migration Pending)
+
 ```javascript
 function ExampleComponent(props) {
   if (!window.React) return null; // safety
@@ -145,6 +164,10 @@ Examples:
 
 No fluff, no status phrases, no “successfully”, no outcome commentary. Body only when needed for
 context / breaking change note.
+
+Note on workflow: This is a solo-dev repository. Do not open pull requests; changes are merged
+directly (including force-push when appropriate). Keep commits atomic and follow Conventional
+Commits.
 
 ## 10. Performance & Accessibility
 
