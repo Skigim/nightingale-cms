@@ -214,15 +214,41 @@ function NightingaleCMSApp() {
   const showToast = (msg, type) => Toast.showToast?.(msg, type);
 
   const handleSubmitBug = useCallback(
-    async ({ content, activeTab: tab, createdAt }) => {
+    async ({ content, activeTab: tab, createdAt, diagnostics }) => {
       try {
+        let recentLogs = null;
+        try {
+          const exported = globalThis.NightingaleLogger?.exportLogs?.('json');
+          // exportLogs('json') returns a JSON string; attempt parse to embed as object
+          if (exported && typeof exported === 'string') {
+            try {
+              recentLogs = JSON.parse(exported);
+            } catch (_e) {
+              recentLogs = exported; // fall back to raw string
+            }
+          } else if (exported) {
+            recentLogs = exported;
+          }
+        } catch (_) {
+          // ignore log export errors
+        }
         const logger = globalThis.NightingaleLogger?.get('bug-report');
-        logger?.info('Bug report submitted', { tab, createdAt, content });
+        logger?.info('Bug report submitted', {
+          tab,
+          createdAt,
+          content,
+          diagnostics,
+        });
         const entry = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           tab,
           content,
           createdAt,
+          ...(diagnostics
+            ? { diagnostics: { ...diagnostics, logs: recentLogs } }
+            : recentLogs
+              ? { diagnostics: { logs: recentLogs } }
+              : {}),
         };
         // Persist to localStorage list first (source of truth for aggregation)
         const key = 'nightingale-bug-reports';
@@ -445,6 +471,15 @@ function NightingaleCMSApp() {
           onClose: () => setIsBugModalOpen(false),
           onSubmit: handleSubmitBug,
           activeTab,
+          includeDiagnostics: true,
+          diagnostics: {
+            appVersion: '1.0.0-rc.1',
+            git: undefined,
+            locale: globalThis?.navigator?.language || 'unknown',
+            storage: {
+              localStorage: !!globalThis.localStorage,
+            },
+          },
         }),
     ),
   );
