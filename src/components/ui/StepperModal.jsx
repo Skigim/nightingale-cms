@@ -22,6 +22,10 @@ function StepperModal({
   isCompleteDisabled = false, // Whether the complete button should be disabled
   hideNavigation = false, // Whether to hide the Next/Back buttons and use only custom buttons
   customFooterContent = null, // Custom footer content to replace default buttons
+  confirmOnEnter = true, // When true, Enter triggers Next (or Complete on last step)
+  confirmOnCtrlEnter = true, // When true, Ctrl/Cmd+Enter triggers Complete on any step
+  enterAction = 'complete-on-last', // 'next' | 'complete-on-last'
+  ignoreSelectors = 'textarea,[contenteditable]', // Ignore plain Enter when typing in these
 }) {
   // Reference to the step content area for focus management
   const stepContentRef = useRef(null);
@@ -60,6 +64,55 @@ function StepperModal({
   };
 
   const isLastStep = currentStep === steps.length - 1;
+
+  const shouldIgnorePlainEnter = (target) => {
+    // Always ignore contenteditable or textarea unless Ctrl/Cmd is pressed
+    if (!target) return false;
+    const tag = target.tagName ? target.tagName.toLowerCase() : '';
+    if (tag === 'textarea' || target.isContentEditable) return true;
+    // Additional selectors
+    try {
+      if (
+        ignoreSelectors &&
+        target.closest &&
+        target.closest(ignoreSelectors)
+      ) {
+        return true;
+      }
+    } catch (_) {
+      // Ignore selector parsing errors and fall back to basic checks
+    }
+    return false;
+  };
+
+  const handleKeyDown = (e) => {
+    if (!isOpen) return;
+    if (e.key !== 'Enter') return;
+    if (e.isComposing) return;
+
+    // Ctrl/Cmd + Enter -> Complete (if enabled)
+    if (confirmOnCtrlEnter && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (!isCompleteDisabled) onComplete?.();
+      return;
+    }
+
+    // Plain Enter handling (if enabled)
+    if (!confirmOnEnter) return;
+    if (shouldIgnorePlainEnter(e.target)) return;
+
+    e.preventDefault();
+    if (enterAction === 'next') {
+      handleNext();
+    } else {
+      // complete-on-last
+      if (isLastStep) {
+        if (!isCompleteDisabled) onComplete?.();
+      } else {
+        handleNext();
+      }
+    }
+  };
 
   // Use custom footer content if provided, otherwise use default navigation
   const footerContent =
@@ -140,7 +193,10 @@ function StepperModal({
       size="large"
       footerContent={footerContent}
     >
-      <div className="flex space-x-8">
+      <div
+        className="flex space-x-8"
+        onKeyDown={handleKeyDown}
+      >
         {/* Stepper Navigation */}
         <div className="w-1/4">
           <nav className="space-y-1">
@@ -228,6 +284,10 @@ StepperModal.propTypes = {
   isCompleteDisabled: PropTypes.bool,
   hideNavigation: PropTypes.bool,
   customFooterContent: PropTypes.node,
+  confirmOnEnter: PropTypes.bool,
+  confirmOnCtrlEnter: PropTypes.bool,
+  enterAction: PropTypes.oneOf(['next', 'complete-on-last']),
+  ignoreSelectors: PropTypes.string,
 };
 
 // Register with UI registry
