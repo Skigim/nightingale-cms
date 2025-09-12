@@ -30,18 +30,23 @@ if (!window.NightingaleBusiness) {
 
 // Import factory (TabBase defines createBusinessComponent & fallbacks)
 import '../../src/components/ui/TabBase.jsx';
+import { registerComponent as registerAppComponent } from '../../src/services/registry';
 
 // Stub ONLY the PersonCreationModal for predictable modal content text
-function PersonCreationModalStub({ isOpen }) {
+function PersonCreationModalStub({ isOpen, editPersonId, onClose }) {
   if (!isOpen) return null;
   const e = window.React.createElement;
+  const title = editPersonId ? 'Edit Person' : 'Create New Person';
   return e(
     'div',
     { role: 'dialog', 'aria-modal': 'true' },
-    e('h2', null, 'Create New Person'),
+    e('h2', null, title),
+    e('button', { onClick: onClose }, 'Close'),
   );
 }
-window.NightingaleBusiness.registerComponent(
+// Register stub with the actual app registry used by TabBase
+registerAppComponent(
+  'business',
   'PersonCreationModal',
   PersonCreationModalStub,
 );
@@ -114,31 +119,25 @@ describe('PeopleTab (MUI version)', () => {
     expect(screen.getByText('No people found')).toBeInTheDocument();
   });
 
-  test('navigates to details view on row click', () => {
+  test('opens edit modal on row click', () => {
     render(<PeopleTab {...baseProps} />);
     const firstCell = screen.getByText('Alice Johnson');
     const row = firstCell.closest('tr');
     fireEvent.click(row);
-    // Back to List button from real PersonDetailsView
-    expect(
-      screen.getByRole('button', { name: /Back to List/i }),
-    ).toBeInTheDocument();
-    // Original table row (Bob) should no longer be visible
-    expect(screen.queryByText('Bob Smith')).toBeNull();
+    // Edit modal should be visible
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Edit Person')).toBeInTheDocument();
   });
 
-  test('returns to list from details view', () => {
+  test('closes edit modal and table remains visible', () => {
     render(<PeopleTab {...baseProps} />);
-    // Enter details view
+    // Open edit modal
     fireEvent.click(screen.getByText('Alice Johnson').closest('tr'));
-    expect(
-      screen.getByRole('button', { name: /Back to List/i }),
-    ).toBeInTheDocument();
-    // Go back
-    fireEvent.click(screen.getByRole('button', { name: /Back to List/i }));
-    // Table restored (Bob visible again)
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    // Close it
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    // Table content visible again
     expect(screen.getByText('Bob Smith')).toBeInTheDocument();
-    // Count visible
     expect(screen.getByText(/3 people/)).toBeInTheDocument();
   });
 });

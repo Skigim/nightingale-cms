@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import PersonDetailsView from './PersonDetailsView';
 import { registerComponent } from '../../services/registry';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
 import dateUtils from '../../services/nightingale.dayjs.js';
@@ -100,18 +99,9 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { DataGrid } from '@mui/x-data-grid';
-function renderPeopleContent({ components, data: dataResult, props }) {
+function renderPeopleContent({ components, data: dataResult }) {
   const { SearchBar, SearchSection } = components;
-  if (dataResult.selectedPersonId && PersonDetailsView) {
-    return (
-      <PersonDetailsView
-        personId={dataResult.selectedPersonId}
-        fullData={props.fullData}
-        onBackToList={dataResult.handleBackToList}
-        onUpdateData={props.onUpdateData}
-      />
-    );
-  }
+  // Clicking a row should open the Person modal in edit mode, not navigate to details
   const isTestEnv =
     typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test';
   const canUseGrid = !isTestEnv;
@@ -205,7 +195,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
             disableRowSelectionOnClick
             onRowClick={(params) => {
               const person = dataResult.data.find((p) => p.id === params.id);
-              if (person) dataResult.handleViewDetails(person);
+              if (person) dataResult.handlePersonClick(person);
             }}
           />
         </div>
@@ -249,7 +239,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
                   <TableRow
                     key={person.id}
                     hover
-                    onClick={() => dataResult.handleViewDetails(person)}
+                    onClick={() => dataResult.handlePersonClick(person)}
                     sx={{ cursor: 'pointer' }}
                   >
                     <TableCell sx={{ fontWeight: 500 }}>
@@ -271,7 +261,7 @@ function renderPeopleContent({ components, data: dataResult, props }) {
 function renderPeopleModals({ components, data: dataResult, props }) {
   const PersonCreationModal =
     components.PersonCreationModal ||
-    (({ isOpen, onClose }) =>
+    (({ isOpen, onClose, editPersonId }) =>
       isOpen ? (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -284,7 +274,7 @@ function renderPeopleModals({ components, data: dataResult, props }) {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-semibold text-white mb-4">
-              Create New Person
+              {editPersonId ? 'Edit Person' : 'Create New Person'}
             </h2>
             <p className="text-gray-400 mb-4">
               PersonCreationModal component not available
@@ -303,6 +293,7 @@ function renderPeopleModals({ components, data: dataResult, props }) {
       <PersonCreationModal
         isOpen={dataResult.isCreateModalOpen}
         onClose={() => dataResult.setIsCreateModalOpen(false)}
+        editPersonId={null}
         onPersonCreated={(newPerson) => {
           const updatedData = {
             ...props.fullData,
