@@ -311,10 +311,11 @@ function NotesModal({
               e(
                 'div',
                 { className: 'flex items-center gap-2 mb-1' },
+                // Badge: use supported props (status variant). Previously used unsupported variant 'info' and 'text' prop.
                 e(Badge, {
-                  variant: 'info',
+                  variant: 'status',
+                  status: note.category || 'Note',
                   size: 'sm', // Badge supports 'sm'; keeping as-is
-                  text: note.category,
                 }),
                 e(
                   'span',
