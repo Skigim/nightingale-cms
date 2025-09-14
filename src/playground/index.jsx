@@ -4,11 +4,20 @@ import { createRoot } from 'react-dom/client';
 import '../index.css';
 import { getComponent } from '../services/registry';
 // Side-effect imports to ensure registration
+// Business components (side-effect registration)
 import '../components/business/FinancialItemCard.jsx';
 import '../components/business/FinancialManagementSection.jsx';
+import '../components/business/FinancialItemModal.jsx';
+import '../components/business/AvsImportModal.jsx';
 import '../components/business/CaseCreationModal.jsx';
 import '../components/business/NotesModal.jsx';
 import '../components/business/CaseDetailsView.jsx';
+// UI components required by business components (ensure they register before getComponent calls)
+import '../components/ui/Badge.jsx';
+import '../components/ui/Button.jsx';
+import '../components/ui/Modal.jsx';
+import '../components/ui/StepperModal.jsx';
+import '../components/ui/FormComponents.jsx';
 
 function useField(initial) {
   const [value, setValue] = useState(initial);
