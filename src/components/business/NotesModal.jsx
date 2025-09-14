@@ -313,7 +313,7 @@ function NotesModal({
                 { className: 'flex items-center gap-2 mb-1' },
                 e(Badge, {
                   variant: 'info',
-                  size: 'sm',
+                  size: 'sm', // Badge supports 'sm'; keeping as-is
                   text: note.category,
                 }),
                 e(
@@ -332,7 +332,7 @@ function NotesModal({
               { className: 'flex gap-2' },
               e(Button, {
                 variant: 'secondary',
-                size: 'sm',
+                size: 'sm', // Button component supports 'sm'
                 onClick: () => handleEdit(note),
                 children: 'Edit',
               }),
@@ -464,7 +464,8 @@ function NotesModal({
         isOpen: showDeleteConfirm,
         onClose: cancelDelete,
         title: 'Confirm Delete',
-        size: 'sm',
+        // Use supported Modal size token ('small' instead of unsupported 'sm')
+        size: 'small',
         footerContent: e(
           React.Fragment,
           {},
