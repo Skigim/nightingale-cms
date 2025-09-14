@@ -3,9 +3,8 @@ import PropTypes from 'prop-types';
 import { createRoot } from 'react-dom/client';
 import '../index.css';
 import { getComponent } from '../services/registry';
-
-// Lazy acquire business component (registered elsewhere)
-const FinancialItemCard = getComponent('business', 'FinancialItemCard');
+// Ensure component registration side-effects by importing its module
+import '../components/business/FinancialItemCard.jsx';
 
 function useField(initial) {
   const [value, setValue] = useState(initial);
@@ -39,6 +38,9 @@ function ComponentPlayground() {
   const accountNumber = useField('123456789');
   const itemType = useField('income');
   const showActions = useField('true');
+
+  // Acquire component after ensuring its module import executed
+  const FinancialItemCard = getComponent('business', 'FinancialItemCard', true);
 
   const item = useMemo(
     () => ({
@@ -158,7 +160,7 @@ function ComponentPlayground() {
             />
           ) : (
             <p style={{ fontSize: 12, color: '#9ca3af' }}>
-              FinancialItemCard not registered.
+              FinancialItemCard not registered (ensure import present).
             </p>
           )}
         </div>
