@@ -1,0 +1,79 @@
+{
+  "people": [
+    {
+      "id": "p100",
+      "name": "Ada Lovelace",
+      "email": "ada@example.com",
+      "phone": "555-1000",
+      "address": {
+        "street": "12 Analytical Way",
+        "city": "London",
+        "state": "NA",
+        "zip": "EC1"
+      }
+    },
+    {
+      "id": "p101",
+      "name": "Grace Hopper",
+      "email": "grace@example.com",
+      "phone": "555-1001",
+      "address": {
+        "street": "7 Compiler Ct",
+        "city": "Arlington",
+        "state": "VA",
+        "zip": "22201"
+      }
+    },
+    {
+      "id": "p102",
+      "name": "Alan Turing",
+      "email": "alan@example.org",
+      "phone": "555-1002",
+      "address": {
+        "street": "1 Enigma Rd",
+        "city": "Manchester",
+        "state": "NA",
+        "zip": "M13"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "c500",
+      "title": "Encryption Review",
+      "personId": "p102",
+      "status": "Active",
+      "description": "Review of encryption methods"
+    },
+    {
+      "id": "c501",
+      "title": "Compiler Audit",
+      "personId": "p101",
+      "status": "Pending",
+      "description": "Legacy compiler analysis"
+    }
+  ],
+  "organizations": [
+    {
+      "id": "org1",
+      "name": "Analytical Engines Ltd",
+      "address": {
+        "street": "12 Analytical Way",
+        "city": "London",
+        "state": "NA",
+        "zip": "EC1"
+      }
+    },
+    {
+      "id": "org2",
+      "name": "Naval Computing",
+      "address": {
+        "street": "7 Compiler Ct",
+        "city": "Arlington",
+        "state": "VA",
+        "zip": "22201"
+      }
+    }
+  ],
+  "meta": { "source": "embedded-sample", "version": 1 }
+}

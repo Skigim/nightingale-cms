@@ -843,7 +843,13 @@ SettingsModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   fileService: PropTypes.object,
   onDataLoaded: PropTypes.func,
-  fileStatus: PropTypes.oneOf(['connected', 'disconnected', 'connecting']),
+  fileStatus: PropTypes.oneOf([
+    'connected',
+    'disconnected',
+    'connecting',
+    // Extended to support reconnect interim state (permission re-grant required)
+    'reconnect',
+  ]),
   onFileStatusChange: PropTypes.func,
 };
 
