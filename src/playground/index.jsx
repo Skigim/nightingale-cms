@@ -18,6 +18,7 @@ import '../components/ui/Button.jsx';
 import '../components/ui/Modal.jsx';
 import '../components/ui/StepperModal.jsx';
 import '../components/ui/FormComponents.jsx';
+import '../components/ui/SearchBar.jsx';
 
 function useField(initial) {
   const [value, setValue] = useState(initial);
