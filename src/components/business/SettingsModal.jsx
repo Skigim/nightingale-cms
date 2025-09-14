@@ -7,7 +7,7 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
@@ -67,7 +67,7 @@ function SettingsModal({
   const [navLogsEnabled, setNavLogsEnabled] = useState(initialNavLogs);
   const [logLevel, setLogLevel] = useState(initialLevel);
 
-  // Get dependencies
+  // Get dependencies (resolved after state/effect declarations to avoid conditional hook ordering issues)
   const Modal = getComponent('ui', 'Modal');
   const showToast = (msg, type) => {
     // Call module toast
@@ -81,14 +81,76 @@ function SettingsModal({
     }
   };
 
-  // Validate required props
-  if (!Modal) {
-    return null;
-  }
+  // Demo Mode (embedded sample dataset) -------------------------------------
+  // NOTE: This block must remain above any early returns to preserve hook ordering.
+  const [demoMode, setDemoMode] = useState(false);
+  useEffect(() => {
+    // Detect existing demo mode (presence of meta.source === embedded-sample)
+    try {
+      const raw = localStorage.getItem('nightingale_data');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.meta?.source === 'embedded-sample') setDemoMode(true);
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  }, []);
 
-  if (typeof onClose !== 'function') {
-    return null;
-  }
+  const enableDemoMode = async () => {
+    try {
+      const { loadEmbeddedSampleData } = await import(
+        '../../services/staticSampleLoader.js'
+      );
+      const dataset = await loadEmbeddedSampleData('/sample-data.json');
+      try {
+        localStorage.setItem('nightingale_data', JSON.stringify(dataset));
+      } catch (_) {
+        /* ignore */
+      }
+      onDataLoaded?.(dataset);
+      setDemoMode(true);
+      showToast('Demo mode enabled (embedded sample)', 'success');
+    } catch (_) {
+      showToast('Failed to enable demo mode', 'error');
+    }
+  };
+  const disableDemoMode = async () => {
+    try {
+      try {
+        localStorage.removeItem('nightingale_data');
+      } catch (_) {
+        /* ignore */
+      }
+      setDemoMode(false);
+      // Option A chosen: clear in-memory data unless file is connected (then reload file)
+      if (fileStatus === 'connected' && fileService?.readFile) {
+        try {
+          const data = await fileService.readFile();
+          if (data && Object.keys(data).length > 0) {
+            onDataLoaded?.(data);
+          } else {
+            onDataLoaded?.(null);
+          }
+        } catch (_) {
+          onDataLoaded?.(null);
+        }
+      } else {
+        onDataLoaded?.(null);
+      }
+      showToast('Demo mode disabled', 'info');
+    } catch (_) {
+      showToast('Failed to disable demo mode', 'error');
+    }
+  };
+  const toggleDemoMode = async () => {
+    if (demoMode) await disableDemoMode();
+    else await enableDemoMode();
+  };
+
+  // Validate required props AFTER declaring hooks to avoid conditional hook execution
+  if (!Modal) return null;
+  if (typeof onClose !== 'function') return null;
   const handleConnect = async () => {
     const logger = globalThis.NightingaleLogger?.get('settings:connect');
     if (!fileService?.connect) {
@@ -98,6 +160,12 @@ function SettingsModal({
 
     setIsConnecting(true);
     try {
+      // Clear any embedded/local-only dataset to avoid confusion when switching to live directory
+      try {
+        localStorage.removeItem('nightingale_data');
+      } catch (_) {
+        /* ignore */
+      }
       const connected = await fileService.connect();
       if (connected) {
         if (onFileStatusChange) onFileStatusChange('connected');
@@ -133,6 +201,12 @@ function SettingsModal({
 
     setLoadingData(true);
     try {
+      // Ensure local embedded sample cache cleared before loading canonical file-based data
+      try {
+        localStorage.removeItem('nightingale_data');
+      } catch (_) {
+        /* ignore */
+      }
       const data = await fileService.readFile();
       if (data) {
         const normalizedData = globalThis.NightingaleDataManagement
@@ -186,6 +260,8 @@ function SettingsModal({
       showToast('Error creating sample data', 'error');
     }
   };
+
+  // (Demo mode logic moved above early returns)
 
   const handleBackfillClientNames = async () => {
     if (!fileService?.writeFile) {
@@ -422,6 +498,7 @@ function SettingsModal({
               >
                 {loadingData ? 'Loading...' : 'Load Data File'}
               </button>
+              {/* Demo Mode handled by switch below; removed embedded sample button */}
               <button
                 onClick={handleCreateSample}
                 disabled={fileStatus !== 'connected'}
@@ -579,7 +656,51 @@ function SettingsModal({
                 Or use &apos;Create Sample Data&apos; to generate test cases for
                 development
               </li>
+              <li>
+                Toggle &apos;Demo Mode&apos; below to quickly load/remove an
+                embedded sample dataset without using the file system
+              </li>
             </ol>
+          </div>
+          {/* Demo Mode Switch */}
+          <div className="p-4 bg-gray-800 rounded-lg border border-gray-700 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-semibold text-sm tracking-wide">
+                  Demo Mode
+                </h3>
+                <p className="text-gray-400 text-xs max-w-md">
+                  Loads a small embedded dataset into memory & local storage.
+                  Disabling clears it (and reloads live file data if connected).
+                </p>
+              </div>
+              <label className="inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={demoMode}
+                  onChange={toggleDemoMode}
+                  aria-label="Toggle demo mode"
+                />
+                <span
+                  className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ${
+                    demoMode ? 'bg-teal-500' : 'bg-gray-600'
+                  }`}
+                >
+                  <span
+                    className={`bg-white w-4 h-4 rounded-full shadow transform transition-transform duration-200 ${
+                      demoMode ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </span>
+              </label>
+            </div>
+            {demoMode && (
+              <div className="text-xs text-teal-300">
+                Active – embedded sample sourced from{' '}
+                <code>sample-data.json</code>
+              </div>
+            )}
           </div>
         </div>
       </Modal>
@@ -722,7 +843,13 @@ SettingsModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   fileService: PropTypes.object,
   onDataLoaded: PropTypes.func,
-  fileStatus: PropTypes.oneOf(['connected', 'disconnected', 'connecting']),
+  fileStatus: PropTypes.oneOf([
+    'connected',
+    'disconnected',
+    'connecting',
+    // Extended to support reconnect interim state (permission re-grant required)
+    'reconnect',
+  ]),
   onFileStatusChange: PropTypes.func,
 };
 

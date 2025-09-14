@@ -130,4 +130,138 @@ describe('SettingsModal', () => {
     );
     expect(onClose).toHaveBeenCalled();
   });
+
+  test('demo mode switch enables embedded dataset (disconnected)', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        people: [{ id: 'p1', name: 'User' }],
+        cases: [],
+        meta: { source: 'embedded-sample' },
+      }),
+    });
+    const onDataLoaded = jest.fn();
+    render(
+      <SettingsModal
+        isOpen
+        onClose={jest.fn()}
+        onDataLoaded={onDataLoaded}
+        fileStatus="disconnected"
+      />,
+    );
+    const checkbox = screen.getByRole('checkbox', {
+      name: /toggle demo mode/i,
+    });
+    expect(checkbox).not.toBeChecked();
+    fireEvent.click(checkbox);
+    await waitFor(() => expect(onDataLoaded).toHaveBeenCalled());
+    const stored = JSON.parse(localStorage.getItem('nightingale_data'));
+    expect(stored.meta.source).toBe('embedded-sample');
+    expect(window.showToast).toHaveBeenCalledWith(
+      'Demo mode enabled (embedded sample)',
+      'success',
+    );
+  });
+
+  test('demo mode disabling while disconnected clears localStorage and data', async () => {
+    // Seed demo mode first
+    localStorage.setItem(
+      'nightingale_data',
+      JSON.stringify({ meta: { source: 'embedded-sample' }, people: [] }),
+    );
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        people: [],
+        meta: { source: 'embedded-sample' },
+      }),
+    });
+    const onDataLoaded = jest.fn();
+    render(
+      <SettingsModal
+        isOpen
+        onClose={jest.fn()}
+        onDataLoaded={onDataLoaded}
+        fileStatus="disconnected"
+      />,
+    );
+    // Switch should start in checked state due to seeded localStorage detection
+    const checkbox = screen.getByRole('checkbox', {
+      name: /toggle demo mode/i,
+    });
+    expect(checkbox).toBeChecked();
+    fireEvent.click(checkbox); // disable
+    await waitFor(() =>
+      expect(window.showToast).toHaveBeenCalledWith(
+        'Demo mode disabled',
+        'info',
+      ),
+    );
+    expect(localStorage.getItem('nightingale_data')).toBeNull();
+  });
+
+  test('demo mode disabling while connected reloads file data', async () => {
+    // Seed demo mode first
+    localStorage.setItem(
+      'nightingale_data',
+      JSON.stringify({ meta: { source: 'embedded-sample' }, people: [] }),
+    );
+    const fileService = createFileService({
+      readData: { cases: [{ id: 'live' }] },
+    });
+    const onDataLoaded = jest.fn();
+    render(
+      <SettingsModal
+        isOpen
+        onClose={jest.fn()}
+        onDataLoaded={onDataLoaded}
+        fileService={fileService}
+        fileStatus="connected"
+      />,
+    );
+    const checkbox = screen.getByRole('checkbox', {
+      name: /toggle demo mode/i,
+    });
+    expect(checkbox).toBeChecked();
+    fireEvent.click(checkbox); // disable
+    await waitFor(() =>
+      expect(window.showToast).toHaveBeenCalledWith(
+        'Demo mode disabled',
+        'info',
+      ),
+    );
+    // After disable, should have attempted to reload file data
+    expect(fileService.readFile).toHaveBeenCalled();
+    // onDataLoaded called with live data at some point
+    const calls = onDataLoaded.mock.calls.map((c) => c[0]);
+    expect(
+      calls.some((arg) => arg && arg.cases && arg.cases[0].id === 'live'),
+    ).toBe(true);
+  });
+
+  test('loading data file clears embedded localStorage sample', async () => {
+    // Seed localStorage with embedded sample
+    localStorage.setItem(
+      'nightingale_data',
+      JSON.stringify({ people: [{ id: 'pX' }] }),
+    );
+    const fileService = createFileService({
+      readData: { cases: [{ id: 'cLive' }], people: [{ id: 'pLive' }] },
+    });
+    const onDataLoaded = jest.fn();
+    const onClose = jest.fn();
+    render(
+      <SettingsModal
+        isOpen
+        onClose={onClose}
+        fileService={fileService}
+        onDataLoaded={onDataLoaded}
+        fileStatus="connected"
+      />,
+    );
+    const btn = screen.getByRole('button', { name: /Load Data File/i });
+    fireEvent.click(btn);
+    await waitFor(() => expect(fileService.readFile).toHaveBeenCalled());
+    expect(localStorage.getItem('nightingale_data')).toBeNull();
+  });
 });
