@@ -207,7 +207,7 @@ function NightingaleCMSApp() {
   // Memoize tab props to prevent unnecessary re-renders of heavy tab components
   const tabProps = useMemo(
     () => ({
-      dashboard: { fullData },
+      dashboard: { fullData, onUpdateData: handleDataUpdate },
       cases: {
         fullData,
         onUpdateData: handleDataUpdate,
