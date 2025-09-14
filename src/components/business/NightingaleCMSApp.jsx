@@ -113,8 +113,15 @@ function NightingaleCMSApp() {
     (nextTab) => {
       if (navLogsEnabled) {
         try {
-          const logger = globalThis.NightingaleLogger?.get('nav:tab_change');
-          logger?.info('Tab changed', { from: activeTab, to: nextTab });
+          if (
+            !handleTabChange.lastLog ||
+            handleTabChange.lastLog.from !== activeTab ||
+            handleTabChange.lastLog.to !== nextTab
+          ) {
+            const logger = globalThis.NightingaleLogger?.get('nav:tab_change');
+            logger?.info('Tab changed', { from: activeTab, to: nextTab });
+            handleTabChange.lastLog = { from: activeTab, to: nextTab };
+          }
         } catch (_) {
           /* ignore */
         }

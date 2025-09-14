@@ -114,6 +114,28 @@ const { migratedData, report } = await runFullMigration(raw, { applyFixes: true 
 await fs.writeFile(migratedData);
 ```
 
+### Component Playground (Experimental)
+
+A standalone sandbox page (`component-playground.html`) is available for rapid UX iteration on
+individual components (currently focused on `FinancialItemCard`). It runs outside the main
+application shell to minimize reload time and isolate props.
+
+Usage:
+
+```bash
+npm run dev
+# then open
+http://localhost:5173/component-playground.html
+```
+
+Features:
+
+- Real-time prop editing (amount, frequency, verification status, account number, etc.)
+- No persistence; reload to reset
+- Pulls registered components via the standard registry (no new globals)
+
+Extend by editing `src/playground/index.js` and adding new control groups + preview panels.
+
 ## 🧪 Testing
 
 - Jest + React Testing Library (jsdom)
