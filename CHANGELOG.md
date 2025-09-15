@@ -18,6 +18,11 @@ The format loosely follows Keep a Changelog and Semantic Versioning.
 
 - (placeholder)
 
+### Removed
+
+- Experimental component playground (HTML + src/playground) deprecated and removed to reduce
+  maintenance overhead.
+
 ## [1.0.0-rc.2] - 2025-09-15
 
 ### Added
