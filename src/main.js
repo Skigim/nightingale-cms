@@ -39,6 +39,7 @@ import './components/business/BugReportModal.jsx';
 
 // Import the root app last so all dependencies are registered
 import NightingaleCMSApp from './components/business/NightingaleCMSApp.jsx';
+import { AppThemeProvider } from './theme/index.tsx';
 import AutosaveFileService from './services/nightingale.autosavefile.js';
 import { setFileService } from './services/fileServiceProvider.js';
 import Toast from './services/nightingale.toast.js';
@@ -104,7 +105,11 @@ const mount = () => {
     React.createElement(
       React.StrictMode,
       null,
-      React.createElement(NightingaleCMSApp),
+      React.createElement(
+        AppThemeProvider,
+        null,
+        React.createElement(NightingaleCMSApp),
+      ),
     ),
   );
 };

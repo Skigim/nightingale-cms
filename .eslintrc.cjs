@@ -17,7 +17,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react', 'react-hooks', 'internal'],
+  plugins: ['react', 'react-hooks', 'internal', '@typescript-eslint'],
   // Custom rules registration (map namespace to implementation)
   rules: {
   'internal/no-prop-types-disable': 'error',
@@ -78,12 +78,29 @@ module.exports = {
     ],
   },
   settings: { react: { version: 'detect' } },
+  overrides: [
+    {
+      files: ['**/*.ts', '**/*.tsx'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        ecmaVersion: 'latest',
+        sourceType: 'module'
+      },
+      extends: [
+        'plugin:@typescript-eslint/recommended'
+      ],
+      rules: {
+        // Allow explicit any during incremental migration; tighten later.
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off'
+      }
+    }
+  ],
   globals: {
     React: 'readonly',
     ReactDOM: 'readonly',
     _: 'readonly',
     window: 'writable',
   },
-  // Specify plugin resolution
-  settings: { react: { version: 'detect' } },
 };
