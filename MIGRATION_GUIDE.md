@@ -364,15 +364,15 @@ Use Jest + RTL:
 
 ## 5. Risk Matrix & Mitigations
 
-| Risk                                         | Phase(s) | Mitigation                                                      |
-| -------------------------------------------- | -------- | --------------------------------------------------------------- |
-| Visual drift due to theme mismatch           | 1–3      | Snapshot baseline & targeted storybook/playground validation    |
-| Hidden tab logic regressions                 | 5        | Add pre-migration test coverage; log tab switch events          |
-| Data grid feature gaps (filters, selection)  | 6        | Gap analysis doc before implementation                          |
-| Form validation differences                  | 7        | Centralize error prop contract; QA checklist                    |
-| Toast timing changes                         | 8        | Keep old system in parallel behind feature flag for one release |
-| Tailwind removal reveals layout dependencies | 10       | Replace utilities incrementally; maintain style parity doc      |
-| Registry removal breaks dynamic composition  | 11       | Static import rehearsal in feature branch + codemod dry run     |
+| Risk                                         | Phase(s) | Mitigation                                                            |
+| -------------------------------------------- | -------- | --------------------------------------------------------------------- |
+| Visual drift due to theme mismatch           | 1–3      | Snapshot baseline & targeted storybook or isolated harness validation |
+| Hidden tab logic regressions                 | 5        | Add pre-migration test coverage; log tab switch events                |
+| Data grid feature gaps (filters, selection)  | 6        | Gap analysis doc before implementation                                |
+| Form validation differences                  | 7        | Centralize error prop contract; QA checklist                          |
+| Toast timing changes                         | 8        | Keep old system in parallel behind feature flag for one release       |
+| Tailwind removal reveals layout dependencies | 10       | Replace utilities incrementally; maintain style parity doc            |
+| Registry removal breaks dynamic composition  | 11       | Static import rehearsal in feature branch + codemod dry run           |
 
 ---
 
