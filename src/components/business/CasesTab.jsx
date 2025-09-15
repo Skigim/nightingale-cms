@@ -90,12 +90,39 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     setIsEditModalOpen(true);
   };
 
+  const [pendingDetailsCaseId, setPendingDetailsCaseId] = useState(null);
+  const peopleReady =
+    Array.isArray(fullData?.people) && fullData.people.length > 0;
+
   const handleOpenCaseDetails = (caseItem, e) => {
     e.stopPropagation();
+    if (!peopleReady) {
+      setPendingDetailsCaseId(caseItem.id);
+      const logger = globalThis.NightingaleLogger?.get('nav:cases');
+      logger?.info('Deferring case details open until people loaded', {
+        caseId: caseItem.id,
+      });
+      return;
+    }
     setDetailsCaseId(caseItem.id);
     setViewMode('details');
     onViewModeChange?.('details');
   };
+
+  // When people finish loading, honor any pending details navigation
+  useEffect(() => {
+    if (peopleReady && pendingDetailsCaseId && viewMode !== 'details') {
+      const target = pendingDetailsCaseId;
+      setPendingDetailsCaseId(null);
+      setDetailsCaseId(target);
+      setViewMode('details');
+      onViewModeChange?.('details');
+      const logger = globalThis.NightingaleLogger?.get('nav:cases');
+      logger?.info('Opened deferred case details after people load', {
+        caseId: target,
+      });
+    }
+  }, [peopleReady, pendingDetailsCaseId, viewMode, onViewModeChange]);
 
   const formatDate = (dateString) =>
     dateUtils.format?.(dateString) || dateString;
