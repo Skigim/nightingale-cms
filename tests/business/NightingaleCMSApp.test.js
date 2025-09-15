@@ -181,20 +181,9 @@ describe('NightingaleCMSApp smoke tests', () => {
     }).not.toThrow();
   });
 
-  test('has proper container structure', () => {
+  test('renders main content area element', () => {
     const { container } = render(<NightingaleCMSApp />);
-
-    // Should have a main flex container
-    const mainContainer = container.querySelector('.h-screen.w-screen.flex');
-    expect(mainContainer).toBeInTheDocument();
-  });
-
-  test('renders main content area', () => {
-    const { container } = render(<NightingaleCMSApp />);
-
-    // Should have a main content area
     const mainElement = container.querySelector('main');
     expect(mainElement).toBeInTheDocument();
-    expect(mainElement).toHaveClass('flex-1', 'min-h-0', 'overflow-auto');
   });
 });

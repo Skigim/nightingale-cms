@@ -31,13 +31,20 @@ describe('fileServiceProvider', () => {
     global.globalThis.NightingaleFileService = null;
     global.globalThis.FileService = null;
 
+    // Provide CustomEvent polyfill if missing (jsdom normally supplies it)
+    if (typeof global.CustomEvent === 'undefined') {
+      global.CustomEvent = function (type, params) {
+        return { type, detail: params?.detail };
+      };
+    }
+
     // Import the module after mocking
     const provider = require('../../src/services/fileServiceProvider.js');
     setFileService = provider.setFileService;
     getFileService = provider.getFileService;
   });
 
-  test('setFileService stores service reference', () => {
+  test('setFileService stores non-null service and no event assertion dependency', () => {
     setFileService(mockService);
     expect(getFileService()).toBe(mockService);
   });
@@ -83,13 +90,8 @@ describe('fileServiceProvider', () => {
     expect(getFileService()).toBe(mockService);
   });
 
-  test('event dispatching behavior tested via side effects', () => {
-    // The actual event dispatch is hard to test in isolation due to module imports
-    // Focus on verifying the functionality doesn't break when document methods exist
+  test('clearing after set removes reference', () => {
     setFileService(mockService);
-    expect(getFileService()).toBe(mockService);
-
-    // Test that setting to null doesn't throw
     setFileService(null);
     expect(getFileService()).toBeNull();
   });
