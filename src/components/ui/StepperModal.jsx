@@ -13,9 +13,9 @@ function StepperModal({
   onClose,
   title,
   steps = [],
-  currentStep,
-  onStepChange,
-  onComplete,
+  currentStep = 0,
+  onStepChange = () => {},
+  onComplete = () => {},
   children,
   isStepClickable = () => true, // Function to determine if a step is clickable
   completeButtonText = 'Complete', // Custom text for the complete button
@@ -91,7 +91,13 @@ function StepperModal({
     }
   };
 
-  const isLastStep = currentStep === steps.length - 1;
+  // Defensive bounds for currentStep when steps length changes or is omitted
+  const safeCurrentStep =
+    typeof currentStep === 'number' && currentStep >= 0
+      ? Math.min(currentStep, Math.max(steps.length - 1, 0))
+      : 0;
+
+  const isLastStep = safeCurrentStep === steps.length - 1 && steps.length > 0;
 
   const handleComplete = () => {
     try {
@@ -226,7 +232,7 @@ function StepperModal({
         {/* Back Button */}
         <button
           onClick={handleBack}
-          disabled={currentStep === 0}
+          disabled={safeCurrentStep === 0}
           className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
         >
           Back
@@ -311,8 +317,8 @@ function StepperModal({
         <div className="w-1/4">
           <nav className="space-y-1">
             {steps.map((step, index) => {
-              const isCompleted = index < currentStep;
-              const isActive = index === currentStep;
+              const isCompleted = index < safeCurrentStep;
+              const isActive = index === safeCurrentStep;
               const isAccessible = isStepClickable(index);
 
               return (
@@ -326,7 +332,7 @@ function StepperModal({
                         const logger =
                           globalThis.NightingaleLogger?.get('nav:stepper');
                         logger?.debug('Step clicked', {
-                          from: currentStep,
+                          from: safeCurrentStep,
                           to: index,
                           title,
                         });
@@ -396,9 +402,9 @@ StepperModal.propTypes = {
       description: PropTypes.string,
     }),
   ),
-  currentStep: PropTypes.number.isRequired,
-  onStepChange: PropTypes.func.isRequired,
-  onComplete: PropTypes.func.isRequired,
+  currentStep: PropTypes.number,
+  onStepChange: PropTypes.func,
+  onComplete: PropTypes.func,
   children: PropTypes.node,
   isStepClickable: PropTypes.func,
   completeButtonText: PropTypes.string,

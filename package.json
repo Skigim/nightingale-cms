@@ -51,7 +51,6 @@
   "homepage": "https://Skigim.github.io/nightingale-cms/",
   "type": "module",
   "devDependencies": {
-    "conventional-changelog-cli": "^4.1.0",
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
@@ -68,6 +67,8 @@
     "@typescript-eslint/parser": "^8.43.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.20",
+    "conventional-changelog-cli": "^4.1.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "eslint": "^8.57.1",
     "eslint-plugin-internal": "file:./eslint-plugin-internal",
     "eslint-plugin-jsx-a11y": "^6.10.2",
