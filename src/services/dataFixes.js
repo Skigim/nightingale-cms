@@ -61,22 +61,49 @@ export async function normalizeDataset(fullData, fileService, persist = true) {
 
   let caseClientNameRemoved = 0;
   let orphanClientNamesRetained = 0;
-  const normalizedCases = cases.map((c) => {
+  let vrRequestClientNameRemoved = 0;
+  let orphanVrRequestClientNamesRetained = 0;
+  const normalizedCases = cases.map((rawCase) => {
+    let c = rawCase;
     if (!c) return c;
     if (c.clientName && c.personId) {
       const resolved = peopleMap.get(ensureStringId(c.personId));
       if (resolved) {
-        // Safe to drop snapshot; UI derives live name
         caseClientNameRemoved += 1;
         const { clientName, ...rest } = c; // eslint-disable-line no-unused-vars
-        return { ...rest };
+        c = { ...rest };
+      } else {
+        orphanClientNamesRetained += 1;
       }
-      orphanClientNamesRetained += 1; // Keep for historical display (person missing)
+    }
+    // Normalize nested vrRequests snapshots
+    if (Array.isArray(c.vrRequests)) {
+      if (c.personId && peopleMap.get(ensureStringId(c.personId))) {
+        const cleaned = c.vrRequests.map((vr) => {
+          if (vr && vr.clientName) {
+            vrRequestClientNameRemoved += 1;
+            const { clientName, ...restVr } = vr; // eslint-disable-line no-unused-vars
+            return { ...restVr };
+          }
+          return vr;
+        });
+        c = { ...c, vrRequests: cleaned };
+      } else {
+        // Person unresolved or missing personId; count retained snapshots
+        for (const vr of c.vrRequests) {
+          if (vr && vr.clientName) {
+            orphanVrRequestClientNamesRetained += 1;
+          }
+        }
+      }
     }
     return c;
   });
 
-  const changed = peopleNameFixed + caseClientNameRemoved > 0 ? 1 : 0; // flag if any mutation occurred
+  const changed =
+    peopleNameFixed + caseClientNameRemoved + vrRequestClientNameRemoved > 0
+      ? 1
+      : 0; // flag if any mutation occurred
   if (!changed) {
     return {
       changed: 0,
@@ -86,6 +113,8 @@ export async function normalizeDataset(fullData, fileService, persist = true) {
         peopleNameFixed: 0,
         caseClientNameRemoved: 0,
         orphanClientNamesRetained,
+        vrRequestClientNameRemoved: 0,
+        orphanVrRequestClientNamesRetained,
         message: 'No normalization changes required',
       },
     };
@@ -115,6 +144,8 @@ export async function normalizeDataset(fullData, fileService, persist = true) {
       peopleNameFixed,
       caseClientNameRemoved,
       orphanClientNamesRetained,
+      vrRequestClientNameRemoved,
+      orphanVrRequestClientNamesRetained,
       message: 'Dataset normalized',
     },
   };
