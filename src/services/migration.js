@@ -27,7 +27,6 @@ export function detectLegacyProfile(data) {
     financialTypeWithoutDescription: false,
     missingMetadata: false,
     casePersonIdNumeric: false,
-    casesMissingClientName: 0,
   };
 
   const summary = [];
@@ -43,13 +42,6 @@ export function detectLegacyProfile(data) {
       (c) => c && typeof c.personId === 'number',
     );
     if (indicators.casePersonIdNumeric) summary.push('numeric case.personId');
-
-    indicators.casesMissingClientName = data.cases.reduce(
-      (acc, c) => (c && !c.clientName && c.personId ? acc + 1 : acc),
-      0,
-    );
-    if (indicators.casesMissingClientName > 0)
-      summary.push('cases missing clientName');
   }
 
   // numeric IDs in people / cases / orgs
@@ -88,9 +80,7 @@ export function detectLegacyProfile(data) {
   indicators.missingMetadata = !data.metadata || !data.metadata.schemaVersion;
   if (indicators.missingMetadata) summary.push('missing metadata');
 
-  const isLegacy =
-    Object.values(indicators).some((v) => v === true) ||
-    indicators.casesMissingClientName > 0;
+  const isLegacy = Object.values(indicators).some((v) => v === true);
 
   return { isLegacy, indicators, summary };
 }
