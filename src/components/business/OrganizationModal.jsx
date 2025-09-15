@@ -1016,7 +1016,7 @@ function OrganizationModal({
       currentStep,
       onStepChange: handleStepChange,
       onComplete: handleSubmit,
-      completButtonText: isLoading
+      completeButtonText: isLoading
         ? 'Saving...'
         : editOrganizationId
           ? 'Update Organization'
@@ -1040,10 +1040,7 @@ OrganizationModal.propTypes = {
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,
   onOrganizationCreated: PropTypes.func,
-  editOrganizationId: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  editOrganizationId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   fullData: PropTypes.object,
   fileService: PropTypes.object,
 };

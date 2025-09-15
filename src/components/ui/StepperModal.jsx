@@ -18,7 +18,7 @@ function StepperModal({
   onComplete,
   children,
   isStepClickable = () => true, // Function to determine if a step is clickable
-  completButtonText = 'Complete', // Custom text for the complete button
+  completeButtonText = 'Complete', // Custom text for the complete button
   isCompleteDisabled = false, // Whether the complete button should be disabled
   hideNavigation = false, // Whether to hide the Next/Back buttons and use only custom buttons
   customFooterContent = null, // Custom footer content to replace default buttons
@@ -241,7 +241,7 @@ function StepperModal({
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {isLastStep ? completButtonText : 'Next'}
+          {isLastStep ? completeButtonText : 'Next'}
         </button>
       </div>
     ) : null);
@@ -401,7 +401,7 @@ StepperModal.propTypes = {
   onComplete: PropTypes.func.isRequired,
   children: PropTypes.node,
   isStepClickable: PropTypes.func,
-  completButtonText: PropTypes.string,
+  completeButtonText: PropTypes.string,
   isCompleteDisabled: PropTypes.bool,
   hideNavigation: PropTypes.bool,
   customFooterContent: PropTypes.node,

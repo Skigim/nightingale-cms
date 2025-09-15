@@ -1079,7 +1079,7 @@ function PersonCreationModal({
       currentStep,
       onStepChange: handleStepChange,
       onComplete: handleSubmit,
-      completButtonText: isLoading
+      completeButtonText: isLoading
         ? 'Saving...'
         : editPersonId
           ? 'Update Person'

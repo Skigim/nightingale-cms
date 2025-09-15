@@ -1122,7 +1122,7 @@ function CaseCreationModal({
       currentStep,
       onStepChange: handleStepChange,
       onComplete: handleComplete,
-      completButtonText: isLoading
+      completeButtonText: isLoading
         ? 'Saving...'
         : editCaseId
           ? 'Update Case'
@@ -1146,10 +1146,7 @@ CaseCreationModal.propTypes = {
   isOpen: PropTypes.bool,
   onClose: PropTypes.func,
   onCaseCreated: PropTypes.func,
-  editCaseId: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  editCaseId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   fullData: PropTypes.object,
   fileService: PropTypes.object,
   onViewCaseDetails: PropTypes.func,
