@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 
@@ -26,11 +26,13 @@ function StepperModal({
   confirmOnCtrlEnter = true, // When true, Ctrl/Cmd+Enter triggers Complete on any step
   enterAction = 'complete-on-last', // 'next' | 'complete-on-last'
   ignoreSelectors = 'textarea,[contenteditable]', // Ignore plain Enter when typing in these
+  trapFocus = true, // When true, keep tab focus within the modal
 }) {
   // Reference to the step content area for focus management
   const stepContentRef = useRef(null);
+  const modalRootRef = useRef(null);
 
-  if (!isOpen) return null;
+  // Do not early-return before hooks; instead render null later to keep hook order stable
 
   // Enhanced step change handler with focus management
   const handleStepChange = (newStep) => {
@@ -150,6 +152,72 @@ function StepperModal({
     }
   };
 
+  // Focus trap implementation (lightweight, no external deps)
+  const handleFocusTrap = useCallback(
+    (e) => {
+      if (!trapFocus || !isOpen) return;
+      if (e.key !== 'Tab') return;
+      const root = modalRootRef.current;
+      if (!root) return;
+      // Collect focusable elements inside modal
+      const focusableSelectors = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[role="button"]',
+        '[tabindex]:not([tabindex="-1"])',
+      ];
+      const focusable = Array.from(
+        root.querySelectorAll(focusableSelectors.join(',')),
+      ).filter(
+        (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey) {
+        if (active === first || !root.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    },
+    [trapFocus, isOpen],
+  );
+
+  useEffect(() => {
+    if (!isOpen || !trapFocus) return;
+    const previouslyFocused = document.activeElement;
+    // Try focusing first interactive element on open
+    const root = modalRootRef.current;
+    if (root) {
+      const focusTarget = root.querySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      focusTarget?.focus();
+    }
+    const keyListener = (e) => handleFocusTrap(e);
+    window.addEventListener('keydown', keyListener, true);
+    return () => {
+      window.removeEventListener('keydown', keyListener, true);
+      if (previouslyFocused && previouslyFocused.focus) {
+        try {
+          previouslyFocused.focus();
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    };
+  }, [isOpen, trapFocus, handleFocusTrap]);
+
   // Use custom footer content if provided, otherwise use default navigation
   const footerContent =
     customFooterContent ||
@@ -221,6 +289,8 @@ function StepperModal({
         </div>
       ) : null);
 
+  if (!isOpen) return null;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -230,8 +300,12 @@ function StepperModal({
       footerContent={footerContent}
     >
       <div
+        ref={modalRootRef}
         className="flex space-x-8"
         onKeyDown={handleKeyDown}
+        aria-modal="true"
+        role="dialog"
+        aria-label={title}
       >
         {/* Stepper Navigation */}
         <div className="w-1/4">
@@ -335,6 +409,7 @@ StepperModal.propTypes = {
   confirmOnCtrlEnter: PropTypes.bool,
   enterAction: PropTypes.oneOf(['next', 'complete-on-last']),
   ignoreSelectors: PropTypes.string,
+  trapFocus: PropTypes.bool,
 };
 
 // Register with UI registry
