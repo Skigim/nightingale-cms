@@ -7,6 +7,12 @@
 
 import '@testing-library/jest-dom';
 
+// Define a global __DEV__ constant mirroring Vite define for tests
+if (typeof global.__DEV__ === 'undefined') {
+  // eslint-disable-next-line no-underscore-dangle
+  global.__DEV__ = true;
+}
+
 // Mock React and ReactDOM globals (as they're loaded via CDN in the app)
 global.React = require('react');
 global.ReactDOM = require('react-dom');

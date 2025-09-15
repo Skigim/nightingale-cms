@@ -1,3 +1,4 @@
+/* global __DEV__ */
 /**
  * SettingsModal.js - Settings and data management modal
  *
@@ -240,8 +241,9 @@ function SettingsModal({
       return;
     }
     // Provide functionality only in development builds to exclude heavy faker dependency from production bundle.
-    // Vite statically replaces import.meta.env.DEV/PROD allowing tree-shaking of the dynamic import below in prod.
-    const createSampleData = import.meta.env.DEV
+    // We use a global __DEV__ constant (defined by Vite and in test setup) instead of import.meta to keep Jest transformation simple.
+    const isDev = (typeof __DEV__ !== 'undefined' && __DEV__) || false;
+    const createSampleData = isDev
       ? async (opts) => {
           const mod = await import('../../services/sampleData.js');
           return mod.generateSampleData?.(opts) || {};
