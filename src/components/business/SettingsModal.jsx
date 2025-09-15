@@ -239,17 +239,29 @@ function SettingsModal({
       showToast('File service not available', 'error');
       return;
     }
+    // Provide functionality only in development builds to exclude heavy faker dependency from production bundle.
+    // Vite statically replaces import.meta.env.DEV/PROD allowing tree-shaking of the dynamic import below in prod.
+    const createSampleData = import.meta.env.DEV
+      ? async (opts) => {
+          const mod = await import('../../services/sampleData.js');
+          return mod.generateSampleData?.(opts) || {};
+        }
+      : null;
+
+    if (!createSampleData) {
+      showToast(
+        'Sample data generation disabled in production build',
+        'warning',
+      );
+      return;
+    }
 
     try {
-      // Lazy-load generator (reduces initial bundle size)
-      const mod = await import('../../services/sampleData.js');
-      const sampleData =
-        mod.generateSampleData?.({
-          organizations: 20,
-          people: 100,
-          cases: 50,
-        }) || {};
-
+      const sampleData = await createSampleData({
+        organizations: 20,
+        people: 100,
+        cases: 50,
+      });
       await fileService.writeFile(sampleData);
       onDataLoaded?.(sampleData);
       showToast('Sample data created and loaded!', 'success');
