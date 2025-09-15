@@ -1,201 +1,186 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { createRoot } from 'react-dom/client';
 import '../index.css';
-import { getComponent } from '../services/registry';
-// Side-effect imports to ensure registration
-// Business components (side-effect registration)
+import { getComponent, listComponents } from '../services/registry';
+import '../components/ui/ErrorBoundary.jsx';
+// Dev Playground – FinancialItemCard only.
 import '../components/business/FinancialItemCard.jsx';
-import '../components/business/FinancialManagementSection.jsx';
-import '../components/business/FinancialItemModal.jsx';
-import '../components/business/AvsImportModal.jsx';
-import '../components/business/CaseCreationModal.jsx';
-import '../components/business/NotesModal.jsx';
-import '../components/business/CaseDetailsView.jsx';
-// UI components required by business components (ensure they register before getComponent calls)
 import '../components/ui/Badge.jsx';
 import '../components/ui/Button.jsx';
-import '../components/ui/Modal.jsx';
-import '../components/ui/StepperModal.jsx';
-import '../components/ui/FormComponents.jsx';
-import '../components/ui/SearchBar.jsx';
 
-function useField(initial) {
-  const [value, setValue] = useState(initial);
-  return {
-    value,
-    set: (v) => setValue(v),
-    bind: { value, onChange: (e) => setValue(e.target.value) },
-  };
-}
+// (Removed previous local hook helpers after refactor; using centralized store instead)
 
-function ControlGroup({ label, children }) {
-  return (
-    <label style={{ display: 'block' }}>
-      <span style={{ display: 'block', marginBottom: 4 }}>{label}</span>
-      {children}
-    </label>
-  );
-}
-ControlGroup.propTypes = {
-  label: PropTypes.string.isRequired,
-  children: PropTypes.node,
+// --- Simple shared store so controls (in sidebar) and preview (main) stay in sync across two React roots ---
+const DEFAULTS = {
+  description: 'Primary Checking',
+  amount: '2500',
+  frequency: 'monthly',
+  verificationStatus: 'pending',
+  verificationSource: 'Bank API',
+  accountNumber: '123456789',
+  itemType: 'income',
+  showActions: true,
 };
 
-function ComponentPlayground() {
-  // Component selector
-  const [selected, setSelected] = useState('FinancialItemCard');
+const workbenchStore = {
+  state: {
+    ...DEFAULTS,
+    showJson: false,
+    componentName: 'FinancialItemCard',
+    registryGroup: 'business',
+    snapshots: [],
+    lastRenderMs: null,
+    dirty: false,
+  },
+  listeners: new Set(),
+  set(partial) {
+    this.state = { ...this.state, ...partial };
+    this.listeners.forEach((l) => l(this.state));
+  },
+  reset() {
+    this.set({ ...DEFAULTS });
+  },
+  randomize() {
+    const freqs = ['monthly', 'weekly', 'yearly', 'daily', 'one-time'];
+    const statuses = [
+      'pending',
+      'verified',
+      'unverified',
+      'needs-vr',
+      'vr-pending',
+      'review-pending',
+      'avs-pending',
+    ];
+    this.set({
+      description: `Acct ${Math.floor(Math.random() * 1000)}`,
+      amount: String(Math.floor(Math.random() * 9000) + 100),
+      frequency: freqs[Math.floor(Math.random() * freqs.length)],
+      verificationStatus: statuses[Math.floor(Math.random() * statuses.length)],
+      verificationSource: 'AutoGen',
+      accountNumber: String(
+        Math.floor(Math.random() * 9_000_000_000) + 1_000_000_000,
+      ),
+      itemType: ['income', 'expenses', 'resources'][
+        Math.floor(Math.random() * 3)
+      ],
+      showActions: Math.random() > 0.3,
+    });
+  },
+  snapshot() {
+    const { snapshots, ...rest } = this.state; // omit lastRenderMs from snapshot
+    const snap = {
+      id: Date.now().toString(36),
+      ts: Date.now(),
+      data: { ...rest },
+    };
+    this.set({ snapshots: [...snapshots, snap] });
+  },
+  deleteSnapshot(id) {
+    this.set({ snapshots: this.state.snapshots.filter((s) => s.id !== id) });
+  },
+  applySnapshot(id) {
+    const snap = this.state.snapshots.find((s) => s.id === id);
+    if (snap) this.set({ ...snap.data });
+  },
+};
 
-  // Demo fullData + case for CaseDetailsView and related components
-  const [fullData, setFullData] = useState(() => ({
-    cases: [
-      {
-        id: 'case-1',
-        mcn: 'MCN-2025-001',
-        status: 'Pending',
-        priority: false,
-        retroStatus: false,
-        appDetails: { caseType: 'STANDARD' },
-        financials: {
-          resources: [
-            {
-              id: 'res-1',
-              description: 'Checking Account',
-              amount: '2500',
-              verificationStatus: 'pending',
-              accountNumber: '123456789',
-            },
-          ],
-          income: [
-            {
-              id: 'inc-1',
-              description: 'Employment',
-              amount: '4200',
-              frequency: 'monthly',
-              verificationStatus: 'verified',
-              verificationSource: 'Pay Stub',
-            },
-          ],
-          expenses: [
-            {
-              id: 'exp-1',
-              description: 'Rent',
-              amount: '1200',
-              frequency: 'monthly',
-              verificationStatus: 'pending',
-            },
-          ],
-        },
-        notes: [
-          {
-            id: 'n1',
-            category: 'General',
-            text: 'Initial intake complete.',
-            timestamp: Date.now() - 3600_000,
-          },
-          {
-            id: 'n2',
-            category: 'Follow-Up',
-            text: 'Requested bank statements.',
-            timestamp: Date.now() - 600_000,
-          },
-        ],
-      },
-    ],
-    people: [
-      { id: 'person-1', name: 'Jane Doe', firstName: 'Jane', lastName: 'Doe' },
-    ],
-    organizations: [],
-  }));
+function useWorkbenchState() {
+  const [data, setData] = useState(workbenchStore.state);
+  useEffect(() => {
+    const listener = (s) => setData(s);
+    workbenchStore.listeners.add(listener);
+    return () => workbenchStore.listeners.delete(listener);
+  }, []);
+  return [data, (partial) => workbenchStore.set(partial)];
+}
 
-  const caseId = 'case-1';
-  const handleUpdateData = (next) => setFullData(next);
-  const noop = () => {};
-  const description = useField('Primary Checking');
-  const amount = useField('2500');
-  const frequency = useField('monthly');
-  const verificationStatus = useField('pending');
-  const verificationSource = useField('Bank API');
-  const accountNumber = useField('123456789');
-  const itemType = useField('income');
-  const showActions = useField('true');
-
-  const item = useMemo(
-    () => ({
-      id: 'demo-item-1',
-      description: description.value,
-      amount: amount.value,
-      frequency: frequency.value,
-      verificationStatus: verificationStatus.value,
-      verificationSource: verificationSource.value,
-      accountNumber: accountNumber.value,
-      type: itemType.value,
-    }),
-    [
-      description.value,
-      amount.value,
-      frequency.value,
-      verificationStatus.value,
-      verificationSource.value,
-      accountNumber.value,
-      itemType.value,
-    ],
-  );
-
-  const FinancialItemCard = getComponent('business', 'FinancialItemCard', true);
-  const FinancialManagementSection = getComponent(
-    'business',
-    'FinancialManagementSection',
-    true,
-  );
-  const CaseCreationModal = getComponent('business', 'CaseCreationModal', true);
-  const NotesModal = getComponent('business', 'NotesModal', true);
-  const CaseDetailsView = getComponent('business', 'CaseDetailsView', true);
-  const parsedShowActions = showActions.value === 'true';
-
+function WorkbenchControls() {
+  const [data, set] = useWorkbenchState();
+  const update = (field) => (e) =>
+    set({
+      [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value,
+    });
+  const toggleJson = () => set({ showJson: !data.showJson });
+  const components = listComponents(data.registryGroup) || [];
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 32,
-        alignItems: 'flex-start',
-        flexWrap: 'wrap',
-      }}
-    >
-      <div style={{ width: 300 }}>
-        <ControlGroup label="Component">
+    <div style={{ fontSize: 12 }}>
+      <div
+        className="toolbar"
+        style={{ marginTop: 0 }}
+      >
+        <button onClick={() => workbenchStore.reset()}>Reset</button>
+        <button onClick={() => workbenchStore.randomize()}>Rand</button>
+        <button onClick={() => workbenchStore.snapshot()}>Snap</button>
+        <button
+          onClick={() =>
+            navigator.clipboard?.writeText(JSON.stringify(data, null, 2))
+          }
+        >
+          Copy
+        </button>
+        <button onClick={toggleJson}>
+          {data.showJson ? 'Hide JSON' : 'JSON'}
+        </button>
+      </div>
+      <fieldset
+        style={{ border: '1px solid #374151', padding: 8, marginTop: 12 }}
+      >
+        <legend style={{ fontSize: 11, padding: '0 4px' }}>Component</legend>
+        <label style={{ display: 'block', marginBottom: 8 }}>
+          Group
           <select
-            value={selected}
-            onChange={(e) => setSelected(e.target.value)}
+            value={data.registryGroup}
+            onChange={(e) => set({ registryGroup: e.target.value })}
           >
-            <option value="FinancialItemCard">FinancialItemCard</option>
-            <option value="FinancialManagementSection">
-              FinancialManagementSection
-            </option>
-            <option value="CaseCreationModal">CaseCreationModal</option>
-            <option value="NotesModal">NotesModal</option>
-            <option value="CaseDetailsView">CaseDetailsView</option>
+            <option value="business">business</option>
+            <option value="ui">ui</option>
           </select>
-        </ControlGroup>
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Description">
+        </label>
+        <label style={{ display: 'block' }}>
+          Name
+          <select
+            value={data.componentName}
+            onChange={(e) => set({ componentName: e.target.value })}
+          >
+            {components.map((c) => (
+              <option
+                key={c}
+                value={c}
+              >
+                {c}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p style={{ fontSize: 10, color: '#6b7280', marginTop: 6 }}>
+          Dirty: {data.dirty ? 'yes' : 'no'} • Last render:{' '}
+          {data.lastRenderMs ?? '-'}ms
+        </p>
+      </fieldset>
+      {/* Domain Fields (shown only for FinancialItemCard for now) */}
+      {data.componentName === 'FinancialItemCard' && (
+        <div>
+          <label>
+            Description
             <input
-              {...description.bind}
-              placeholder="Description"
+              value={data.description}
+              onChange={update('description')}
             />
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Amount">
+          </label>
+          <label>
+            Amount
             <input
-              {...amount.bind}
-              placeholder="Amount"
+              value={data.amount}
+              onChange={update('amount')}
             />
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Frequency">
-            <select {...frequency.bind}>
+          </label>
+          <label>
+            Frequency
+            <select
+              value={data.frequency}
+              onChange={update('frequency')}
+            >
               <option value="">(none)</option>
               <option value="monthly">monthly</option>
               <option value="yearly">yearly</option>
@@ -203,11 +188,13 @@ function ComponentPlayground() {
               <option value="daily">daily</option>
               <option value="one-time">one-time</option>
             </select>
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Verification Status">
-            <select {...verificationStatus.bind}>
+          </label>
+          <label>
+            Verification Status
+            <select
+              value={data.verificationStatus}
+              onChange={update('verificationStatus')}
+            >
               <option value="pending">pending</option>
               <option value="verified">verified</option>
               <option value="unverified">unverified</option>
@@ -216,153 +203,234 @@ function ComponentPlayground() {
               <option value="review-pending">review-pending</option>
               <option value="avs-pending">avs-pending</option>
             </select>
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Verification Source (for verified)">
+          </label>
+          <label>
+            Verification Source
             <input
-              {...verificationSource.bind}
-              placeholder="Source"
+              value={data.verificationSource}
+              onChange={update('verificationSource')}
             />
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Account Number">
+          </label>
+          <label>
+            Account Number
             <input
-              {...accountNumber.bind}
-              placeholder="Account Number"
+              value={data.accountNumber}
+              onChange={update('accountNumber')}
             />
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Item Type">
-            <select {...itemType.bind}>
+          </label>
+          <label>
+            Item Type
+            <select
+              value={data.itemType}
+              onChange={update('itemType')}
+            >
               <option value="income">income</option>
               <option value="expenses">expenses</option>
               <option value="resources">resources</option>
             </select>
-          </ControlGroup>
-        )}
-        {selected === 'FinancialItemCard' && (
-          <ControlGroup label="Show Actions">
-            <select {...showActions.bind}>
-              <option value="true">true</option>
-              <option value="false">false</option>
-            </select>
-          </ControlGroup>
-        )}
-      </div>
-      <div style={{ flex: 1, minWidth: 320 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px' }}>
-          Preview
-        </h2>
-        <div
-          style={{
-            background: '#1f2937',
-            padding: 16,
-            border: '1px solid #374151',
-            borderRadius: 8,
-          }}
-        >
-          {selected === 'FinancialItemCard' &&
-            (FinancialItemCard ? (
-              <FinancialItemCard
-                item={item}
-                itemType={itemType.value}
-                showActions={parsedShowActions}
-                confirmingDelete={false}
-                onEdit={() => {}}
-                onDelete={() => {}}
-                onDeleteCancel={() => {}}
-                onDeleteConfirm={() => {}}
-              />
-            ) : (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>
-                FinancialItemCard not registered.
-              </p>
-            ))}
-          {selected === 'FinancialManagementSection' &&
-            (FinancialManagementSection ? (
-              <FinancialManagementSection
-                caseData={fullData.cases[0]}
-                fullData={fullData}
-                onUpdateData={handleUpdateData}
-              />
-            ) : (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>
-                Component missing.
-              </p>
-            ))}
-          {selected === 'CaseCreationModal' &&
-            (CaseCreationModal ? (
-              <CaseCreationModal
-                isOpen={true}
-                onClose={noop}
-                editCaseId={fullData.cases[0].id}
-                fullData={fullData}
-                onCaseCreated={handleUpdateData}
-              />
-            ) : (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>
-                Component missing.
-              </p>
-            ))}
-          {selected === 'NotesModal' &&
-            (NotesModal ? (
-              <NotesModal
-                isOpen={true}
-                onClose={noop}
-                caseId={fullData.cases[0].id}
-                notes={fullData.cases[0].notes}
-                onNotesUpdate={(cid, notes) => {
-                  const updated = { ...fullData };
-                  updated.cases = updated.cases.map((c) =>
-                    c.id === cid ? { ...c, notes } : c,
-                  );
-                  setFullData(updated);
-                }}
-                caseData={fullData.cases[0]}
-                fullData={fullData}
-              />
-            ) : (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>
-                Component missing.
-              </p>
-            ))}
-          {selected === 'CaseDetailsView' &&
-            (CaseDetailsView ? (
-              <CaseDetailsView
-                caseId={caseId}
-                fullData={fullData}
-                onUpdateData={handleUpdateData}
-                onBackToList={noop}
-              />
-            ) : (
-              <p style={{ fontSize: 12, color: '#9ca3af' }}>
-                Component missing.
-              </p>
-            ))}
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <input
+              type="checkbox"
+              checked={data.showActions}
+              onChange={update('showActions')}
+              style={{ width: 16, height: 16 }}
+            />
+            Show Actions
+          </label>
         </div>
-        <p
+      )}
+      {data.showJson && (
+        <pre
           style={{
-            fontSize: 11,
-            marginTop: 12,
+            background: '#111827',
+            border: '1px solid #374151',
+            padding: 8,
+            fontSize: 10,
             lineHeight: 1.4,
-            color: '#6b7280',
+            maxHeight: 180,
+            overflow: 'auto',
+            marginTop: 12,
           }}
         >
-          Playground loaded: {selected}. Adjust props where available.
-        </p>
-      </div>
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      )}
+      {/* Snapshots */}
+      {data.snapshots.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <h4 style={{ fontSize: 11, margin: '0 0 4px' }}>Snapshots</h4>
+          <ul
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              maxHeight: 120,
+              overflow: 'auto',
+            }}
+          >
+            {data.snapshots.map((s) => (
+              <li
+                key={s.id}
+                style={{
+                  display: 'flex',
+                  gap: 4,
+                  alignItems: 'center',
+                  marginBottom: 4,
+                }}
+              >
+                <button
+                  style={{ fontSize: 10 }}
+                  onClick={() => workbenchStore.applySnapshot(s.id)}
+                  title={new Date(s.ts).toLocaleTimeString()}
+                >
+                  Load
+                </button>
+                <code
+                  style={{
+                    fontSize: 10,
+                    flex: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {s.data.componentName}:{s.data.description}
+                </code>
+                <button
+                  style={{ fontSize: 10, color: '#f87171' }}
+                  onClick={() => workbenchStore.deleteSnapshot(s.id)}
+                >
+                  x
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
 
-function mount() {
-  const rootEl = document.getElementById('root');
-  if (!rootEl) return;
-  const root = createRoot(rootEl);
-  root.render(<ComponentPlayground />);
+function WorkbenchPreview() {
+  const [data, set] = useWorkbenchState();
+  const boundaryKey = `${data.registryGroup}:${data.componentName}`;
+  const Comp = getComponent(data.registryGroup, data.componentName, true);
+  const tRef = useRef(null);
+  const startRef = useRef(null);
+
+  // Start timing before render commit
+  startRef.current = performance.now();
+
+  useEffect(() => {
+    // After paint
+    const end = performance.now();
+    const dur = Math.round(end - startRef.current);
+    set({ lastRenderMs: dur, dirty: false });
+  });
+
+  // Derive props for known components (basic heuristic)
+  const derivedProps = useMemo(() => {
+    if (data.componentName === 'FinancialItemCard') {
+      return {
+        item: {
+          id: 'demo-item-1',
+          description: data.description,
+          amount: data.amount,
+          frequency: data.frequency,
+          verificationStatus: data.verificationStatus,
+          verificationSource: data.verificationSource,
+          accountNumber: data.accountNumber,
+          type: data.itemType,
+        },
+        itemType: data.itemType,
+        showActions: data.showActions,
+        confirmingDelete: false,
+        onEdit: () => {},
+        onDelete: () => {},
+        onDeleteCancel: () => {},
+        onDeleteConfirm: () => {},
+      };
+    }
+    // Fallback: pass no props
+    return {};
+  }, [data]);
+
+  return (
+    <div
+      className="card-preview-wrapper"
+      ref={tRef}
+    >
+      <div
+        style={{
+          border: data.dirty ? '2px dashed #f59e0b' : '1px solid #374151',
+          padding: 12,
+          borderRadius: 8,
+          background: '#1f2937',
+          transition: 'border-color 120ms',
+        }}
+      >
+        {Comp ? (
+          <React.Suspense fallback={<p style={{ fontSize: 12 }}>Loading…</p>}>
+            {React.createElement(
+              getComponent('ui', 'ErrorBoundary'),
+              { boundaryKey },
+              React.createElement(Comp, derivedProps),
+            )}
+          </React.Suspense>
+        ) : (
+          <p style={{ fontSize: 12, color: '#9ca3af' }}>
+            {data.componentName} not registered in {data.registryGroup}.
+          </p>
+        )}
+      </div>
+      <p
+        className="note"
+        style={{ marginTop: 8 }}
+      >
+        State is ephemeral. No persistence. ({data.lastRenderMs ?? '-'}ms)
+      </p>
+    </div>
+  );
 }
 
+// Small field wrapper for consistent label styling
+// Field component retained for potential future styling (not currently used after refactor)
+function Field({ label, children }) {
+  return (
+    <label style={{ display: 'block', marginTop: 12 }}>
+      <span
+        style={{
+          display: 'block',
+          fontSize: 11,
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          color: '#9ca3af',
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+Field.propTypes = {
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node,
+};
+
+function mount() {
+  const controlsEl = document.getElementById('controls');
+  const previewEl = document.getElementById('root');
+  if (controlsEl) createRoot(controlsEl).render(<WorkbenchControls />);
+  if (previewEl) createRoot(previewEl).render(<WorkbenchPreview />);
+}
 mount();
+
+// Mark preview dirty on HMR (Vite environment) so user knows component reloaded
+if (import.meta?.hot) {
+  import.meta.hot.accept(() => {
+    workbenchStore.set({ dirty: true });
+  });
+}
