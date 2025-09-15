@@ -250,4 +250,41 @@ describe('CaseDetailsView - Batch 3 utilities & edges', () => {
     fireEvent.click(mcnEl);
     expect(utilSpyObj.copyMCN).toHaveBeenCalledWith('MCN-303');
   });
+
+  test('logs missing_person_for_case only once and renders diagnostic notice', () => {
+    const warnSpy = jest.fn();
+    globalThis.NightingaleLogger = {
+      get: () => ({ warn: warnSpy }),
+    };
+    const caseData = { id: '404', mcn: 'MCN-404', personId: 'person-missing' };
+    // Provide at least one unrelated person so peopleCount > 0 but lookup fails
+    const localFullData = {
+      cases: [caseData],
+      people: [{ id: 'person-existing', name: 'Someone Else' }],
+      organizations: [],
+    };
+    const { rerender } = render(
+      <CaseDetailsView
+        caseId={caseData.id}
+        fullData={localFullData}
+        onUpdateData={() => {}}
+      />,
+    );
+    // Effect should have fired once
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toBe('missing_person_for_case');
+    // Rerender with same data - should not duplicate warning
+    rerender(
+      <CaseDetailsView
+        caseId={caseData.id}
+        fullData={localFullData}
+        onUpdateData={() => {}}
+      />,
+    );
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    // Diagnostic inline notice present
+    expect(
+      screen.getByText(/Person record not found. The case references personId/),
+    ).toBeInTheDocument();
+  });
 });

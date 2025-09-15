@@ -179,3 +179,31 @@ manually.
 —
 
 Nightingale CMS — modern, modular case management.
+
+## 🩺 Data Integrity Diagnostics
+
+Use the reporting script to identify orphan references and duplication issues in a data file.
+
+Run:
+
+```bash
+node scripts/data-integrity-report.js            # uses Data/nightingale-data.json
+node scripts/data-integrity-report.js path/to/other.json
+```
+
+Reports:
+
+- Orphan cases (case.personId not found in people)
+- Orphan spouse references
+- Orphan authorized representative IDs
+- Duplicate person IDs
+- Duplicate case IDs
+- Summary counts
+
+Exit codes:
+
+- 0: No critical issues
+- 1: File not found / parse error
+- 2: Integrity issues detected
+
+Integrate into CI by running the script post-migration to prevent committing broken references.

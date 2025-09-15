@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
+import { safeMergeFullData } from '../../services/safeDataMerge.js';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import { findPersonById } from '../../services/nightingale.datamanagement.js';
@@ -458,10 +459,9 @@ function renderCasesModals({ data: dataResult, props }) {
       isOpen: dataResult.isCreateModalOpen,
       onClose: () => dataResult.setIsCreateModalOpen(false),
       onCaseCreated: (newCase) => {
-        const updatedData = {
-          ...props.fullData,
+        const updatedData = safeMergeFullData(props.fullData, {
           cases: [...(props.fullData.cases || []), newCase],
-        };
+        });
         props.onUpdateData(updatedData);
         dataResult.setIsCreateModalOpen(false);
       },
@@ -478,12 +478,11 @@ function renderCasesModals({ data: dataResult, props }) {
           dataResult.setEditCaseId(null);
         },
         onCaseCreated: (updatedCase) => {
-          const updatedData = {
-            ...props.fullData,
+          const updatedData = safeMergeFullData(props.fullData, {
             cases: props.fullData.cases.map((c) =>
               c.id === updatedCase.id ? updatedCase : c,
             ),
-          };
+          });
           props.onUpdateData(updatedData);
           dataResult.setIsEditModalOpen(false);
           dataResult.setEditCaseId(null);
