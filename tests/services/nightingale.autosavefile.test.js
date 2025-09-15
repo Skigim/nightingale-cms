@@ -260,5 +260,172 @@ describe('AutosaveFileService', () => {
         }),
       );
     });
+
+    test('performAutosave handles missing permission gracefully', async () => {
+      service.setDataProvider(() => ({ a: 1 }));
+      service.state.isRunning = true;
+      // mock permission denied
+      service.checkPermission = jest.fn(() => Promise.resolve('denied'));
+      await service.performAutosave();
+      expect(mockStatusCallback).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'waiting' }),
+      );
+    });
+
+    test('performAutosave handles write failure path', async () => {
+      // Arrange
+      service.setDataProvider(() => ({ a: 1 }));
+      service.state.isRunning = true;
+      service.checkPermission = jest.fn(() => Promise.resolve('granted'));
+      // Force writeFile to return false
+      service.writeFile = jest.fn(() => Promise.resolve(false));
+      await service.performAutosave();
+      // Should have transitioned through retrying state
+      expect(mockStatusCallback).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'retrying' }),
+      );
+    });
+
+    test('performAutosave success resets consecutiveFailures', async () => {
+      service.setDataProvider(() => ({ a: 1 }));
+      service.state.isRunning = true;
+      service.state.consecutiveFailures = 2;
+      service.checkPermission = jest.fn(() => Promise.resolve('granted'));
+      service.writeFile = jest.fn(() => Promise.resolve(true));
+      await service.performAutosave();
+      expect(service.state.consecutiveFailures).toBe(0);
+      expect(mockStatusCallback).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'saved' }),
+      );
+    });
+  });
+
+  describe('Backup Operations', () => {
+    test('backupAndWrite returns success object when both operations succeed', async () => {
+      service.directoryHandle = {
+        // minimal handle to satisfy _performWrite path
+        getFileHandle: jest.fn(() => ({
+          createWritable: jest.fn(() => ({
+            write: jest.fn(),
+            close: jest.fn(),
+          })),
+        })),
+        queryPermission: jest.fn(() => Promise.resolve('granted')),
+      };
+      // Spy on internal helpers
+      const writeNamedSpy = jest
+        .spyOn(service, 'writeNamedFile')
+        .mockResolvedValue(true);
+      const performWriteSpy = jest
+        .spyOn(service, '_performWrite')
+        .mockResolvedValue(true);
+
+      const data = { x: 1 };
+      const result = await service.backupAndWrite(data);
+
+      expect(writeNamedSpy).toHaveBeenCalledTimes(1);
+      expect(performWriteSpy).toHaveBeenCalledWith(data);
+      expect(result.backupCreated).toBe(true);
+      expect(result.written).toBe(true);
+      expect(result.backupName).toMatch(/nightingale-data.backup-/);
+    });
+
+    test('backupAndWrite reflects backup failure but write success', async () => {
+      service.directoryHandle = {
+        getFileHandle: jest.fn(() => ({
+          createWritable: jest.fn(() => ({
+            write: jest.fn(),
+            close: jest.fn(),
+          })),
+        })),
+        queryPermission: jest.fn(() => Promise.resolve('granted')),
+      };
+      const writeNamedSpy = jest
+        .spyOn(service, 'writeNamedFile')
+        .mockResolvedValue(false);
+      const performWriteSpy = jest
+        .spyOn(service, '_performWrite')
+        .mockResolvedValue(true);
+
+      const result = await service.backupAndWrite({ y: 2 });
+
+      expect(writeNamedSpy).toHaveBeenCalled();
+      expect(performWriteSpy).toHaveBeenCalled();
+      expect(result.backupCreated).toBe(false);
+      expect(result.written).toBe(true);
+    });
+  });
+
+  describe('Restore Flow', () => {
+    test('restoreLastDirectoryAccess updates status when permission granted', async () => {
+      const mockHandle = {
+        queryPermission: jest.fn(() => Promise.resolve('granted')),
+      };
+      // Force support
+      jest.spyOn(service, 'isSupported').mockReturnValue(true);
+
+      const getRequest = { onsuccess: null, onerror: null, result: null };
+      const originalOpen = global.indexedDB.open;
+      global.indexedDB.open = jest.fn(() => {
+        const openReq = {
+          onerror: null,
+          onsuccess: null,
+          onupgradeneeded: null,
+          result: {
+            objectStoreNames: { contains: jest.fn(() => true) },
+            transaction: jest.fn(() => ({
+              objectStore: jest.fn(() => ({
+                get: jest.fn(() => getRequest),
+              })),
+            })),
+          },
+        };
+        setTimeout(() => {
+          if (openReq.onsuccess) {
+            openReq.onsuccess();
+            getRequest.result = { handle: mockHandle };
+            if (getRequest.onsuccess) getRequest.onsuccess();
+          }
+        }, 0);
+        return openReq;
+      });
+
+      const res = await service.restoreLastDirectoryAccess();
+      // Allow queued setTimeout callbacks to run
+      await new Promise((r) => setTimeout(r, 5));
+
+      expect(res.handle).toBe(mockHandle);
+      expect(service.state.permissionStatus).toBe('granted');
+      const connectedCall = mockStatusCallback.mock.calls.find(
+        (c) => c[0].status === 'connected',
+      );
+      expect(connectedCall).toBeDefined();
+
+      global.indexedDB.open = originalOpen;
+    });
+  });
+
+  describe('Write Queue', () => {
+    test('processes multiple writeFile calls sequentially', async () => {
+      service.directoryHandle = {
+        queryPermission: jest.fn(() => Promise.resolve('granted')),
+      };
+      const performWriteOrder = [];
+      jest
+        .spyOn(service, '_performWrite')
+        .mockImplementation(async (payload) => {
+          performWriteOrder.push(payload.id);
+          // simulate small async delay
+          await new Promise((r) => setTimeout(r, 5));
+          return true;
+        });
+
+      const writes = [1, 2, 3, 4, 5].map((id) => service.writeFile({ id }));
+      await Promise.all(writes);
+
+      expect(performWriteOrder).toEqual([1, 2, 3, 4, 5]);
+      expect(service.writeQueue.length).toBe(0);
+      expect(service.isWriting).toBe(false);
+    });
   });
 });

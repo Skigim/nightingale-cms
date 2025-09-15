@@ -311,5 +311,31 @@ describe('NightingaleLogger', () => {
 
       expect(mockTransport.write).toHaveBeenCalledTimes(1);
     });
+
+    test('buffered mode flushes on error when flushOnLevel=error', () => {
+      const memory = NightingaleLogger.transports.memory(100);
+      NightingaleLogger.configure({
+        transports: [memory],
+        buffered: true,
+        flushOnLevel: 'error',
+      });
+      const logger = NightingaleLogger.get('bufferNS');
+      logger.info('info message'); // buffered
+      logger.error('boom'); // triggers flush
+      const entries = memory.getEntries();
+      // Expect both entries delivered after flush
+      expect(entries.some((e) => e.message === 'info message')).toBe(true);
+      expect(entries.some((e) => e.message === 'boom')).toBe(true);
+    });
+
+    test('child logger namespaces concatenate correctly', () => {
+      const memory = NightingaleLogger.transports.memory(50);
+      NightingaleLogger.configure({ transports: [memory], buffered: false });
+      const parent = NightingaleLogger.get('root');
+      const child = parent.child('leaf');
+      child.info('child message');
+      const entries = memory.getEntries();
+      expect(entries[0].namespace).toBe('root:leaf');
+    });
   });
 });

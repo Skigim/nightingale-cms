@@ -156,7 +156,21 @@ function FinancialItemModal({
       c.id === caseData.id ? updatedCase : c,
     );
 
-    onUpdateData({ ...fullData, cases: updatedCases });
+    try {
+      onUpdateData({ ...fullData, cases: updatedCases });
+    } catch (err) {
+      // Log and surface error without closing modal
+      try {
+        window.NightingaleLogger?.get?.('FinancialItemModal').error?.(
+          'Save failed',
+          err,
+        );
+      } catch (_) {
+        // ignore logging failures
+      }
+      showToast(`Failed to save ${itemType} item.`, 'error');
+      return;
+    }
 
     if (addAnother && !isEditing) {
       // Reset form for another item
