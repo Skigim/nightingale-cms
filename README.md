@@ -221,3 +221,19 @@ Exit codes:
 - 2: Integrity issues detected
 
 Integrate into CI by running the script post-migration to prevent committing broken references.
+
+## 🗂️ Versioning & Changelog
+
+This project follows Semantic Versioning. Pre-release identifiers (`-rc.N`) mark stabilization
+cycles; only critical fixes land between candidates.
+
+- Current pre-release: `1.0.0-rc.2`
+- Version policy: see `VERSIONING.md`
+- Notable change history: `CHANGELOG.md`
+
+Release flow:
+
+1. RC phase: lock features; address only blockers, docs, perf, security.
+2. Gates: tests green, integrity exit != 2, bundle within budgets, manual test matrix complete.
+3. Finalize: remove suffix → `1.0.0`, tag `v1.0.0`, deploy.
+4. Post-release: patch (1.0.1) for fixes; minor (1.1.0) for additive features.

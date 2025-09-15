@@ -12,7 +12,7 @@
 
 Status:
 
-- [x] Full suite executed — all tests passed (730/730)
+- [x] Full suite executed — all tests passed (830/830)
 - [ ] Coverage thresholds met (80%) — current overall ~35% (improve during QA)
 - [x] E2E stub executed
 - [x] Performance stub executed
@@ -106,7 +106,7 @@ const searchResults = useMemo(() => performSearch(cases, searchTerm), [cases, se
 #### B. User Documentation
 
 - [ ] README.md with setup instructions
-- [ ] CHANGELOG.md with all changes
+- [x] CHANGELOG.md with all changes (see root `CHANGELOG.md`)
 - [ ] API documentation for services
 - [ ] Deployment guide
 - [ ] Known issues / limitations
@@ -144,8 +144,9 @@ npm run build:staging && npm run start:preview
 
 ```bash
 # Version bump
-# Ensure package.json version aligns with the release tag (current file shows 2.0.0). Adjust if needed:
-# npm version 1.0.0  # or use major/minor/patch as appropriate
+# Ensure `package.json` version matches the release tag (current pre-release: 1.0.0-rc.2)
+# When ready to finalize:
+# npm version 1.0.0 --no-git-tag-version
 
 # Generate production build
 npm run build:production
