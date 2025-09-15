@@ -1,199 +1,421 @@
-# Nightingale CMS - React Modernization Migration Guide
+# Nightingale CMS – Full UI Migration Guide (TypeScript + MUI)
 
-## Overview
+> Objective: Replace the legacy JS + Tailwind + custom UI registry layer with a TypeScript‑first,
+> MUI‑native design system and application shell while preserving functional parity and minimizing
+> user disruption.
 
-This document outlines the migration from legacy `window.React.createElement` patterns to modern JSX syntax with ES6 imports. This represents a foundational shift in our React architecture to align with modern React development practices.
+This guide documents the authoritative sequence, scope boundaries, success criteria, and quality
+gates for the full migration. Treat each phase as _done_ only when its exit criteria are satisfied.
+Avoid starting more than one complex phase concurrently.
 
-## Pattern Changes
+---
 
-### Legacy Pattern (Before)
+## 0. Principles
 
-```javascript
-function ExampleComponent(props) {
-  if (!window.React) return null; // safety
-  const e = window.React.createElement;
-  const { useState, useEffect, useMemo, useCallback } = window.React;
+1. Parity before embellishment – match existing behaviors before adding new UX.
+2. Stable main branch – every merged commit builds, tests pass, no partial broken features.
+3. Incremental visibility – ship dormant code behind feature flags (where helpful) instead of
+   long‑lived branches.
+4. Eliminate duplication quickly – once a screen is migrated, delete old component usage in same PR.
+5. Observability – log key UX state changes during migration (tab switching, data loads) to surface
+   regressions early.
+6. Strong typing early – introduce domain types before porting complex orchestrators (Tabs,
+   DataGrid, Stepper).
 
-  // Hooks (unconditional)
-  const [value, setValue] = useState('');
-  const derived = useMemo(() => value.trim(), [value]);
-  const handleChange = useCallback((ev) => setValue(ev.target.value), []);
+---
 
-  return e('div', { className: 'p-4' }, derived);
-}
+## 1. Scope Summary
 
-// Registration
-if (typeof window !== 'undefined') {
-  window.ExampleComponent = ExampleComponent;
-  if (window.NightingaleUI) {
-    window.NightingaleUI.registerComponent('ExampleComponent', ExampleComponent);
-  }
-}
+In Scope:
+
+- Adoption of `@mui/material`, `@mui/x-data-grid`, emotion styling, and a unified MUI theme.
+- Conversion of UI components to TypeScript (`.tsx`).
+- Decommission of Tailwind classes in UI layer (may remain in legacy pages temporarily).
+- Replacement of: Buttons, Badges, Header (AppBar), Sidebar (Drawer), Modal (Dialog), Stepper, Tabs,
+  DataTable → DataGrid, Form Controls, Toast system → Snackbar, Progress indicators, Menus,
+  Accordions.
+- Removal of dynamic runtime registry _after_ all consumers use static imports (final phase).
+
+Out of Scope (explicitly):
+
+- Backend/data model changes.
+- New feature development (unless required for parity e.g., better accessibility).
+- Full visual redesign (styling refinements allowed, but no drastic layout changes beyond MUI
+  alignment).
+
+---
+
+## 2. High-Level Phases
+
+| Phase | Title                                                 | Core Deliverable                  | Risk | Parallelization |
+| ----- | ----------------------------------------------------- | --------------------------------- | ---- | --------------- |
+| 0     | Preparation & Baseline Tooling                        | tsconfig, theme scaffold, deps    | Low  | Blocker for all |
+| 1     | Foundational Theme & Tokens                           | Stable theme + design tokens doc  | Low  | Enables 2–6     |
+| 2     | Core Primitives (Buttons, Badges, Progress)           | MUI replacements live             | Low  | Parallel with 3 |
+| 3     | Layout Shell (AppBar + Drawer)                        | App structural frame              | Med  | After 1         |
+| 4     | Dialog & Stepper Refactor                             | MUI Dialog + StepperModal rewrite | Med  | After 2         |
+| 5     | Tabs & Tab Factory Migration                          | MUI Tabs + refactored TabBase     | High | After 2,4       |
+| 6     | DataTable → DataGrid                                  | Unified data grid wrapper         | High | After 1         |
+| 7     | Forms Suite (TextField, Select, etc.)                 | TS form components                | High | After 1         |
+| 8     | Notifications & Feedback                              | Snackbar bridge, error states     | Med  | After 2         |
+| 9     | Advanced Components (Menu, Accordion, Chips decision) | Added patterns                    | Low  | After 2         |
+| 10    | Tailwind Decommission (UI Layer)                      | Remove dependencies               | Med  | After 2–9       |
+| 11    | Registry Retirement & Cleanup                         | Static imports, delete registry   | Med  | Final           |
+
+---
+
+## 3. Detailed Phase Plans
+
+### Phase 0 – Preparation & Baseline Tooling
+
+**Goals:** Non‑breaking setup enabling dual JS/TS operation.
+
+Tasks:
+
+1. Add dependencies:
+   `@mui/material @mui/icons-material @emotion/react @emotion/styled @mui/x-data-grid`.
+2. Create `tsconfig.json` with `"allowJs": true`, `"checkJs": false` initially, module resolution
+   aligning with existing bundler.
+3. Add `types` script (`tsc --noEmit`) to CI for static checking early (optional pre-commit hook
+   later).
+4. Add `src/theme/index.ts` with `createTheme` skeleton (palette placeholders only).
+5. Wrap root React render in `<ThemeProvider>` + `<CssBaseline />`.
+6. Add `docs/Design-Tokens.md` stub.
+
+Exit Criteria:
+
+- App runs with theme provider and no visual regressions.
+- Build & tests green.
+
+### Phase 1 – Foundational Theme & Tokens
+
+**Goals:** Establish design language parity with legacy styling.
+
+Tasks:
+
+1. Define palette (primary, secondary, success, error, warning, info, neutral gray scale).
+2. Typography scale mapping (Tailwind `text-sm`, `text-base`, etc.).
+3. Shape (border radius) + spacing scale alignment.
+4. Component overrides: Button (variants), Chip (status), Dialog (padding), Drawer (width), Tabs
+   (indicator), DataGrid (header styling).
+5. Export token reference cheat sheet in `Design-Tokens.md`.
+
+Exit Criteria:
+
+- ≥80% of recurring Tailwind utility patterns have token or theme override.
+- Snapshot or visual check of 5 representative screens shows consistent typography & spacing.
+
+### Phase 2 – Core Primitives (Buttons, Badges, Progress)
+
+**Goals:** Replace high-frequency primitives early to validate theming & typing.
+
+Tasks:
+
+1. Convert `Button.jsx` → `Button.tsx` using MUI `<Button>`.
+2. Map legacy variants (Primary, Danger, etc.) to `variant/color` combos; export same names.
+3. Convert `Badge.jsx` → `Badge.tsx`; reimplement: count (MUI Badge), status & progress (Chips +
+   optional icon / progress overlay).
+4. Centralize loading spinner logic in a new `Progress.tsx` (Circular + Linear exports).
+5. Update business components to import new TS primitives.
+
+Exit Criteria:
+
+- All legacy button & badge variant code removed.
+- No failing tests referencing removed CSS classes.
+
+### Phase 3 – Layout Shell (AppBar + Drawer)
+
+**Goals:** Introduce MUI structural frame while keeping feature views unchanged.
+
+Tasks:
+
+1. Create `LayoutShell.tsx` housing `<AppBar>` / `<Toolbar>` + `<Drawer>`.
+2. Migrate `Header` logic; retain name by re-exporting `Header` from new file.
+3. Migrate `Sidebar` to Drawer (responsive: temporary on small screens, permanent on large).
+4. Introduce navigation item config (array of { label, icon?, path }).
+5. Adjust content container to account for AppBar height & Drawer width.
+
+Exit Criteria:
+
+- All pages wrapped in `LayoutShell`.
+- No overlapping or double scrollbars.
+
+### Phase 4 – Dialog & Stepper Refactor
+
+**Goals:** Normalize modals and multistep workflows.
+
+Tasks:
+
+1. Replace `Modal.jsx` internals with MUI `<Dialog>`; keep external props stable.
+2. Extract `useStepper` hook from `StepperModal` logic.
+3. Rebuild `StepperModal` with `<Stepper>` + `<Step>` + `<StepLabel>` and Button primitives.
+4. Introduce accessibility tests (focus trap, ESC close, aria attributes).
+
+Exit Criteria:
+
+- All modal usages rely on new Dialog; no legacy overlay markup remains.
+- Step transitions still emit analytics/logging events (if any previously).
+
+### Phase 5 – Tabs & Tab Factory Migration
+
+**Goals:** Replace custom tab orchestration with MUI Tabs while preserving dynamic composition.
+
+Tasks:
+
+1. Analyze `TabBase` API (component resolution, data loading hooks).
+2. Implement `TabContainer.tsx` using `<Tabs>` + `<Tab>` and controlled index state.
+3. Refactor factory to produce panels only; container handles selection.
+4. Add keyboard nav tests (arrow keys, home/end) and lazy mount logic if performance needed.
+5. Remove custom tab header rendering code.
+
+Exit Criteria:
+
+- No manual tab selection state in business components outside new container.
+- All prior tab sets function identically (including error and empty states).
+
+### Phase 6 – DataTable → DataGrid
+
+**Goals:** Modernize table with virtualization, built-in sorting/pagination.
+
+Tasks:
+
+1. Inventory current `DataTable` props & events.
+2. Create `DataGridWrapper.tsx` translating legacy prop names to DataGrid config.
+3. Implement custom cell renderers & empty/loading overlays.
+4. Map selection & pagination callback semantics.
+5. Performance test with largest realistic dataset.
+
+Exit Criteria:
+
+- All table usages replaced; pagination, sorting, selection still work.
+- No console warnings from DataGrid.
+
+### Phase 7 – Forms Suite (TextField, Select, Checkbox, RadioGroup, Switch)
+
+**Goals:** Standardize form inputs with validation and consistent error display.
+
+Tasks:
+
+1. Break out `FormComponents` into discrete TS components.
+2. Align prop contracts: `value`, `onChange`, `error`, `helperText`, `disabled`.
+3. Provide field wrapper for label + description + error region.
+4. Add unit tests for controlled behavior & validation rendering.
+5. Replace all legacy form input usages.
+
+Exit Criteria:
+
+- No remaining direct HTML inputs in business layer except edge cases (file upload etc.).
+- Consistent error message styling across form fields.
+
+### Phase 8 – Notifications & Feedback (Snackbar, Progress Integration)
+
+**Goals:** Consolidate to MUI Snackbar & unify progress reporting.
+
+Tasks:
+
+1. Wrap existing toast publisher to feed a centralized `<SnackbarProvider>` (custom) managing queue.
+2. Map legacy toast levels to `severity` (info, success, warning, error).
+3. Replace inline spinners with `Progress` component where appropriate.
+4. Optionally convert ErrorBoundary fallback to use `<Alert>`.
+
+Exit Criteria:
+
+- All toasts visible through MUI Snackbar styling.
+- Legacy toast UI file removable.
+
+### Phase 9 – Advanced Components (Menu, Accordion, Chips Refinement)
+
+**Goals:** Implement missing MUI targets and finalize chip/badge strategy.
+
+Tasks:
+
+1. Identify action clusters needing contextual `Menu` (e.g., card overflow buttons).
+2. Replace any hand-written collapse patterns with `<Accordion>`.
+3. Decide: `StatusBadge` family → `Chip` wrappers (document decision & API).
+4. Update docs to reflect final usage patterns.
+
+Exit Criteria:
+
+- No duplicated custom collapse logic.
+- Clear guidance in docs for when to use Chip vs Badge.
+
+### Phase 10 – Tailwind Decommission (UI Layer)
+
+**Goals:** Remove dependency from UI components to prevent style drift.
+
+Tasks:
+
+1. Grep UI directory for Tailwind class patterns; replace with `sx` or theme variants.
+2. Remove Tailwind directives from component-level styles.
+3. If Tailwind only used by legacy pages, decide retention or full removal.
+4. Update build config if Tailwind purge no longer needed.
+
+Exit Criteria:
+
+- UI components contain no Tailwind classes.
+- (Optional) Tailwind dependency removed if not used elsewhere.
+
+### Phase 11 – Registry Retirement & Cleanup
+
+**Goals:** Simplify architecture; rely on direct imports.
+
+Tasks:
+
+1. Identify all dynamic `getRegistryComponent` usages; replace with static imports (codemod or
+   manual).
+2. Remove `registerComponent` calls; delete registry service.
+3. Adjust docs & samples to show standard ES module imports.
+4. Run tree-shaking / bundle analysis to confirm reduction.
+
+Exit Criteria:
+
+- No runtime component lookups; app compiles without registry code.
+- Documentation updated (Architecture, README, MIGRATION_GUIDE final note).
+
+---
+
+## 4. Cross-Cutting Concerns
+
+### TypeScript Adoption Path
+
+Stage 1: allowJs, basic theme + primitives. Stage 2: Convert high fan-out components (registry,
+theme, DataGrid wrapper). Stage 3: Introduce domain entity types (Person, Case, etc.). Stage 4:
+Enable `strict` gradually (`noImplicitAny`, `strictNullChecks`). Stage 5: Remove remaining `.jsx` in
+UI layer.
+
+### Testing Strategy
+
+Use Jest + RTL:
+
+- Smoke test each migrated primitive (render, variant, disabled state).
+- Accessibility tests for Dialog, Tabs, DataGrid (focus, roles, keyboard nav).
+- Regression tests for DataGrid sorting/pagination state transitions.
+- Snapshot tests only for _layout chrome_, not dynamic content.
+
+### Performance & Bundle Size
+
+- Track initial bundle size baseline (before MUI) and after major phases.
+- Prefer named imports from `@mui/material` to help tree-shaking.
+- Lazy-load heavy feature routes if bundle growth > threshold (define threshold, e.g., +150KB gzip).
+
+### Accessibility
+
+- Enforce semantic roles (Tabs, Dialog, Grid) rely on MUI defaults.
+- Validate color contrast after final theme creation.
+- Provide focus outlines consistent with brand (custom palette focus ring token).
+
+### Documentation
+
+- Add `/docs/MUI-Migration-Status.md` updated per phase completion.
+- Update `README.md` only when majority of UI has switched (Phase 6 or 7).
+- Final pass: consolidate into `Architecture-Context.md` removal of registry references.
+
+---
+
+## 5. Risk Matrix & Mitigations
+
+| Risk                                         | Phase(s) | Mitigation                                                      |
+| -------------------------------------------- | -------- | --------------------------------------------------------------- |
+| Visual drift due to theme mismatch           | 1–3      | Snapshot baseline & targeted storybook/playground validation    |
+| Hidden tab logic regressions                 | 5        | Add pre-migration test coverage; log tab switch events          |
+| Data grid feature gaps (filters, selection)  | 6        | Gap analysis doc before implementation                          |
+| Form validation differences                  | 7        | Centralize error prop contract; QA checklist                    |
+| Toast timing changes                         | 8        | Keep old system in parallel behind feature flag for one release |
+| Tailwind removal reveals layout dependencies | 10       | Replace utilities incrementally; maintain style parity doc      |
+| Registry removal breaks dynamic composition  | 11       | Static import rehearsal in feature branch + codemod dry run     |
+
+---
+
+## 6. Metrics & Tracking
+
+- % UI components migrated (count of legacy files remaining / initial count).
+- TypeScript adoption (% of UI LOC typed).
+- Bundle size delta (gzip main bundle).
+- a11y check pass rate (axe violation count < target threshold).
+- Defect rate (regression bugs per phase – aim ≤ 2 P1/P2 per phase).
+
+---
+
+## 7. Phase Gate Checklist (Template)
+
+For each phase completion PR include:
+
+- [ ] Phase tasks all implemented
+- [ ] Tests added/updated
+- [ ] Docs updated (Status + tokens if needed)
+- [ ] Bundle/a11y check run
+- [ ] Legacy code for replaced area removed
+- [ ] Migration metrics updated
+
+---
+
+## 8. Final Decommission Steps
+
+1. Remove unused assets (icons, css files, Tailwind config if fully retired).
+2. Remove registry service and associated tests.
+3. Run dependency prune: remove Tailwind, old spinner libs, unused polyfills.
+4. Publish final architecture doc revision.
+5. Tag release: `vNext-mui-complete` (or semantic version bump if external consumers exist).
+
+---
+
+## 9. Appendix
+
+### Suggested Directory Structure (Mid-Migration)
+
+```
+src/
+	theme/
+		index.ts
+	components/
+		ui/ (legacy, shrinking)
+		ds/ (new design system)
+			primitives/
+				Button.tsx
+				Badge.tsx
+				Progress.tsx
+				Dialog.tsx
+				Tabs/
+				Forms/
+			layout/
+				AppBarHeader.tsx
+				DrawerNav.tsx
+				LayoutShell.tsx
+			data/
+				DataGridWrapper.tsx
+			feedback/
+				SnackbarProvider.tsx
+	domain/
+		entities.ts
+	pages/
 ```
 
-### Modern Pattern (After)
+### Column Mapping Example (DataGrid)
 
-```jsx
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import { registerComponent } from '../../services/registry';
+Legacy column:
 
-function ExampleComponent({ value: initialValue = '', onChange, ...props }) {
-  const [value, setValue] = useState(initialValue);
-  const derived = useMemo(() => value.trim(), [value]);
-  
-  const handleChange = useCallback((ev) => {
-    setValue(ev.target.value);
-    onChange?.(ev.target.value);
-  }, [onChange]);
-
-  return (
-    <div className="p-4" {...props}>
-      {derived}
-    </div>
-  );
-}
-
-ExampleComponent.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func,
-};
-
-// Registration with new registry system
-registerComponent('ExampleComponent', ExampleComponent);
-
-export default ExampleComponent;
+```js
+{ key: 'status', label: 'Status', sortable: true, render: (row) => <StatusBadge status={row.status}/> }
 ```
 
-## Key Migration Changes
+New column:
 
-### 1. Import System
-- **Before**: `window.React.createElement` and destructured hooks from `window.React`
-- **After**: Direct ES6 imports from 'react' package
-
-### 2. JSX Syntax
-- **Before**: `e('div', { className: 'p-4' }, content)`
-- **After**: `<div className="p-4">{content}</div>`
-
-### 3. PropTypes Validation
-- **Before**: No type validation
-- **After**: Comprehensive PropTypes with proper type checking
-
-### 4. Registration Pattern
-- **Before**: Manual window assignment + registry check
-- **After**: Centralized `registerComponent` utility
-
-### 5. Component Structure
-- **Before**: Single function with inline registration
-- **After**: Function + PropTypes + centralized registration + default export
-
-## Modernization Status
-
-### ✅ Completed Components (5/14)
-- Button.jsx - Full button suite with variants
-- Modal.jsx - Modal system with variants
-- Badge.jsx - Badge components with status/progress variants
-- TabHeader.jsx - Tab interface header
-- ErrorBoundary.jsx - Error boundary with modern patterns
-
-### 🔄 Remaining Components (9/14)
-- Cards.js - Card layout components
-- DataTable.js - Table with sorting/pagination
-- FormComponents.js - Form input components
-- Header.js - Application header
-- SearchBar.js - Search functionality
-- Sidebar.js - Navigation sidebar
-- Stepper.js - Step-by-step workflow
-- StepperModal.js - Modal with stepper
-- TabBase.js - Base tab functionality
-
-## Testing Migration
-
-### Legacy Test Pattern
-```javascript
-// Basic smoke tests only
-test('renders without crashing', () => {
-  render(React.createElement(Component));
-});
+```ts
+{ field: 'status', headerName: 'Status', sortable: true, renderCell: (params) => <StatusBadge status={params.row.status} /> }
 ```
 
-### Modern Test Pattern
-```javascript
-import { render, screen, fireEvent } from '@testing-library/react';
-import Component from '../Component';
+### Button Variant Mapping
 
-describe('Component', () => {
-  test('renders with correct props', () => {
-    render(<Component variant="primary" />);
-    expect(screen.getByRole('button')).toHaveClass('btn-primary');
-  });
+| Legacy          | MUI Variant | MUI Color | Notes                             |
+| --------------- | ----------- | --------- | --------------------------------- |
+| PrimaryButton   | contained   | primary   |                                   |
+| SecondaryButton | contained   | secondary |                                   |
+| DangerButton    | contained   | error     |                                   |
+| SuccessButton   | contained   | success   |                                   |
+| OutlineButton   | outlined    | primary   | Could vary by theme               |
+| GhostButton     | text        | primary   | Add low-emphasis styling override |
+| LinkButton      | text        | primary   | Add underline + hover color       |
 
-  test('handles user interactions', () => {
-    const onClickMock = jest.fn();
-    render(<Component onClick={onClickMock} />);
-    fireEvent.click(screen.getByRole('button'));
-    expect(onClickMock).toHaveBeenCalledOnce();
-  });
-});
-```
+---
 
-## Backward Compatibility
-
-The modernization maintains full backward compatibility:
-
-1. **Registry System**: Components still register with existing registry for dynamic resolution
-2. **Window Access**: Legacy `window.ComponentName` access patterns continue to work
-3. **API Compatibility**: No breaking changes to component props or interfaces
-4. **Browser Support**: Modern JSX compiles to compatible JavaScript
-
-## Best Practices for Remaining Components
-
-### 1. Start with Tests
-- Create comprehensive test suite before modernization
-- Test current behavior to prevent regressions
-- Add behavioral and accessibility tests
-
-### 2. Incremental Migration
-- Modernize one component at a time
-- Validate each component independently
-- Update imports and references systematically
-
-### 3. PropTypes First
-- Define comprehensive PropTypes for all props
-- Include sensible defaults
-- Document complex prop shapes
-
-### 4. Accessibility
-- Add proper ARIA attributes
-- Ensure keyboard navigation
-- Test with screen readers
-
-### 5. Error Handling
-- Add defensive programming patterns
-- Graceful fallbacks for missing props
-- Proper error boundaries where needed
-
-## Architecture Alignment
-
-This migration aligns with modern React ecosystem standards:
-
-- **Build Tools**: Compatible with Vite, webpack, and other modern bundlers
-- **Development Experience**: Better IDE support, autocomplete, and error detection
-- **Testing**: Enhanced testing capabilities with React Testing Library
-- **Performance**: Better tree-shaking and optimization opportunities
-- **Maintainability**: Clearer component structure and dependencies
-
-## Next Steps
-
-1. **Complete UI Layer**: Modernize remaining 9 UI components
-2. **Business Layer**: Apply patterns to business components
-3. **Services Integration**: Modernize service layer imports
-4. **Bundle Optimization**: Leverage ES6 modules for better tree-shaking
-5. **Developer Experience**: Add TypeScript definitions (future consideration)
-
-## Support and Questions
-
-For questions about this migration:
-- Review this guide and modernized component examples
-- Check existing tests for implementation patterns
-- Follow the established patterns in Button, Modal, Badge, TabHeader, and ErrorBoundary components
+End of Guide.
