@@ -239,6 +239,56 @@ Exit Criteria:
 - No duplicated custom collapse logic.
 - Clear guidance in docs for when to use Chip vs Badge.
 
+### Schema Normalization Update (People / Cases Name Fields)
+
+As of normalization refactor (2025-09), `case.clientName` is deprecated. The canonical source for a
+person's display name is `people[].name`.
+
+Rationale:
+
+- Eliminates stale denormalized snapshots when a person record is renamed.
+- Simplifies UI logic—cases resolve names dynamically via `personId` → `people[].name`.
+- Reduces migration overhead: only one field requires validation and correction.
+
+Normalization Behavior (`normalizeDataset` in `dataFixes.js`):
+
+- Ensures every person has `name` (derived from `firstName + lastName` or set to `Unknown Person`).
+- Removes `case.clientName` when the referenced person exists.
+- Retains `case.clientName` only for orphaned cases (missing or unmatched `personId`).
+- Returns a summary (`peopleNameFixed`, `caseClientNameRemoved`, `orphanClientNamesRetained`).
+
+UI Expectations:
+
+- `CasesTab` and `CaseDetailsView` now rely solely on `person.name` and will surface an explicit
+  placeholder if a name is missing, signaling a data integrity problem instead of silently falling
+  back.
+
+Migration Guidance for Existing Data Files:
+
+1. Run the Settings → "Normalize Dataset" action (invokes `normalizeDataset`).
+2. Commit the updated data file; removed `clientName` fields are intentional.
+3. Remove any custom scripts or data pipelines that attempt to populate or rely on
+   `case.clientName`.
+4. If external exports still require a client name snapshot, generate it on demand during export (do
+   not persist it back into the canonical dataset).
+
+Backward Compatibility Notes:
+
+- Legacy tooling referencing `case.clientName` should be updated to resolve person names directly.
+- The normalization step is idempotent; repeated runs produce no additional mutations.
+
+Testing Additions:
+
+- `normalizeDataset.test.js` covers name generation, snapshot removal, orphan retention,
+  idempotency.
+- `migration.test.js` updated to assert absence of `case.clientName` on migrated cases.
+
+Deprecation Timeline:
+
+- Immediate: Field considered deprecated; no new writes.
+- Future (removal window TBD): Data export paths and analytics to drop awareness of the field
+  entirely.
+
 ### Phase 10 – Tailwind Decommission (UI Layer)
 
 **Goals:** Remove dependency from UI components to prevent style drift.

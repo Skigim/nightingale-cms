@@ -48,7 +48,11 @@ describe('migration service', () => {
     // Person ID & case personId stringified
     expect(typeof migratedData.people[0].id).toBe('string');
     expect(typeof migratedData.cases[0].personId).toBe('string');
-    // clientName backfilled
-    expect(migratedData.cases[0].clientName).toBe('Jane Doe');
+    // clientName snapshot may be removed; ensure person name was generated
+    const person = migratedData.people.find(
+      (p) => p.id === migratedData.cases[0].personId,
+    );
+    expect(person.name).toBe('Jane Doe');
+    expect(migratedData.cases[0].clientName).toBeUndefined();
   });
 });

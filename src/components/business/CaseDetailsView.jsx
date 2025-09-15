@@ -130,11 +130,8 @@ function CaseDetailsView({
               title: 'Click to edit case details',
               onClick: () => setIsEditModalOpen(true),
             },
-            person?.name ||
-              [person?.firstName, person?.lastName].filter(Boolean).join(' ') ||
-              caseData?.clientName ||
-              caseData?.personName ||
-              'Unknown',
+            // Expect normalized data to always provide person.name. If missing, explicit placeholder signals data issue.
+            person?.name || 'Missing Person Name',
             ' ',
             e(
               'svg',
