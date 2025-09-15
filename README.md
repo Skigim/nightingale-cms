@@ -155,7 +155,7 @@ API references:
 - Search Service: `src/services/nightingale.search.js`
 - Autosave: `src/services/README-autosave.md`
 
-## � Deployment
+## 🚢 Deployment
 
 - Build with Vite: `npm run build`
 - GitHub Pages supported (see `homepage` in package.json)
@@ -179,6 +179,20 @@ manually.
 —
 
 Nightingale CMS — modern, modular case management.
+
+## 🧩 Core Utilities & Data Integrity
+
+Key shared services/utilities (see source for full API):
+
+- Person Resolution: `src/services/personResolution.js` – index-based O(1) lookup + unified display
+  name + diagnostics (`missing_person_for_case`).
+- Safe Data Merge: `src/services/safeDataMerge.js` – merges partial updates without clobbering
+  existing arrays (people, cases, organizations).
+- Logger: `src/services/nightingale.logger.js` – structured namespaced logging (warn once patterns
+  via refs in components).
+- Integrity Report Script: `scripts/data-integrity-report.js` – detects orphan/duplicate records.
+
+Use these instead of re‑implementing lookup / merge logic inside components.
 
 ## 🩺 Data Integrity Diagnostics
 
