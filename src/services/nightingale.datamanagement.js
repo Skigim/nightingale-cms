@@ -126,16 +126,32 @@ function toNumber(val, fallback = 0) {
  */
 function findPersonById(people, personId) {
   if (!people || !personId) return null;
+  // Normalization helper (remove zero-width chars, trim, unify, produce variants)
+  const clean = (v) =>
+    String(v)
+      .replace(/[\u200B-\u200D\uFEFF]/g, '')
+      .trim();
+  const baseTarget = clean(personId);
+  const targetNoZeros = baseTarget.replace(/^0+/, '') || baseTarget; // preserve if all zeros
+  const variantsTarget = new Set([
+    baseTarget,
+    baseTarget.padStart(2, '0'),
+    targetNoZeros,
+    targetNoZeros.padStart(2, '0'),
+  ]);
+  const targetNum = Number(targetNoZeros);
 
   return people.find((p) => {
-    // Convert both to strings and try exact match
-    if (String(p.id) === String(personId)) return true;
-    // Try with zero-padding (legacy format)
-    if (String(p.id) === String(personId).padStart(2, '0')) return true;
-    // Try reverse: personId might be zero-padded
-    if (String(p.id).padStart(2, '0') === String(personId)) return true;
-    // Try numeric comparison
-    if (Number(p.id) === Number(personId)) return true;
+    const raw = p?.id;
+    if (raw === undefined || raw === null) return false;
+    const base = clean(raw);
+    const noZeros = base.replace(/^0+/, '') || base;
+    if (variantsTarget.has(base)) return true;
+    if (variantsTarget.has(noZeros)) return true;
+    if (variantsTarget.has(base.padStart(2, '0'))) return true;
+    if (variantsTarget.has(noZeros.padStart(2, '0'))) return true;
+    if (Number(noZeros) === targetNum && Number.isFinite(targetNum))
+      return true;
     return false;
   });
 }

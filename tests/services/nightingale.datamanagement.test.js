@@ -34,14 +34,26 @@ describe('NightingaleDataManagement Service', () => {
     test('default export includes all expected functions', () => {
       expect(NightingaleDataManagement).toHaveProperty('generateSecureId');
       expect(NightingaleDataManagement).toHaveProperty('findPersonById');
-      expect(NightingaleDataManagement).toHaveProperty('normalizeDataMigrations');
-      expect(NightingaleDataManagement).toHaveProperty('updateCaseInCollection');
-      expect(NightingaleDataManagement).toHaveProperty('updatePersonInCollection');
-      expect(NightingaleDataManagement).toHaveProperty('updateOrganizationInCollection');
-      expect(NightingaleDataManagement).toHaveProperty('transformFinancialItems');
+      expect(NightingaleDataManagement).toHaveProperty(
+        'normalizeDataMigrations',
+      );
+      expect(NightingaleDataManagement).toHaveProperty(
+        'updateCaseInCollection',
+      );
+      expect(NightingaleDataManagement).toHaveProperty(
+        'updatePersonInCollection',
+      );
+      expect(NightingaleDataManagement).toHaveProperty(
+        'updateOrganizationInCollection',
+      );
+      expect(NightingaleDataManagement).toHaveProperty(
+        'transformFinancialItems',
+      );
       expect(NightingaleDataManagement).toHaveProperty('validateCaseData');
       expect(NightingaleDataManagement).toHaveProperty('validatePersonData');
-      expect(NightingaleDataManagement).toHaveProperty('validateOrganizationData');
+      expect(NightingaleDataManagement).toHaveProperty(
+        'validateOrganizationData',
+      );
     });
 
     test('includes version and name metadata', () => {
@@ -148,6 +160,22 @@ describe('NightingaleDataManagement Service', () => {
       expect(findPersonById(testPeople, null)).toBeNull();
       expect(findPersonById(testPeople, undefined)).toBeNull();
     });
+
+    test('matches with surrounding whitespace and zero-width chars', () => {
+      const people = [
+        { id: '\u200B 001 \u200B', name: 'Zero Width' },
+        { id: '  person-9 ', name: 'Padded Person' },
+      ];
+      expect(findPersonById(people, '1')).toEqual(people[0]);
+      expect(findPersonById(people, 'person-9')).toEqual(people[1]);
+    });
+
+    test('matches numeric equivalence after stripping leading zeros', () => {
+      const people = [{ id: '0007', name: 'James Bond Variant' }];
+      expect(findPersonById(people, '7')).toEqual(people[0]);
+      expect(findPersonById(people, '07')).toEqual(people[0]);
+      expect(findPersonById(people, '0007')).toEqual(people[0]);
+    });
   });
 
   describe('normalizeDataMigrations', () => {
@@ -164,12 +192,12 @@ describe('NightingaleDataManagement Service', () => {
       };
 
       const normalized = await normalizeDataMigrations(rawData);
-      
+
       expect(normalized.people).toHaveLength(2);
       expect(normalized.cases).toHaveLength(2);
-      
+
       // Each case should have an ID
-      normalized.cases.forEach(caseItem => {
+      normalized.cases.forEach((caseItem) => {
         expect(caseItem.id).toBeDefined();
         expect(caseItem.id).toContain('case-');
       });
@@ -189,7 +217,7 @@ describe('NightingaleDataManagement Service', () => {
       };
 
       const normalized = await normalizeDataMigrations(rawData);
-      
+
       expect(normalized.cases[0].id).toBe('existing-1');
       expect(normalized.cases[1].id).toContain('case-');
     });
@@ -209,9 +237,13 @@ describe('NightingaleDataManagement Service', () => {
       ];
 
       test('updates existing case', () => {
-        const updatedCase = { id: 'case-2', title: 'Updated Case 2', status: 'active' };
+        const updatedCase = {
+          id: 'case-2',
+          title: 'Updated Case 2',
+          status: 'active',
+        };
         const result = updateCaseInCollection(testCases, 'case-2', updatedCase);
-        
+
         expect(result).toHaveLength(3);
         expect(result[1]).toEqual(updatedCase);
         expect(result[0]).toEqual(testCases[0]); // Others unchanged
@@ -220,15 +252,19 @@ describe('NightingaleDataManagement Service', () => {
 
       test('returns original array when case not found', () => {
         const updatedCase = { id: 'case-999', title: 'Non-existent Case' };
-        const result = updateCaseInCollection(testCases, 'case-999', updatedCase);
-        
+        const result = updateCaseInCollection(
+          testCases,
+          'case-999',
+          updatedCase,
+        );
+
         expect(result).toEqual(testCases);
       });
 
       test('handles empty array', () => {
         const updatedCase = { id: 'case-1', title: 'Updated Case' };
         const result = updateCaseInCollection([], 'case-1', updatedCase);
-        
+
         expect(result).toEqual([]);
       });
     });
@@ -240,9 +276,17 @@ describe('NightingaleDataManagement Service', () => {
       ];
 
       test('updates existing person', () => {
-        const updatedPerson = { id: 'person-1', name: 'John Updated', email: 'john.updated@example.com' };
-        const result = updatePersonInCollection(testPeople, 'person-1', updatedPerson);
-        
+        const updatedPerson = {
+          id: 'person-1',
+          name: 'John Updated',
+          email: 'john.updated@example.com',
+        };
+        const result = updatePersonInCollection(
+          testPeople,
+          'person-1',
+          updatedPerson,
+        );
+
         expect(result).toHaveLength(2);
         expect(result[0]).toEqual(updatedPerson);
         expect(result[1]).toEqual(testPeople[1]);
@@ -250,8 +294,12 @@ describe('NightingaleDataManagement Service', () => {
 
       test('returns original array when person not found', () => {
         const updatedPerson = { id: 'person-999', name: 'Non-existent Person' };
-        const result = updatePersonInCollection(testPeople, 'person-999', updatedPerson);
-        
+        const result = updatePersonInCollection(
+          testPeople,
+          'person-999',
+          updatedPerson,
+        );
+
         expect(result).toEqual(testPeople);
       });
     });
@@ -263,9 +311,17 @@ describe('NightingaleDataManagement Service', () => {
       ];
 
       test('updates existing organization', () => {
-        const updatedOrg = { id: 'org-1', name: 'Updated Company A', type: 'government' };
-        const result = updateOrganizationInCollection(testOrgs, 'org-1', updatedOrg);
-        
+        const updatedOrg = {
+          id: 'org-1',
+          name: 'Updated Company A',
+          type: 'government',
+        };
+        const result = updateOrganizationInCollection(
+          testOrgs,
+          'org-1',
+          updatedOrg,
+        );
+
         expect(result).toHaveLength(2);
         expect(result[0]).toEqual(updatedOrg);
         expect(result[1]).toEqual(testOrgs[1]);
@@ -273,8 +329,12 @@ describe('NightingaleDataManagement Service', () => {
 
       test('returns original array when organization not found', () => {
         const updatedOrg = { id: 'org-999', name: 'Non-existent Org' };
-        const result = updateOrganizationInCollection(testOrgs, 'org-999', updatedOrg);
-        
+        const result = updateOrganizationInCollection(
+          testOrgs,
+          'org-999',
+          updatedOrg,
+        );
+
         expect(result).toEqual(testOrgs);
       });
     });
@@ -288,15 +348,15 @@ describe('NightingaleDataManagement Service', () => {
       ];
 
       const result = transformFinancialItems(importedItems);
-      
+
       expect(result).toHaveLength(2);
-      
-      result.forEach(item => {
+
+      result.forEach((item) => {
         expect(item.id).toBeDefined();
         expect(item.id).toContain('financial-');
         expect(item.description).toBeDefined();
       });
-      
+
       expect(result[0].description).toBe('Computer');
       expect(result[1].description).toBe('furniture - warehouse');
     });
@@ -314,7 +374,7 @@ describe('NightingaleDataManagement Service', () => {
       ];
 
       const result = transformFinancialItems(importedItems);
-      
+
       expect(result).toHaveLength(3);
       expect(result[0].description).toBe('equipment');
       expect(result[1].description).toBe('Unknown Item');
@@ -356,7 +416,7 @@ describe('NightingaleDataManagement Service', () => {
         const errorsNull = validateCaseData(null);
         expect(errorsNull.mcn).toBe('MCN is required');
         expect(errorsNull.personId).toBe('Person selection is required');
-        
+
         const errorsUndef = validateCaseData(undefined);
         expect(errorsUndef.mcn).toBe('MCN is required');
         expect(errorsUndef.personId).toBe('Person selection is required');
@@ -394,7 +454,7 @@ describe('NightingaleDataManagement Service', () => {
       test('handles null/undefined input', () => {
         const errorsNull = validatePersonData(null);
         expect(errorsNull.name).toBe('Name is required');
-        
+
         const errorsUndef = validatePersonData(undefined);
         expect(errorsUndef.name).toBe('Name is required');
       });
@@ -433,7 +493,7 @@ describe('NightingaleDataManagement Service', () => {
       test('handles null/undefined input', () => {
         const errorsNull = validateOrganizationData(null);
         expect(errorsNull.name).toBe('Organization name is required');
-        
+
         const errorsUndef = validateOrganizationData(undefined);
         expect(errorsUndef.name).toBe('Organization name is required');
       });
