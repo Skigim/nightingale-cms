@@ -9,7 +9,12 @@ import { registerComponent, getComponent } from '../../services/registry';
 import { safeMergeFullData } from '../../services/safeDataMerge.js';
 import { createBusinessComponent } from '../ui/TabBase.jsx';
 import dateUtils from '../../services/nightingale.dayjs.js';
-import { findPersonById } from '../../services/nightingale.datamanagement.js';
+// (findPersonById kept available via personResolution fallback, no direct import needed)
+import {
+  buildPeopleIndex,
+  resolvePerson as prResolvePerson,
+  derivePersonName,
+} from '../../services/personResolution.js';
 /**
  * Nightingale CMS - Cases Tab Component
  *
@@ -58,6 +63,12 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     }
   }, [onBackToList, backToList]);
 
+  // Precompute people index for fast resolution
+  const peopleIndex = useMemo(
+    () => buildPeopleIndex(fullData?.people || []),
+    [fullData?.people],
+  );
+
   // Filter cases (DataTable handles sorting)
   const filteredCases = useMemo(() => {
     if (!fullData?.cases) return [];
@@ -70,8 +81,20 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     if (searchString.trim()) {
       const term = searchString.toLowerCase();
       filtered = filtered.filter((caseItem) => {
-        const person = findPersonById(fullData.people, caseItem.personId);
-        const personName = person?.name?.toLowerCase() || '';
+        const person = prResolvePerson(
+          peopleIndex,
+          fullData.people,
+          caseItem.personId,
+        );
+        const personComposite = person
+          ? [person.firstName, person.lastName].filter(Boolean).join(' ')
+          : '';
+        const personName = (
+          person?.name ||
+          personComposite ||
+          caseItem?.clientName ||
+          ''
+        ).toLowerCase();
 
         return (
           caseItem.mcn?.toLowerCase().includes(term) ||
@@ -83,7 +106,7 @@ function useCasesData({ fullData, onViewModeChange, onBackToList }) {
     }
 
     return filtered;
-  }, [fullData, searchTerm]);
+  }, [fullData, searchTerm, peopleIndex]);
 
   // Event handlers
   const handleCaseClick = (caseItem) => {
@@ -163,6 +186,8 @@ function renderCasesContent({ components, data: dataResult, props }) {
   const isTestEnv =
     typeof process !== 'undefined' && process?.env?.NODE_ENV === 'test';
   const canUseGrid = !isTestEnv;
+  // Local people index for fast lookup during row mapping (non-hook context)
+  const peopleIndex = buildPeopleIndex(props.fullData?.people || []);
 
   // Conditional rendering for details view
   if (dataResult.viewMode === 'details' && dataResult.detailsCaseId) {
@@ -258,34 +283,14 @@ function renderCasesContent({ components, data: dataResult, props }) {
             sx: { width: '100%' },
             rows: dataResult.data.map((c) => {
               const people = props.fullData?.people || [];
-              let person =
-                globalThis.NightingaleDataManagement?.findPersonById?.(
-                  people,
-                  c.personId,
-                ) || null;
-              if (!person) {
-                // Local fallback matching mirroring findPersonById logic (defensive for environments where global is absent)
-                const pid = c.personId;
-                person =
-                  people.find((p) => {
-                    const a = String(p.id);
-                    const b = String(pid);
-                    if (a === b) return true;
-                    if (a === b.padStart(2, '0')) return true;
-                    if (a.padStart(2, '0') === b) return true;
-                    if (Number(a) === Number(b)) return true;
-                    return false;
-                  }) || null;
-              }
-              const composite = person
-                ? [person.firstName, person.lastName].filter(Boolean).join(' ')
-                : '';
-              const personName =
-                person?.name ||
-                composite ||
-                c?.clientName || // legacy snapshot (may be removed by normalization)
-                c?.personName ||
-                'Unknown';
+              const person = prResolvePerson(peopleIndex, people, c.personId);
+              const personName = derivePersonName(
+                person,
+                c,
+                // peopleLoaded => array defined (could be empty) treated as loaded
+                Array.isArray(people),
+                people.length > 0,
+              );
               return {
                 id: c.id,
                 mcn: c.mcn || 'N/A',

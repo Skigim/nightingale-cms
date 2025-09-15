@@ -13,6 +13,11 @@ import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { ensureStringId } from '../../services/nightingale.datamanagement.js';
 import { safeMergeFullData } from '../../services/safeDataMerge.js';
+import {
+  buildPeopleIndex,
+  resolvePerson as prResolvePerson,
+  derivePersonName,
+} from '../../services/personResolution.js';
 
 /**
  * CaseDetailsView Component
@@ -50,46 +55,40 @@ function CaseDetailsView({
   );
   const peopleReady = Array.isArray(fullData?.people);
   const peopleCount = peopleReady ? fullData.people.length : 0;
-  const person = peopleReady
-    ? globalThis.NightingaleDataManagement?.findPersonById?.(
-        fullData?.people,
-        caseData?.personId,
-      ) || null
-    : null;
+  const peopleIndex = React.useMemo(
+    () => buildPeopleIndex(fullData?.people || []),
+    [fullData?.people],
+  );
+  const person =
+    peopleReady && caseData?.personId
+      ? prResolvePerson(peopleIndex, fullData.people, caseData.personId)
+      : null;
 
   // Instrumentation (no side-effects in render -> useEffect). Safe because above any early return.
   // Track which caseIds we've already warned for missing person to avoid noisy duplicate logs
   const warnedMissingPersonRef = useRef(new Set());
   useEffect(() => {
-    if (!caseId || !fullData || typeof onUpdateData !== 'function') return;
-    if (!peopleReady || peopleCount === 0 || !caseData) return;
+    if (!caseData) return;
     const logger = globalThis.NightingaleLogger?.get('data:person_lookup');
-    if (caseData.personId && !person) {
-      if (!warnedMissingPersonRef.current.has(caseData.id)) {
-        warnedMissingPersonRef.current.add(caseData.id);
-        logger?.warn('missing_person_for_case', {
-          caseId: caseData.id,
-          // Provide shortened context to help debugging mismatches
-          personId: caseData.personId,
-          peopleCount: fullData?.people?.length || 0,
-        });
-      }
-    } else if (person && !person.name) {
-      logger?.warn('person_missing_name', {
+    const currentlyMissing = caseData.personId && !person;
+    if (currentlyMissing && !warnedMissingPersonRef.current.has(caseData.id)) {
+      warnedMissingPersonRef.current.add(caseData.id);
+      logger?.warn?.('missing_person_for_case', {
+        caseId: caseData.id,
+        personId: caseData.personId,
+        peopleCount: fullData?.people?.length || 0,
+      });
+    }
+    if (!currentlyMissing && person && !person.name) {
+      logger?.warn?.('person_missing_name', {
         caseId: caseData.id,
         personId: caseData.personId,
         personObject: person,
       });
     }
-  }, [
-    caseId,
-    fullData,
-    onUpdateData,
-    peopleReady,
-    peopleCount,
-    caseData,
-    person,
-  ]);
+    // Intentionally exclude `person` to ensure warning fires on first commit when unresolved
+    // We rely on caseData + fullData.people identity changes to re-run if dataset changes
+  }, [caseData, person, fullData?.people]);
   const lateResolvedRef = useRef(false);
   useEffect(() => {
     if (!caseData?.personId || !peopleReady || peopleCount === 0) return;
@@ -131,20 +130,13 @@ function CaseDetailsView({
   const NotesModal = getComponent('business', 'NotesModal');
 
   // Derive display name with richer fallbacks (do not perform heavy work inline in JSX)
-  const displayPersonName = (() => {
-    if (!peopleReady) return 'Loading...';
-    // If people array exists but still empty, we treat as loading (avoids premature Unlinked Person)
-    if (peopleReady && peopleCount === 0) return 'Loading...';
-    if (!caseData?.personId) return 'No Person Assigned';
-    if (!person) {
-      if (!graceDone) return 'Resolving…';
-      return 'Unlinked Person';
-    }
-    const composite = [person.firstName, person.lastName]
-      .filter(Boolean)
-      .join(' ');
-    return person.name || composite || 'Unlinked Person';
-  })();
+  const displayPersonName = derivePersonName(
+    person,
+    caseData,
+    // peopleLoaded: once we have an array reference treat as loaded
+    peopleReady,
+    peopleCount > 0,
+  );
   const debugMissingRef = useRef(false);
   useEffect(() => {
     if (
