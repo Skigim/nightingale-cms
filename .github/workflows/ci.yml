@@ -38,6 +38,13 @@ jobs:
       - name: Run tests
         run: npm test -- --passWithNoTests
 
+      - name: Coverage (generate)
+        run: npm run test:coverage || true
+
+      - name: Coverage gate (no regression)
+        run: node scripts/coverage-gate.js
+        # Allow on PRs & main; baseline auto-updates unless regression
+
       - name: Data integrity report
         run: |
           set -e
@@ -61,6 +68,10 @@ jobs:
           MAX_BUNDLE_KB: '1500' # temporarily raised; optimize bundle to reduce
           MAX_BUNDLE_GZIP_KB: '470' # temporarily raised; target < 200KB gzip
         run: node scripts/analyze-dist.js
+
+      - name: Verify version tag (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: node scripts/verify-version-tag.js
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
