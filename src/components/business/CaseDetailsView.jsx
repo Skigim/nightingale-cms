@@ -8,10 +8,16 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { ensureStringId } from '../../services/nightingale.datamanagement.js';
+import { safeMergeFullData } from '../../services/safeDataMerge.js';
+import {
+  buildPeopleIndex,
+  resolvePerson as prResolvePerson,
+  derivePersonName,
+} from '../../services/personResolution.js';
 
 /**
  * CaseDetailsView Component
@@ -37,21 +43,80 @@ function CaseDetailsView({
   // Component state - must be called unconditionally
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [graceDone, setGraceDone] = useState(false); // grace period for fallback flicker
+  useEffect(() => {
+    const t = setTimeout(() => setGraceDone(true), 250);
+    return () => clearTimeout(t);
+  }, []);
 
-  // Validate required props
-  if (!caseId || !fullData || typeof onUpdateData !== 'function') {
-    return null;
-  }
-
-  // Data lookups (robust ID matching)
+  // Data lookups (robust ID matching) with loading gate & instrumentation
   const caseData = fullData?.cases?.find(
     (c) => ensureStringId(c.id) === ensureStringId(caseId),
   );
+  const peopleReady = Array.isArray(fullData?.people);
+  const peopleCount = peopleReady ? fullData.people.length : 0;
+  const peopleIndex = React.useMemo(
+    () => buildPeopleIndex(fullData?.people || []),
+    [fullData?.people],
+  );
   const person =
-    globalThis.NightingaleDataManagement?.findPersonById?.(
-      fullData?.people,
-      caseData?.personId,
-    ) || null;
+    peopleReady && caseData?.personId
+      ? prResolvePerson(peopleIndex, fullData.people, caseData.personId)
+      : null;
+
+  // Instrumentation (no side-effects in render -> useEffect). Safe because above any early return.
+  // Track which caseIds we've already warned for missing person to avoid noisy duplicate logs
+  const warnedMissingPersonRef = useRef(new Set());
+  useEffect(() => {
+    if (!caseData) return;
+    const logger = globalThis.NightingaleLogger?.get('data:person_lookup');
+    const currentlyMissing = caseData.personId && !person;
+    if (currentlyMissing && !warnedMissingPersonRef.current.has(caseData.id)) {
+      warnedMissingPersonRef.current.add(caseData.id);
+      logger?.warn?.('missing_person_for_case', {
+        caseId: caseData.id,
+        personId: caseData.personId,
+        peopleCount: fullData?.people?.length || 0,
+      });
+    }
+    if (!currentlyMissing && person && !person.name) {
+      logger?.warn?.('person_missing_name', {
+        caseId: caseData.id,
+        personId: caseData.personId,
+        personObject: person,
+      });
+    }
+    // Intentionally exclude `person` to ensure warning fires on first commit when unresolved
+    // We rely on caseData + fullData.people identity changes to re-run if dataset changes
+  }, [caseData, person, fullData?.people]);
+  const lateResolvedRef = useRef(false);
+  useEffect(() => {
+    if (!caseData?.personId || !peopleReady || peopleCount === 0) return;
+    const wasMissing = warnedMissingPersonRef.current.has(caseData.id);
+    if (wasMissing && person && !lateResolvedRef.current) {
+      lateResolvedRef.current = true;
+      globalThis.NightingaleLogger?.get('data:person_lookup')?.info(
+        'person_late_resolution',
+        { caseId: caseData.id, personId: caseData.personId, name: person.name },
+      );
+    }
+  }, [caseData, person, peopleReady, peopleCount]);
+  // Integrity watch: warn if people array vanishes after being present (helps diagnose overwrite bugs)
+  const hadPeopleRef = useRef(false);
+  useEffect(() => {
+    const logger = globalThis.NightingaleLogger?.get('data:integrity');
+    if (peopleReady && peopleCount > 0) {
+      hadPeopleRef.current = true;
+    } else if (hadPeopleRef.current && (!peopleReady || peopleCount === 0)) {
+      logger?.warn('people_array_disappeared', {
+        caseId,
+        keys: fullData ? Object.keys(fullData) : null,
+      });
+      // Only log once per disappearance cycle
+      hadPeopleRef.current = false;
+    }
+  }, [peopleReady, peopleCount, caseId, fullData]);
+  // (Defer prop validation return until after all hooks to preserve hook ordering)
   // TODO: Add spouse and organization display when needed
   // const spouse = caseData?.spouseId ? window.NightingaleDataManagement?.findPersonById?.(fullData?.people, caseData.spouseId) : null;
   // const organization = caseData?.organizationId ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0')) : null;
@@ -64,6 +129,34 @@ function CaseDetailsView({
   );
   const NotesModal = getComponent('business', 'NotesModal');
 
+  // Derive display name with richer fallbacks (do not perform heavy work inline in JSX)
+  const displayPersonName = derivePersonName(
+    person,
+    caseData,
+    // peopleLoaded: once we have an array reference treat as loaded
+    peopleReady,
+    peopleCount > 0,
+  );
+  const debugMissingRef = useRef(false);
+  useEffect(() => {
+    if (
+      graceDone &&
+      caseData?.personId &&
+      !person &&
+      !debugMissingRef.current
+    ) {
+      debugMissingRef.current = true;
+      globalThis.NightingaleLogger?.get('data:person_lookup')?.info(
+        'person_header_unlinked',
+        {
+          caseId: caseData?.id,
+          personId: caseData?.personId,
+          peopleCount,
+        },
+      );
+    }
+  }, [graceDone, caseData, person, peopleCount]);
+
   // Update case field helper
   const updateCaseField = (field, value) => {
     if (!caseData) return;
@@ -72,7 +165,7 @@ function CaseDetailsView({
     const updatedCases = fullData.cases.map((c) =>
       c.id === caseData.id ? updatedCase : c,
     );
-    onUpdateData({ ...fullData, cases: updatedCases });
+    onUpdateData(safeMergeFullData(fullData, { cases: updatedCases }));
   };
 
   // Update notes handler
@@ -83,10 +176,13 @@ function CaseDetailsView({
     const updatedCases = fullData.cases.map((c) =>
       c.id === caseData.id ? updatedCase : c,
     );
-    onUpdateData({ ...fullData, cases: updatedCases });
+    onUpdateData(safeMergeFullData(fullData, { cases: updatedCases }));
   };
 
-  // Early return if case not found
+  // Safe early returns (after hooks)
+  if (!caseId || !fullData || typeof onUpdateData !== 'function') {
+    return null;
+  }
   if (!caseData) {
     return e(
       'div',
@@ -130,8 +226,8 @@ function CaseDetailsView({
               title: 'Click to edit case details',
               onClick: () => setIsEditModalOpen(true),
             },
-            // Expect normalized data to always provide person.name. If missing, explicit placeholder signals data issue.
-            person?.name || 'Missing Person Name',
+            // Loading gate distinguishes between not-yet-loaded people vs real data issue
+            displayPersonName,
             ' ',
             e(
               'svg',
@@ -163,6 +259,25 @@ function CaseDetailsView({
             },
             `MCN: ${caseData.mcn || 'Not set'}`,
           ),
+          // Inline diagnostic (non-intrusive) if person record is missing but we have an id
+          !peopleReady
+            ? null
+            : caseData.personId && !person
+              ? e(
+                  'div',
+                  {
+                    className:
+                      'mt-2 text-sm text-amber-400 bg-amber-900/30 border border-amber-700/50 rounded px-3 py-2 max-w-xl',
+                  },
+                  'Person record not found. The case references personId ',
+                  e(
+                    'code',
+                    { className: 'px-1 font-mono text-amber-300' },
+                    String(caseData.personId),
+                  ),
+                  '. This may indicate migrated data missing a corresponding person or an id mismatch. You can edit the case to re-associate with an existing person.',
+                )
+              : null,
           e(
             'div',
             { className: 'flex items-center gap-4 mt-3' },
@@ -299,7 +414,7 @@ function CaseDetailsView({
           // Consumers should pass a handler to switch to details view; otherwise, do nothing
         },
         onCaseCreated: (updatedCaseData) => {
-          onUpdateData(updatedCaseData);
+          onUpdateData(safeMergeFullData(fullData, updatedCaseData));
           setIsEditModalOpen(false);
         },
       }),

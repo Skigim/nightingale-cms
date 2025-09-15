@@ -11,6 +11,7 @@
  */
 import React, { useState } from 'react';
 import { registerComponent, getComponent } from '../../services/registry';
+import { safeMergeFullData } from '../../services/safeDataMerge.js';
 function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
   const e = React.createElement;
 
@@ -65,7 +66,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
         updatedCase,
       );
 
-    onUpdateData({ ...fullData, cases: updatedCases });
+    onUpdateData(safeMergeFullData(fullData, { cases: updatedCases }));
   };
 
   const confirmDelete = (type, item) => {
@@ -117,7 +118,7 @@ function FinancialManagementSection({ caseData, fullData, onUpdateData }) {
         caseData.id,
         updatedCase,
       );
-    onUpdateData({ ...fullData, cases: updatedCases });
+    onUpdateData(safeMergeFullData(fullData, { cases: updatedCases }));
 
     // Show success notification
     if (window.NightingaleToast && window.NightingaleToast.showSuccessToast) {
