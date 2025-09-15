@@ -109,6 +109,39 @@ function NightingaleCMSApp() {
     fullDataRef.current = fullData;
   }, [fullData]);
 
+  // Instrumentation: log orphan case.personId and persons missing name (dev only)
+  useEffect(() => {
+    if (!fullData || process.env.NODE_ENV === 'production') return;
+    try {
+      const logger = globalThis.NightingaleLogger?.get('data:integrity');
+      const people = Array.isArray(fullData.people) ? fullData.people : [];
+      const casesCol = Array.isArray(fullData.cases) ? fullData.cases : [];
+      const peopleIdSet = new Set(people.map((p) => String(p.id)));
+      for (const p of people) {
+        if (p && !p.name) {
+          logger?.warn('person_missing_name_at_app_level', { personId: p.id });
+        }
+      }
+      for (const c of casesCol) {
+        if (c && c.personId) {
+          const id = String(c.personId);
+          if (
+            !peopleIdSet.has(id) &&
+            !peopleIdSet.has(id.padStart(2, '0')) &&
+            !peopleIdSet.has(id.replace(/^0+/, ''))
+          ) {
+            logger?.warn('orphan_case_person_reference', {
+              caseId: c.id,
+              personId: c.personId,
+            });
+          }
+        }
+      }
+    } catch (_) {
+      // swallow logging errors
+    }
+  }, [fullData]);
+
   const handleTabChange = useCallback(
     (nextTab) => {
       if (navLogsEnabled) {

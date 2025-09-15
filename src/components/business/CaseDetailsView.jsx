@@ -8,7 +8,7 @@
  * @version 1.0.0
  * @author Nightingale CMS Team
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { ensureStringId } from '../../services/nightingale.datamanagement.js';
@@ -38,20 +38,43 @@ function CaseDetailsView({
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Validate required props
-  if (!caseId || !fullData || typeof onUpdateData !== 'function') {
-    return null;
-  }
+  // (Do not early-return before hooks; validate later in render phase)
 
-  // Data lookups (robust ID matching)
+  // Data lookups (robust ID matching) with loading gate & instrumentation
   const caseData = fullData?.cases?.find(
     (c) => ensureStringId(c.id) === ensureStringId(caseId),
   );
-  const person =
-    globalThis.NightingaleDataManagement?.findPersonById?.(
-      fullData?.people,
-      caseData?.personId,
-    ) || null;
+  const peopleReady = Array.isArray(fullData?.people);
+  const person = peopleReady
+    ? globalThis.NightingaleDataManagement?.findPersonById?.(
+        fullData?.people,
+        caseData?.personId,
+      ) || null
+    : null;
+
+  // Instrumentation (no side-effects in render -> useEffect). Safe because above any early return.
+  useEffect(() => {
+    if (!caseId || !fullData || typeof onUpdateData !== 'function') return;
+    if (!peopleReady || !caseData) return;
+    const logger = globalThis.NightingaleLogger?.get('data:person_lookup');
+    if (caseData.personId && !person) {
+      logger?.warn('missing_person_for_case', {
+        caseId: caseData.id,
+        personId: caseData.personId,
+        peopleCount: fullData?.people?.length || 0,
+      });
+    } else if (person && !person.name) {
+      logger?.warn('person_missing_name', {
+        caseId: caseData.id,
+        personId: caseData.personId,
+        personObject: person,
+      });
+    }
+  }, [caseId, fullData, onUpdateData, peopleReady, caseData, person]);
+  // Validate required props (after hooks to satisfy rules of hooks)
+  if (!caseId || !fullData || typeof onUpdateData !== 'function') {
+    return null;
+  }
   // TODO: Add spouse and organization display when needed
   // const spouse = caseData?.spouseId ? window.NightingaleDataManagement?.findPersonById?.(fullData?.people, caseData.spouseId) : null;
   // const organization = caseData?.organizationId ? fullData?.organizations?.find((o) => o.id === String(caseData.organizationId || '').padStart(2, '0')) : null;
@@ -130,8 +153,8 @@ function CaseDetailsView({
               title: 'Click to edit case details',
               onClick: () => setIsEditModalOpen(true),
             },
-            // Expect normalized data to always provide person.name. If missing, explicit placeholder signals data issue.
-            person?.name || 'Missing Person Name',
+            // Loading gate distinguishes between not-yet-loaded people vs real data issue
+            !peopleReady ? 'Loading...' : person?.name || 'Missing Person Name',
             ' ',
             e(
               'svg',
