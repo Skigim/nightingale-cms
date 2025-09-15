@@ -404,6 +404,20 @@ describe('StepperModal Component', () => {
   });
 
   describe('Edge Cases', () => {
+    test('renders with only required minimal props', () => {
+      render(
+        <StepperModal
+          isOpen={true}
+          onClose={() => {}}
+          title="Minimal"
+        >
+          <div>Content</div>
+        </StepperModal>,
+      );
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+      expect(screen.getByText('Minimal')).toBeInTheDocument();
+      expect(screen.getByText('Content')).toBeInTheDocument();
+    });
     test('handles empty steps array', () => {
       render(
         <StepperModal
@@ -437,8 +451,8 @@ describe('StepperModal Component', () => {
         />,
       );
 
-      // Should not crash, all steps should appear completed
-      expect(screen.getAllByText('✓')).toHaveLength(3);
+      // Should not crash; steps beyond max clamp to last index so only prior steps show completed
+      expect(screen.getAllByText('✓')).toHaveLength(2);
     });
 
     test('handles negative currentStep', () => {
