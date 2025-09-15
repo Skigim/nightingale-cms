@@ -114,28 +114,6 @@ const { migratedData, report } = await runFullMigration(raw, { applyFixes: true 
 await fs.writeFile(migratedData);
 ```
 
-### Component Playground (Experimental)
-
-A standalone sandbox page (`component-playground.html`) is available for rapid UX iteration on
-individual components (currently focused on `FinancialItemCard`). It runs outside the main
-application shell to minimize reload time and isolate props.
-
-Usage:
-
-```bash
-npm run dev
-# then open
-http://localhost:5173/component-playground.html
-```
-
-Features:
-
-- Real-time prop editing (amount, frequency, verification status, account number, etc.)
-- No persistence; reload to reset
-- Pulls registered components via the standard registry (no new globals)
-
-Extend by editing `src/playground/index.js` and adding new control groups + preview panels.
-
 ## 🧪 Testing
 
 - Jest + React Testing Library (jsdom)
@@ -155,7 +133,7 @@ API references:
 - Search Service: `src/services/nightingale.search.js`
 - Autosave: `src/services/README-autosave.md`
 
-## � Deployment
+## 🚢 Deployment
 
 - Build with Vite: `npm run build`
 - GitHub Pages supported (see `homepage` in package.json)
@@ -179,6 +157,20 @@ manually.
 —
 
 Nightingale CMS — modern, modular case management.
+
+## 🧩 Core Utilities & Data Integrity
+
+Key shared services/utilities (see source for full API):
+
+- Person Resolution: `src/services/personResolution.js` – index-based O(1) lookup + unified display
+  name + diagnostics (`missing_person_for_case`).
+- Safe Data Merge: `src/services/safeDataMerge.js` – merges partial updates without clobbering
+  existing arrays (people, cases, organizations).
+- Logger: `src/services/nightingale.logger.js` – structured namespaced logging (warn once patterns
+  via refs in components).
+- Integrity Report Script: `scripts/data-integrity-report.js` – detects orphan/duplicate records.
+
+Use these instead of re‑implementing lookup / merge logic inside components.
 
 ## 🩺 Data Integrity Diagnostics
 
@@ -207,3 +199,19 @@ Exit codes:
 - 2: Integrity issues detected
 
 Integrate into CI by running the script post-migration to prevent committing broken references.
+
+## 🗂️ Versioning & Changelog
+
+This project follows Semantic Versioning. Pre-release identifiers (`-rc.N`) mark stabilization
+cycles; only critical fixes land between candidates.
+
+- Current pre-release: `1.0.0-rc.2`
+- Version policy: see `VERSIONING.md`
+- Notable change history: `CHANGELOG.md`
+
+Release flow:
+
+1. RC phase: lock features; address only blockers, docs, perf, security.
+2. Gates: tests green, integrity exit != 2, bundle within budgets, manual test matrix complete.
+3. Finalize: remove suffix → `1.0.0`, tag `v1.0.0`, deploy.
+4. Post-release: patch (1.0.1) for fixes; minor (1.1.0) for additive features.

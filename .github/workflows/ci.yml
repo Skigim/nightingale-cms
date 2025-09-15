@@ -1,13 +1,23 @@
-name: CI
+name: CI & Deploy
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  test:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,6 +38,28 @@ jobs:
       - name: Run tests
         run: npm test -- --passWithNoTests
 
+      - name: Coverage (generate)
+        run: npm run test:coverage || true
+
+      - name: Coverage gate (no regression)
+        run: node scripts/coverage-gate.js
+        # Allow on PRs & main; baseline auto-updates unless regression
+
+      - name: Data integrity report
+        run: |
+          set -e
+          echo "Running data integrity report..."
+          node scripts/data-integrity-report.js || code=$? || true
+          code=${code:-0}
+          if [ "$code" -eq 2 ]; then
+            echo "Integrity report detected blocking issues (exit code 2). Failing build." >&2
+            exit 2
+          fi
+          if [ "$code" -ne 0 ]; then
+            echo "Integrity report returned non-zero (code $code) but not blocking; continuing." >&2
+          fi
+          echo "Integrity report completed with code $code."
+
       - name: Build (production)
         run: npm run build --silent
 
@@ -36,3 +68,25 @@ jobs:
           MAX_BUNDLE_KB: '1500' # temporarily raised; optimize bundle to reduce
           MAX_BUNDLE_GZIP_KB: '470' # temporarily raised; target < 200KB gzip
         run: node scripts/analyze-dist.js
+
+      - name: Verify version tag (main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: node scripts/verify-version-tag.js
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build_and_test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

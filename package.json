@@ -1,6 +1,6 @@
 {
   "name": "nightingale-cms",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "description": "A comprehensive React-based case management system for vocational rehabilitation services",
   "main": "index.html",
   "scripts": {
@@ -27,7 +27,9 @@
     "build:staging": "vite build",
     "deploy:staging": "echo 'Deploy staging not configured; use vite preview or a staging workflow' && exit 0",
     "commitlint": "commitlint --from HEAD~1 --to HEAD --verbose",
-    "prepare": "husky"
+    "prepare": "husky",
+    "changelog:generate": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
+    "changelog:preview": "conventional-changelog -p conventionalcommits -r 1"
   },
   "keywords": [
     "case-management",
@@ -49,6 +51,7 @@
   "homepage": "https://Skigim.github.io/nightingale-cms/",
   "type": "module",
   "devDependencies": {
+    "conventional-changelog-cli": "^4.1.0",
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-react": "^7.22.0",
