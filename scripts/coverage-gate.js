@@ -9,24 +9,26 @@ function readJSON(path) {
 }
 
 function loadCurrent() {
-  // Jest writes coverage/coverage-final.json; we compute overall from that file's totals
-  const cov = readJSON('coverage/coverage-final.json');
-  const totals = { statements: 0, branches: 0, functions: 0, lines: 0 };
-  let files = 0;
-  for (const file of Object.keys(cov)) {
-    const data = cov[file];
-    if (!data) continue;
-    totals.statements += data.s.total ? data.s.covered / data.s.total : 0;
-    totals.branches += data.b.total ? data.b.covered / data.b.total : 0;
-    totals.functions += data.f.total ? data.f.covered / data.f.total : 0;
-    totals.lines += data.l.total ? data.l.covered / data.l.total : 0;
-    files++;
+  // Prefer summarized totals for accuracy
+  const summaryPath = 'coverage/coverage-summary.json';
+  if (!fs.existsSync(summaryPath)) {
+    throw new Error(
+      'coverage-summary.json not found; run coverage before gate.',
+    );
   }
-  if (files === 0) throw new Error('No files found in coverage-final.json');
-  for (const k of Object.keys(totals)) {
-    totals[k] = +((totals[k] / files) * 100).toFixed(2);
-  }
-  return totals;
+  const summary = readJSON(summaryPath);
+  if (!summary.total)
+    throw new Error('Invalid coverage-summary.json: missing total key');
+  const { total } = summary;
+  const map = {
+    statements: total.statements.pct,
+    branches: total.branches.pct,
+    functions: total.functions.pct,
+    lines: total.lines.pct,
+  };
+  // Normalize to two decimals
+  for (const k of Object.keys(map)) map[k] = +map[k].toFixed(2);
+  return map;
 }
 
 function main() {
