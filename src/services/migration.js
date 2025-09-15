@@ -8,7 +8,7 @@ import {
   normalizeDataMigrations,
   ensureStringId,
 } from './nightingale.datamanagement.js';
-import { backfillClientNames } from './dataFixes.js';
+import { normalizeDataset } from './dataFixes.js';
 
 /**
  * Inspect a raw dataset and return legacy indicators.
@@ -108,9 +108,13 @@ export async function runFullMigration(rawData, options = {}) {
 
   const migratedData = await normalizeDataMigrations(before);
 
-  let clientNameFix = { changed: 0 };
+  let normalizationResult = { changed: 0, summary: {} };
   if (applyFixes) {
-    clientNameFix = await backfillClientNames(migratedData, null, false);
+    normalizationResult = await normalizeDataset(migratedData, null, false);
+    // Use potentially updated data (people/cases) after normalization step
+    if (normalizationResult.changed) {
+      Object.assign(migratedData, normalizationResult.updatedData);
+    }
   }
 
   // orphan personId warnings
@@ -141,7 +145,12 @@ export async function runFullMigration(rawData, options = {}) {
       },
     },
     fixes: {
-      clientNamesAdded: clientNameFix.changed,
+      normalizationApplied: normalizationResult.changed === 1,
+      peopleNameFixed: normalizationResult.summary?.peopleNameFixed || 0,
+      caseClientNameRemoved:
+        normalizationResult.summary?.caseClientNameRemoved || 0,
+      orphanClientNamesRetained:
+        normalizationResult.summary?.orphanClientNamesRetained || 0,
     },
     warnings: {
       orphanCasePersonIds: [...new Set(orphanCasePersonIds)],

@@ -347,7 +347,31 @@ function NightingaleCMSApp() {
   // Handle data updates from children
   const handleDataLoaded = useCallback(
     (data) => {
-      setFullData(data);
+      let normalized = data;
+      try {
+        if (data && Array.isArray(data.people)) {
+          // Ensure every person has a name (post external normalization safety) without mutating original objects
+          const needsFix = data.people.some((p) => p && !p.name);
+          if (needsFix) {
+            normalized = {
+              ...data,
+              people: data.people.map((p) => {
+                if (p && !p.name) {
+                  const composite = [p.firstName, p.lastName]
+                    .filter(Boolean)
+                    .join(' ')
+                    .trim();
+                  return { ...p, name: composite || 'Unknown Person' };
+                }
+                return p;
+              }),
+            };
+          }
+        }
+      } catch (_) {
+        // Silent; fallback to given data
+      }
+      setFullData(normalized);
       try {
         fileService?.notifyDataChange?.();
       } catch (_) {

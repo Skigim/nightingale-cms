@@ -229,17 +229,33 @@ function renderCasesContent({ components, data: dataResult, props }) {
             autoHeight: true,
             sx: { width: '100%' },
             rows: dataResult.data.map((c) => {
-              const person =
+              const people = props.fullData?.people || [];
+              let person =
                 globalThis.NightingaleDataManagement?.findPersonById?.(
-                  props.fullData?.people,
+                  people,
                   c.personId,
                 ) || null;
+              if (!person) {
+                // Local fallback matching mirroring findPersonById logic (defensive for environments where global is absent)
+                const pid = c.personId;
+                person =
+                  people.find((p) => {
+                    const a = String(p.id);
+                    const b = String(pid);
+                    if (a === b) return true;
+                    if (a === b.padStart(2, '0')) return true;
+                    if (a.padStart(2, '0') === b) return true;
+                    if (Number(a) === Number(b)) return true;
+                    return false;
+                  }) || null;
+              }
+              const composite = person
+                ? [person.firstName, person.lastName].filter(Boolean).join(' ')
+                : '';
               const personName =
                 person?.name ||
-                [person?.firstName, person?.lastName]
-                  .filter(Boolean)
-                  .join(' ') ||
-                c?.clientName ||
+                composite ||
+                c?.clientName || // legacy snapshot (may be removed by normalization)
                 c?.personName ||
                 'Unknown';
               return {

@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
-import { backfillClientNames } from '../../services/dataFixes.js';
+import { normalizeDataset } from '../../services/dataFixes.js';
 import {
   detectLegacyProfile,
   runFullMigration,
@@ -41,7 +41,7 @@ function SettingsModal({
 }) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-  const [isBackfilling, setIsBackfilling] = useState(false);
+  const [isBackfilling, setIsBackfilling] = useState(false); // legacy naming retained for minimal ripple
   const [isMigrationOpen, setIsMigrationOpen] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
@@ -277,7 +277,7 @@ function SettingsModal({
 
   // (Demo mode logic moved above early returns)
 
-  const handleBackfillClientNames = async () => {
+  const handleNormalizeDataset = async () => {
     if (!fileService?.writeFile) {
       showToast('File service not available', 'error');
       return;
@@ -289,24 +289,25 @@ function SettingsModal({
     setIsBackfilling(true);
     try {
       const currentData = await fileService.readFile();
-      const { changed, updatedData, persisted } = await backfillClientNames(
-        currentData,
-        fileService,
-        true,
-      );
+      const { changed, updatedData, persisted, summary } =
+        await normalizeDataset(currentData, fileService, true);
       if (changed > 0) {
         onDataLoaded?.(updatedData);
+        const removed = summary?.caseClientNameRemoved || 0;
+        const fixed = summary?.peopleNameFixed || 0;
         showToast(
-          `Backfilled ${changed} case client name${changed === 1 ? '' : 's'}${
-            persisted ? ' and saved' : ''
+          `Normalized dataset: ${fixed} person name fix${
+            fixed === 1 ? '' : 'es'
+          }, ${removed} case snapshot removal${removed === 1 ? '' : 's'}$${
+            persisted ? ' (saved)' : ''
           }`,
           'success',
         );
       } else {
-        showToast('No missing client names detected', 'info');
+        showToast('No normalization changes required', 'info');
       }
     } catch (e) {
-      showToast('Backfill failed', 'error');
+      showToast('Normalization failed', 'error');
     } finally {
       setIsBackfilling(false);
     }
@@ -525,7 +526,7 @@ function SettingsModal({
                 Create Sample Data
               </button>
               <button
-                onClick={handleBackfillClientNames}
+                onClick={handleNormalizeDataset}
                 disabled={fileStatus !== 'connected' || isBackfilling}
                 className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                   fileStatus !== 'connected' || isBackfilling
@@ -533,7 +534,7 @@ function SettingsModal({
                     : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                 }`}
               >
-                {isBackfilling ? 'Backfilling...' : 'Backfill Client Names'}
+                {isBackfilling ? 'Normalizing...' : 'Normalize Dataset'}
               </button>
               <button
                 onClick={openMigrationModal}
