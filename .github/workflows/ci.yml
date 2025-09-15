@@ -38,6 +38,21 @@ jobs:
       - name: Run tests
         run: npm test -- --passWithNoTests
 
+      - name: Data integrity report
+        run: |
+          set -e
+          echo "Running data integrity report..."
+          node scripts/data-integrity-report.js || code=$? || true
+          code=${code:-0}
+          if [ "$code" -eq 2 ]; then
+            echo "Integrity report detected blocking issues (exit code 2). Failing build." >&2
+            exit 2
+          fi
+          if [ "$code" -ne 0 ]; then
+            echo "Integrity report returned non-zero (code $code) but not blocking; continuing." >&2
+          fi
+          echo "Integrity report completed with code $code."
+
       - name: Build (production)
         run: npm run build --silent
 
