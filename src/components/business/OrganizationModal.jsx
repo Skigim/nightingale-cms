@@ -19,6 +19,7 @@ function OrganizationModal({
   editOrganizationId = null, // If provided, component will edit existing organization
   fullData = null,
   fileService = null, // File service instance for data operations
+  requireFields = true, // NEW: disable validation gating when false
 }) {
   const e = React.createElement;
 
@@ -239,16 +240,12 @@ function OrganizationModal({
   // Handle step change with validation
   const handleStepChange = useCallback(
     (newStep) => {
-      if (editOrganizationId) {
-        // Edit mode: Allow free navigation to any step
+      if (editOrganizationId || !requireFields) {
         setValidationErrors({});
         setCurrentStep(newStep);
         return;
       }
-
-      // Creation mode: Validate before advancing
       if (newStep > currentStep) {
-        // Validate current step before advancing
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
@@ -259,11 +256,10 @@ function OrganizationModal({
           return;
         }
       }
-
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editOrganizationId],
+    [currentStep, validateStep, editOrganizationId, requireFields],
   );
 
   // Handle form data updates
@@ -337,24 +333,26 @@ function OrganizationModal({
 
   // Handle form submission
   const handleSubmit = useCallback(async () => {
-    // Final validation - check all available steps based on mode
-    const maxStepIndex = editOrganizationId
-      ? filteredStepsConfig.length - 1
-      : 3;
-    const allStepErrors = [];
-    for (let i = 0; i <= maxStepIndex; i++) {
-      const stepErrors = validateStep(i);
-      allStepErrors.push(stepErrors);
-    }
-    const finalErrors = allStepErrors.reduce(
-      (acc, stepErrors) => ({ ...acc, ...stepErrors }),
-      {},
-    );
+    if (requireFields) {
+      // Final validation - check all available steps based on mode
+      const maxStepIndex = editOrganizationId
+        ? filteredStepsConfig.length - 1
+        : 3;
+      const allStepErrors = [];
+      for (let i = 0; i <= maxStepIndex; i++) {
+        const stepErrors = validateStep(i);
+        allStepErrors.push(stepErrors);
+      }
+      const finalErrors = allStepErrors.reduce(
+        (acc, stepErrors) => ({ ...acc, ...stepErrors }),
+        {},
+      );
 
-    if (Object.keys(finalErrors).length > 0) {
-      setValidationErrors(finalErrors);
-      Toast.showToast?.('Please fix all validation errors', 'error');
-      return;
+      if (Object.keys(finalErrors).length > 0) {
+        setValidationErrors(finalErrors);
+        Toast.showToast?.('Please fix all validation errors', 'error');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -484,6 +482,7 @@ function OrganizationModal({
     validateStep,
     fileService,
     filteredStepsConfig.length,
+    requireFields,
   ]);
 
   // Get all US states for dropdown
@@ -1043,4 +1042,5 @@ OrganizationModal.propTypes = {
   editOrganizationId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   fullData: PropTypes.object,
   fileService: PropTypes.object,
+  requireFields: PropTypes.bool,
 };
