@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { execSync } = require('node:child_process');
 
 const THRESHOLD_STEP = 2.0; // require at least this much improvement or no regression
 const METRICS = ['statements', 'branches', 'functions', 'lines'];
@@ -12,9 +15,29 @@ function loadCurrent() {
   // Prefer summarized totals for accuracy
   const summaryPath = 'coverage/coverage-summary.json';
   if (!fs.existsSync(summaryPath)) {
-    throw new Error(
-      'coverage-summary.json not found; run coverage before gate.',
-    );
+    // Attempt automatic coverage generation fallback
+    try {
+      console.log(
+        '[coverage-gate] coverage-summary.json missing – attempting to run Jest to generate it...',
+      );
+      // Run jest in a child process synchronously
+      execSync(
+        'npx jest --coverage --coverageReporters=json-summary --coverageReporters=text-summary --silent',
+        {
+          stdio: 'inherit',
+        },
+      );
+    } catch (err) {
+      throw new Error(
+        'coverage-summary.json not found and auto-generation failed: ' +
+          (err?.message || err),
+      );
+    }
+    if (!fs.existsSync(summaryPath)) {
+      throw new Error(
+        'coverage-summary.json still missing after attempted generation.',
+      );
+    }
   }
   const summary = readJSON(summaryPath);
   if (!summary.total)
