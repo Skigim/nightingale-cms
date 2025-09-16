@@ -10,6 +10,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { Validators } from '../../services/core.js';
+import { formatSSN, formatUSPhone } from '../../services/formatters.js';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
 import { getStrictValidationEnabled } from '../../services/settings.js';
@@ -213,9 +214,8 @@ function PersonCreationModal({
               errors.dateOfBirth = 'Date of birth is required';
             }
             if (personData.ssn) {
-              // Simple SSN format validation (XXX-XX-XXXX)
-              const ssnPattern = /^\d{3}-\d{2}-\d{4}$/;
-              if (!ssnPattern.test(personData.ssn)) {
+              const digits = personData.ssn.replace(/[^0-9]/g, '');
+              if (digits.length !== 9) {
                 errors.ssn = 'Invalid SSN format (use XXX-XX-XXXX)';
               }
             }
@@ -305,30 +305,34 @@ function PersonCreationModal({
   // Handle form data updates
   const updatePersonData = useCallback(
     (field, value) => {
+      let formattedValue = value;
+      if (field === 'ssn') {
+        formattedValue = formatSSN(value);
+      } else if (field === 'phone') {
+        formattedValue = formatUSPhone(value);
+      }
+
       setPersonData((prev) => {
         const newData = { ...prev };
 
-        // Handle nested objects (address, mailingAddress)
         if (field.includes('.')) {
           const [parent, child] = field.split('.');
-          newData[parent] = { ...prev[parent], [child]: value };
+          newData[parent] = { ...prev[parent], [child]: formattedValue };
         } else {
-          newData[field] = value;
+          newData[field] = formattedValue;
         }
 
-        // Auto-sync mailing address if checkbox is checked
         if (
           field.startsWith('address.') &&
           newData.mailingAddress?.sameAsPhysical
         ) {
           const addressField = field.split('.')[1];
-          newData.mailingAddress[addressField] = value;
+          newData.mailingAddress[addressField] = formattedValue;
         }
 
         return newData;
       });
 
-      // Clear validation error for this field
       if (validationErrors[field]) {
         setValidationErrors((prev) => {
           const newErrors = { ...prev };

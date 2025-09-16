@@ -10,6 +10,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { Validators } from '../../services/core.js';
+import { formatUSPhone } from '../../services/formatters.js';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
 import { getStrictValidationEnabled } from '../../services/settings.js';
@@ -271,21 +272,20 @@ function OrganizationModal({
   // Handle form data updates
   const updateOrganizationData = useCallback(
     (field, value) => {
+      let formattedValue = value;
+      if (field === 'phone') {
+        formattedValue = formatUSPhone(value);
+      }
       setOrganizationData((prev) => {
         const newData = { ...prev };
-
-        // Handle nested objects (address)
         if (field.includes('.')) {
           const [parent, child] = field.split('.');
-          newData[parent] = { ...prev[parent], [child]: value };
+          newData[parent] = { ...prev[parent], [child]: formattedValue };
         } else {
-          newData[field] = value;
+          newData[field] = formattedValue;
         }
-
         return newData;
       });
-
-      // Clear validation error for this field
       if (validationErrors[field]) {
         setValidationErrors((prev) => {
           const newErrors = { ...prev };

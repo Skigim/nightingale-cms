@@ -115,7 +115,7 @@ describe('PersonCreationModal (business)', () => {
     );
   });
 
-  test('validation: invalid SSN format flagged then cleared', () => {
+  test('validation: partial SSN invalid then valid when complete (auto-formatting)', () => {
     openModal();
     fireEvent.change(screen.getByLabelText(/Full Name/i), {
       target: { value: 'Jane User' },
@@ -123,15 +123,17 @@ describe('PersonCreationModal (business)', () => {
     fireEvent.change(screen.getByLabelText(/Date of Birth/i), {
       target: { value: '1990-02-02' },
     });
+    // Enter only 8 digits (auto-formats to 123-45-678) => invalid
     fireEvent.change(screen.getByLabelText(/Social Security Number/i), {
-      target: { value: '123456789' },
+      target: { value: '12345678' },
     });
     fireEvent.click(screen.getByText('Next'));
     expect(
       screen.getByText('Invalid SSN format (use XXX-XX-XXXX)'),
     ).toBeInTheDocument();
+    // Enter full 9 digits (auto-formats to 123-45-6789) => valid
     fireEvent.change(screen.getByLabelText(/Social Security Number/i), {
-      target: { value: '123-45-6789' },
+      target: { value: '123456789' },
     });
     fireEvent.click(screen.getByText('Next'));
     expect(
@@ -219,7 +221,7 @@ describe('PersonCreationModal (business)', () => {
 
     fireEvent.click(screen.getByText('Contact Information'));
     const phoneLabel = screen.getByLabelText(/Phone Number/i);
-    fireEvent.change(phoneLabel, { target: { value: '402-555-9999' } });
+    fireEvent.change(phoneLabel, { target: { value: '4025559999' } });
 
     const saveBtnEdit = screen.getByText(/Save Changes|No Changes/);
     expect(saveBtnEdit).toHaveTextContent('Save Changes');
@@ -230,10 +232,10 @@ describe('PersonCreationModal (business)', () => {
     expect(fileService.writeFile).toHaveBeenCalledTimes(1);
     const updatedDataEdit = fileService._getData();
     const updatedPerson = updatedDataEdit.people.find((p) => p.id === '5');
-    expect(updatedPerson.phone).toBe('402-555-9999');
+    expect(updatedPerson.phone).toBe('(402) 555-9999');
     expect(updatedPerson.createdAt).toBe('2024-12-12T00:00:00.000Z');
     expect(onCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ id: '5', phone: '402-555-9999' }),
+      expect.objectContaining({ id: '5', phone: '(402) 555-9999' }),
     );
     expect(getToastMock()).toHaveBeenCalledWith(
       'Person updated successfully',
