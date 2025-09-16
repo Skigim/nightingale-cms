@@ -3,6 +3,6 @@
   "branches": 63.64,
   "functions": 66.45,
   "lines": 70.98,
-  "generatedAt": "2025-09-16T01:11:26.479Z",
+  "generatedAt": "2025-09-16T01:31:03.133Z",
   "notes": "Baseline using Jest coverage-summary totals (updated aggregation method)."
 }
