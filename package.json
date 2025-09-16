@@ -114,6 +114,11 @@
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.js"
     ],
+    "coverageReporters": [
+      "json-summary",
+      "text-summary",
+      "lcov"
+    ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
     },
