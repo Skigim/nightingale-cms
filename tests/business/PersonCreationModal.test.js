@@ -90,6 +90,7 @@ describe('PersonCreationModal (business)', () => {
           props.fileService || setupFileService(props.fileServiceData)
         }
         editPersonId={props.editPersonId || null}
+        requireFields={true}
       />,
     );
   };

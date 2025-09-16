@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
+import { getStrictValidationEnabled } from '../../services/settings.js';
 
 // Access utilities via module import
 const getDateUtils = () => dateUtils || {};
@@ -748,7 +749,7 @@ function CaseCreationModal({
   fullData = null,
   fileService = null, // File service instance for data operations
   onViewCaseDetails = null, // Callback to switch to case details view
-  requireFields = true, // NEW: when false, disable validation gating and allow optional fields
+  requireFields, // If undefined, derive from global settings (strictValidation)
 }) {
   const e = React.createElement;
 
@@ -845,9 +846,15 @@ function CaseCreationModal({
     }
   }, [isOpen, editCaseId]);
 
+  // Determine effective requirement flag (prop precedence over global)
+  const effectiveRequire =
+    typeof requireFields === 'boolean'
+      ? requireFields
+      : getStrictValidationEnabled();
+
   const handleStepChange = useCallback(
     (newStep) => {
-      if (editCaseId || !requireFields) {
+      if (editCaseId || !effectiveRequire) {
         // Edit mode or optional mode: Allow free navigation
         setValidationErrors({});
         setCurrentStep(newStep);
@@ -866,11 +873,11 @@ function CaseCreationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editCaseId, requireFields, showToast],
+    [currentStep, validateStep, editCaseId, effectiveRequire, showToast],
   );
 
   const handleComplete = async () => {
-    if (requireFields) {
+    if (effectiveRequire) {
       // Final validation of all steps before completing (strict mode)
       const configToUse = editCaseId ? filteredStepsConfig : stepsConfig;
       const maxStepIndex = editCaseId

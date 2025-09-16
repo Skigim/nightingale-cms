@@ -12,6 +12,7 @@ import { registerComponent, getComponent } from '../../services/registry';
 import { Validators } from '../../services/core.js';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
+import { getStrictValidationEnabled } from '../../services/settings.js';
 function OrganizationModal({
   isOpen = false,
   onClose = () => {},
@@ -19,7 +20,7 @@ function OrganizationModal({
   editOrganizationId = null, // If provided, component will edit existing organization
   fullData = null,
   fileService = null, // File service instance for data operations
-  requireFields = true, // NEW: disable validation gating when false
+  requireFields,
 }) {
   const e = React.createElement;
 
@@ -238,9 +239,14 @@ function OrganizationModal({
   );
 
   // Handle step change with validation
+  const effectiveRequire =
+    typeof requireFields === 'boolean'
+      ? requireFields
+      : getStrictValidationEnabled();
+
   const handleStepChange = useCallback(
     (newStep) => {
-      if (editOrganizationId || !requireFields) {
+      if (editOrganizationId || !effectiveRequire) {
         setValidationErrors({});
         setCurrentStep(newStep);
         return;
@@ -259,7 +265,7 @@ function OrganizationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editOrganizationId, requireFields],
+    [currentStep, validateStep, editOrganizationId, effectiveRequire],
   );
 
   // Handle form data updates
@@ -333,7 +339,7 @@ function OrganizationModal({
 
   // Handle form submission
   const handleSubmit = useCallback(async () => {
-    if (requireFields) {
+    if (effectiveRequire) {
       // Final validation - check all available steps based on mode
       const maxStepIndex = editOrganizationId
         ? filteredStepsConfig.length - 1
@@ -482,7 +488,7 @@ function OrganizationModal({
     validateStep,
     fileService,
     filteredStepsConfig.length,
-    requireFields,
+    effectiveRequire,
   ]);
 
   // Get all US states for dropdown

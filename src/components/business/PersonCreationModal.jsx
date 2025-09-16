@@ -12,6 +12,7 @@ import { registerComponent, getComponent } from '../../services/registry';
 import { Validators } from '../../services/core.js';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
+import { getStrictValidationEnabled } from '../../services/settings.js';
 function PersonCreationModal({
   isOpen = false,
   onClose = () => {},
@@ -19,7 +20,7 @@ function PersonCreationModal({
   editPersonId = null, // If provided, component will edit existing person
   fullData = null,
   fileService = null, // File service instance for data operations
-  requireFields = true, // NEW: disable validation gating when false
+  requireFields,
 }) {
   const e = React.createElement;
 
@@ -272,9 +273,14 @@ function PersonCreationModal({
     },
     [personData],
   ); // Handle step change with validation
+  const effectiveRequire =
+    typeof requireFields === 'boolean'
+      ? requireFields
+      : getStrictValidationEnabled();
+
   const handleStepChange = useCallback(
     (newStep) => {
-      if (editPersonId || !requireFields) {
+      if (editPersonId || !effectiveRequire) {
         setValidationErrors({});
         setCurrentStep(newStep);
         return;
@@ -293,7 +299,7 @@ function PersonCreationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editPersonId, requireFields],
+    [currentStep, validateStep, editPersonId, effectiveRequire],
   );
 
   // Handle form data updates
@@ -349,7 +355,7 @@ function PersonCreationModal({
 
   // Handle form submission
   const handleSubmit = useCallback(async () => {
-    if (requireFields) {
+    if (effectiveRequire) {
       // Final validation - check all available steps based on mode
       const maxStepIndex = editPersonId ? filteredStepsConfig.length - 1 : 3;
       const allStepErrors = [];
@@ -506,7 +512,7 @@ function PersonCreationModal({
     validateStep,
     fileService,
     filteredStepsConfig.length,
-    requireFields,
+    effectiveRequire,
   ]);
 
   // Render step content

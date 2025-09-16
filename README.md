@@ -57,33 +57,42 @@ src/
 - Data stored as JSON; persisted via a file service abstraction
 - Search powered by `fuse.js`; dates via `dayjs`
 
-### Optional Validation Mode (`requireFields`)
+### Validation Mode (`requireFields` & Settings Toggle)
 
-Creation/edit modals (CaseCreationModal, PersonCreationModal, OrganizationModal) support a
-`requireFields` prop (default `true`).
+Creation/edit modals (CaseCreationModal, PersonCreationModal, OrganizationModal) now default to
+optional mode (no required-field gating). A new global toggle in the Settings modal lets you enable
+"Strict validation" for all creation/edit modals without passing props everywhere.
 
-When `requireFields` is `false`:
+Defaults:
 
-- Per-step validation gates are skipped (you can advance with empty fields).
-- Final submission skips aggregate required-field validation.
-- Useful for rapid prototyping, demo data entry, or importing partially complete records.
+- Global setting `strictValidation`: persisted in localStorage (default `false`).
+- If you pass an explicit `requireFields` prop, it overrides the global setting.
 
-Example:
+Strict mode (either `strictValidation` enabled or `requireFields={true}`):
+
+- Step navigation blocked until current step passes validation.
+- Final submission performs a full cross-step required-field sweep.
+
+Optional mode (`strictValidation` off and no prop override, or `requireFields={false}`):
+
+- Steps advance freely with incomplete data.
+- Final submission does not enforce required fields.
+
+Override example (force strict for one modal even if global is off):
 
 ```jsx
 <CaseCreationModal
   isOpen
   fullData={data}
   fileService={fileService}
-  onClose={() => {}}
-  requireFields={false}
+  requireFields={true}
 />
 ```
 
-Tests validating this behavior live in: `tests/business/CaseCreationModal.optional.test.jsx` (and
-equivalent for Person & Organization).
+Global toggle location: Settings → Validation Mode → "Strict validation" checkbox.
 
-Default behavior (strict validation) is unchanged when the prop is omitted.
+Tests: `tests/business/*CreationModal.optional.test.jsx` verify optional navigation; base modal
+tests now pass `requireFields={true}` to assert strict behavior.
 
 ## 📚 Components
 
