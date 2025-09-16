@@ -57,6 +57,34 @@ src/
 - Data stored as JSON; persisted via a file service abstraction
 - Search powered by `fuse.js`; dates via `dayjs`
 
+### Optional Validation Mode (`requireFields`)
+
+Creation/edit modals (CaseCreationModal, PersonCreationModal, OrganizationModal) support a
+`requireFields` prop (default `true`).
+
+When `requireFields` is `false`:
+
+- Per-step validation gates are skipped (you can advance with empty fields).
+- Final submission skips aggregate required-field validation.
+- Useful for rapid prototyping, demo data entry, or importing partially complete records.
+
+Example:
+
+```jsx
+<CaseCreationModal
+  isOpen
+  fullData={data}
+  fileService={fileService}
+  onClose={() => {}}
+  requireFields={false}
+/>
+```
+
+Tests validating this behavior live in: `tests/business/CaseCreationModal.optional.test.jsx` (and
+equivalent for Person & Organization).
+
+Default behavior (strict validation) is unchanged when the prop is omitted.
+
 ## 📚 Components
 
 - UI: Button, Modal, DataTable, SearchBar, Badge, Form inputs, StepperModal
