@@ -1,8 +1,8 @@
 {
-  "statements": 51.34,
-  "branches": 49.04,
-  "functions": 46.89,
-  "lines": 52.21,
-  "generatedAt": "2025-09-15T00:00:00.000Z",
+  "statements": 69.88,
+  "branches": 63.64,
+  "functions": 66.45,
+  "lines": 70.98,
+  "generatedAt": "2025-09-16T01:11:26.479Z",
   "notes": "Baseline using Jest coverage-summary totals (updated aggregation method)."
 }
