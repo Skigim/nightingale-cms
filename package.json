@@ -125,7 +125,10 @@
       "src/**/*.{js,jsx}",
       "!src/index.js",
       "!src/setupTests.js",
-      "!src/**/*.d.ts"
+      "!src/**/*.d.ts",
+      "!src/assets/**",
+      "!src/services/logger-quickstart.js",
+      "!src/services/toast-test.js"
     ],
     "transform": {
       "^.+\\.(js|jsx|ts|tsx)$": "babel-jest"
