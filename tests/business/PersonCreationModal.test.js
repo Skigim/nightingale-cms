@@ -180,10 +180,15 @@ describe('PersonCreationModal (business)', () => {
     const savedArg = writeFile.mock.calls[0][0];
     const newPerson = savedArg.people.find((p) => p.name === 'John Example');
     expect(newPerson).toBeTruthy();
-    expect(newPerson.id).toBe('3');
+    // Secure ID should start with 'person-' and be non-numeric UUID-like
+    expect(newPerson.id).toMatch(/^person-/);
+    // Legacy counter still increments for compatibility
     expect(savedArg.nextPersonId).toBe(4);
     expect(onCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'John Example', id: '3' }),
+      expect.objectContaining({
+        name: 'John Example',
+        id: expect.stringMatching(/^person-/),
+      }),
     );
     expect(onClose).toHaveBeenCalled();
     expect(getToastMock()).toHaveBeenCalledWith(

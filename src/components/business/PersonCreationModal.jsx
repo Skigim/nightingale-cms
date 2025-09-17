@@ -14,6 +14,10 @@ import { formatSSN, formatUSPhone } from '../../services/formatters.js';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
 import { getStrictValidationEnabled } from '../../services/settings.js';
+import {
+  generateSecureId,
+  ensureStringId,
+} from '../../services/nightingale.datamanagement.js';
 function PersonCreationModal({
   isOpen = false,
   onClose = () => {},
@@ -439,6 +443,33 @@ function PersonCreationModal({
       let updatedData;
       let successMessage;
 
+      // Helper: repair duplicate person IDs and update any case references
+      const repairDuplicatePersonIds = (dataObj) => {
+        if (!dataObj || !Array.isArray(dataObj.people)) return dataObj;
+        const idMap = new Map();
+        const duplicates = [];
+        dataObj.people = dataObj.people.map((p) => {
+          const id = ensureStringId(p.id);
+          if (!id || idMap.has(id)) {
+            const newId = generateSecureId('person');
+            duplicates.push({ old: id, new: newId });
+            return { ...p, id: newId };
+          }
+          idMap.set(id, true);
+          return p;
+        });
+        if (duplicates.length && Array.isArray(dataObj.cases)) {
+          dataObj.cases = dataObj.cases.map((c) => {
+            if (!c || !c.personId) return c;
+            const match = duplicates.find(
+              (d) => ensureStringId(c.personId) === d.old,
+            );
+            return match ? { ...c, personId: match.new } : c;
+          });
+        }
+        return dataObj;
+      };
+
       if (editPersonId) {
         // Update existing person
         updatedData = {
@@ -454,21 +485,23 @@ function PersonCreationModal({
               : person,
           ),
         };
+        updatedData = repairDuplicatePersonIds(updatedData);
         successMessage = 'Person updated successfully';
       } else {
-        // Create new person
-        const nextPersonId = String(safeCurrentData.nextPersonId || 1);
+        // Create new person with secure unique id immediately (avoid collisions with numeric sequence)
+        const secureId = generateSecureId('person');
         const newPerson = {
           ...personData,
-          id: nextPersonId,
+          id: secureId,
           createdAt: dateUtils.now?.() || new Date().toISOString(),
         };
-
         updatedData = {
           ...safeCurrentData,
           people: [...safeCurrentData.people, newPerson],
-          nextPersonId: parseInt(nextPersonId) + 1,
+          // Maintain legacy counter for backward compatibility even if not used for ID generation
+          nextPersonId: (safeCurrentData.nextPersonId || 1) + 1,
         };
+        updatedData = repairDuplicatePersonIds(updatedData);
         successMessage = 'Person created successfully';
       }
 
