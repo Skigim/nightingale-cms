@@ -1,5 +1,7 @@
 # Nightingale CMS Data Templates
 
+> Last Updated: 2025-09-16
+
 This document contains the data structure templates for the Nightingale CMS system. These templates
 define the expected format and fields for each entity type in the system.
 
@@ -20,6 +22,37 @@ These templates serve as:
 - **Validation Schema**: Structure validation for data imports
 - **Testing Data**: Base structure for sample data generation
 
+## Top-Level JSON Structure (Current `nightingale-data.json`)
+
+The persisted data file is a single JSON object with these top-level keys (domain vs non-domain
+noted):
+
+| Key                                                                                                                            | Type                    | Domain         | Description                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------- | -------------- | ---------------------------------------------------------------- |
+| `cases`                                                                                                                        | Case[]                  | Yes            | Collection of persisted case records                             |
+| `people`                                                                                                                       | Person[]                | Yes            | Collection of person records                                     |
+| `organizations`                                                                                                                | Organization[]          | Yes            | Collection of organization records                               |
+| `metadata`                                                                                                                     | Metadata                | Yes            | Data file metadata & aggregate counts                            |
+| `caseTemplate`                                                                                                                 | Case                    | Yes (template) | Canonical shape used for creating new cases (all fields present) |
+| `personTemplate`                                                                                                               | Person                  | Yes (template) | Canonical shape for people                                       |
+| `organizationTemplate`                                                                                                         | Organization            | Yes (template) | Canonical shape for organizations                                |
+| `contacts`                                                                                                                     | any[]                   | Pending        | Placeholder (shape not yet formalized)                           |
+| `vrTemplates`                                                                                                                  | any[]                   | Pending        | Future VR request templates (undetermined shape)                 |
+| `vrCategories`                                                                                                                 | any[]                   | Pending        | Category definitions for VR workflows                            |
+| `vrRequests`                                                                                                                   | any[]                   | Partially      | Global VR request list (case-level duplicates may exist)         |
+| `vrDraftItems`                                                                                                                 | any[]                   | Pending        | In-progress VR artifacts                                         |
+| `activeCase`                                                                                                                   | string\|null            | UI             | Currently focused case id (or null)                              |
+| `accordionState`                                                                                                               | object<string, boolean> | UI             | Persisted open/closed panel state                                |
+| `viewState`                                                                                                                    | ViewState               | UI             | Current navigation & expansion state                             |
+| `showAllCases` / `showAllContacts` / `showAllPeople` / `showAllOrganizations`                                                  | boolean                 | UI             | Filter toggles                                                   |
+| `caseSortReversed`                                                                                                             | boolean                 | UI             | Sort order toggle for cases                                      |
+| `priorityFilterActive`                                                                                                         | boolean                 | UI             | Priority filter flag                                             |
+| `isDataLoaded`                                                                                                                 | boolean                 | UI             | Loader readiness state                                           |
+| `nextPersonId`, `nextCaseId`, `nextOrganizationId`, `nextFinancialItemId`, `nextNoteId`, `nextVrTemplateId`, `nextVrRequestId` | number                  | Infra          | Auto-increment counters for ID generation                        |
+
+Non-domain (presentation) keys SHOULD be excluded if exporting/sharing data externally. Future
+separation: consider a `uiState` root.
+
 ## Field Format Standards
 
 ### **Date/Time Fields**
@@ -29,24 +62,47 @@ These templates serve as:
 
 ### **ID Fields**
 
-- **Format**: Prefixed strings like `"case-001"`, `"person-001"`, `"org-001"`
-- **Usage**: All entity IDs and references
+- **Primary Pattern**: `^(case|person|org|financial|income|expense|note|todo|vr|rep)-[0-9]+$`
+- **Canonical Prefixes**:
+  - Cases: `case-`
+  - People: `person-`
+  - Organizations: `org-`
+  - Financial items (resources/income/expenses): `financial-`, `income-`, `expense-`
+  - Notes: `note-`
+  - Todos: `todo-`
+  - VR Requests / Templates: `vr-`, `vrtpl-`
+  - Authorized Representatives: `rep-`
+  - Legacy numeric IDs are converted during migration to prefixed form.
 
 ### **Address Fields**
 
-- **Type**: Object with `{street, city, state, zip}` structure
-- **Alternative**: String format `"123 Main St, City, State Zip"` (legacy)
+- **Preferred**: Object `{ street, city, state, zip }`
+- **Legacy Alternative**: Single string (retain for backward compatibility; migration normalizes to
+  object)
 
 ### **Boolean Fields**
 
-- **Type**: Actual boolean values (`true`/`false`)
-- **Usage**: Priority flags, verification status, etc.
+- Use actual JSON booleans (never stringified). Empty template values default to `false`.
 
 ### **Financial Fields**
 
-- **Primary**: `"amount"` (current standard)
-- **Legacy**: `"value"` (maintained for backward compatibility)
-- **Type**: `"description"` (current) and `"type"` (legacy)
+- **Current**: `amount`, `description`
+- **Legacy**: `value`, `type` (retained for imported historical data)
+- Consumers should prefer `amount`+`description`; treat `value`+`type` as fallback.
+
+### **Validation Patterns (Recommended)**
+
+| Field                   | Pattern / Rule                                                     | Notes                                                              |
+| ----------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ | --- | --------- | ------ | ------- | ---- | ---- | --- | ------------- | ----------------------- |
+| ID                      | `^(case                                                            | person                                                             | org | financial | income | expense | note | todo | vr  | rep)-[0-9]+$` | Enforced post-migration |
+| Date / DateTime         | ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`) or empty string in templates | Empty allowed only in templates / draft state                      |
+| SSN                     | `^(?:\d{3}-?\d{2}-?\d{4})$`                                        | Stored unformatted OR formatted; normalize to digits on processing |
+| Phone                   | `^\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}$`                                | Render formatted `(555) 123-4567`                                  |
+| ZIP                     | `^\d{5}(?:-\d{4})?$`                                               | 5 or 9 digit ZIP                                                   |
+| State                   | `^[A-Z]{2}$`                                                       | USPS 2-letter code                                                 |
+| Currency (amount/value) | Number ≥ 0                                                         | Negative values only if explicitly supported (e.g., adjustments)   |
+
+---
 
 ---
 
@@ -194,6 +250,20 @@ Complete case record structure with all possible fields:
 }
 ```
 
+### Authorized Representatives
+
+Structured objects (preferred) replacing earlier simple string arrays:
+
+| Field          | Type   | Required | Notes                        |
+| -------------- | ------ | -------- | ---------------------------- |
+| `id`           | String | Yes      | `rep-<n>` pattern            |
+| `name`         | String | Yes      | Display name                 |
+| `relationship` | String | Yes      | e.g. Attorney, Guardian, POA |
+| `phone`        | String | No       | Standard phone format        |
+| `email`        | String | No       | Email address                |
+
+Legacy form: an array of strings (names) is accepted but should be migrated.
+
 ### Case Field Definitions
 
 | Field                 | Type    | Required | Description                                          |
@@ -261,6 +331,11 @@ Complete person record structure:
     "zip": "62702",
     "sameAsPhysical": false
   },
+  "emergencyContact": {
+    "name": "Jane Doe",
+    "phone": "(555) 987-6543",
+    "relationship": "spouse"
+  },
   "notes": "Client notes and additional information",
   "tags": ["client", "active"]
 }
@@ -268,25 +343,26 @@ Complete person record structure:
 
 ### Person Field Definitions
 
-| Field            | Type   | Required | Description                                                   |
-| ---------------- | ------ | -------- | ------------------------------------------------------------- |
-| `id`             | String | Yes      | Unique person identifier                                      |
-| `name`           | String | Yes      | Full display name                                             |
-| `firstName`      | String | Yes      | First name                                                    |
-| `lastName`       | String | Yes      | Last name                                                     |
-| `middleName`     | String | No       | Middle name                                                   |
-| `ssn`            | String | No       | Social Security Number                                        |
-| `dateOfBirth`    | String | No       | Date of birth (ISO 8601)                                      |
-| `phone`          | String | No       | Primary phone number                                          |
-| `email`          | String | No       | Email address                                                 |
-| `status`         | String | Yes      | Person status (active, inactive)                              |
-| `dateAdded`      | String | Yes      | Date record was created (ISO 8601)                            |
-| `lastUpdated`    | String | Yes      | Date record was last modified (ISO 8601)                      |
-| `relationship`   | String | No       | Relationship to other person (spouse, parent, attorney, etc.) |
-| `address`        | Object | No       | Physical address                                              |
-| `mailingAddress` | Object | No       | Mailing address if different                                  |
-| `notes`          | String | No       | Additional notes about the person                             |
-| `tags`           | Array  | No       | Classification tags                                           |
+| Field              | Type   | Required | Description                                                   |
+| ------------------ | ------ | -------- | ------------------------------------------------------------- |
+| `id`               | String | Yes      | Unique person identifier                                      |
+| `name`             | String | Yes      | Full display name                                             |
+| `firstName`        | String | Yes      | First name                                                    |
+| `lastName`         | String | Yes      | Last name                                                     |
+| `middleName`       | String | No       | Middle name                                                   |
+| `ssn`              | String | No       | Social Security Number                                        |
+| `dateOfBirth`      | String | No       | Date of birth (ISO 8601)                                      |
+| `phone`            | String | No       | Primary phone number                                          |
+| `email`            | String | No       | Email address                                                 |
+| `status`           | String | Yes      | Person status (active, inactive)                              |
+| `dateAdded`        | String | Yes      | Date record was created (ISO 8601)                            |
+| `lastUpdated`      | String | Yes      | Date record was last modified (ISO 8601)                      |
+| `relationship`     | String | No       | Relationship to other person (spouse, parent, attorney, etc.) |
+| `address`          | Object | No       | Physical address                                              |
+| `mailingAddress`   | Object | No       | Mailing address if different                                  |
+| `emergencyContact` | Object | No       | { name, phone, relationship } emergency/next-of-kin           |
+| `notes`            | String | No       | Additional notes about the person                             |
+| `tags`             | Array  | No       | Classification tags                                           |
 
 ---
 
@@ -344,9 +420,9 @@ Complete organization record structure:
 
 ---
 
-## Status Values
+## Status & Enumerations
 
-### Case Status
+### Case Status (Recommended Set)
 
 - `"Pending"` - Application submitted, under review
 - `"Active"` - Case approved and in progress
@@ -358,7 +434,7 @@ Complete organization record structure:
 - `true` - High priority case
 - `false` - Normal priority case
 
-### Case Types
+### Case Types (Examples—extendable)
 
 - `"SIMP"` - Simplified Application Process
 - `"LTC"` - Long-term Care
@@ -386,6 +462,23 @@ Complete organization record structure:
 - `"follow-up"` - Progress monitoring
 
 ---
+
+## UI State vs Domain Data
+
+The following keys are considered **UI / presentation state** and should not be required for domain
+exports: `accordionState`, `viewState`, all `showAll*` flags, `priorityFilterActive`,
+`isDataLoaded`, `activeCase`. Consumers performing analytical export should strip these.
+
+## Schema & Validation Roadmap
+
+Planned JSON Schema (2020-12) deliverables:
+
+1. `$defs` for: Address, MailingAddress, EmergencyContact, ContactPerson, FinancialItem, Note,
+   TodoItem, VRRequest, AuthorizedRep, Case, Person, Organization, Metadata, ViewState.
+2. Pattern validation for IDs, SSN, phone, dates (see Validation Patterns table above).
+3. Backward compatibility: allow legacy fields (`value`, `type`, string address) through `anyOf`
+   branches until migration window closes.
+4. Provide a `dataVersion` upgrade path via `metadata.schemaVersion`.
 
 ## Migration Notes
 
@@ -453,7 +546,8 @@ field is ambiguous (spouse of WHO?).
 }
 ```
 
-**SQLite Solution:** Create a dedicated relationships table to properly link people:
+**SQLite Solution (Refined):** Create dedicated relationship + representative link tables to capture
+directionality and type granularity:
 
 ```sql
 CREATE TABLE person_relationships (
@@ -468,7 +562,7 @@ CREATE TABLE person_relationships (
 );
 ```
 
-**Supported Person-to-Person Relationship Types:**
+**Supported Person-to-Person Relationship Types (Initial Set):**
 
 - **`spouse`** - Married partner relationship
 - **`parent`** - Parent of another person
@@ -478,7 +572,35 @@ CREATE TABLE person_relationships (
   - **`case-representative`** - Case-specific representative
   - **`legal-guardian`** - Court-appointed legal guardian
 
-**Migration Strategy:**
+**Migration Strategy (Phased):**
+
+1. **Extraction**: Expand `authorizedReps[]` (case-level) into discrete Person + Relation edges
+   where representative is not already a Person.
+2. **Normalization**: Generate `person_relationships` records (bidirectional where applicable, e.g.,
+   spouse) with controlled `relationship_type`.
+3. **Deprecation**: Mark original inline `authorizedReps` arrays as legacy; retain for one release;
+   remove write support after verification.
+4. **Enrichment**: Introduce `effective_start` / `effective_end` for temporal queries.
+5. **Indexing**: Add composite index `(relationship_type, person_id_1)` and `(person_id_2)` for
+   reverse lookups.
+
+---
+
+## Open Questions / Extension Points
+
+| Area                        | Question                   | Proposed Action                                                 |
+| --------------------------- | -------------------------- | --------------------------------------------------------------- |
+| VR Templates                | Shape undefined            | Introduce draft `$defs.VRTemplate` once first fields identified |
+| contacts[]                  | Usage unclear              | Decide if contacts converge with `people` or distinct entity    |
+| searchableText              | Persist vs derive?         | Consider dropping from persistence & computing at load          |
+| duplication of `vrRequests` | Case-level + global arrays | Choose one authoritative source; global may become index        |
+| UI vs domain separation     | Mixed currently            | Isolate UI keys under `uiState` in a future migration           |
+
+---
+
+This documentation now reflects the current persisted structure (as of 2025-09-16) and aligns
+templates with newly clarified fields (`emergencyContact`, structured `authorizedReps`) and
+validation recommendations.
 
 - Extract `authorizedReps[]` array entries into people records
 - Create relationship entries linking representatives to clients

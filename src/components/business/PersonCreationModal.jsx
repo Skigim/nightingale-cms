@@ -10,8 +10,10 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import { Validators } from '../../services/core.js';
+import { formatSSN, formatUSPhone } from '../../services/formatters.js';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
+import { getStrictValidationEnabled } from '../../services/settings.js';
 function PersonCreationModal({
   isOpen = false,
   onClose = () => {},
@@ -19,6 +21,7 @@ function PersonCreationModal({
   editPersonId = null, // If provided, component will edit existing person
   fullData = null,
   fileService = null, // File service instance for data operations
+  requireFields,
 }) {
   const e = React.createElement;
 
@@ -211,9 +214,8 @@ function PersonCreationModal({
               errors.dateOfBirth = 'Date of birth is required';
             }
             if (personData.ssn) {
-              // Simple SSN format validation (XXX-XX-XXXX)
-              const ssnPattern = /^\d{3}-\d{2}-\d{4}$/;
-              if (!ssnPattern.test(personData.ssn)) {
+              const digits = personData.ssn.replace(/[^0-9]/g, '');
+              if (digits.length !== 9) {
                 errors.ssn = 'Invalid SSN format (use XXX-XX-XXXX)';
               }
             }
@@ -271,18 +273,19 @@ function PersonCreationModal({
     },
     [personData],
   ); // Handle step change with validation
+  const effectiveRequire =
+    typeof requireFields === 'boolean'
+      ? requireFields
+      : getStrictValidationEnabled();
+
   const handleStepChange = useCallback(
     (newStep) => {
-      if (editPersonId) {
-        // Edit mode: Allow free navigation to any step
+      if (editPersonId || !effectiveRequire) {
         setValidationErrors({});
         setCurrentStep(newStep);
         return;
       }
-
-      // Creation mode: Validate before advancing
       if (newStep > currentStep) {
-        // Validate current step before advancing
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
@@ -293,40 +296,43 @@ function PersonCreationModal({
           return;
         }
       }
-
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [currentStep, validateStep, editPersonId],
+    [currentStep, validateStep, editPersonId, effectiveRequire],
   );
 
   // Handle form data updates
   const updatePersonData = useCallback(
     (field, value) => {
+      let formattedValue = value;
+      if (field === 'ssn') {
+        formattedValue = formatSSN(value);
+      } else if (field === 'phone') {
+        formattedValue = formatUSPhone(value);
+      }
+
       setPersonData((prev) => {
         const newData = { ...prev };
 
-        // Handle nested objects (address, mailingAddress)
         if (field.includes('.')) {
           const [parent, child] = field.split('.');
-          newData[parent] = { ...prev[parent], [child]: value };
+          newData[parent] = { ...prev[parent], [child]: formattedValue };
         } else {
-          newData[field] = value;
+          newData[field] = formattedValue;
         }
 
-        // Auto-sync mailing address if checkbox is checked
         if (
           field.startsWith('address.') &&
           newData.mailingAddress?.sameAsPhysical
         ) {
           const addressField = field.split('.')[1];
-          newData.mailingAddress[addressField] = value;
+          newData.mailingAddress[addressField] = formattedValue;
         }
 
         return newData;
       });
 
-      // Clear validation error for this field
       if (validationErrors[field]) {
         setValidationErrors((prev) => {
           const newErrors = { ...prev };
@@ -353,22 +359,24 @@ function PersonCreationModal({
 
   // Handle form submission
   const handleSubmit = useCallback(async () => {
-    // Final validation - check all available steps based on mode
-    const maxStepIndex = editPersonId ? filteredStepsConfig.length - 1 : 3;
-    const allStepErrors = [];
-    for (let i = 0; i <= maxStepIndex; i++) {
-      const stepErrors = validateStep(i);
-      allStepErrors.push(stepErrors);
-    }
-    const finalErrors = allStepErrors.reduce(
-      (acc, stepErrors) => ({ ...acc, ...stepErrors }),
-      {},
-    );
+    if (effectiveRequire) {
+      // Final validation - check all available steps based on mode
+      const maxStepIndex = editPersonId ? filteredStepsConfig.length - 1 : 3;
+      const allStepErrors = [];
+      for (let i = 0; i <= maxStepIndex; i++) {
+        const stepErrors = validateStep(i);
+        allStepErrors.push(stepErrors);
+      }
+      const finalErrors = allStepErrors.reduce(
+        (acc, stepErrors) => ({ ...acc, ...stepErrors }),
+        {},
+      );
 
-    if (Object.keys(finalErrors).length > 0) {
-      setValidationErrors(finalErrors);
-      Toast.showToast?.('Please fix all validation errors', 'error');
-      return;
+      if (Object.keys(finalErrors).length > 0) {
+        setValidationErrors(finalErrors);
+        Toast.showToast?.('Please fix all validation errors', 'error');
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -508,6 +516,7 @@ function PersonCreationModal({
     validateStep,
     fileService,
     filteredStepsConfig.length,
+    effectiveRequire,
   ]);
 
   // Render step content
@@ -1107,4 +1116,5 @@ PersonCreationModal.propTypes = {
   editPersonId: PropTypes.string,
   fullData: PropTypes.object,
   fileService: PropTypes.object,
+  requireFields: PropTypes.bool,
 };

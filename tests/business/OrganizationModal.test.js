@@ -82,6 +82,7 @@ const renderModal = (props = {}) => {
         props.fileService || fileServiceFactory(props.initialFileData)
       }
       editOrganizationId={props.editOrganizationId || null}
+      requireFields={true}
     />,
   );
 };

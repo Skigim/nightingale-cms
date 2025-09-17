@@ -114,6 +114,7 @@ function TextInput({
   className = '',
   validator = null,
   formatter = null,
+  format = null, // 'phone' | 'ssn'
   ...props
 }) {
   const { useState } = React;
@@ -122,10 +123,29 @@ function TextInput({
   const handleChange = (e) => {
     let newValue = e.target.value;
 
-    // Apply formatter if provided (e.g., phone number formatting)
-    if (formatter && typeof formatter === 'function') {
-      newValue = formatter(newValue);
+    // Built-in format mapping (defer dynamic import until needed to avoid bundle cost if unused)
+    if (format && !formatter) {
+      try {
+        const map = {
+          phone: (val) => {
+            const fn = require('../../services/formatters.js');
+            return fn.formatUSPhone ? fn.formatUSPhone(val) : val;
+          },
+          ssn: (val) => {
+            const fn = require('../../services/formatters.js');
+            return fn.formatSSN ? fn.formatSSN(val) : val;
+          },
+        };
+        const f = map[format];
+        if (f) newValue = f(newValue);
+      } catch (_) {
+        // silent fail – formatting non-critical
+      }
     }
+
+    // Custom formatter prop takes precedence
+    if (formatter && typeof formatter === 'function')
+      newValue = formatter(newValue);
 
     // Validate if validator provided
     if (validator && typeof validator === 'function') {
@@ -187,6 +207,7 @@ TextInput.propTypes = {
   className: PropTypes.string,
   validator: PropTypes.func,
   formatter: PropTypes.func,
+  format: PropTypes.oneOf(['phone', 'ssn', null]),
 };
 
 /**

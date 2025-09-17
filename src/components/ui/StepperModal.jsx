@@ -97,7 +97,9 @@ function StepperModal({
       ? Math.min(currentStep, Math.max(steps.length - 1, 0))
       : 0;
 
-  const isLastStep = safeCurrentStep === steps.length - 1 && steps.length > 0;
+  const hasSteps = Array.isArray(steps) && steps.length > 0;
+  // If there are no steps, treat as last step contextually (single-screen modal)
+  const isLastStep = hasSteps ? safeCurrentStep === steps.length - 1 : true;
 
   const handleComplete = () => {
     try {
@@ -229,26 +231,28 @@ function StepperModal({
     customFooterContent ||
     (!hideNavigation ? (
       <div className="flex justify-between w-full">
-        {/* Back Button */}
-        <button
-          onClick={handleBack}
-          disabled={safeCurrentStep === 0}
-          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
-        >
-          Back
-        </button>
-        {/* Next/Complete Button */}
-        <button
-          onClick={isLastStep ? handleComplete : handleNext}
-          disabled={isLastStep ? isCompleteDisabled : false}
-          className={`px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            isLastStep
-              ? 'bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600'
-              : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-        >
-          {isLastStep ? completeButtonText : 'Next'}
-        </button>
+        {hasSteps && (
+          <button
+            onClick={handleBack}
+            disabled={safeCurrentStep === 0}
+            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors disabled:opacity-50"
+          >
+            Back
+          </button>
+        )}
+        <div className="ml-auto">
+          <button
+            onClick={isLastStep ? handleComplete : handleNext}
+            disabled={isLastStep ? isCompleteDisabled : false}
+            className={`px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              isLastStep
+                ? 'bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {isLastStep ? completeButtonText : 'Next'}
+          </button>
+        </div>
       </div>
     ) : null);
 
@@ -307,81 +311,85 @@ function StepperModal({
     >
       <div
         ref={modalRootRef}
-        className="flex space-x-8"
+        className={`flex ${hasSteps ? 'space-x-8' : ''}`}
         onKeyDown={handleKeyDown}
         aria-modal="true"
         role="dialog"
         aria-label={title}
       >
-        {/* Stepper Navigation */}
-        <div className="w-1/4">
-          <nav className="space-y-1">
-            {steps.map((step, index) => {
-              const isCompleted = index < safeCurrentStep;
-              const isActive = index === safeCurrentStep;
-              const isAccessible = isStepClickable(index);
-
-              return (
-                <a
-                  key={index}
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isAccessible) {
-                      try {
-                        const logger =
-                          globalThis.NightingaleLogger?.get('nav:stepper');
-                        logger?.debug('Step clicked', {
-                          from: safeCurrentStep,
-                          to: index,
-                          title,
-                        });
-                      } catch (_) {
-                        /* ignore */
+        {hasSteps && (
+          <div className="w-1/4">
+            <nav
+              className="space-y-1"
+              role="navigation"
+            >
+              {steps.map((step, index) => {
+                const isCompleted = index < safeCurrentStep;
+                const isActive = index === safeCurrentStep;
+                const isAccessible = isStepClickable(index);
+                return (
+                  <a
+                    key={index}
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (isAccessible) {
+                        try {
+                          const logger =
+                            globalThis.NightingaleLogger?.get('nav:stepper');
+                          logger?.debug('Step clicked', {
+                            from: safeCurrentStep,
+                            to: index,
+                            title,
+                          });
+                        } catch (_) {
+                          /* ignore */
+                        }
+                        handleStepChange(index);
                       }
-                      handleStepChange(index);
-                    }
-                  }}
-                  className={`group flex items-start p-3 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-blue-600/20'
-                      : isAccessible
-                        ? 'hover:bg-gray-700'
-                        : 'cursor-not-allowed opacity-50'
-                  }`}
-                >
-                  {/* Step Icon/Number */}
-                  <div
-                    className={`flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full font-bold ${
-                      isCompleted
-                        ? 'bg-green-600 text-white'
-                        : isActive
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-600 text-gray-300'
+                    }}
+                    className={`group flex items-start p-3 rounded-lg transition-colors ${
+                      isActive
+                        ? 'bg-blue-600/20'
+                        : isAccessible
+                          ? 'hover:bg-gray-700'
+                          : 'cursor-not-allowed opacity-50'
                     }`}
                   >
-                    {isCompleted ? '✓' : index + 1}
-                  </div>
-                  {/* Step Title/Description */}
-                  <div className="ml-4">
-                    <h4
-                      className={`text-sm font-medium ${
-                        isActive ? 'text-blue-300' : 'text-white'
+                    <div
+                      className={`flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full font-bold ${
+                        isCompleted
+                          ? 'bg-green-600 text-white'
+                          : isActive
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-600 text-gray-300'
                       }`}
                     >
-                      {step.title}
-                    </h4>
-                    <p className="text-sm text-gray-400">{step.description}</p>
-                  </div>
-                </a>
-              );
-            })}
-          </nav>
-        </div>
-        {/* Step Content */}
+                      {isCompleted ? '✓' : index + 1}
+                    </div>
+                    <div className="ml-4">
+                      <h4
+                        className={`text-sm font-medium ${
+                          isActive ? 'text-blue-300' : 'text-white'
+                        }`}
+                      >
+                        {step.title || `Step ${index + 1}`}
+                      </h4>
+                      {step.description && (
+                        <p className="text-sm text-gray-400">
+                          {step.description}
+                        </p>
+                      )}
+                    </div>
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
+        )}
         <div
           ref={stepContentRef}
-          className="w-3/4 p-4 border-l border-gray-700"
+          className={`${hasSteps ? 'w-3/4 p-4 border-l border-gray-700' : 'w-full p-4'}`}
           data-step-content="true"
         >
           {children}
@@ -398,7 +406,7 @@ StepperModal.propTypes = {
   title: PropTypes.string.isRequired,
   steps: PropTypes.arrayOf(
     PropTypes.shape({
-      title: PropTypes.string.isRequired,
+      title: PropTypes.string, // now optional
       description: PropTypes.string,
     }),
   ),

@@ -12,6 +12,11 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import Toast from '../../services/nightingale.toast.js';
+import {
+  getStrictValidationEnabled,
+  toggleStrictValidation,
+  subscribeSettings,
+} from '../../services/settings.js';
 import { normalizeDataset } from '../../services/dataFixes.js';
 import {
   detectLegacyProfile,
@@ -67,6 +72,15 @@ function SettingsModal({
   })();
   const [navLogsEnabled, setNavLogsEnabled] = useState(initialNavLogs);
   const [logLevel, setLogLevel] = useState(initialLevel);
+  const [strictValidation, setStrictValidation] = useState(
+    getStrictValidationEnabled(),
+  );
+  useEffect(() => {
+    const unsub = subscribeSettings((s) => {
+      setStrictValidation(!!s.strictValidation);
+    });
+    return () => unsub();
+  }, []);
 
   // Get dependencies (resolved after state/effect declarations to avoid conditional hook ordering issues)
   const Modal = getComponent('ui', 'Modal');
@@ -457,6 +471,30 @@ function SettingsModal({
         }
       >
         <div className="space-y-6">
+          <section className="p-4 border border-gray-700 rounded">
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Validation Mode
+            </h3>
+            <p className="text-sm text-gray-300 mb-3">
+              Toggle strict required-field validation for creation/edit modals.
+              When off, steps and submissions do not require mandatory fields.
+            </p>
+            <label className="flex items-center space-x-3 text-sm text-gray-200">
+              <input
+                type="checkbox"
+                checked={strictValidation}
+                onChange={() => {
+                  const next = toggleStrictValidation();
+                  setStrictValidation(next);
+                  Toast.showToast?.(
+                    `Strict validation ${next ? 'enabled' : 'disabled'}`,
+                    next ? 'info' : 'warning',
+                  );
+                }}
+              />
+              <span>Strict validation {strictValidation ? 'ON' : 'OFF'}</span>
+            </label>
+          </section>
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-white">
               File System Connection

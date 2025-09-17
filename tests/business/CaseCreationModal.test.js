@@ -74,6 +74,7 @@ describe('CaseCreationModal (business)', () => {
           }
         }
         fileService={fileService}
+        requireFields={true}
       />,
     );
     // Stepper title
@@ -89,6 +90,7 @@ describe('CaseCreationModal (business)', () => {
         isOpen
         fullData={{ people: [], organizations: [], cases: [] }}
         fileService={fileService}
+        requireFields={true}
       />,
     );
     // Attempt to go to next step
@@ -132,6 +134,7 @@ describe('CaseCreationModal (business)', () => {
         fileService={fileService}
         onCaseCreated={onCaseCreated}
         onClose={onClose}
+        requireFields={true}
       />,
     );
 

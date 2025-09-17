@@ -57,6 +57,43 @@ src/
 - Data stored as JSON; persisted via a file service abstraction
 - Search powered by `fuse.js`; dates via `dayjs`
 
+### Validation Mode (`requireFields` & Settings Toggle)
+
+Creation/edit modals (CaseCreationModal, PersonCreationModal, OrganizationModal) now default to
+optional mode (no required-field gating). A new global toggle in the Settings modal lets you enable
+"Strict validation" for all creation/edit modals without passing props everywhere.
+
+Defaults:
+
+- Global setting `strictValidation`: persisted in localStorage (default `false`).
+- If you pass an explicit `requireFields` prop, it overrides the global setting.
+
+Strict mode (either `strictValidation` enabled or `requireFields={true}`):
+
+- Step navigation blocked until current step passes validation.
+- Final submission performs a full cross-step required-field sweep.
+
+Optional mode (`strictValidation` off and no prop override, or `requireFields={false}`):
+
+- Steps advance freely with incomplete data.
+- Final submission does not enforce required fields.
+
+Override example (force strict for one modal even if global is off):
+
+```jsx
+<CaseCreationModal
+  isOpen
+  fullData={data}
+  fileService={fileService}
+  requireFields={true}
+/>
+```
+
+Global toggle location: Settings → Validation Mode → "Strict validation" checkbox.
+
+Tests: `tests/business/*CreationModal.optional.test.jsx` verify optional navigation; base modal
+tests now pass `requireFields={true}` to assert strict behavior.
+
 ## 📚 Components
 
 - UI: Button, Modal, DataTable, SearchBar, Badge, Form inputs, StepperModal

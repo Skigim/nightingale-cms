@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { registerComponent, getComponent } from '../../services/registry';
 import dateUtils from '../../services/nightingale.dayjs.js';
 import Toast from '../../services/nightingale.toast.js';
+import { getStrictValidationEnabled } from '../../services/settings.js';
 
 // Access utilities via module import
 const getDateUtils = () => dateUtils || {};
@@ -748,6 +749,7 @@ function CaseCreationModal({
   fullData = null,
   fileService = null, // File service instance for data operations
   onViewCaseDetails = null, // Callback to switch to case details view
+  requireFields, // If undefined, derive from global settings (strictValidation)
 }) {
   const e = React.createElement;
 
@@ -844,18 +846,22 @@ function CaseCreationModal({
     }
   }, [isOpen, editCaseId]);
 
+  // Determine effective requirement flag (prop precedence over global)
+  const effectiveRequire =
+    typeof requireFields === 'boolean'
+      ? requireFields
+      : getStrictValidationEnabled();
+
   const handleStepChange = useCallback(
     (newStep) => {
-      if (editCaseId) {
-        // Edit mode: Allow free navigation to any step
+      if (editCaseId || !effectiveRequire) {
+        // Edit mode or optional mode: Allow free navigation
         setValidationErrors({});
         setCurrentStep(newStep);
         return;
       }
 
-      // Creation mode: Validate before advancing
       if (newStep > currentStep) {
-        // Validate current step before advancing
         const stepErrors = validateStep(currentStep);
         if (Object.keys(stepErrors).length > 0) {
           setValidationErrors(stepErrors);
@@ -867,31 +873,29 @@ function CaseCreationModal({
       setValidationErrors({});
       setCurrentStep(newStep);
     },
-    [
-      currentStep,
-      validateStep,
-      editCaseId,
-      setCurrentStep,
-      setValidationErrors,
-      showToast,
-    ],
+    [currentStep, validateStep, editCaseId, effectiveRequire, showToast],
   );
 
   const handleComplete = async () => {
-    // Final validation of all steps before completing
-    const configToUse = editCaseId ? filteredStepsConfig : stepsConfig;
-    const maxStepIndex = editCaseId
-      ? configToUse.length - 1
-      : stepsConfig.length - 1;
+    if (effectiveRequire) {
+      // Final validation of all steps before completing (strict mode)
+      const configToUse = editCaseId ? filteredStepsConfig : stepsConfig;
+      const maxStepIndex = editCaseId
+        ? configToUse.length - 1
+        : stepsConfig.length - 1;
 
-    for (let i = 0; i <= maxStepIndex; i++) {
-      const stepErrors = validateStep(i);
-      if (Object.keys(stepErrors).length > 0) {
-        setValidationErrors(stepErrors);
-        setCurrentStep(i);
-        const stepTitle = configToUse[i]?.title || `Step ${i + 1}`;
-        showToast(`Please fix the errors on the '${stepTitle}' step.`, 'error');
-        return;
+      for (let i = 0; i <= maxStepIndex; i++) {
+        const stepErrors = validateStep(i);
+        if (Object.keys(stepErrors).length > 0) {
+          setValidationErrors(stepErrors);
+          setCurrentStep(i);
+          const stepTitle = configToUse[i]?.title || `Step ${i + 1}`;
+          showToast(
+            `Please fix the errors on the '${stepTitle}' step.`,
+            'error',
+          );
+          return;
+        }
       }
     }
 
@@ -1150,4 +1154,5 @@ CaseCreationModal.propTypes = {
   fullData: PropTypes.object,
   fileService: PropTypes.object,
   onViewCaseDetails: PropTypes.func,
+  requireFields: PropTypes.bool,
 };
